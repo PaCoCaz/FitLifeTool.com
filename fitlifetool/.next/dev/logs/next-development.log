@@ -1,0 +1,56 @@
+[00:09:54.930] Server  ERROR   ⨯ Error: Cannot find module 'next/dist/client/components/builtin/global-not-found'
+Require stack:
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/on-demand-entry-handler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/hot-reloader-turbopack.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-server.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/start-server.js
+[00:09:55.073] Server  ERROR   Error: Cannot find module 'next/dist/pages/_error'
+Require stack:
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/on-demand-entry-handler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/hot-reloader-turbopack.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-server.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/start-server.js
+[00:09:55.204] Server  ERROR   ⨯ Error: Cannot find module 'next/dist/pages/_error'
+Require stack:
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/on-demand-entry-handler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/hot-reloader-turbopack.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-server.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/start-server.js
+[00:09:55.422] Server  ERROR   Error: Cannot find module 'next/dist/pages/_error'
+Require stack:
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/on-demand-entry-handler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/hot-reloader-turbopack.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-server.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/start-server.js
+[00:09:55.551] Server  ERROR   ⨯ Error: Cannot find module 'next/dist/client/components/builtin/global-not-found'
+Require stack:
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/on-demand-entry-handler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/hot-reloader-turbopack.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-server.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/start-server.js
+[00:09:55.668] Server  ERROR   Error: Cannot find module 'next/dist/pages/_error'
+Require stack:
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/on-demand-entry-handler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/hot-reloader-turbopack.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-server.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/start-server.js
+[00:09:55.905] Server  ERROR   ⨯ Error: Cannot find module 'next/dist/pages/_error'
+Require stack:
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/on-demand-entry-handler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/hot-reloader-turbopack.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-server.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/start-server.js
+[00:09:55.940] Server  ERROR   Error: Cannot find module 'next/dist/pages/_error'
+Require stack:
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/on-demand-entry-handler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/dev/hot-reloader-turbopack.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/router-server.js
+- /Users/paulcastelijns/Library/Mobile Documents/com~apple~CloudDocs/Websites | Webdesign/fitlifetool/node_modules/next/dist/server/lib/start-server.js
