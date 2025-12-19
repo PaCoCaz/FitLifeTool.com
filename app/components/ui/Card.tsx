@@ -1,15 +1,17 @@
 type Props = {
-    title: string;
-  };
-  
-  export default function Card({ title }: Props) {
-    return (
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <h3 className="font-semibold mb-2">{title}</h3>
-        <div className="text-sm text-gray-500">
-          Placeholder content
-        </div>
-      </div>
-    );
-  }
-  
+  title: string
+  children?: React.ReactNode
+}
+
+export default function Card({ title, children }: Props) {
+  return (
+    <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <h3 className="mb-3 text-sm font-semibold text-gray-700">
+        {title}
+      </h3>
+      {children ?? (
+        <div className="h-24 rounded-lg bg-gray-50" />
+      )}
+    </div>
+  )
+}
