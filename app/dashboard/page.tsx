@@ -1,5 +1,5 @@
-import Header from "../components/Header";
-import DashboardGrid from "../components/DashboardGrid";
+import Header from "../components/layout/Header";
+import DashboardGrid from "../components/layout/DashboardGrid";
 
 export default function DashboardPage() {
   return (
