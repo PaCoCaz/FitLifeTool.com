@@ -4,27 +4,30 @@ export default function DashboardGrid() {
   return (
     <div className="space-y-4">
 
-      {/* Rij 1: Water | Activiteiten | Voeding */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card title="Water" />
-        <Card title="Activiteiten" />
-        <Card title="Voeding" />
-      </div>
-
-      {/* Rij 2: Weekoverzicht (75%) | Gewicht (25%) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-3">
-          <Card title="Weekoverzicht" />
+      {/* RIJ 1 */}
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-12 md:col-span-6">
+          <Card title="Water" />
         </div>
-        <div className="md:col-span-1">
+        <div className="col-span-12 md:col-span-6">
+          <Card title="Activiteiten" />
+        </div>
+        {/* RIJ 2 */}
+        <div className="col-span-12 md:col-span-6">
+          <Card title="Voeding" />
+        </div>
+        <div className="col-span-12 md:col-span-6">
           <Card title="Gewicht" />
         </div>
       </div>
 
-      {/* Rij 3: Dagdoelen – volle breedte */}
+      {/* RIJ 3 */}
+      <Card title="Weekoverzicht" />
+
+      {/* RIJ 4 */}
       <Card title="Dagdoelen" />
 
-      {/* Rij 4: Tip van vandaag – volle breedte */}
+      {/* RIJ 5 */}
       <Card title="Tip van vandaag" />
 
     </div>

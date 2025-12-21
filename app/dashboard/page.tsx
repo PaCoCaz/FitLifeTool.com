@@ -11,7 +11,7 @@ export default function DashboardPage() {
       {/* Content onder header */}
       <main className="pt-14">
         <div className="mx-auto max-w-[1200px] px-4 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[240px_1fr] gap-4">
 
             {/* Sidebar – alleen desktop */}
             <Sidebar />

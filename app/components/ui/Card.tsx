@@ -10,7 +10,7 @@ export default function Card({ title, children }: Props) {
         {title}
       </h3>
       {children ?? (
-        <div className="h-24 rounded-[var(--radius)] bg-gray-50" />
+        <div className="min-h-[6rem] rounded-[var(--radius)] bg-gray-50" />
       )}
     </div>
   )
