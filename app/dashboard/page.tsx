@@ -5,19 +5,21 @@ import DashboardGrid from "../components/layout/DashboardGrid";
 export default function DashboardPage() {
   return (
     <>
-      {/* Fixed header */}
       <Header />
 
-      {/* Content onder header */}
-      <main className="pt-14">
-        <div className="mx-auto max-w-[1200px] px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[240px_1fr] gap-4">
+      <main className="pt-20">
+        <div className="mx-auto max-w-[1200px] px-4">
+          <div className="relative flex gap-4">
 
-            {/* Sidebar – alleen desktop */}
-            <Sidebar />
+            {/* Sidebar */}
+            <div className="hidden md:block w-[220px] lg:w-[240px] shrink-0">
+              <Sidebar />
+            </div>
 
-            {/* Dashboard cards */}
-            <DashboardGrid />
+            {/* Dashboard content */}
+            <div className="flex-1">
+              <DashboardGrid />
+            </div>
 
           </div>
         </div>

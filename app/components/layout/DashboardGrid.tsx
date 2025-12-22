@@ -2,33 +2,40 @@ import Card from "../ui/Card";
 
 export default function DashboardGrid() {
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-12 gap-4 items-start">
 
-      {/* RIJ 1 */}
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 md:col-span-6">
-          <Card title="Water" />
-        </div>
-        <div className="col-span-12 md:col-span-6">
-          <Card title="Activiteiten" />
-        </div>
-        {/* RIJ 2 */}
-        <div className="col-span-12 md:col-span-6">
-          <Card title="Voeding" />
-        </div>
-        <div className="col-span-12 md:col-span-6">
-          <Card title="Gewicht" />
-        </div>
+      {/* Rij 1 */}
+      <div className="col-span-12 md:col-span-6">
+        <Card title="Water" />
       </div>
 
-      {/* RIJ 3 */}
-      <Card title="Weekoverzicht" />
+      <div className="col-span-12 md:col-span-6">
+        <Card title="Activiteiten" />
+      </div>
 
-      {/* RIJ 4 */}
-      <Card title="Dagdoelen" />
+      {/* Rij 2 */}
+      <div className="col-span-12 md:col-span-6">
+        <Card title="Voeding" />
+      </div>
 
-      {/* RIJ 5 */}
-      <Card title="Tip van vandaag" />
+      <div className="col-span-12 md:col-span-6">
+        <Card title="Gewicht" />
+      </div>
+
+      {/* Rij 3 */}
+      <div className="col-span-12">
+        <Card title="Weekoverzicht" />
+      </div>
+
+      {/* Rij 4 */}
+      <div className="col-span-12">
+        <Card title="Dagdoelen" />
+      </div>
+
+      {/* Rij 5 */}
+      <div className="col-span-12">
+        <Card title="Tip van vandaag" />
+      </div>
 
     </div>
   );
