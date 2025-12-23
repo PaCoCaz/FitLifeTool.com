@@ -35,7 +35,10 @@ export type Labels = {
     changeUp: string;
     changeDown: string;
     noChange: string;
-  };
+    add: string;
+    save: string;
+    cancel: string;
+  };  
   week: {
     title: string;
     subtitle: string;
@@ -93,7 +96,10 @@ export const labels: Record<Language, Labels> = {
       changeUp: "Toename t.o.v. gisteren",
       changeDown: "Afname t.o.v. gisteren",
       noChange: "Geen verandering t.o.v. gisteren",
-    },
+      add: "Gewicht invoeren",
+      save: "Opslaan",
+      cancel: "Annuleren",
+    },    
     week: {
       title: "Weekoverzicht",
       subtitle: "Laatste 7 dagen",
