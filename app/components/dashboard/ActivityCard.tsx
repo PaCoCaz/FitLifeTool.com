@@ -1,23 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Card from "../ui/Card";
 import { useLabels } from "../../lib/useLabels";
 
-const DAILY_ACTIVITY_GOAL = 30; // minuten
+const DAILY_ACTIVITY_GOAL = 30;
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export default function ActivityCard() {
-  const [minutes, setMinutes] = useState(20); // dummy data
   const t = useLabels("nl").activity;
 
-  const progressRaw = minutes / DAILY_ACTIVITY_GOAL;
-  const progress = Math.min(progressRaw, 1);
-  const isEmpty = minutes === 0;
-  const isComplete = minutes >= DAILY_ACTIVITY_GOAL;
+  const [dayKey, setDayKey] = useState(getTodayKey);
+  const [entries, setEntries] = useState<number[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [input, setInput] = useState("");
 
-  function addActivity(amount: number) {
-    setMinutes((prev) => prev + amount);
+  /* Dagwissel detectie */
+  useEffect(() => {
+    const today = getTodayKey();
+    if (today !== dayKey) {
+      setDayKey(today);
+      setEntries([]);
+      setEditing(false);
+      setInput("");
+    }
+  }, [dayKey]);
+
+  const total = entries.reduce((sum, v) => sum + v, 0);
+  const progress = Math.min(total / DAILY_ACTIVITY_GOAL, 1);
+  const isEmpty = total === 0;
+  const isComplete = total >= DAILY_ACTIVITY_GOAL;
+
+  function saveActivity() {
+    const value = Number(input);
+    if (Number.isNaN(value) || value <= 0) return;
+
+    setEntries((prev) => [...prev, value]);
+    setEditing(false);
+    setInput("");
+  }
+
+  function undoLast() {
+    setEntries((prev) => prev.slice(0, -1));
+  }
+
+  function resetToday() {
+    setEntries([]);
   }
 
   return (
@@ -37,7 +69,7 @@ export default function ActivityCard() {
         {/* Bovenkant */}
         <div className="space-y-2">
           <div className="text-2xl font-semibold text-[#191970]">
-            {minutes} {t.duration}
+            {total} {t.duration}
           </div>
 
           <div className="text-xs text-gray-500">
@@ -64,16 +96,67 @@ export default function ActivityCard() {
         </div>
 
         {/* Acties */}
-        <div className="mt-4 flex gap-2">
-          {[10, 15].map((amount) => (
+        <div className="mt-4 space-y-2">
+
+          {!editing && (
             <button
-              key={amount}
-              onClick={() => addActivity(amount)}
-              className="flex-1 rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-xs font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
+              onClick={() => setEditing(true)}
+              className="w-full rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
             >
-              + {amount} {t.duration}
+              {t.add}
             </button>
-          ))}
+          )}
+
+          {editing && (
+            <div className="space-y-2">
+              <input
+                type="number"
+                placeholder={`0 ${t.duration}`}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
+              />
+
+              <div className="flex gap-2">
+                <button
+                  onClick={saveActivity}
+                  className="flex-1 rounded-[var(--radius)] bg-[#0095D3] px-3 py-2 text-xs text-white hover:opacity-90"
+                >
+                  {t.save}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setEditing(false);
+                    setInput("");
+                  }}
+                  className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
+                >
+                  {t.cancel}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Extra acties */}
+          {entries.length > 0 && !editing && (
+            <div className="flex gap-2">
+              <button
+                onClick={undoLast}
+                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
+              >
+                Undo
+              </button>
+
+              <button
+                onClick={resetToday}
+                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
+              >
+                Reset vandaag
+              </button>
+            </div>
+          )}
+
         </div>
 
       </div>

@@ -16,6 +16,9 @@ export type Labels = {
     progress: string;
     completed: string;
     duration: string;
+    add: string;
+    save: string;
+    cancel: string;
   };
   nutrition: {
     title: string;
@@ -77,7 +80,11 @@ export const labels: Record<Language, Labels> = {
       progress: "Goed bezig, blijf bewegen",
       completed: "Dagdoel behaald",
       duration: "minuten",
+      add: "Activiteit toevoegen",
+      save: "Opslaan",
+      cancel: "Annuleren",
     },
+    
     nutrition: {
       title: "Voeding",
       goal: "Dagdoel",
