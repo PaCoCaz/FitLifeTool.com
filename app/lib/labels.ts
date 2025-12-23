@@ -1,6 +1,63 @@
 export type Language = "nl" | "en" | "de" | "fr";
 
-export const labels = {
+export type Labels = {
+  water: {
+    title: string;
+    goal: string;
+    empty: string;
+    progress: string;
+    completed: string;
+    add: (amount: number) => string;
+  };
+  activity: {
+    title: string;
+    goal: string;
+    empty: string;
+    progress: string;
+    completed: string;
+    duration: string;
+  };
+  nutrition: {
+    title: string;
+    goal: string;
+    calories: string;
+    protein: string;
+    carbs: string;
+    fat: string;
+    empty: string;
+    progress: string;
+    completed: string;
+  };
+  weight: {
+    title: string;
+    unit: string;
+    goal: string;
+    changeUp: string;
+    changeDown: string;
+    noChange: string;
+  };
+  week: {
+    title: string;
+    subtitle: string;
+    avgWeight: string;
+    avgCalories: string;
+    avgActivity: string;
+    unitKg: string;
+    unitKcal: string;
+    unitMin: string;
+  };
+  goals: {
+    title: string;
+    water: string;
+    activity: string;
+    nutrition: string;
+  };
+  tip: {
+    title: string;
+  };
+};
+
+export const labels: Record<Language, Labels> = {
   nl: {
     water: {
       title: "Water",
@@ -8,9 +65,8 @@ export const labels = {
       empty: "Nog geen water gedronken",
       progress: "Goed bezig, blijf drinken",
       completed: "Dagdoel behaald",
-      add: (amount: number) => `+ ${amount} ml`,
+      add: (amount) => `+ ${amount} ml`,
     },
-
     activity: {
       title: "Activiteiten",
       goal: "Dagdoel",
@@ -19,7 +75,6 @@ export const labels = {
       completed: "Dagdoel behaald",
       duration: "minuten",
     },
-
     nutrition: {
       title: "Voeding",
       goal: "Dagdoel",
@@ -31,7 +86,6 @@ export const labels = {
       progress: "Goed bezig met je voeding",
       completed: "Dagdoel behaald",
     },
-    
     weight: {
       title: "Gewicht",
       unit: "kg",
@@ -40,7 +94,6 @@ export const labels = {
       changeDown: "Afname t.o.v. gisteren",
       noChange: "Geen verandering t.o.v. gisteren",
     },
-    
     week: {
       title: "Weekoverzicht",
       subtitle: "Laatste 7 dagen",
@@ -51,17 +104,19 @@ export const labels = {
       unitKcal: "kcal",
       unitMin: "min",
     },
-    
     goals: {
       title: "Dagdoelen",
       water: "Water",
       activity: "Activiteit",
       nutrition: "Voeding",
     },
-    
     tip: {
       title: "Tip van vandaag",
-    },    
+    },
   },
-} as const;
 
+  // Tijdelijk: andere talen vallen terug op nl
+  en: {} as any,
+  de: {} as any,
+  fr: {} as any,
+};
