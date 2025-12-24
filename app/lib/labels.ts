@@ -30,6 +30,10 @@ export type Labels = {
     empty: string;
     progress: string;
     completed: string;
+    add: string;
+    name: string;
+    save: string;
+    cancel: string;
   };
   weight: {
     title: string;
@@ -95,7 +99,11 @@ export const labels: Record<Language, Labels> = {
       empty: "Nog geen voeding gelogd vandaag",
       progress: "Goed bezig met je voeding",
       completed: "Dagdoel behaald",
-    },
+      add: "Voeding toevoegen",
+      name: "Product",
+      save: "Opslaan",
+      cancel: "Annuleren",
+    },    
     weight: {
       title: "Gewicht",
       unit: "kg",
