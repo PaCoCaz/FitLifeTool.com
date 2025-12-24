@@ -10,10 +10,11 @@ export const FOODS: FoodProduct[] = [
     carbs: 14,
     fat: 0.2,
     portions: {
-      "100 g": 100,
-      "1 klein": 120,
-      "1 middel": 180,
-      "1 groot": 220,
+        "1 g": 1,
+        "100 g": 100,
+        "1 klein": 120,
+        "1 middel": 180,
+        "1 groot": 220,
     },
   },
   {
@@ -25,8 +26,9 @@ export const FOODS: FoodProduct[] = [
     carbs: 4.8,
     fat: 1.5,
     portions: {
-      "100 ml": 100,
-      "1 glas": 250,
+        "1 ml": 1,
+        "100 ml": 100,
+        "1 glas": 250,
     },
   },
 ];
