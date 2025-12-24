@@ -34,7 +34,9 @@ export default function NutritionCard() {
 
   const [foodId, setFoodId] = useState("");
   const [portion, setPortion] = useState<number | null>(null);
+  const [quantity, setQuantity] = useState(1);
 
+  /* Dagwissel detectie */
   useEffect(() => {
     const today = getTodayKey();
     if (today !== dayKey) {
@@ -43,20 +45,24 @@ export default function NutritionCard() {
       setEditing(false);
       setFoodId("");
       setPortion(null);
+      setQuantity(1);
     }
   }, [dayKey]);
 
   function saveEntry() {
     const food = FOODS.find((f) => f.id === foodId);
-    if (!food || !portion) return;
+    if (!food || !portion || quantity <= 0) return;
+
+    const totalAmount = portion * quantity;
 
     setEntries((prev) => [
       ...prev,
-      calculateEntry(food, portion),
+      calculateEntry(food, totalAmount),
     ]);
 
     setFoodId("");
     setPortion(null);
+    setQuantity(1);
     setEditing(false);
   }
 
@@ -88,7 +94,14 @@ export default function NutritionCard() {
   return (
     <Card
       title={t.title}
-      icon={<Image src="/nutrition.svg" alt="" width={16} height={16} />}
+      icon={
+        <Image
+          src="/nutrition.svg"
+          alt=""
+          width={16}
+          height={16}
+        />
+      }
     >
       <div className="h-full flex flex-col justify-between">
 
@@ -106,7 +119,7 @@ export default function NutritionCard() {
         <div className="mt-4 space-y-2">
           <div className="h-2 w-full rounded-full bg-gray-200">
             <div
-              className={`h-2 rounded-full ${
+              className={`h-2 rounded-full transition-all ${
                 isComplete ? "bg-green-500" : "bg-[#0095D3]"
               }`}
               style={{ width: `${progress * 100}%` }}
@@ -141,7 +154,7 @@ export default function NutritionCard() {
           {!editing && (
             <button
               onClick={() => setEditing(true)}
-              className="w-full rounded-[var(--radius)] border px-3 py-2 text-xs"
+              className="w-full rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
             >
               {t.add}
             </button>
@@ -149,11 +162,14 @@ export default function NutritionCard() {
 
           {editing && (
             <div className="space-y-2">
+
+              {/* Product */}
               <select
                 value={foodId}
                 onChange={(e) => {
                   setFoodId(e.target.value);
                   setPortion(null);
+                  setQuantity(1);
                 }}
                 className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
               >
@@ -165,10 +181,14 @@ export default function NutritionCard() {
                 ))}
               </select>
 
+              {/* Portie */}
               {selectedFood && (
                 <select
                   value={portion ?? ""}
-                  onChange={(e) => setPortion(Number(e.target.value))}
+                  onChange={(e) => {
+                    setPortion(Number(e.target.value));
+                    setQuantity(1);
+                  }}
                   className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
                 >
                   <option value="">Selecteer portie</option>
@@ -182,20 +202,36 @@ export default function NutritionCard() {
                 </select>
               )}
 
+              {/* Aantal */}
+              {selectedFood && portion && (
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
+                  placeholder="Aantal"
+                />
+              )}
+
+              {/* Actieknoppen */}
               <div className="flex gap-2">
                 <button
                   onClick={saveEntry}
-                  className="flex-1 rounded-[var(--radius)] bg-[#0095D3] px-3 py-2 text-xs text-white"
+                  className="flex-1 rounded-[var(--radius)] bg-[#0095D3] px-3 py-2 text-xs text-white hover:opacity-90"
                 >
                   {t.save}
                 </button>
+
                 <button
                   onClick={() => {
                     setEditing(false);
                     setFoodId("");
                     setPortion(null);
+                    setQuantity(1);
                   }}
-                  className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs"
+                  className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
                 >
                   {t.cancel}
                 </button>
@@ -203,17 +239,18 @@ export default function NutritionCard() {
             </div>
           )}
 
+          {/* Extra acties */}
           {entries.length > 0 && !editing && (
             <div className="flex gap-2">
               <button
                 onClick={undoLast}
-                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs"
+                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
               >
                 Undo
               </button>
               <button
                 onClick={resetToday}
-                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs"
+                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
               >
                 Reset vandaag
               </button>
