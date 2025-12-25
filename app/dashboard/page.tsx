@@ -1,5 +1,6 @@
 import Header from "../components/layout/Header";
-import Sidebar from "../components/layout/Sidebar";
+import { DesktopSidebar } from "../components/layout/Sidebar";
+import { MobileNav } from "../components/layout/MobileNav";
 import DashboardGrid from "../components/layout/DashboardGrid";
 
 export default function DashboardPage() {
@@ -7,13 +8,16 @@ export default function DashboardPage() {
     <>
       <Header />
 
+      {/* Mobiele horizontale navigatie */}
+      <MobileNav />
+
       <main className="pt-20">
         <div className="mx-auto max-w-[1200px] px-4">
           <div className="relative flex gap-4">
 
-            {/* Sidebar */}
+            {/* Desktop sidebar – exacte oude breedtes */}
             <div className="hidden md:block w-[220px] lg:w-[240px] shrink-0">
-              <Sidebar />
+              <DesktopSidebar />
             </div>
 
             {/* Dashboard content */}
