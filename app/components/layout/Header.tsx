@@ -1,6 +1,14 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import { useUser } from "../../lib/AuthProvider";
+import { login, logout } from "../../lib/authActions";
 
 export default function Header() {
+  const { user, loading } = useUser();
+  const [email, setEmail] = useState("");
+
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-[#B8CAE0]">
       <div className="mx-auto max-w-[1200px] px-4 h-15 flex items-center justify-between">
@@ -12,15 +20,12 @@ export default function Header() {
             aria-label="Open menu"
             className="group relative h-7 w-7 md:hidden rounded-[var(--radius)] p-1"
           >
-            {/* Default icon */}
             <Image
               src="/menu.svg"
               alt=""
               fill
               className="object-contain transition-opacity group-hover:opacity-0"
             />
-
-            {/* Hover icon */}
             <Image
               src="/menu_hover.svg"
               alt=""
@@ -29,7 +34,7 @@ export default function Header() {
             />
           </button>
 
-          {/* Logo desktop – links */}
+          {/* Logo desktop */}
           <div className="hidden md:block relative h-9 md:h-12">
             <Image
               src="/logo_fitlifetool.png"
@@ -42,7 +47,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Logo mobiel – exact gecentreerd */}
+        {/* Logo mobiel */}
         <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
           <div className="relative h-9">
             <Image
@@ -56,32 +61,46 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Rechts: avatar */}
-        <button
-          aria-label="Gebruikersmenu"
-          className="group flex items-center gap-2 rounded-[var(--radius)] h-11 p-2 bg-[#191970] text-[#FFFFFF] hover:bg-[#0BA4E0]"
-        >
-          {/* Avatar */}
-          <span className="relative h-8 w-8 overflow-hidden rounded-full">
-            <Image
-              src="/user.svg"
-              alt=""
-              fill
-              className="object-contain"
-            />
-            <Image
-              src="/user_hover.svg"
-              alt=""
-              fill
-              className="object-contain opacity-0 transition-opacity group-hover:opacity-100"
-            />
-          </span>
+        {/* Rechts: auth */}
+        <div className="flex items-center gap-2">
+          {!loading && !user && (
+            <>
+              <input
+                type="email"
+                placeholder="E-mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="rounded-[var(--radius)] px-2 py-1 text-xs"
+              />
+              <button
+                onClick={() => login(email)}
+                className="rounded-[var(--radius)] h-11 px-3 text-xs bg-[#191970] text-white hover:bg-[#0BA4E0]"
+              >
+                Login
+              </button>
+            </>
+          )}
 
-          {/* Naam – alleen desktop */}
-          <span className="hidden md:block font-medium">
-            Gebruikersnaam
-          </span>
-        </button>
+          {user && (
+            <button
+              onClick={logout}
+              className="group flex items-center gap-2 rounded-[var(--radius)] h-11 p-2 bg-[#191970] text-white hover:bg-[#0BA4E0]"
+            >
+              <span className="relative h-8 w-8 overflow-hidden rounded-full">
+                <Image src="/user.svg" alt="" fill />
+                <Image
+                  src="/user_hover.svg"
+                  alt=""
+                  fill
+                  className="opacity-0 transition-opacity group-hover:opacity-100"
+                />
+              </span>
+              <span className="hidden md:block font-medium">
+                Logout
+              </span>
+            </button>
+          )}
+        </div>
 
       </div>
     </header>

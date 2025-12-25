@@ -3,50 +3,76 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Card from "../ui/Card";
-import { useLabels } from "../../lib/useLabels";
+import { supabase } from "../../lib/supabaseClient";
+import { useUser } from "../../lib/AuthProvider";
 
-const DAILY_WATER_GOAL = 2000;
 const QUICK_AMOUNTS = [250, 500];
 
-function getTodayKey() {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-}
+type WaterGoalResult = {
+  water_goal_ml: number;
+};
 
 export default function WaterCard() {
-  const t = useLabels("nl").water;
+  const { user } = useUser();
 
-  const [dayKey, setDayKey] = useState(getTodayKey);
-  const [entries, setEntries] = useState<number[]>([]);
+  const [waterGoal, setWaterGoal] = useState<number | null>(null);
+  const [current, setCurrent] = useState<number>(0);
 
-  /* Detecteer dagwissel (bij render / focus) */
+  const isEmpty = current === 0;
+  const isComplete =
+    waterGoal !== null && current >= waterGoal;
+
+  const progress =
+    waterGoal !== null
+      ? Math.min(current / waterGoal, 1)
+      : 0;
+
+  // Haal waterdoel op
   useEffect(() => {
-    const today = getTodayKey();
-    if (today !== dayKey) {
-      setDayKey(today);
-      setEntries([]);
-    }
-  }, [dayKey]);
+    if (!user) return;
 
-  const total = entries.reduce((sum, v) => sum + v, 0);
-  const progress = Math.min(total / DAILY_WATER_GOAL, 1);
-  const isEmpty = total === 0;
-  const isComplete = total >= DAILY_WATER_GOAL;
+    supabase
+      .from("profiles")
+      .select("water_goal_ml")
+      .eq("id", user.id)
+      .single()
+      .then(
+        ({
+          data,
+          error,
+        }: {
+          data: WaterGoalResult | null;
+          error: { message: string } | null;
+        }) => {
+          if (error) {
+            console.error(error.message);
+            return;
+          }
+
+          if (data?.water_goal_ml) {
+            setWaterGoal(data.water_goal_ml);
+          }
+        }
+      );
+  }, [user]);
 
   function addWater(amount: number) {
-    setEntries((prev) => [...prev, amount]);
+    setCurrent((prev) => prev + amount);
   }
 
-  function undoLast() {
-    setEntries((prev) => prev.slice(0, -1));
-  }
-
-  function resetToday() {
-    setEntries([]);
+  if (!waterGoal) {
+    return (
+      <Card title="Water">
+        <div className="text-sm text-gray-500">
+          Waterdoel laden…
+        </div>
+      </Card>
+    );
   }
 
   return (
     <Card
-      title={t.title}
+      title="Water"
       icon={
         <Image
           src="/water_drop.svg"
@@ -57,15 +83,14 @@ export default function WaterCard() {
       }
     >
       <div className="h-full flex flex-col justify-between">
-
         {/* Bovenkant */}
         <div className="space-y-2">
           <div className="text-2xl font-semibold text-[#191970]">
-            {total.toLocaleString()} ml
+            {current.toLocaleString()} ml
           </div>
 
           <div className="text-xs text-gray-500">
-            {t.goal}: {DAILY_WATER_GOAL.toLocaleString()} ml
+            Dagdoel: {waterGoal.toLocaleString()} ml
           </div>
         </div>
 
@@ -74,52 +99,34 @@ export default function WaterCard() {
           <div className="h-2 w-full rounded-full bg-gray-200">
             <div
               className={`h-2 rounded-full transition-all ${
-                isComplete ? "bg-green-500" : "bg-[#0095D3]"
+                isComplete
+                  ? "bg-green-500"
+                  : "bg-[#0095D3]"
               }`}
               style={{ width: `${progress * 100}%` }}
             />
           </div>
 
           <div className="text-xs text-gray-600">
-            {isEmpty && t.empty}
-            {!isEmpty && !isComplete && t.progress}
-            {isComplete && t.completed}
+            {isEmpty && "Nog geen water gedronken"}
+            {!isEmpty && !isComplete &&
+              "Goed bezig, blijf drinken"}
+            {isComplete && "Dagdoel behaald"}
           </div>
         </div>
 
         {/* Acties */}
-        <div className="mt-4 space-y-2">
-          <div className="flex gap-2">
-            {QUICK_AMOUNTS.map((amount) => (
-              <button
-                key={amount}
-                onClick={() => addWater(amount)}
-                className="flex-1 rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-xs font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
-              >
-                {t.add(amount)}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
+        <div className="mt-4 flex gap-2">
+          {QUICK_AMOUNTS.map((amount) => (
             <button
-              onClick={undoLast}
-              disabled={entries.length === 0}
-              className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600 disabled:opacity-40"
+              key={amount}
+              onClick={() => addWater(amount)}
+              className="flex-1 rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-xs font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
             >
-              Undo
+              + {amount} ml
             </button>
-
-            <button
-              onClick={resetToday}
-              disabled={entries.length === 0}
-              className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600 disabled:opacity-40"
-            >
-              Reset vandaag
-            </button>
-          </div>
+          ))}
         </div>
-
       </div>
     </Card>
   );

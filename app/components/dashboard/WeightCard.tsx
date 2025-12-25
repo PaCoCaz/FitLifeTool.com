@@ -3,56 +3,70 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Card from "../ui/Card";
-import { useLabels } from "../../lib/useLabels";
+import { supabase } from "../../lib/supabaseClient";
+import { useUser } from "../../lib/AuthProvider";
 
-function getTodayKey() {
-  return new Date().toISOString().slice(0, 10);
+type WeightProfileResult = {
+  weight_kg: number;
+  bmi: number;
+};
+
+function getBMICategory(bmi: number): string {
+  if (bmi < 18.5) return "Ondergewicht";
+  if (bmi < 25) return "Gezond";
+  if (bmi < 30) return "Overgewicht";
+  return "Obesitas";
 }
 
 export default function WeightCard() {
-  const t = useLabels("nl").weight;
+  const { user } = useUser();
 
-  // Dummy data – later Supabase
-  const yesterdayWeight = 82.7;
-  const targetWeight = 78;
+  const [weight, setWeight] = useState<number | null>(null);
+  const [bmi, setBmi] = useState<number | null>(null);
 
-  const [dayKey, setDayKey] = useState(getTodayKey);
-  const [weightByDay, setWeightByDay] = useState<Record<string, number>>({});
-  const [editing, setEditing] = useState(false);
-  const [input, setInput] = useState("");
-
-  /* Dagwissel detectie */
+  // Profiel ophalen
   useEffect(() => {
-    const today = getTodayKey();
-    if (today !== dayKey) {
-      setDayKey(today);
-      setEditing(false);
-      setInput("");
-    }
-  }, [dayKey]);
+    if (!user) return;
 
-  const currentWeight = weightByDay[dayKey];
-  const diff =
-    currentWeight !== undefined
-      ? +(currentWeight - yesterdayWeight).toFixed(1)
-      : null;
+    supabase
+      .from("profiles")
+      .select("weight_kg, bmi")
+      .eq("id", user.id)
+      .single()
+      .then(
+        ({
+          data,
+          error,
+        }: {
+          data: WeightProfileResult | null;
+          error: { message: string } | null;
+        }) => {
+          if (error) {
+            console.error(error.message);
+            return;
+          }
 
-  function saveWeight() {
-    const value = Number(input.replace(",", "."));
-    if (Number.isNaN(value)) return;
+          if (data) {
+            setWeight(data.weight_kg);
+            setBmi(data.bmi);
+          }
+        }
+      );
+  }, [user]);
 
-    setWeightByDay((prev) => ({
-      ...prev,
-      [dayKey]: value,
-    }));
-
-    setEditing(false);
-    setInput("");
+  if (weight === null || bmi === null) {
+    return (
+      <Card title="Gewicht">
+        <div className="text-sm text-gray-500">
+          Gegevens laden…
+        </div>
+      </Card>
+    );
   }
 
   return (
     <Card
-      title={t.title}
+      title="Gewicht"
       icon={
         <Image
           src="/weight.svg"
@@ -63,81 +77,21 @@ export default function WeightCard() {
       }
     >
       <div className="h-full flex flex-col justify-between">
-
         {/* Bovenkant */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <div className="text-2xl font-semibold text-[#191970]">
-            {currentWeight !== undefined
-              ? `${currentWeight} ${t.unit}`
-              : `– ${t.unit}`}
+            {weight} kg
           </div>
-
           <div className="text-xs text-gray-500">
-            {t.goal}: {targetWeight} {t.unit}
+            BMI: {bmi} ({getBMICategory(bmi)})
           </div>
         </div>
 
-        {/* Verandering */}
-        <div className="mt-3 text-xs">
-          {diff !== null && diff > 0 && (
-            <div className="text-red-600">
-              +{diff} {t.unit} · {t.changeUp}
-            </div>
-          )}
-          {diff !== null && diff < 0 && (
-            <div className="text-green-600">
-              {diff} {t.unit} · {t.changeDown}
-            </div>
-          )}
-          {diff === 0 && (
-            <div className="text-gray-600">{t.noChange}</div>
-          )}
+        {/* Info */}
+        <div className="mt-4 text-xs text-gray-600">
+          BMI is een algemene indicatie en houdt geen rekening
+          met spiermassa of vetpercentage.
         </div>
-
-        {/* Invoer */}
-        <div className="mt-4">
-          {!editing && (
-            <button
-              onClick={() => setEditing(true)}
-              className="w-full rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
-            >
-              {t.add}
-            </button>
-          )}
-
-          {editing && (
-            <div className="space-y-2">
-              <input
-                type="number"
-                step="0.1"
-                placeholder={`0.0 ${t.unit}`}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
-              />
-
-              <div className="flex gap-2">
-                <button
-                  onClick={saveWeight}
-                  className="flex-1 rounded-[var(--radius)] bg-[#0095D3] px-3 py-2 text-xs text-white hover:opacity-90"
-                >
-                  {t.save}
-                </button>
-
-                <button
-                  onClick={() => {
-                    setEditing(false);
-                    setInput("");
-                  }}
-                  className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
-                >
-                  {t.cancel}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
       </div>
     </Card>
   );

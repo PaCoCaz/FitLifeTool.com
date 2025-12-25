@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./styles/globals.css";
+import { AuthProvider } from "./lib/AuthProvider";
 
 export const metadata: Metadata = {
   title: "FitLifeTool",
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="nl">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

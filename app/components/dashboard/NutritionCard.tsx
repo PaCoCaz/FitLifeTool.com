@@ -3,97 +3,146 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Card from "../ui/Card";
-import { useLabels } from "../../lib/useLabels";
-import { FOODS } from "../../data/foods";
-import type { FoodProduct, FoodEntry } from "../../types/food";
+import { supabase } from "../../lib/supabaseClient";
+import { useUser } from "../../lib/AuthProvider";
 
-const DAILY_CALORIE_GOAL = 2200;
+type ActivityLog = {
+  calories: number;
+};
 
-function getTodayKey() {
+type NutritionProfile = {
+  calorie_goal: number;
+};
+
+function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function calculateEntry(food: FoodProduct, amount: number): FoodEntry {
-  const factor = amount / 100;
-
-  return {
-    name: food.name,
-    calories: Math.round(food.calories * factor),
-    protein: +(food.protein * factor).toFixed(1),
-    carbs: +(food.carbs * factor).toFixed(1),
-    fat: +(food.fat * factor).toFixed(1),
-  };
-}
-
 export default function NutritionCard() {
-  const t = useLabels("nl").nutrition;
+  const { user } = useUser();
 
-  const [dayKey, setDayKey] = useState(getTodayKey);
-  const [entries, setEntries] = useState<FoodEntry[]>([]);
-  const [editing, setEditing] = useState(false);
+  const [baseGoal, setBaseGoal] = useState<number | null>(null);
+  const [activityBonus, setActivityBonus] =
+    useState<number>(0);
 
-  const [foodId, setFoodId] = useState("");
-  const [portion, setPortion] = useState<number | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  // Tijdelijke dummy calorie-inname
+  const [currentCalories, setCurrentCalories] =
+    useState<number>(0);
 
-  /* Dagwissel detectie */
-  useEffect(() => {
-    const today = getTodayKey();
-    if (today !== dayKey) {
-      setDayKey(today);
-      setEntries([]);
-      setEditing(false);
-      setFoodId("");
-      setPortion(null);
-      setQuantity(1);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // 🔁 Centrale loader (herbruikbaar)
+  async function loadData(userId: string) {
+    setLoading(true);
+
+    // 1️⃣ Basis calorie-doel
+    const {
+      data: profile,
+      error: profileError,
+    }: {
+      data: NutritionProfile | null;
+      error: { message: string } | null;
+    } = await supabase
+      .from("profiles")
+      .select("calorie_goal")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error(
+        profileError?.message ??
+          "Geen calorie_goal gevonden"
+      );
+      setLoading(false);
+      return;
     }
-  }, [dayKey]);
 
-  function saveEntry() {
-    const food = FOODS.find((f) => f.id === foodId);
-    if (!food || !portion || quantity <= 0) return;
+    setBaseGoal(profile.calorie_goal);
 
-    const totalAmount = portion * quantity;
+    // 2️⃣ Activiteiten van vandaag
+    const {
+      data: activities,
+      error: activityError,
+    }: {
+      data: ActivityLog[] | null;
+      error: { message: string } | null;
+    } = await supabase
+      .from("activity_logs")
+      .select("calories")
+      .eq("user_id", userId)
+      .eq("date", today());
 
-    setEntries((prev) => [
-      ...prev,
-      calculateEntry(food, totalAmount),
-    ]);
+    if (activityError) {
+      console.error(activityError.message);
+      setLoading(false);
+      return;
+    }
 
-    setFoodId("");
-    setPortion(null);
-    setQuantity(1);
-    setEditing(false);
+    const totalBurned =
+      activities?.reduce(
+        (sum, a) => sum + a.calories,
+        0
+      ) ?? 0;
+
+    setActivityBonus(totalBurned);
+    setLoading(false);
   }
 
-  function undoLast() {
-    setEntries((prev) => prev.slice(0, -1));
+  // 🔔 Init + luisteren naar activiteit-updates
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const userId = user.id;
+
+    loadData(userId);
+
+    function handleActivityUpdate() {
+      loadData(userId);
+    }
+
+    window.addEventListener(
+      "activity-updated",
+      handleActivityUpdate
+    );
+
+    return () => {
+      window.removeEventListener(
+        "activity-updated",
+        handleActivityUpdate
+      );
+    };
+  }, [user]);
+
+  if (loading || baseGoal === null) {
+    return (
+      <Card title="Voeding">
+        <div className="text-sm text-gray-500">
+          Dagbudget laden…
+        </div>
+      </Card>
+    );
   }
 
-  function resetToday() {
-    setEntries([]);
-  }
+  const dailyBudget = baseGoal + activityBonus;
 
-  const totals = entries.reduce(
-    (acc, e) => {
-      acc.calories += e.calories;
-      acc.protein += e.protein;
-      acc.carbs += e.carbs;
-      acc.fat += e.fat;
-      return acc;
-    },
-    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  const progress = Math.min(
+    currentCalories / dailyBudget,
+    1
   );
 
-  const progress = Math.min(totals.calories / DAILY_CALORIE_GOAL, 1);
-  const isEmpty = totals.calories === 0;
-  const isComplete = totals.calories >= DAILY_CALORIE_GOAL;
+  const isEmpty = currentCalories === 0;
+  const isComplete = currentCalories >= dailyBudget;
 
-  const selectedFood = FOODS.find((f) => f.id === foodId);
+  function addCalories(amount: number) {
+    setCurrentCalories((prev) => prev + amount);
+  }
 
   return (
     <Card
-      title={t.title}
+      title="Voeding"
       icon={
         <Image
           src="/nutrition.svg"
@@ -104,14 +153,19 @@ export default function NutritionCard() {
       }
     >
       <div className="h-full flex flex-col justify-between">
-
         {/* Bovenkant */}
-        <div>
+        <div className="space-y-1">
           <div className="text-2xl font-semibold text-[#191970]">
-            {totals.calories} {t.calories}
+            {currentCalories.toLocaleString()} kcal
           </div>
+
           <div className="text-xs text-gray-500">
-            {t.goal}: {DAILY_CALORIE_GOAL} {t.calories}
+            Dagbudget: {dailyBudget} kcal
+          </div>
+
+          <div className="text-[11px] text-gray-400">
+            Basis {baseGoal} + activiteit{" "}
+            {activityBonus}
           </div>
         </div>
 
@@ -120,143 +174,33 @@ export default function NutritionCard() {
           <div className="h-2 w-full rounded-full bg-gray-200">
             <div
               className={`h-2 rounded-full transition-all ${
-                isComplete ? "bg-green-500" : "bg-[#0095D3]"
+                isComplete
+                  ? "bg-green-500"
+                  : "bg-[#0095D3]"
               }`}
               style={{ width: `${progress * 100}%` }}
             />
           </div>
+
           <div className="text-xs text-gray-600">
-            {isEmpty && t.empty}
-            {!isEmpty && !isComplete && t.progress}
-            {isComplete && t.completed}
+            {isEmpty && "Nog geen voeding gelogd"}
+            {!isEmpty && !isComplete &&
+              "Goed bezig, blijf loggen"}
+            {isComplete && "Dagbudget bereikt"}
           </div>
         </div>
 
-        {/* Macro’s */}
-        <div className="mt-4 grid grid-cols-3 gap-2 text-xs text-gray-700">
-          <div className="text-center">
-            <div className="font-semibold">{totals.protein}g</div>
-            <div className="text-gray-500">{t.protein}</div>
-          </div>
-          <div className="text-center">
-            <div className="font-semibold">{totals.carbs}g</div>
-            <div className="text-gray-500">{t.carbs}</div>
-          </div>
-          <div className="text-center">
-            <div className="font-semibold">{totals.fat}g</div>
-            <div className="text-gray-500">{t.fat}</div>
-          </div>
-        </div>
-
-        {/* Acties */}
-        <div className="mt-4 space-y-2">
-
-          {!editing && (
+        {/* Tijdelijke test-acties */}
+        <div className="mt-4 flex gap-2">
+          {[200, 500].map((amount) => (
             <button
-              onClick={() => setEditing(true)}
-              className="w-full rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+              key={amount}
+              onClick={() => addCalories(amount)}
+              className="flex-1 rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-xs font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
             >
-              {t.add}
+              + {amount} kcal
             </button>
-          )}
-
-          {editing && (
-            <div className="space-y-2">
-
-              {/* Product */}
-              <select
-                value={foodId}
-                onChange={(e) => {
-                  setFoodId(e.target.value);
-                  setPortion(null);
-                  setQuantity(1);
-                }}
-                className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
-              >
-                <option value="">Selecteer product</option>
-                {FOODS.map((food) => (
-                  <option key={food.id} value={food.id}>
-                    {food.name}
-                  </option>
-                ))}
-              </select>
-
-              {/* Portie */}
-              {selectedFood && (
-                <select
-                  value={portion ?? ""}
-                  onChange={(e) => {
-                    setPortion(Number(e.target.value));
-                    setQuantity(1);
-                  }}
-                  className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
-                >
-                  <option value="">Selecteer portie</option>
-                  {Object.entries(selectedFood.portions).map(
-                    ([label, amount]) => (
-                      <option key={label} value={amount}>
-                        {label}
-                      </option>
-                    )
-                  )}
-                </select>
-              )}
-
-              {/* Aantal */}
-              {selectedFood && portion && (
-                <input
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
-                  className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
-                  placeholder="Aantal"
-                />
-              )}
-
-              {/* Actieknoppen */}
-              <div className="flex gap-2">
-                <button
-                  onClick={saveEntry}
-                  className="flex-1 rounded-[var(--radius)] bg-[#0095D3] px-3 py-2 text-xs text-white hover:opacity-90"
-                >
-                  {t.save}
-                </button>
-
-                <button
-                  onClick={() => {
-                    setEditing(false);
-                    setFoodId("");
-                    setPortion(null);
-                    setQuantity(1);
-                  }}
-                  className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
-                >
-                  {t.cancel}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Extra acties */}
-          {entries.length > 0 && !editing && (
-            <div className="flex gap-2">
-              <button
-                onClick={undoLast}
-                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
-              >
-                Undo
-              </button>
-              <button
-                onClick={resetToday}
-                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
-              >
-                Reset vandaag
-              </button>
-            </div>
-          )}
-
+          ))}
         </div>
       </div>
     </Card>

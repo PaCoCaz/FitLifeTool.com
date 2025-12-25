@@ -3,58 +3,113 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Card from "../ui/Card";
-import { useLabels } from "../../lib/useLabels";
+import { supabase } from "../../lib/supabaseClient";
+import { useUser } from "../../lib/AuthProvider";
 
-const DAILY_ACTIVITY_GOAL = 30;
+type ActivityLog = {
+  id: string;
+  type: string;
+  calories: number;
+};
 
-function getTodayKey() {
+const ACTIVITY_OPTIONS = [
+  { type: "wandelen", label: "Wandelen (30 min)", calories: 150 },
+  { type: "fietsen", label: "Fietsen (30 min)", calories: 200 },
+  { type: "kracht", label: "Krachttraining", calories: 250 },
+  { type: "hardlopen", label: "Hardlopen (30 min)", calories: 300 },
+];
+
+function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
 export default function ActivityCard() {
-  const t = useLabels("nl").activity;
+  const { user } = useUser();
 
-  const [dayKey, setDayKey] = useState(getTodayKey);
-  const [entries, setEntries] = useState<number[]>([]);
-  const [editing, setEditing] = useState(false);
-  const [input, setInput] = useState("");
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  /* Dagwissel detectie */
+  // Laad activiteiten van vandaag
   useEffect(() => {
-    const today = getTodayKey();
-    if (today !== dayKey) {
-      setDayKey(today);
-      setEntries([]);
-      setEditing(false);
-      setInput("");
+    if (!user) return;
+
+    supabase
+      .from("activity_logs")
+      .select("id, type, calories")
+      .eq("user_id", user.id)
+      .eq("date", today())
+      .then(
+        ({
+          data,
+          error,
+        }: {
+          data: ActivityLog[] | null;
+          error: { message: string } | null;
+        }) => {
+          if (error) {
+            console.error(error.message);
+            setLoading(false);
+            return;
+          }
+
+          setLogs(data ?? []);
+          setLoading(false);
+        }
+      );
+  }, [user]);
+
+  async function addActivity(
+    type: string,
+    calories: number
+  ) {
+    if (!user) return;
+
+    const {
+      data,
+      error,
+    }: {
+      data: ActivityLog | null;
+      error: { message: string } | null;
+    } = await supabase
+      .from("activity_logs")
+      .insert({
+        user_id: user.id,
+        date: today(),
+        type,
+        calories,
+      })
+      .select("id, type, calories")
+      .single();
+
+    if (error) {
+      console.error(error.message);
+      return;
     }
-  }, [dayKey]);
 
-  const total = entries.reduce((sum, v) => sum + v, 0);
-  const progress = Math.min(total / DAILY_ACTIVITY_GOAL, 1);
-  const isEmpty = total === 0;
-  const isComplete = total >= DAILY_ACTIVITY_GOAL;
-
-  function saveActivity() {
-    const value = Number(input);
-    if (Number.isNaN(value) || value <= 0) return;
-
-    setEntries((prev) => [...prev, value]);
-    setEditing(false);
-    setInput("");
+    if (data) {
+      setLogs((prev) => [...prev, data]);
+      window.dispatchEvent(new Event("activity-updated"));
+    }    
   }
 
-  function undoLast() {
-    setEntries((prev) => prev.slice(0, -1));
-  }
+  const totalBurned = logs.reduce(
+    (sum, a) => sum + a.calories,
+    0
+  );
 
-  function resetToday() {
-    setEntries([]);
+  if (loading) {
+    return (
+      <Card title="Activiteit">
+        <div className="text-sm text-gray-500">
+          Activiteiten laden…
+        </div>
+      </Card>
+    );
   }
 
   return (
     <Card
-      title={t.title}
+      title="Activiteit"
       icon={
         <Image
           src="/activity.svg"
@@ -65,100 +120,30 @@ export default function ActivityCard() {
       }
     >
       <div className="h-full flex flex-col justify-between">
-
         {/* Bovenkant */}
-        <div className="space-y-2">
+        <div>
           <div className="text-2xl font-semibold text-[#191970]">
-            {total} {t.duration}
+            {totalBurned} kcal
           </div>
-
           <div className="text-xs text-gray-500">
-            {t.goal}: {DAILY_ACTIVITY_GOAL} {t.duration}
+            Vandaag verbrand
           </div>
         </div>
 
-        {/* Progress */}
+        {/* Activiteiten toevoegen */}
         <div className="mt-4 space-y-2">
-          <div className="h-2 w-full rounded-full bg-gray-200">
-            <div
-              className={`h-2 rounded-full transition-all ${
-                isComplete ? "bg-green-500" : "bg-[#0095D3]"
-              }`}
-              style={{ width: `${progress * 100}%` }}
-            />
-          </div>
-
-          <div className="text-xs text-gray-600">
-            {isEmpty && t.empty}
-            {!isEmpty && !isComplete && t.progress}
-            {isComplete && t.completed}
-          </div>
-        </div>
-
-        {/* Acties */}
-        <div className="mt-4 space-y-2">
-
-          {!editing && (
+          {ACTIVITY_OPTIONS.map((a) => (
             <button
-              onClick={() => setEditing(true)}
+              key={a.type}
+              onClick={() =>
+                addActivity(a.type, a.calories)
+              }
               className="w-full rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
             >
-              {t.add}
+              + {a.label}
             </button>
-          )}
-
-          {editing && (
-            <div className="space-y-2">
-              <input
-                type="number"
-                placeholder={`0 ${t.duration}`}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="w-full rounded-[var(--radius)] border px-3 py-2 text-sm"
-              />
-
-              <div className="flex gap-2">
-                <button
-                  onClick={saveActivity}
-                  className="flex-1 rounded-[var(--radius)] bg-[#0095D3] px-3 py-2 text-xs text-white hover:opacity-90"
-                >
-                  {t.save}
-                </button>
-
-                <button
-                  onClick={() => {
-                    setEditing(false);
-                    setInput("");
-                  }}
-                  className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
-                >
-                  {t.cancel}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Extra acties */}
-          {entries.length > 0 && !editing && (
-            <div className="flex gap-2">
-              <button
-                onClick={undoLast}
-                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
-              >
-                Undo
-              </button>
-
-              <button
-                onClick={resetToday}
-                className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-xs text-gray-600"
-              >
-                Reset vandaag
-              </button>
-            </div>
-          )}
-
+          ))}
         </div>
-
       </div>
     </Card>
   );
