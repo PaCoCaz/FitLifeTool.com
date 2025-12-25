@@ -35,10 +35,20 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 z-50 w-full bg-[#B8CAE0]">
-      <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4">
-
-        {/* Logo – vaste grootte */}
-        <div className="relative h-12">
+      <div
+        className="
+          mx-auto
+          flex
+          h-16
+          max-w-[1200px]
+          items-center
+          justify-between
+          gap-3
+          px-4
+        "
+      >
+        {/* Logo */}
+        <div className="relative h-12 max-w-[55%] min-w-0 shrink">
           <Image
             src="/logo_fitlifetool.png"
             alt="FitLifeTool"
@@ -51,8 +61,23 @@ export default function Header() {
 
         {/* User */}
         {!loading && user && (
-          <div className="flex items-center gap-2 rounded-[var(--radius)] bg-[#191970] px-3 py-1 text-white">
-            <span className="relative h-8 w-8 overflow-hidden rounded-full">
+          <div
+            className="
+              flex
+              h-10
+              max-w-[45%]
+              min-w-0
+              shrink
+              items-center
+              gap-2
+              rounded-[var(--radius)]
+              bg-[#191970]
+              px-3
+              text-white
+            "
+          >
+            {/* Avatar */}
+            <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full">
               <Image
                 src="/user.svg"
                 alt=""
@@ -61,12 +86,12 @@ export default function Header() {
               />
             </span>
 
-            <span className="text-sm font-medium">
+            {/* Naam */}
+            <span className="min-w-0 truncate text-sm font-medium">
               {firstName ?? "Gebruiker"}
             </span>
           </div>
         )}
-
       </div>
     </header>
   );
