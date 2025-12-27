@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { label: "Instellingen", href: "/settings" },
 ];
 
-export function MobileNav() {
+export default function TopNavigation() {
   const pathname = usePathname();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -42,11 +42,11 @@ export function MobileNav() {
   }, []);
 
   return (
-    <nav className="md:hidden sticky top-16 z-40 bg-[#B8CAE0]">
+    <nav className="sticky top-16 z-40 bg-[#B8CAE0]">
       <div className="mx-auto max-w-[1200px] px-4">
         <div className="flex items-start">
 
-          {/* Left chevron (alleen als nodig) */}
+          {/* Left chevron */}
           {canScrollLeft && (
             <div className="mr-2 pt-[4px] flex items-start">
               <Image
@@ -90,7 +90,7 @@ export function MobileNav() {
             })}
           </div>
 
-          {/* Right chevron (alleen als nodig) */}
+          {/* Right chevron */}
           {canScrollRight && (
             <div className="ml-2 pt-[4px] flex items-start">
               <Image
