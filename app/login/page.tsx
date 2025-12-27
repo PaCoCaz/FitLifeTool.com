@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Alleen redirecten als auth definitief is
+  // Alleen redirecten als auth ZEKER klaar is
   useEffect(() => {
     if (!loading && user) {
       router.replace("/dashboard");
@@ -39,9 +39,6 @@ export default function LoginPage() {
 
     router.replace("/dashboard");
   };
-
-  // 🔑 Alleen blokkeren als user al ingelogd is
-  if (user) return null;
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 bg-[#DBE4F0]">
