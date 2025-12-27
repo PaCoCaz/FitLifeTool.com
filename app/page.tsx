@@ -1,34 +1,42 @@
 import Link from "next/link";
-import Image from "next/image";
+import Header from "./components/layout/Header";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 bg-[#DBE4F0]">
-      <div className="mb-6 relative h-16">
-        <Image
-          src="/logo_fitlifetool.png"
-          alt="FitLifeTool"
-          width={1500}
-          height={300}
-          className="h-full w-auto object-contain"
-          priority
-        />
-      </div>
+    <>
+      <Header />
 
-      <h1 className="mb-2 text-xl font-semibold text-[#191970]">
-        Welkom bij FitLifeTool
-      </h1>
+      <main className="pt-[104px]">
+        <div className="mx-auto max-w-[1200px] px-4">
+          <section className="py-16 text-center">
+            <h1 className="mb-4 text-3xl font-semibold text-[#191970]">
+              Personal health & nutrition, tailored to you
+            </h1>
 
-      <p className="mb-6 text-sm text-gray-600 text-center max-w-sm">
-        Jouw persoonlijke tool voor voeding, beweging en gezondheid.
-      </p>
+            <p className="mx-auto mb-8 max-w-2xl text-gray-600">
+              FitLifeTool helps you track nutrition, activity, weight and daily
+              goals in one clear dashboard — built to be simple, personal and
+              sustainable.
+            </p>
 
-      <Link
-        href="/login"
-        className="rounded-[var(--radius)] bg-[#191970] px-6 py-2 text-white hover:bg-[#0BA4E0] transition"
-      >
-        Inloggen
-      </Link>
-    </main>
+            <div className="flex justify-center gap-4">
+              <Link
+                href="/register"
+                className="rounded-[var(--radius)] bg-[#191970] px-6 py-3 text-white hover:bg-[#0BA4E0] transition"
+              >
+                Get started
+              </Link>
+
+              <Link
+                href="/login"
+                className="rounded-[var(--radius)] border border-[#191970] px-6 py-3 text-[#191970] hover:bg-gray-50 transition"
+              >
+                Log in
+              </Link>
+            </div>
+          </section>
+        </div>
+      </main>
+    </>
   );
 }
