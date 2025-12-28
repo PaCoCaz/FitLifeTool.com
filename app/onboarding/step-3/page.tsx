@@ -43,7 +43,6 @@ export default function OnboardingStep3() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Guard
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/register");
@@ -61,7 +60,6 @@ export default function OnboardingStep3() {
     setSaving(true);
     setError(null);
 
-    // 1️⃣ Sla activiteit + doel op
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
@@ -77,7 +75,6 @@ export default function OnboardingStep3() {
       return;
     }
 
-    // 2️⃣ Haal compleet profiel op voor berekeningen
     const {
       data: profile,
       error: profileError,
@@ -105,7 +102,6 @@ export default function OnboardingStep3() {
       return;
     }
 
-    // 3️⃣ Berekeningen
     const age = calculateAge(profile.birthdate);
 
     const bmr = calculateBMR(
@@ -127,18 +123,17 @@ export default function OnboardingStep3() {
     const bmi = calculateBMI(
       profile.weight_kg,
       profile.height_cm
-    );   
+    );
 
-    // 4️⃣ Sla dagdoelen + BMI op
     const { error: goalsError } = await supabase
-    .from("profiles")
-    .update({
-      calorie_goal: calorieGoal,
-      water_goal_ml: waterGoal,
-      bmi: bmi,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
+      .from("profiles")
+      .update({
+        calorie_goal: calorieGoal,
+        water_goal_ml: waterGoal,
+        bmi,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
 
     if (goalsError) {
       setError(goalsError.message);
@@ -146,20 +141,18 @@ export default function OnboardingStep3() {
       return;
     }
 
-    // 5️⃣ Klaar → dashboard
     router.replace("/dashboard");
   };
 
-  if (loading || !user) {
-    return null;
-  }
+  if (loading || !user) return null;
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-[var(--radius)] bg-white p-6 shadow">
-        <h1 className="mb-2 text-xl font-semibold">
+    <main className="min-h-screen flex items-center justify-center px-4 bg-[#DBE4F0]">
+      <div className="w-full max-w-sm rounded-[var(--radius)] bg-white p-6 shadow">
+        <h1 className="mb-2 text-lg font-semibold text-[#191970]">
           Je doelen
         </h1>
+
         <p className="mb-6 text-sm text-gray-500">
           Op basis hiervan stellen we je persoonlijke dagdoelen in.
         </p>
@@ -177,7 +170,7 @@ export default function OnboardingStep3() {
                   e.target.value as ActivityLevel
                 )
               }
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 text-base"
             >
               <option value="">Selecteer</option>
               <option value="sedentary">
@@ -204,7 +197,7 @@ export default function OnboardingStep3() {
               Wat is je doel?
             </label>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-base">
               <label className="flex items-center gap-2">
                 <input
                   type="radio"

@@ -25,7 +25,6 @@ export default function OnboardingStep2() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Guard + ophalen gender uit stap 1
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/register");
@@ -55,7 +54,6 @@ export default function OnboardingStep2() {
           if (data?.gender) {
             setGender(data.gender);
 
-            // Automatisch instellen bij man/vrouw
             if (data.gender === "male" || data.gender === "female") {
               setCalculationSex(data.gender);
             }
@@ -97,16 +95,15 @@ export default function OnboardingStep2() {
     router.push("/onboarding/step-3");
   };
 
-  if (loading || !user || !gender) {
-    return null;
-  }
+  if (loading || !user || !gender) return null;
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-[var(--radius)] bg-white p-6 shadow">
-        <h1 className="mb-2 text-xl font-semibold">
+    <main className="min-h-screen flex items-center justify-center px-4 bg-[#DBE4F0]">
+      <div className="w-full max-w-sm rounded-[var(--radius)] bg-white p-6 shadow">
+        <h1 className="mb-2 text-lg font-semibold text-[#191970]">
           Lichaamsgegevens
         </h1>
+
         <p className="mb-6 text-sm text-gray-500">
           Deze gegevens gebruiken we om je energie- en voedingsbehoeften
           te berekenen.
@@ -120,9 +117,10 @@ export default function OnboardingStep2() {
             </label>
             <input
               type="number"
+              inputMode="numeric"
               value={height}
               onChange={(e) => setHeight(e.target.value)}
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 text-base"
             />
           </div>
 
@@ -133,20 +131,21 @@ export default function OnboardingStep2() {
             </label>
             <input
               type="number"
+              inputMode="numeric"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 text-base"
             />
           </div>
 
-          {/* Alleen tonen bij gender = other */}
+          {/* Alleen bij gender = other */}
           {gender === "other" && (
             <div>
               <label className="mb-1 block text-sm font-medium">
                 Berekening baseren op
               </label>
 
-              <div className="space-y-2">
+              <div className="space-y-2 text-base">
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
