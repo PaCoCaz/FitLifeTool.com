@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { useSearchParams } from "next/navigation";
 
 export default function ResetPasswordPage() {
-  const hasExchanged = useRef(false);
+  const searchParams = useSearchParams();
+  const hasVerified = useRef(false);
 
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,14 +14,22 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleRecovery = async () => {
-      if (hasExchanged.current) return;
-      hasExchanged.current = true;
+    const verifyRecovery = async () => {
+      if (hasVerified.current) return;
+      hasVerified.current = true;
 
-      const { error } =
-        await supabase.auth.exchangeCodeForSession(
-          window.location.href
-        );
+      const token_hash = searchParams.get("token_hash");
+      const type = searchParams.get("type");
+
+      if (!token_hash || type !== "recovery") {
+        setError("Ongeldige of verlopen reset-link.");
+        return;
+      }
+
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash,
+        type: "recovery",
+      });
 
       if (error) {
         setError("Ongeldige of verlopen reset-link.");
@@ -29,8 +39,8 @@ export default function ResetPasswordPage() {
       setReady(true);
     };
 
-    handleRecovery();
-  }, []);
+    verifyRecovery();
+  }, [searchParams]);
 
   const handleReset = async () => {
     setLoading(true);
@@ -47,7 +57,6 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    // middleware regelt verdere redirect
     window.location.href = "/dashboard";
   };
 
