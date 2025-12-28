@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabaseClient";
 
 type Props = {
   firstName: string;
@@ -29,14 +28,14 @@ export default function AvatarMenu({ firstName }: Props) {
 
   const handleLogout = async () => {
     setOpen(false);
-  
+
     await fetch("/auth/logout", {
       method: "POST",
     });
-  
-    // fallback, mocht redirect niet meteen gebeuren
-    window.location.href = "/login";
-  };   
+
+    // 🔴 Nodig in productie om UI direct te resetten
+    window.location.reload();
+  };
 
   return (
     <div ref={ref} className="relative">
