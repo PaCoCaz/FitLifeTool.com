@@ -1,25 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabaseClient";
-import { useUser } from "../lib/AuthProvider";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loading } = useUser();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // Alleen redirecten als auth ZEKER klaar is
-  useEffect(() => {
-    if (!loading && user) {
-      router.replace("/dashboard");
-    }
-  }, [user, loading, router]);
 
   const handleLogin = async () => {
     setError(null);
@@ -37,6 +28,7 @@ export default function LoginPage() {
       return;
     }
 
+    // Succesvolle login → dashboard
     router.replace("/dashboard");
   };
 

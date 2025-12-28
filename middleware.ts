@@ -14,18 +14,10 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
+          response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: any) {
-          response.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
+          response.cookies.set({ name, value: "", ...options });
         },
       },
     }
@@ -35,12 +27,27 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const isDashboard =
-    request.nextUrl.pathname.startsWith("/dashboard");
+  const pathname = request.nextUrl.pathname;
 
-  if (isDashboard && !session) {
+  const isLoggedIn = !!session;
+  const isProtectedRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/settings");
+
+  const isLoginPage = pathname === "/login";
+  const isHomePage = pathname === "/";
+
+  // ❌ Niet ingelogd → protected routes blokkeren
+  if (!isLoggedIn && isProtectedRoute) {
     return NextResponse.redirect(
       new URL("/login", request.url)
+    );
+  }
+
+  // ✅ Ingelogd → login en home overslaan
+  if (isLoggedIn && (isLoginPage || isHomePage)) {
+    return NextResponse.redirect(
+      new URL("/dashboard", request.url)
     );
   }
 
@@ -48,5 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/", "/login", "/dashboard/:path*", "/settings/:path*"],
 };
