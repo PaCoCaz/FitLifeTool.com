@@ -32,11 +32,11 @@ export default function AvatarMenu({ firstName }: Props) {
     await fetch("/auth/logout", {
       method: "POST",
       cache: "no-store",
+      credentials: "include", // 🔴 DIT IS DE MISSENDE SCHAKEL
     });
   
-    // 🔴 HARD navigation: nieuwe request, nieuwe middleware run
     window.location.assign("/login");
-  };  
+  };    
 
   return (
     <div ref={ref} className="relative">

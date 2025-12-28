@@ -1,20 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-
-type CookieToSet = {
-  name: string;
-  value: string;
-  options?: {
-    path?: string;
-    domain?: string;
-    maxAge?: number;
-    expires?: Date;
-    httpOnly?: boolean;
-    secure?: boolean;
-    sameSite?: "lax" | "strict" | "none";
-  };
-};
+import type { SetAllCookies } from "@supabase/ssr";
 
 export async function POST() {
   const cookieStore = await cookies();
@@ -27,17 +14,11 @@ export async function POST() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(
-            ({ name, value, options }) => {
-              cookieStore.set({
-                name,
-                value,
-                ...options,
-              });
-            }
-          );
-        },
+        setAll: ((cookiesToSet) => {
+          cookiesToSet.forEach((cookie) => {
+            cookieStore.set(cookie);
+          });
+        }) as SetAllCookies,
       },
     }
   );
