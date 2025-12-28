@@ -3,6 +3,13 @@ import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // ⛔️ NOOIT auth endpoints intercepten (logout, callbacks, etc.)
+  if (pathname.startsWith("/auth")) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next();
 
   const supabase = createServerClient(
@@ -23,29 +30,37 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // ⚠️ BELANGRIJK: geen getSession(), alleen getUser()
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
+  const isLoggedIn = !!user;
 
-  const isLoggedIn = !!session;
-  const isProtectedRoute =
+  const isProtected =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/settings");
 
-  const isLoginPage = pathname === "/login";
-  const isHomePage = pathname === "/";
+  const isLogin = pathname === "/login";
+  const isHome = pathname === "/";
+  const isResetPassword = pathname === "/reset-password";
+  const isForgotPassword = pathname === "/forgot-password";
 
   // ❌ Niet ingelogd → protected routes blokkeren
-  if (!isLoggedIn && isProtectedRoute) {
+  if (!isLoggedIn && isProtected) {
     return NextResponse.redirect(
       new URL("/login", request.url)
     );
   }
 
-  // ✅ Ingelogd → login en home overslaan
-  if (isLoggedIn && (isLoginPage || isHomePage)) {
+  // ✅ Ingelogd → login/home overslaan
+  // ⚠️ MAAR reset/forgot password altijd toestaan
+  if (
+    isLoggedIn &&
+    (isLogin || isHome) &&
+    !isResetPassword &&
+    !isForgotPassword
+  ) {
     return NextResponse.redirect(
       new URL("/dashboard", request.url)
     );
@@ -55,5 +70,13 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/dashboard/:path*", "/settings/:path*"],
+  matcher: [
+    "/",
+    "/login",
+    "/forgot-password",
+    "/reset-password",
+    "/dashboard/:path*",
+    "/settings/:path*",
+    "/auth/:path*",
+  ],
 };

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabaseClient";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,7 +29,6 @@ export default function LoginPage() {
       return;
     }
 
-    // Succesvolle login → dashboard
     router.replace("/dashboard");
   };
 
@@ -67,6 +67,23 @@ export default function LoginPage() {
           >
             {submitting ? "Inloggen…" : "Inloggen"}
           </button>
+        </div>
+
+        {/* 👇 HIER hoort dit blok */}
+        <div className="mt-4 text-sm flex justify-between">
+          <Link
+            href="/forgot-password"
+            className="text-[#191970] hover:underline"
+          >
+            Wachtwoord vergeten?
+          </Link>
+
+          <Link
+            href="/register"
+            className="text-[#191970] hover:underline"
+          >
+            Account aanmaken
+          </Link>
         </div>
       </div>
     </main>

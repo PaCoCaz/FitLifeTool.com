@@ -28,9 +28,15 @@ export default function AvatarMenu({ firstName }: Props) {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.replace("/login");
-  };
+    setOpen(false);
+  
+    await fetch("/auth/logout", {
+      method: "POST",
+    });
+  
+    // fallback, mocht redirect niet meteen gebeuren
+    window.location.href = "/login";
+  };   
 
   return (
     <div ref={ref} className="relative">
