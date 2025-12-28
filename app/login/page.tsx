@@ -45,7 +45,7 @@ export default function LoginPage() {
             placeholder="E-mailadres"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className="w-full rounded border px-3 py-2 text-base"
           />
 
           <input
@@ -53,7 +53,7 @@ export default function LoginPage() {
             placeholder="Wachtwoord"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className="w-full rounded border px-3 py-2 text-base"
           />
 
           {error && (
