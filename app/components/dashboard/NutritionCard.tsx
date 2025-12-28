@@ -5,13 +5,22 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
+import {
+  calculateNutritionScoreV2,
+  getFitLifeScoreColor,
+  NutritionGoal,
+} from "../../lib/fitlifeScore";
 
+/**
+ * Types
+ */
 type ActivityLog = {
   calories: number;
 };
 
 type NutritionProfile = {
   calorie_goal: number;
+  goal: NutritionGoal;
 };
 
 function today(): string {
@@ -22,20 +31,25 @@ export default function NutritionCard() {
   const { user } = useUser();
 
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
-  const [activityBonus, setActivityBonus] =
+  const [goal, setGoal] = useState<NutritionGoal>("maintain");
+  const [activityBonus, setActivityBonus] = useState<number>(0);
+
+  // 🔧 Tijdelijk (tot food logging)
+  const [currentCalories, setCurrentCalories] =
     useState<number>(0);
 
-  // Tijdelijke dummy calorie-inname
-  const [currentCalories, setCurrentCalories] =
+  const [nutritionScore, setNutritionScore] =
     useState<number>(0);
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  // 🔁 Centrale loader (herbruikbaar)
+  /**
+   * Data laden
+   */
   async function loadData(userId: string) {
     setLoading(true);
 
-    // 1️⃣ Basis calorie-doel
+    // 1️⃣ Profiel (calorie_goal + doel)
     const {
       data: profile,
       error: profileError,
@@ -44,22 +58,23 @@ export default function NutritionCard() {
       error: { message: string } | null;
     } = await supabase
       .from("profiles")
-      .select("calorie_goal")
+      .select("calorie_goal, goal")
       .eq("id", userId)
       .single();
 
     if (profileError || !profile) {
       console.error(
         profileError?.message ??
-          "Geen calorie_goal gevonden"
+          "Geen nutrition profiel gevonden"
       );
       setLoading(false);
       return;
     }
 
     setBaseGoal(profile.calorie_goal);
+    setGoal(profile.goal);
 
-    // 2️⃣ Activiteiten van vandaag
+    // 2️⃣ Activiteit van vandaag
     const {
       data: activities,
       error: activityError,
@@ -88,7 +103,9 @@ export default function NutritionCard() {
     setLoading(false);
   }
 
-  // 🔔 Init + luisteren naar activiteit-updates
+  /**
+   * Init + updates
+   */
   useEffect(() => {
     if (!user) {
       setLoading(false);
@@ -96,7 +113,6 @@ export default function NutritionCard() {
     }
 
     const userId = user.id;
-
     loadData(userId);
 
     function handleActivityUpdate() {
@@ -116,6 +132,24 @@ export default function NutritionCard() {
     };
   }, [user]);
 
+  /**
+   * Score berekenen
+   */
+  const dailyBudget =
+    baseGoal !== null ? baseGoal + activityBonus : 0;
+
+  useEffect(() => {
+    if (!dailyBudget) return;
+
+    const score = calculateNutritionScoreV2(
+      currentCalories,
+      dailyBudget,
+      goal
+    );
+
+    setNutritionScore(score);
+  }, [currentCalories, dailyBudget, goal]);
+
   if (loading || baseGoal === null) {
     return (
       <Card title="Voeding">
@@ -126,16 +160,17 @@ export default function NutritionCard() {
     );
   }
 
-  const dailyBudget = baseGoal + activityBonus;
-
   const progress = Math.min(
     currentCalories / dailyBudget,
     1
   );
 
   const isEmpty = currentCalories === 0;
-  const isComplete = currentCalories >= dailyBudget;
+  const isOver = currentCalories > dailyBudget;
 
+  /**
+   * Tijdelijke testfunctie
+   */
   function addCalories(amount: number) {
     setCurrentCalories((prev) => prev + amount);
   }
@@ -151,6 +186,21 @@ export default function NutritionCard() {
           height={16}
         />
       }
+      action={
+        <div
+          className={`
+            rounded-[var(--radius)]
+            border
+            px-2 py-1
+            text-xs
+            font-medium
+            whitespace-nowrap
+            ${getFitLifeScoreColor(nutritionScore)}
+          `}
+        >
+          FitLifeScore: {nutritionScore} / 100
+        </div>
+      }
     >
       <div className="h-full flex flex-col justify-between">
         {/* Bovenkant */}
@@ -164,8 +214,7 @@ export default function NutritionCard() {
           </div>
 
           <div className="text-[11px] text-gray-400">
-            Basis {baseGoal} + activiteit{" "}
-            {activityBonus}
+            Basis {baseGoal} + activiteit {activityBonus}
           </div>
         </div>
 
@@ -174,8 +223,8 @@ export default function NutritionCard() {
           <div className="h-2 w-full rounded-full bg-gray-200">
             <div
               className={`h-2 rounded-full transition-all ${
-                isComplete
-                  ? "bg-green-500"
+                isOver
+                  ? "bg-[#C80000]"
                   : "bg-[#0095D3]"
               }`}
               style={{ width: `${progress * 100}%` }}
@@ -184,10 +233,14 @@ export default function NutritionCard() {
 
           <div className="text-xs text-gray-600">
             {isEmpty && "Nog geen voeding gelogd"}
-            {!isEmpty && !isComplete &&
-              "Goed bezig, blijf loggen"}
-            {isComplete && "Dagbudget bereikt"}
+            {!isEmpty && !isOver &&
+              "Binnen je dagbudget"}
+            {isOver && "Boven je dagbudget"}
           </div>
+        </div>
+
+        <div className="mt-2 text-[11px] text-gray-400">
+          FitLifeScore gebaseerd op calorie-inname en doel
         </div>
 
         {/* Tijdelijke test-acties */}
@@ -196,7 +249,17 @@ export default function NutritionCard() {
             <button
               key={amount}
               onClick={() => addCalories(amount)}
-              className="flex-1 rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-xs font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
+              className="
+                flex-1
+                rounded-[var(--radius)]
+                border border-[#0095D3]
+                px-3 py-2
+                text-xs font-medium
+                text-[#0095D3]
+                hover:bg-[#0095D3]
+                hover:text-white
+                transition
+              "
             >
               + {amount} kcal
             </button>
