@@ -28,14 +28,15 @@ export default function AvatarMenu({ firstName }: Props) {
 
   const handleLogout = async () => {
     setOpen(false);
-
+  
     await fetch("/auth/logout", {
       method: "POST",
+      cache: "no-store",
     });
-
-    // 🔴 Nodig in productie om UI direct te resetten
-    window.location.reload();
-  };
+  
+    // 🔴 HARD navigation: nieuwe request, nieuwe middleware run
+    window.location.assign("/login");
+  };  
 
   return (
     <div ref={ref} className="relative">
