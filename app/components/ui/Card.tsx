@@ -22,7 +22,11 @@ export default function Card({ title, children, action, icon }: Props) {
           </h3>
         </div>
 
-        {action && <div>{action}</div>}
+        {action && (
+          <div className="text-sm font-semibold text-[#0095D3]">
+            {action}
+          </div>
+        )}
       </div>
 
       {/* Content */}

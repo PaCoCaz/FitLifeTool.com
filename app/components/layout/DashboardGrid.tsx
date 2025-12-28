@@ -1,4 +1,4 @@
-import WaterCard from "../dashboard/WaterCard";
+import WaterCard from "../dashboard/HydrationCard";
 import ActivityCard from "../dashboard/ActivityCard";
 import NutritionCard from "../dashboard/NutritionCard";
 import WeightCard from "../dashboard/WeightCard";

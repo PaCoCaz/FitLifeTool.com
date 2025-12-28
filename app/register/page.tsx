@@ -109,7 +109,7 @@ export default function RegisterPage() {
         </div>
 
         {/* 👇 Consistent met login */}
-        <div className="mt-4 text-sm text-center">
+        <div className="mt-4 text-sm flex justify-between">
           <span className="text-gray-600">Al een account? </span>
           <Link
             href="/login"
