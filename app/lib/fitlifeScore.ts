@@ -145,3 +145,24 @@ export function getNutritionScoreColor(
      return "bg-gray-400 text-white";
  }
 }
+/**
+ * ─────────────────────────────────────────────
+ * Totale FitLifeScore (dagtotaal)
+ * ─────────────────────────────────────────────
+ */
+ export function calculateDailyFitLifeScore({
+  hydrationScore,
+  nutritionScore,
+  activityScore,
+}: {
+  hydrationScore: number;
+  nutritionScore: number;
+  activityScore: number;
+}): number {
+  const weighted =
+    hydrationScore * 0.3 +
+    nutritionScore * 0.4 +
+    activityScore * 0.3;
+
+  return Math.round(weighted);
+}
