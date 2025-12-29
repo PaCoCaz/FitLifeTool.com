@@ -5,7 +5,11 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
-import { calculateHydrationScore, getFitLifeScoreColor, } from "../../lib/fitlifeScore";
+import {
+  calculateHydrationScore,
+  getFitLifeScoreColor,
+  getFitLifeProgressColor,
+} from "../../lib/fitlifeScore";
 
 /**
  * MVP drinktypes
@@ -35,10 +39,6 @@ export default function HydrationCard() {
   const [loading, setLoading] = useState(true);
 
   const today = new Date().toISOString().slice(0, 10);
-
-  const isEmpty = current === 0;
-  const isComplete =
-    hydrationGoal !== null && current >= hydrationGoal;
 
   const progress =
     hydrationGoal !== null
@@ -75,7 +75,7 @@ export default function HydrationCard() {
 
       const total =
         (logs as HydrationLogRow[] | null)?.reduce(
-          (sum, row) =>
+          (sum: number, row: HydrationLogRow) =>
             sum + row.amount_ml * row.hydration_factor,
           0
         ) ?? 0;
@@ -160,17 +160,16 @@ export default function HydrationCard() {
         <div
           className={`
             rounded-[var(--radius)]
-            border
             px-2 py-1
             text-xs
-            font-medium
+            font-semibold
             whitespace-nowrap
             ${getFitLifeScoreColor(hydrationScore)}
           `}
         >
-          FitLifeScore: {hydrationScore} / 100
+          FitLifeScore {hydrationScore} / 100
         </div>
-      }               
+      }
     >
       <div className="h-full flex flex-col justify-between">
         {/* Bovenkant */}
@@ -188,20 +187,19 @@ export default function HydrationCard() {
         <div className="mt-4 space-y-2">
           <div className="h-2 w-full rounded-full bg-gray-200">
             <div
-              className={`h-2 rounded-full transition-all ${
-                isComplete
-                  ? "bg-green-500"
-                  : "bg-[#0095D3]"
-              }`}
+              className={`h-2 rounded-full transition-all ${getFitLifeProgressColor(
+                hydrationScore
+              )}`}
               style={{ width: `${progress * 100}%` }}
             />
           </div>
 
           <div className="text-xs text-gray-600">
-            {isEmpty && "Nog geen hydratatie gelogd"}
-            {!isEmpty && !isComplete &&
+            {current === 0 && "Nog geen hydratatie gelogd"}
+            {current > 0 && current < hydrationGoal &&
               "Goed bezig, blijf drinken"}
-            {isComplete && "Hydratatiedoel behaald"}
+            {current >= hydrationGoal &&
+              "Hydratatiedoel behaald"}
           </div>
         </div>
 

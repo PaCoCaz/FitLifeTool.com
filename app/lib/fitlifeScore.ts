@@ -1,108 +1,147 @@
 /**
  * ─────────────────────────────────────────────
- * FitLifeScore – algemene helpers
+ * FitLifeScore – UI color helpers (FINAL)
  * ─────────────────────────────────────────────
  */
 
+ export type NutritionGoal =
+ | "lose_weight"
+ | "maintain"
+ | "gain_weight";
+
 /**
- * Bepaalt kleurstijl op basis van score
- * (UI-helper, geen domeinlogica)
- */
- export function getFitLifeScoreColor(score: number) {
-  if (score < 50) return "border-[#C80000] text-[#C80000]";
-  if (score < 75) return "border-orange-400 text-orange-500";
-  return "border-green-500 text-green-600";
+* ─────────────────────────────────────────────
+* Algemene scorekleur (0–100)
+* Gebruikt voor:
+* - Hydration
+* - Activity
+*
+* REGEL:
+* 🔴 < 60
+* 🟠 60 – 99
+* 🟢 EXACT 100
+* ─────────────────────────────────────────────
+*/
+export function getFitLifeScoreColor(score: number) {
+ if (score < 60) {
+   return "bg-[#C80000] text-white"; // rood (logo)
+ }
+
+ if (score < 100) {
+   return "bg-orange-500 text-white";
+ }
+
+ // Alleen bij 100%
+ return "bg-green-600 text-white";
 }
 
 /**
- * ─────────────────────────────────────────────
- * HydrationScore
- * Absoluut doel: dichter bij doel = beter
- * ─────────────────────────────────────────────
+ * Progress bar kleur op basis van FitLifeScore
+ * Exact dezelfde drempels als de score-pill
  */
-export function calculateHydrationScore(
-  effectiveHydrationMl: number,
-  hydrationGoalMl: number
-): number {
-  if (hydrationGoalMl <= 0) return 0;
-
-  const ratio = effectiveHydrationMl / hydrationGoalMl;
-  return Math.min(100, Math.round(ratio * 100));
-}
-
-/**
- * ─────────────────────────────────────────────
- * NutritionScore v1 (legacy / MVP)
- * Enkel calorie-based, doel-onafhankelijk
- * ─────────────────────────────────────────────
- * @deprecated Gebruik calculateNutritionScoreV2
- */
-export function calculateNutritionScore(
-  consumedCalories: number,
-  calorieGoal: number
-): number {
-  if (calorieGoal <= 0) return 0;
-
-  const ratio = consumedCalories / calorieGoal;
-
-  if (ratio < 0.5) return Math.round(ratio * 100);
-  if (ratio <= 1.1) return 100;
-  if (ratio <= 1.3) return Math.round((1.3 - ratio) * 100);
-
-  return 0;
-}
-
-/**
- * ─────────────────────────────────────────────
- * NutritionScore v2 (doel-afhankelijk)
- * ─────────────────────────────────────────────
- */
-
-export type NutritionGoal =
-  | "lose_weight"
-  | "maintain"
-  | "gain_weight";
-
-/**
- * Berekent NutritionScore op basis van:
- * - calorie-inname
- * - dagbudget
- * - gebruikersdoel
- */
-export function calculateNutritionScoreV2(
-  consumedCalories: number,
-  calorieGoal: number,
-  goal: NutritionGoal
-): number {
-  if (calorieGoal <= 0) return 0;
-
-  const ratio = consumedCalories / calorieGoal;
-
-  switch (goal) {
-    case "lose_weight":
-      // Onder of rond budget = goed
-      if (ratio <= 1.0) return 100;
-      if (ratio <= 1.1)
-        return Math.round((1.1 - ratio) * 100);
-      return 0;
-
-    case "maintain":
-      // Dicht bij budget = goed
-      if (ratio >= 0.85 && ratio <= 1.05) return 100;
-      if (ratio < 0.85) return Math.round(ratio * 100);
-      if (ratio <= 1.15)
-        return Math.round((1.15 - ratio) * 100);
-      return 0;
-
-    case "gain_weight":
-      // Meer eten = beter (tot zekere grens)
-      if (ratio < 0.8) return Math.round(ratio * 100);
-      if (ratio <= 1.1) return 100;
-      if (ratio <= 1.25)
-        return Math.round((1.25 - ratio) * 100);
-      return 0;
-
-    default:
-      return 0;
+ export function getFitLifeProgressColor(score: number) {
+  if (score < 60) {
+    return "bg-[#C80000]"; // rood
   }
+
+  if (score < 100) {
+    return "bg-orange-500";
+  }
+
+  return "bg-green-600";
+}
+
+/**
+* ─────────────────────────────────────────────
+* HydrationScore
+* Absoluut doel: dichter bij doel = beter
+* ─────────────────────────────────────────────
+*/
+export function calculateHydrationScore(
+ effectiveHydrationMl: number,
+ hydrationGoalMl: number
+): number {
+ if (hydrationGoalMl <= 0) return 0;
+
+ const ratio = effectiveHydrationMl / hydrationGoalMl;
+ return Math.min(100, Math.round(ratio * 100));
+}
+
+/**
+* ─────────────────────────────────────────────
+* NutritionScore (ENKEL 1 versie)
+* Score = hoe dicht je bij je limiet / doel zit
+* ─────────────────────────────────────────────
+*/
+export function calculateNutritionScore(
+ consumedCalories: number,
+ dailyLimit: number
+): number {
+ if (dailyLimit <= 0) return 0;
+
+ const ratio = consumedCalories / dailyLimit;
+
+ // Lineair naar 100%
+ if (ratio <= 1) {
+   return Math.round(ratio * 100);
+ }
+
+ // Licht boven limiet → langzaam afstraffen
+ if (ratio <= 1.2) {
+   return Math.round((1.2 - ratio) * 100);
+ }
+
+ return 0;
+}
+
+/**
+* ─────────────────────────────────────────────
+* NutritionScore KLEUR (doel-afhankelijk)
+* Deze is INTENTIONEEL anders dan algemeen
+* ─────────────────────────────────────────────
+*/
+export function getNutritionScoreColor(
+ consumedCalories: number,
+ dailyLimit: number,
+ goal: NutritionGoal
+) {
+ if (dailyLimit <= 0) {
+   return "bg-gray-400 text-white";
+ }
+
+ const ratio = consumedCalories / dailyLimit;
+
+ switch (goal) {
+   case "lose_weight":
+   case "maintain":
+     // Groen zolang je ONDER limiet zit
+     if (ratio <= 1) {
+       return "bg-green-600 text-white";
+     }
+
+     // Net erover → oranje
+     if (ratio <= 1.1) {
+       return "bg-orange-500 text-white";
+     }
+
+     // Ver erover → rood
+     return "bg-[#C80000] text-white";
+
+   case "gain_weight":
+     // Te weinig eten → rood
+     if (ratio < 0.9) {
+       return "bg-[#C80000] text-white";
+     }
+
+     // Richting doel → oranje
+     if (ratio < 1) {
+       return "bg-orange-500 text-white";
+     }
+
+     // Doel behaald of erboven → groen
+     return "bg-green-600 text-white";
+
+   default:
+     return "bg-gray-400 text-white";
+ }
 }

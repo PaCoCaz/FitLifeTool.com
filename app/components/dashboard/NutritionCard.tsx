@@ -6,8 +6,8 @@ import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
 import {
-  calculateNutritionScoreV2,
-  getFitLifeScoreColor,
+  calculateNutritionScore,
+  getNutritionScoreColor,
   NutritionGoal,
 } from "../../lib/fitlifeScore";
 
@@ -34,7 +34,7 @@ export default function NutritionCard() {
   const [goal, setGoal] = useState<NutritionGoal>("maintain");
   const [activityBonus, setActivityBonus] = useState<number>(0);
 
-  // 🔧 Tijdelijk (tot food logging)
+  // Tijdelijk totdat food logging bestaat
   const [currentCalories, setCurrentCalories] =
     useState<number>(0);
 
@@ -49,7 +49,7 @@ export default function NutritionCard() {
   async function loadData(userId: string) {
     setLoading(true);
 
-    // 1️⃣ Profiel (calorie_goal + doel)
+    // Profiel
     const {
       data: profile,
       error: profileError,
@@ -74,7 +74,7 @@ export default function NutritionCard() {
     setBaseGoal(profile.calorie_goal);
     setGoal(profile.goal);
 
-    // 2️⃣ Activiteit van vandaag
+    // Activiteit vandaag
     const {
       data: activities,
       error: activityError,
@@ -85,7 +85,7 @@ export default function NutritionCard() {
       .from("activity_logs")
       .select("calories")
       .eq("user_id", userId)
-      .eq("date", today());
+      .eq("log_date", today());
 
     if (activityError) {
       console.error(activityError.message);
@@ -93,13 +93,14 @@ export default function NutritionCard() {
       return;
     }
 
-    const totalBurned =
+    const burned =
       activities?.reduce(
-        (sum, a) => sum + a.calories,
+        (sum: number, a: ActivityLog) =>
+          sum + a.calories,
         0
       ) ?? 0;
 
-    setActivityBonus(totalBurned);
+    setActivityBonus(burned);
     setLoading(false);
   }
 
@@ -135,45 +136,55 @@ export default function NutritionCard() {
   /**
    * Score berekenen
    */
-  const dailyBudget =
+  const dailyLimit =
     baseGoal !== null ? baseGoal + activityBonus : 0;
 
   useEffect(() => {
-    if (!dailyBudget) return;
+    if (!dailyLimit) return;
 
-    const score = calculateNutritionScoreV2(
+    const score = calculateNutritionScore(
       currentCalories,
-      dailyBudget,
-      goal
+      dailyLimit
     );
 
     setNutritionScore(score);
-  }, [currentCalories, dailyBudget, goal]);
+  }, [currentCalories, dailyLimit]);
 
   if (loading || baseGoal === null) {
     return (
       <Card title="Voeding">
         <div className="text-sm text-gray-500">
-          Dagbudget laden…
+          Voeding laden…
         </div>
       </Card>
     );
   }
 
   const progress = Math.min(
-    currentCalories / dailyBudget,
+    currentCalories / dailyLimit,
     1
   );
 
   const isEmpty = currentCalories === 0;
-  const isOver = currentCalories > dailyBudget;
+  const isOver = currentCalories > dailyLimit;
+
+  const limitLabel =
+    goal === "gain_weight"
+      ? "Dagdoel"
+      : "Daglimiet";
 
   /**
-   * Tijdelijke testfunctie
+   * Tijdelijke testactie
    */
   function addCalories(amount: number) {
     setCurrentCalories((prev) => prev + amount);
   }
+
+  const scoreColorClass = getNutritionScoreColor(
+    currentCalories,
+    dailyLimit,
+    goal
+  );
 
   return (
     <Card
@@ -190,15 +201,14 @@ export default function NutritionCard() {
         <div
           className={`
             rounded-[var(--radius)]
-            border
-            px-2 py-1
+            px-3 py-1
             text-xs
-            font-medium
+            font-semibold
             whitespace-nowrap
-            ${getFitLifeScoreColor(nutritionScore)}
+            ${scoreColorClass}
           `}
         >
-          FitLifeScore: {nutritionScore} / 100
+          FitLifeScore {nutritionScore} / 100
         </div>
       }
     >
@@ -210,11 +220,12 @@ export default function NutritionCard() {
           </div>
 
           <div className="text-xs text-gray-500">
-            Dagbudget: {dailyBudget} kcal
+            {limitLabel}: {dailyLimit} kcal
           </div>
 
           <div className="text-[11px] text-gray-400">
-            Basis {baseGoal} + activiteit {activityBonus}
+            Basis {baseGoal} + activiteit{" "}
+            {activityBonus}
           </div>
         </div>
 
@@ -222,25 +233,23 @@ export default function NutritionCard() {
         <div className="mt-4 space-y-2">
           <div className="h-2 w-full rounded-full bg-gray-200">
             <div
-              className={`h-2 rounded-full transition-all ${
-                isOver
-                  ? "bg-[#C80000]"
-                  : "bg-[#0095D3]"
-              }`}
-              style={{ width: `${progress * 100}%` }}
+              className={`h-2 rounded-full transition-all ${scoreColorClass}`}
+              style={{
+                width: `${progress * 100}%`,
+              }}
             />
           </div>
 
           <div className="text-xs text-gray-600">
             {isEmpty && "Nog geen voeding gelogd"}
             {!isEmpty && !isOver &&
-              "Binnen je dagbudget"}
-            {isOver && "Boven je dagbudget"}
+              "Binnen je daglimiet"}
+            {isOver && "Boven je daglimiet"}
           </div>
         </div>
 
         <div className="mt-2 text-[11px] text-gray-400">
-          FitLifeScore gebaseerd op calorie-inname en doel
+          FitLifeScore gebaseerd op calorie-inname
         </div>
 
         {/* Tijdelijke test-acties */}
