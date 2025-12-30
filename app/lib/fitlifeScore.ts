@@ -145,6 +145,7 @@ export function getNutritionScoreColor(
      return "bg-gray-400 text-white";
  }
 }
+
 /**
  * ─────────────────────────────────────────────
  * Totale FitLifeScore (dagtotaal)
@@ -165,4 +166,23 @@ export function getNutritionScoreColor(
     activityScore * 0.3;
 
   return Math.round(weighted);
+}
+
+/**
+ * ─────────────────────────────────────────────
+ * Verwachte hydratatie-voortgang op basis van tijd
+ * Dag: 06:00 – 22:00 (16 uur)
+ * ─────────────────────────────────────────────
+ */
+ export function getExpectedHydrationProgress(now: Date = new Date()): number {
+  const startHour = 6;
+  const endHour = 22;
+
+  const hour =
+    now.getHours() + now.getMinutes() / 60;
+
+  if (hour <= startHour) return 0;
+  if (hour >= endHour) return 1;
+
+  return (hour - startHour) / (endHour - startHour);
 }

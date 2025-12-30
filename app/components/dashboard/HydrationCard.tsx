@@ -8,12 +8,11 @@ import { useUser } from "../../lib/AuthProvider";
 import {
   calculateHydrationScore,
   getFitLifeScoreColor,
-  getFitLifeProgressColor,
+  getExpectedHydrationProgress,
 } from "../../lib/fitlifeScore";
 
 /**
  * MVP drinktypes
- * Later uitbreidbaar (thee, koffie, frisdrank, alcohol)
  */
 const DRINK_TYPES = {
   water: {
@@ -33,20 +32,17 @@ type HydrationLogRow = {
 export default function HydrationCard() {
   const { user } = useUser();
 
-  const [hydrationGoal, setHydrationGoal] = useState<number | null>(null);
+  const [hydrationGoal, setHydrationGoal] =
+    useState<number>(0);
   const [current, setCurrent] = useState<number>(0);
-  const [hydrationScore, setHydrationScore] = useState<number>(0);
+  const [hydrationScore, setHydrationScore] =
+    useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const progress =
-    hydrationGoal !== null
-      ? Math.min(current / hydrationGoal, 1)
-      : 0;
-
   /**
-   * Load hydration goal + today logs
+   * Data laden
    */
   useEffect(() => {
     if (!user) return;
@@ -69,9 +65,8 @@ export default function HydrationCard() {
             .eq("log_date", today),
         ]);
 
-      if (profile?.water_goal_ml) {
-        setHydrationGoal(profile.water_goal_ml);
-      }
+      const goal = profile?.water_goal_ml ?? 0;
+      setHydrationGoal(goal);
 
       const total =
         (logs as HydrationLogRow[] | null)?.reduce(
@@ -80,14 +75,12 @@ export default function HydrationCard() {
           0
         ) ?? 0;
 
-      const roundedTotal = Math.round(total);
-      setCurrent(roundedTotal);
+      const rounded = Math.round(total);
+      setCurrent(rounded);
 
-      const score = calculateHydrationScore(
-        roundedTotal,
-        profile?.water_goal_ml ?? 0
+      setHydrationScore(
+        calculateHydrationScore(rounded, goal)
       );
-      setHydrationScore(score);
 
       setLoading(false);
     };
@@ -96,7 +89,7 @@ export default function HydrationCard() {
   }, [user, today]);
 
   /**
-   * Add drink (MVP: water)
+   * Drink toevoegen
    */
   async function addDrink(
     drinkType: keyof typeof DRINK_TYPES,
@@ -117,25 +110,27 @@ export default function HydrationCard() {
       });
 
     if (error) {
-      console.error("Hydration insert failed:", error.message);
+      console.error(error.message);
       return;
     }
 
-    // Optimistische UI update + score
     setCurrent((prev) => {
-      const newTotal = Math.round(prev + amount * drink.factor);
-
-      const score = calculateHydrationScore(
-        newTotal,
-        hydrationGoal ?? 0
+      const updated = Math.round(
+        prev + amount * drink.factor
       );
-      setHydrationScore(score);
 
-      return newTotal;
+      setHydrationScore(
+        calculateHydrationScore(
+          updated,
+          hydrationGoal
+        )
+      );
+
+      return updated;
     });
   }
 
-  if (loading || hydrationGoal === null) {
+  if (loading || hydrationGoal === 0) {
     return (
       <Card title="Hydratatie">
         <div className="text-sm text-gray-500">
@@ -143,6 +138,35 @@ export default function HydrationCard() {
         </div>
       </Card>
     );
+  }
+
+  /**
+   * Tijd-gecorrigeerd schema (06:00–22:00)
+   */
+  const expectedProgress =
+    getExpectedHydrationProgress(); // 0–1
+
+  const expectedMl = Math.round(
+    hydrationGoal * expectedProgress
+  );
+
+  const actualProgress = Math.min(
+    current / hydrationGoal,
+    1
+  );
+
+  const ratio =
+    expectedMl > 0 ? current / expectedMl : 0;
+
+  let paceLabel = "Op schema";
+  let paceColor = "text-green-600";
+
+  if (ratio < 0.9) {
+    paceLabel = "Achter op schema";
+    paceColor = "text-[#C80000]";
+  } else if (ratio > 1.1) {
+    paceLabel = "Voor op schema";
+    paceColor = "text-orange-500";
   }
 
   return (
@@ -160,7 +184,7 @@ export default function HydrationCard() {
         <div
           className={`
             rounded-[var(--radius)]
-            px-2 py-1
+            px-3 py-1
             text-xs
             font-semibold
             whitespace-nowrap
@@ -183,23 +207,34 @@ export default function HydrationCard() {
           </div>
         </div>
 
-        {/* Progress */}
+        {/* Progressbars */}
         <div className="mt-4 space-y-2">
-          <div className="h-2 w-full rounded-full bg-gray-200">
+          <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+            {/* Schema (verwacht) */}
             <div
-              className={`h-2 rounded-full transition-all ${getFitLifeProgressColor(
+              className="absolute left-0 top-0 h-2"
+              style={{
+                width: `${expectedProgress * 100}%`,
+                backgroundColor: "#B8CAE0",
+              }}
+            />
+
+            {/* Werkelijk */}
+            <div
+              className={`absolute left-0 top-0 h-2 transition-all ${getFitLifeScoreColor(
                 hydrationScore
               )}`}
-              style={{ width: `${progress * 100}%` }}
+              style={{
+                width: `${actualProgress * 100}%`,
+              }}
             />
           </div>
 
-          <div className="text-xs text-gray-600">
-            {current === 0 && "Nog geen hydratatie gelogd"}
-            {current > 0 && current < hydrationGoal &&
-              "Goed bezig, blijf drinken"}
-            {current >= hydrationGoal &&
-              "Hydratatiedoel behaald"}
+          {/* Schema-tekst ONDER de balk */}
+          <div
+            className={`text-xs font-medium ${paceColor}`}
+          >
+            {paceLabel} (verwacht {expectedMl} ml)
           </div>
         </div>
 
@@ -208,7 +243,9 @@ export default function HydrationCard() {
           {QUICK_AMOUNTS.map((amount) => (
             <button
               key={amount}
-              onClick={() => addDrink("water", amount)}
+              onClick={() =>
+                addDrink("water", amount)
+              }
               className="
                 flex-1
                 rounded-[var(--radius)]

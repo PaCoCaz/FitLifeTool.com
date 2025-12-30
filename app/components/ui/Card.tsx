@@ -17,7 +17,7 @@ export default function Card({ title, children, action, icon }: Props) {
               {icon}
             </span>
           )}
-          <h3 className="text-sm font-semibold text-gray-700">
+          <h3 className="text-sm font-semibold text-[#191970]">
             {title}
           </h3>
         </div>

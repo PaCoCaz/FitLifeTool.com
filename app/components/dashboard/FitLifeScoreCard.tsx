@@ -95,16 +95,16 @@ export default function FitLifeScoreCard() {
 
       const activityScore = calculateActivityScore(
         burnedCalories,
-        300 // vast dagdoel (MVP)
+        300
       );
 
       /* ───── Nutrition (tijdelijk) ───── */
       const nutritionScore = calculateNutritionScore(
         0,
-        1 // voorkomt NaN zolang food logging ontbreekt
+        1
       );
 
-      /* ───── Dagscore ───── */
+      /* ───── Dagscore (gemiddelde) ───── */
       const scores = [
         hydrationScore,
         activityScore,
@@ -139,25 +139,48 @@ export default function FitLifeScoreCard() {
   }
 
   return (
-    <Card title="FitLifeScore">
-      <div className="flex items-center gap-4">
-        <div className="text-2xl font-semibold text-[#191970] min-w-[80px]">
-          {score}
-          <span className="text-sm text-gray-400">
-            {" "}
+    <Card
+      title="FitLifeScore"
+      action={
+        <div
+          className="
+            rounded-[var(--radius)]
+            bg-[#191970]
+            px-3 py-1
+            text-xs
+            font-semibold
+            text-white
+            whitespace-nowrap
+          "
+        >
+          Vandaag
+        </div>
+      }
+    >
+      <div className="space-y-3">
+        {/* Score */}
+        <div className="flex items-end gap-2">
+          <div className="text-3xl font-semibold text-[#191970]">
+            {score}
+          </div>
+          <div className="text-sm text-gray-400">
             / 100
-          </span>
+          </div>
         </div>
 
-        <div className="flex-1">
-          <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-            <div
-              className={`h-2 transition-all ${getFitLifeScoreColor(
-                score
-              )}`}
-              style={{ width: `${score}%` }}
-            />
-          </div>
+        {/* Progress */}
+        <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+          <div
+            className={`h-2 transition-all ${getFitLifeScoreColor(
+              score
+            )}`}
+            style={{ width: `${score}%` }}
+          />
+        </div>
+
+        <div className="text-[11px] text-gray-400">
+          Gebaseerd op hydratatie, voeding en
+          activiteit
         </div>
       </div>
     </Card>
