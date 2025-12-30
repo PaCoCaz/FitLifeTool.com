@@ -170,19 +170,101 @@ export function getNutritionScoreColor(
 
 /**
  * ─────────────────────────────────────────────
- * Verwachte hydratatie-voortgang op basis van tijd
- * Dag: 06:00 – 22:00 (16 uur)
+ * Hydratatie – tijdsgewogen dagprogressie (24u)
+ * Zware weging: 07:00 – 23:00
+ * Lichte weging: 23:00 – 07:00
  * ─────────────────────────────────────────────
  */
- export function getExpectedHydrationProgress(now: Date = new Date()): number {
-  const startHour = 6;
-  const endHour = 22;
-
+ export function getExpectedHydrationProgress(
+  now: Date = new Date()
+): number {
   const hour =
     now.getHours() + now.getMinutes() / 60;
 
-  if (hour <= startHour) return 0;
-  if (hour >= endHour) return 1;
+  // Dagindeling
+  const lightWeight = 0.2; // nacht
+  const heavyWeight = 0.8; // dag
 
-  return (hour - startHour) / (endHour - startHour);
+  // Nacht: 23 → 07 (8 uur)
+  const nightHours = 8;
+  // Dag: 07 → 23 (16 uur)
+  const dayHours = 16;
+
+  let progress = 0;
+
+  // Nachtdeel vóór 07:00
+  if (hour < 7) {
+    progress =
+      (hour + 1) / nightHours * lightWeight;
+  }
+  // Dagdeel
+  else if (hour < 23) {
+    progress =
+      lightWeight +
+      ((hour - 7) / dayHours) * heavyWeight;
+  }
+  // Na 23:00
+  else {
+    progress = 1;
+  }
+
+  return Math.min(Math.max(progress, 0), 1);
+}
+
+/**
+ * ─────────────────────────────────────────────
+ * Hydratatie status + kleur + tekst
+ * ─────────────────────────────────────────────
+ */
+export function getHydrationStatus(
+  currentMl: number,
+  dailyGoalMl: number,
+  now: Date = new Date()
+) {
+  if (dailyGoalMl <= 0) {
+    return {
+      color: "bg-gray-400 text-white",
+      message: "Geen hydratatiedoel ingesteld",
+      progress: 0,
+    };
+  }
+
+  const expectedProgress =
+    getExpectedHydrationProgress(now);
+
+  const expectedMl =
+    dailyGoalMl * expectedProgress;
+
+  const delta = Math.round(
+    currentMl - expectedMl
+  );
+
+  const deviationRatio = delta / dailyGoalMl;
+
+  // Status + kleur + tekst
+  if (delta >= 0) {
+    return {
+      color: "bg-green-600 text-white",
+      message: `Goed bezig, je hydratatie loopt ${delta} ml voor op schema`,
+      progress: expectedProgress,
+    };
+  }
+
+  if (deviationRatio >= -0.15) {
+    return {
+      color: "bg-orange-500 text-white",
+      message: `Je hydratatie loopt ${Math.abs(
+        delta
+      )} ml achter op schema`,
+      progress: expectedProgress,
+    };
+  }
+
+  return {
+    color: "bg-[#C80000] text-white",
+    message: `Je hydratatie loopt ${Math.abs(
+      delta
+    )} ml achter op schema`,
+    progress: expectedProgress,
+  };
 }

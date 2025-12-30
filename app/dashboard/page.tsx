@@ -29,7 +29,7 @@ export default function DashboardPage() {
       <Header />
       <TopNavigation />
 
-      <main className="pt-[104px]">
+      <main className="pt-[85px]">
         <div className="mx-auto max-w-[1200px] px-4">
           <DashboardGrid />
         </div>
