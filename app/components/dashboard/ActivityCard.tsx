@@ -23,6 +23,17 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/**
+ * Verwachte activiteit-voortgang (24u, zwaartepunt overdag)
+ */
+function getExpectedActivityProgress(now: Date = new Date()): number {
+  const hour = now.getHours() + now.getMinutes() / 60;
+
+  if (hour < 7) return hour * 0.02;                // nacht
+  if (hour < 23) return 0.14 + (hour - 7) / 16 * 0.76;
+  return 1;
+}
+
 export default function ActivityCard() {
   const { user } = useUser();
 
@@ -32,15 +43,12 @@ export default function ActivityCard() {
   const [lastAdded, setLastAdded] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const activityGoal = 300; // MVP vast doel
+  const activityGoal = 300;
 
-  /**
-   * Load today's activities
-   */
   useEffect(() => {
     if (!user) return;
 
-    const loadActivities = async () => {
+    const load = async () => {
       setLoading(true);
 
       const { data, error } = await supabase
@@ -57,29 +65,22 @@ export default function ActivityCard() {
 
       const total =
         (data as ActivityLogRow[] | null)?.reduce(
-          (sum, row) => sum + row.calories,
+          (s: number, r: ActivityLogRow) => s + r.calories,
           0
         ) ?? 0;
 
       setBurnedCalories(total);
-      setActivityScore(
-        calculateActivityScore(total, activityGoal)
-      );
-
+      setActivityScore(calculateActivityScore(total, activityGoal));
       setLoading(false);
     };
 
-    loadActivities();
+    load();
   }, [user]);
 
-  /**
-   * Add activity
-   */
   async function addActivity(type: ActivityType) {
     if (!user) return;
 
-    const weightKg =
-      user.user_metadata?.weight_kg ?? 75;
+    const weightKg = user.user_metadata?.weight_kg ?? 75;
 
     const calories = calculateActivityCalories(
       ACTIVITY_TYPES[type].met,
@@ -87,27 +88,22 @@ export default function ActivityCard() {
       durationMinutes
     );
 
-    const { error } = await supabase
-      .from("activity_logs")
-      .insert({
-        user_id: user.id,
-        activity_type: type,
-        duration_minutes: durationMinutes,
-        calories,
-        log_date: today(),
-      });
+    const { error } = await supabase.from("activity_logs").insert({
+      user_id: user.id,
+      activity_type: type,
+      duration_minutes: durationMinutes,
+      calories,
+      log_date: today(),
+    });
 
     if (error) {
       console.error(error.message);
       return;
     }
 
-    // Optimistische update
     setBurnedCalories((prev) => {
       const total = prev + calories;
-      setActivityScore(
-        calculateActivityScore(total, activityGoal)
-      );
+      setActivityScore(calculateActivityScore(total, activityGoal));
       return total;
     });
 
@@ -116,42 +112,41 @@ export default function ActivityCard() {
     );
 
     setTimeout(() => setLastAdded(null), 2000);
-
-    // NutritionCard informeren
-    window.dispatchEvent(
-      new Event("activity-updated")
-    );
+    window.dispatchEvent(new Event("activity-updated"));
   }
 
   if (loading) {
     return (
       <Card title="Activiteit">
-        <div className="text-sm text-gray-500">
-          Activiteit laden…
-        </div>
+        <div className="text-sm text-gray-500">Activiteit laden…</div>
       </Card>
     );
   }
 
-  const progress = Math.min(
-    burnedCalories / activityGoal,
-    1
-  );
+  const expectedProgress = getExpectedActivityProgress();
+  const actualProgress = Math.min(burnedCalories / activityGoal, 1);
 
-  const scoreColorClass =
-    getFitLifeScoreColor(activityScore);
+  let status: string;
+
+if (burnedCalories >= activityGoal) {
+  status = "Goed bezig, je hebt je dagdoel gehaald";
+} else {
+  const delta =
+    burnedCalories - activityGoal * expectedProgress;
+
+  if (delta < -30) {
+    status = `Je loopt ${Math.abs(Math.round(delta))} kcal achter op schema`;
+  } else if (delta > 30) {
+    status = `Je loopt ${Math.round(delta)} kcal voor op schema`;
+  } else {
+    status = "Je activiteit loopt op schema";
+  }
+}
 
   return (
     <Card
       title="Activiteit"
-      icon={
-        <Image
-          src="/activity.svg"
-          alt=""
-          width={16}
-          height={16}
-        />
-      }
+      icon={<Image src="/activity.svg" alt="" width={16} height={16} />}
       action={
         <div
           className={`
@@ -159,8 +154,8 @@ export default function ActivityCard() {
             px-3 py-1
             text-xs
             font-semibold
-            whitespace-nowrap
-            ${scoreColorClass}
+            text-white
+            ${getFitLifeScoreColor(activityScore)}
           `}
         >
           FitLifeScore {activityScore} / 100
@@ -168,57 +163,52 @@ export default function ActivityCard() {
       }
     >
       <div className="h-full flex flex-col justify-between">
-        {/* Bovenkant */}
-        <div className="space-y-1">
+        {/* Header */}
+        <div>
           <div className="text-2xl font-semibold text-[#191970]">
             {burnedCalories} kcal
           </div>
-
           <div className="text-xs text-gray-500">
             Dagdoel: {activityGoal} kcal
           </div>
         </div>
 
-        {/* Progress */}
+        {/* ÉÉN progressbar */}
         <div className="mt-4 space-y-2">
-          <div className="h-2 w-full rounded-full bg-gray-200">
+          <div className="relative h-2 w-full rounded-full bg-[#B8CAE0] overflow-hidden">
+            {/* schema */}
             <div
-              className={`h-2 rounded-full transition-all ${scoreColorClass}`}
-              style={{
-                width: `${progress * 100}%`,
-              }}
+              className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
+              style={{ width: `${expectedProgress * 100}%` }}
+            />
+
+            {/* actueel */}
+            <div
+              className={`absolute left-0 top-0 h-full transition-all ${getFitLifeScoreColor(
+                activityScore
+              )}`}
+              style={{ width: `${actualProgress * 100}%` }}
             />
           </div>
 
-          <div className="text-xs text-gray-600">
-            {burnedCalories === 0 &&
-              "Nog geen activiteit gelogd"}
-            {burnedCalories > 0 &&
-              burnedCalories < activityGoal &&
-              "Goed bezig, blijf bewegen"}
-            {burnedCalories >= activityGoal &&
-              "Activiteitsdoel behaald"}
-          </div>
+          <div className="text-xs text-gray-600">{status}</div>
 
           {lastAdded && (
             <div className="text-xs text-green-600">
-              ✓ {lastAdded} toegevoegd
+              ✓ {lastAdded}
             </div>
           )}
         </div>
 
-        {/* Duur selector */}
+        {/* Duur */}
         <div className="mt-4 flex gap-2">
           {[15, 30, 45].map((d) => (
             <button
               key={d}
-              onClick={() =>
-                setDurationMinutes(d)
-              }
+              onClick={() => setDurationMinutes(d)}
               className={`
                 flex-1 rounded-[var(--radius)]
-                px-2 py-1 text-xs font-medium
-                border
+                px-2 py-1 text-xs font-medium border
                 ${
                   durationMinutes === d
                     ? "bg-[#0095D3] text-white border-[#0095D3]"
@@ -233,40 +223,26 @@ export default function ActivityCard() {
 
         {/* Activiteiten */}
         <div className="mt-4 grid grid-cols-2 gap-2">
-          {(Object.keys(ACTIVITY_TYPES) as ActivityType[]).map(
-            (type) => {
-              const kcal =
-                calculateActivityCalories(
-                  ACTIVITY_TYPES[type].met,
-                  user?.user_metadata?.weight_kg ?? 75,
-                  durationMinutes
-                );
+          {(Object.keys(ACTIVITY_TYPES) as ActivityType[]).map((type) => {
+            const kcal = calculateActivityCalories(
+              ACTIVITY_TYPES[type].met,
+              user?.user_metadata?.weight_kg ?? 75,
+              durationMinutes
+            );
 
-              return (
-                <button
-                  key={type}
-                  onClick={() =>
-                    addActivity(type)
-                  }
-                  className="
-                    rounded-[var(--radius)]
-                    border border-[#0095D3]
-                    px-2 py-2
-                    text-xs font-medium
-                    text-[#0095D3]
-                    hover:bg-[#0095D3]
-                    hover:text-white
-                    transition
-                  "
-                >
-                  + {ACTIVITY_TYPES[type].label}
-                  <div className="text-[10px] opacity-70">
-                    {durationMinutes} min · {kcal} kcal
-                  </div>
-                </button>
-              );
-            }
-          )}
+            return (
+              <button
+                key={type}
+                onClick={() => addActivity(type)}
+                className="rounded-[var(--radius)] border border-[#0095D3] px-2 py-2 text-xs font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
+              >
+                + {ACTIVITY_TYPES[type].label}
+                <div className="text-[10px] opacity-70">
+                  {durationMinutes} min · {kcal} kcal
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </Card>

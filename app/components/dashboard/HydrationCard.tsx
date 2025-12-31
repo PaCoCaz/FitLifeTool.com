@@ -5,10 +5,26 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
+
 import {
   calculateHydrationScore,
   getHydrationStatus,
-} from "../../lib/fitlifeScore";
+} from "../../lib/hydrationScore";
+
+/* ───────────────── Types ───────────────── */
+
+type HydrationLogRow = {
+  amount_ml: number;
+  hydration_factor: number;
+};
+
+/* ───────────────── Utils ───────────────── */
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/* ───────────────── Constants ───────────────── */
 
 const DRINK_TYPES = {
   water: {
@@ -18,34 +34,29 @@ const DRINK_TYPES = {
   },
 } as const;
 
-const QUICK_AMOUNTS = [250, 500];
+const QUICK_AMOUNTS = [50, 150, 200, 250, 300, 500];
 
-type HydrationLogRow = {
-  amount_ml: number;
-  hydration_factor: number;
-};
+/* ───────────────── Component ───────────────── */
 
 export default function HydrationCard() {
   const { user } = useUser();
 
-  const [goalMl, setGoalMl] =
-    useState<number | null>(null);
-  const [currentMl, setCurrentMl] =
-    useState<number>(0);
-  const [score, setScore] =
-    useState<number>(0);
-  const [loading, setLoading] =
-    useState<boolean>(true);
+  const [hydrationGoal, setHydrationGoal] = useState<number | null>(null);
+  const [current, setCurrent] = useState<number>(0);
+  const [score, setScore] = useState<number>(0);
+  const [statusText, setStatusText] = useState<string>("");
+  const [statusColor, setStatusColor] = useState<string>("bg-gray-400 text-white");
+  const [schemaProgress, setSchemaProgress] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
 
-  const today = new Date()
-    .toISOString()
-    .slice(0, 10);
+  /* ───────────────── Load data ───────────────── */
 
   useEffect(() => {
     if (!user) return;
 
     const loadHydration = async () => {
       setLoading(true);
+      const date = today();
 
       const [{ data: profile }, { data: logs }] =
         await Promise.all([
@@ -57,46 +68,54 @@ export default function HydrationCard() {
 
           supabase
             .from("hydration_logs")
-            .select(
-              "amount_ml, hydration_factor"
-            )
+            .select("amount_ml, hydration_factor")
             .eq("user_id", user.id)
-            .eq("log_date", today),
+            .eq("log_date", date),
         ]);
-
-      if (!profile?.water_goal_ml) {
-        setLoading(false);
-        return;
-      }
 
       const total =
         (logs as HydrationLogRow[] | null)?.reduce(
           (sum: number, row: HydrationLogRow) =>
-            sum +
-            row.amount_ml *
-              row.hydration_factor,
+            sum + row.amount_ml * row.hydration_factor,
           0
         ) ?? 0;
 
       const rounded = Math.round(total);
+      setCurrent(rounded);
+      setHydrationGoal(profile?.water_goal_ml ?? null);
 
-      setGoalMl(profile.water_goal_ml);
-      setCurrentMl(rounded);
-      setScore(
-        calculateHydrationScore(
+      if (profile?.water_goal_ml) {
+        const scoreValue = calculateHydrationScore(
           rounded,
           profile.water_goal_ml
-        )
-      );
+        );
+
+        const status = getHydrationStatus(
+          rounded,
+          profile.water_goal_ml,
+          new Date()
+        );
+
+        setScore(scoreValue);
+        setStatusText(status.message);
+        setStatusColor(status.color);
+        setSchemaProgress(status.expectedProgress);
+      }
 
       setLoading(false);
     };
 
     loadHydration();
-  }, [user, today]);
+
+    /* ⏱ Live update elke minuut */
+    const interval = setInterval(loadHydration, 60_000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  /* ───────────────── Add drink ───────────────── */
 
   async function addDrink(amount: number) {
-    if (!user || !goalMl) return;
+    if (!user || !hydrationGoal) return;
 
     const { error } = await supabase
       .from("hydration_logs")
@@ -105,7 +124,7 @@ export default function HydrationCard() {
         drink_type: "water",
         amount_ml: amount,
         hydration_factor: 1,
-        log_date: today,
+        log_date: today(),
       });
 
     if (error) {
@@ -113,34 +132,39 @@ export default function HydrationCard() {
       return;
     }
 
-    setCurrentMl((prev) => {
-      const next = prev + amount;
-      setScore(
-        calculateHydrationScore(next, goalMl)
-      );
-      return next;
-    });
+    const newTotal = current + amount;
+    setCurrent(newTotal);
+
+    const scoreValue = calculateHydrationScore(
+      newTotal,
+      hydrationGoal
+    );
+
+    const status = getHydrationStatus(
+      newTotal,
+      hydrationGoal,
+      new Date()
+    );
+
+    setScore(scoreValue);
+    setStatusText(status.message);
+    setStatusColor(status.color);
+    setSchemaProgress(status.expectedProgress);
   }
 
-  if (loading || goalMl === null) {
+  /* ───────────────── Render ───────────────── */
+
+  if (loading || hydrationGoal === null) {
     return (
       <Card title="Hydratatie">
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-400">
           Hydratatie laden…
         </div>
       </Card>
     );
   }
 
-  const status = getHydrationStatus(
-    currentMl,
-    goalMl
-  );
-
-  const actualProgress = Math.min(
-    currentMl / goalMl,
-    1
-  );
+  const actualProgress = Math.min(current / hydrationGoal, 1);
 
   return (
     <Card
@@ -161,63 +185,57 @@ export default function HydrationCard() {
             text-xs
             font-semibold
             whitespace-nowrap
-            ${status.color}
+            ${statusColor}
           `}
         >
           FitLifeScore {score} / 100
         </div>
       }
     >
-      <div className="h-full flex flex-col justify-between">
-        {/* Boven */}
-        <div className="space-y-1">
+      <div className="space-y-4">
+        {/* Bovenkant */}
+        <div>
           <div className="text-2xl font-semibold text-[#191970]">
-            {currentMl.toLocaleString()} ml
+            {current.toLocaleString()} ml
           </div>
           <div className="text-xs text-gray-500">
-            Dagdoel: {goalMl.toLocaleString()} ml
+            Dagdoel: {hydrationGoal.toLocaleString()} ml
           </div>
         </div>
 
         {/* Progress */}
-        <div className="mt-4 space-y-2">
-          <div className="h-2 w-full rounded-full bg-gray-200 relative overflow-hidden">
-            {/* Schema */}
+        <div className="space-y-2">
+          <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+            {/* Schema (verwacht) */}
             <div
-              className="absolute h-2 bg-[#B8CAE0]"
-              style={{
-                width: `${
-                  status.progress * 100
-                }%`,
-              }}
+              className="absolute left-0 top-0 h-2 bg-[#B8CAE0]"
+              style={{ width: `${schemaProgress * 100}%` }}
             />
+
             {/* Actueel */}
             <div
-              className={`absolute h-2 ${status.color}`}
-              style={{
-                width: `${
-                  actualProgress * 100
-                }%`,
-              }}
+              className={`absolute left-0 top-0 h-2 transition-all ${
+                statusColor.replace("text-white", "")
+              }`}
+              style={{ width: `${actualProgress * 100}%` }}
             />
           </div>
 
           <div className="text-xs text-gray-600">
-            {status.message}
+            {statusText}
           </div>
         </div>
 
         {/* Acties */}
-        <div className="mt-4 flex gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {QUICK_AMOUNTS.map((amount) => (
             <button
               key={amount}
               onClick={() => addDrink(amount)}
               className="
-                flex-1
                 rounded-[var(--radius)]
                 border border-[#0095D3]
-                px-3 py-2
+                px-2 py-2
                 text-xs font-medium
                 text-[#0095D3]
                 hover:bg-[#0095D3]

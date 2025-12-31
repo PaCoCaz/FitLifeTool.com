@@ -42,90 +42,124 @@ export default function FitLifeScoreCard() {
   const [score, setScore] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
+  async function loadScore() {
+    if (!user) return;
+
+    setLoading(true);
+    const date = today();
+
+    /* ───── Hydration ───── */
+    const [{ data: profile }, { data: hydrationLogs }] =
+      await Promise.all([
+        supabase
+          .from("profiles")
+          .select("water_goal_ml")
+          .eq("id", user.id)
+          .single<Profile>(),
+
+        supabase
+          .from("hydration_logs")
+          .select("amount_ml, hydration_factor")
+          .eq("user_id", user.id)
+          .eq("log_date", date)
+          .returns<HydrationLog[]>(),
+      ]);
+
+    const hydrationTotal =
+      hydrationLogs?.reduce(
+        (sum: number, row: HydrationLog) =>
+          sum + row.amount_ml * row.hydration_factor,
+        0
+      ) ?? 0;
+
+    const hydrationScore = calculateHydrationScore(
+      hydrationTotal,
+      profile?.water_goal_ml ?? 0
+    );
+
+    /* ───── Activity ───── */
+    const { data: activityLogs } = await supabase
+      .from("activity_logs")
+      .select("calories")
+      .eq("user_id", user.id)
+      .eq("log_date", date)
+      .returns<ActivityLog[]>();
+
+    const burnedCalories =
+      activityLogs?.reduce(
+        (sum: number, row: ActivityLog) =>
+          sum + row.calories,
+        0
+      ) ?? 0;
+
+    const activityScore = calculateActivityScore(
+      burnedCalories,
+      300
+    );
+
+    /* ───── Nutrition (tijdelijk neutraal) ───── */
+    const nutritionScore = calculateNutritionScore(
+      0,
+      1
+    );
+
+    /* ───── Dagscore ───── */
+    const scores: number[] = [
+      hydrationScore,
+      activityScore,
+      nutritionScore,
+    ].filter((s: number) => s > 0);
+
+    const dailyScore =
+      scores.length > 0
+        ? Math.round(
+            scores.reduce(
+              (sum: number, s: number) => sum + s,
+              0
+            ) / scores.length
+          )
+        : 0;
+
+    setScore(dailyScore);
+    setLoading(false);
+  }
+
   useEffect(() => {
     if (!user) return;
 
-    const loadScore = async () => {
-      setLoading(true);
-      const date = today();
-
-      /* ───── Hydration ───── */
-      const [{ data: profile }, { data: hydrationLogs }] =
-        await Promise.all([
-          supabase
-            .from("profiles")
-            .select("water_goal_ml")
-            .eq("id", user.id)
-            .single<Profile>(),
-
-          supabase
-            .from("hydration_logs")
-            .select("amount_ml, hydration_factor")
-            .eq("user_id", user.id)
-            .eq("log_date", date)
-            .returns<HydrationLog[]>(),
-        ]);
-
-      const hydrationTotal =
-        hydrationLogs?.reduce(
-          (sum: number, row: HydrationLog) =>
-            sum + row.amount_ml * row.hydration_factor,
-          0
-        ) ?? 0;
-
-      const hydrationScore = calculateHydrationScore(
-        hydrationTotal,
-        profile?.water_goal_ml ?? 0
-      );
-
-      /* ───── Activity ───── */
-      const { data: activityLogs } = await supabase
-        .from("activity_logs")
-        .select("calories")
-        .eq("user_id", user.id)
-        .eq("log_date", date)
-        .returns<ActivityLog[]>();
-
-      const burnedCalories =
-        activityLogs?.reduce(
-          (sum: number, row: ActivityLog) =>
-            sum + row.calories,
-          0
-        ) ?? 0;
-
-      const activityScore = calculateActivityScore(
-        burnedCalories,
-        300
-      );
-
-      /* ───── Nutrition (tijdelijk) ───── */
-      const nutritionScore = calculateNutritionScore(
-        0,
-        1
-      );
-
-      /* ───── Dagscore (gemiddelde) ───── */
-      const scores = [
-        hydrationScore,
-        activityScore,
-        nutritionScore,
-      ].filter((s) => s > 0);
-
-      const dailyScore =
-        scores.length > 0
-          ? Math.round(
-              scores.reduce(
-                (sum: number, s: number) => sum + s,
-                0
-              ) / scores.length
-            )
-          : 0;
-
-      setScore(dailyScore);
-      setLoading(false);
-    };
-
     loadScore();
+
+    function handleUpdate() {
+      loadScore();
+    }
+
+    window.addEventListener(
+      "hydration-updated",
+      handleUpdate
+    );
+    window.addEventListener(
+      "activity-updated",
+      handleUpdate
+    );
+    window.addEventListener(
+      "nutrition-updated",
+      handleUpdate
+    );
+
+    return () => {
+      window.removeEventListener(
+        "hydration-updated",
+        handleUpdate
+      );
+      window.removeEventListener(
+        "activity-updated",
+        handleUpdate
+      );
+      window.removeEventListener(
+        "nutrition-updated",
+        handleUpdate
+      );
+    };
   }, [user]);
 
   if (loading) {
@@ -142,17 +176,7 @@ export default function FitLifeScoreCard() {
     <Card
       title="FitLifeScore"
       action={
-        <div
-          className="
-            rounded-[var(--radius)]
-            bg-[#191970]
-            px-3 py-1
-            text-xs
-            font-semibold
-            text-white
-            whitespace-nowrap
-          "
-        >
+        <div className="rounded-[var(--radius)] bg-[#191970] px-3 py-1 text-xs font-semibold text-white whitespace-nowrap">
           Vandaag
         </div>
       }
@@ -186,3 +210,4 @@ export default function FitLifeScoreCard() {
     </Card>
   );
 }
+
