@@ -12,7 +12,10 @@ import {
   adjustForGoal,
   calculateWaterGoal,
   calculateBMI,
+  calculateActivityGoal,
 } from "../../lib/calculations";
+
+/* ───────────────── Types ───────────────── */
 
 type ActivityLevel =
   | "sedentary"
@@ -31,6 +34,8 @@ type ProfileForCalculation = {
   activity_level: ActivityLevel;
   goal: Goal;
 };
+
+/* ───────────────── Component ───────────────── */
 
 export default function OnboardingStep3() {
   const router = useRouter();
@@ -60,6 +65,7 @@ export default function OnboardingStep3() {
     setSaving(true);
     setError(null);
 
+    /* 1️⃣ Activiteitsniveau + doel opslaan */
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
@@ -75,6 +81,7 @@ export default function OnboardingStep3() {
       return;
     }
 
+    /* 2️⃣ Profiel ophalen voor berekeningen */
     const {
       data: profile,
       error: profileError,
@@ -83,16 +90,14 @@ export default function OnboardingStep3() {
       error: { message: string } | null;
     } = await supabase
       .from("profiles")
-      .select(
-        `
+      .select(`
         birthdate,
         height_cm,
         weight_kg,
         calculation_sex,
         activity_level,
         goal
-      `
-      )
+      `)
       .eq("id", user.id)
       .single();
 
@@ -102,6 +107,7 @@ export default function OnboardingStep3() {
       return;
     }
 
+    /* 3️⃣ Berekeningen */
     const age = calculateAge(profile.birthdate);
 
     const bmr = calculateBMR(
@@ -118,6 +124,11 @@ export default function OnboardingStep3() {
       adjustForGoal(tdee, profile.goal)
     );
 
+    const activityGoal = calculateActivityGoal(
+      tdee,
+      profile.goal
+    );
+
     const waterGoal = calculateWaterGoal(profile.weight_kg);
 
     const bmi = calculateBMI(
@@ -125,10 +136,12 @@ export default function OnboardingStep3() {
       profile.height_cm
     );
 
+    /* 4️⃣ Doelen opslaan */
     const { error: goalsError } = await supabase
       .from("profiles")
       .update({
         calorie_goal: calorieGoal,
+        activity_goal_kcal: activityGoal,
         water_goal_ml: waterGoal,
         bmi,
         updated_at: new Date().toISOString(),

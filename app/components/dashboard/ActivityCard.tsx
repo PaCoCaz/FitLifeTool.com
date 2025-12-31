@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
@@ -11,76 +11,122 @@ import {
   ActivityType,
   calculateActivityCalories,
   calculateActivityScore,
+  getActivityStatus,
 } from "../../lib/activityScore";
 
-import { getFitLifeScoreColor } from "../../lib/fitlifeScore";
+/* ───────────────── Types ───────────────── */
 
 type ActivityLogRow = {
   calories: number;
 };
 
+type ActivityGoalProfileRow = {
+  activity_goal_kcal: number | null;
+};
+
+/* ───────────────── Utils ───────────────── */
+
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/**
- * Verwachte activiteit-voortgang (24u, zwaartepunt overdag)
- */
-function getExpectedActivityProgress(now: Date = new Date()): number {
-  const hour = now.getHours() + now.getMinutes() / 60;
-
-  if (hour < 7) return hour * 0.02;                // nacht
-  if (hour < 23) return 0.14 + (hour - 7) / 16 * 0.76;
-  return 1;
-}
+/* ───────────────── Component ───────────────── */
 
 export default function ActivityCard() {
   const { user } = useUser();
 
-  const [burnedCalories, setBurnedCalories] = useState(0);
-  const [activityScore, setActivityScore] = useState(0);
-  const [durationMinutes, setDurationMinutes] = useState(30);
+  const [burnedCalories, setBurnedCalories] = useState<number>(0);
+  const [activityScore, setActivityScore] = useState<number>(0);
+  const [activityGoal, setActivityGoal] = useState<number | null>(null);
+  const [durationMinutes, setDurationMinutes] = useState<number>(30);
   const [lastAdded, setLastAdded] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const activityGoal = 300;
+  /** 🔁 Tijd – alleen voor schema (update elke minuut) */
+  const [now, setNow] = useState<Date>(new Date());
 
+  /* ⏱ Minute tick (identiek aan Hydration) */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 60_000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /* 📥 Activiteit + goal laden (Hydration-conform) */
   useEffect(() => {
     if (!user) return;
 
-    const load = async () => {
+    const loadActivity = async () => {
       setLoading(true);
+      const date = today();
 
-      const { data, error } = await supabase
-        .from("activity_logs")
-        .select("calories")
-        .eq("user_id", user.id)
-        .eq("log_date", today());
+      const [{ data: profile }, { data: logs }] =
+        await Promise.all([
+          supabase
+            .from("profiles")
+            .select("activity_goal_kcal")
+            .eq("id", user.id)
+            .single(),
 
-      if (error) {
-        console.error(error.message);
-        setLoading(false);
-        return;
-      }
+          supabase
+            .from("activity_logs")
+            .select("calories")
+            .eq("user_id", user.id)
+            .eq("log_date", date),
+        ]);
+
+      const goal =
+        (profile as ActivityGoalProfileRow | null)
+          ?.activity_goal_kcal ?? null;
+
+      setActivityGoal(goal);
 
       const total =
-        (data as ActivityLogRow[] | null)?.reduce(
-          (s: number, r: ActivityLogRow) => s + r.calories,
+        (logs as ActivityLogRow[] | null)?.reduce(
+          (sum: number, row: ActivityLogRow) =>
+            sum + row.calories,
           0
         ) ?? 0;
 
       setBurnedCalories(total);
-      setActivityScore(calculateActivityScore(total, activityGoal));
+
+      if (goal) {
+        setActivityScore(
+          calculateActivityScore(total, goal)
+        );
+      }
+
       setLoading(false);
     };
 
-    load();
+    loadActivity();
   }, [user]);
 
-  async function addActivity(type: ActivityType) {
-    if (!user) return;
+  /** 🧠 Schema-status (memoized → stabiele UI) */
+  const activityStatus = useMemo(() => {
+    if (!activityGoal) {
+      return {
+        color: "bg-gray-400 text-white",
+        message: "",
+        expectedProgress: 0,
+      };
+    }
 
-    const weightKg = user.user_metadata?.weight_kg ?? 75;
+    return getActivityStatus(
+      burnedCalories,
+      activityGoal,
+      now
+    );
+  }, [burnedCalories, activityGoal, now]);
+
+  /** ➕ Activiteit toevoegen */
+  async function addActivity(type: ActivityType) {
+    if (!user || !activityGoal) return;
+
+    const weightKg =
+      user.user_metadata?.weight_kg ?? 75;
 
     const calories = calculateActivityCalories(
       ACTIVITY_TYPES[type].met,
@@ -88,23 +134,28 @@ export default function ActivityCard() {
       durationMinutes
     );
 
-    const { error } = await supabase.from("activity_logs").insert({
-      user_id: user.id,
-      activity_type: type,
-      duration_minutes: durationMinutes,
-      calories,
-      log_date: today(),
-    });
+    const { error } = await supabase
+      .from("activity_logs")
+      .insert({
+        user_id: user.id,
+        activity_type: type,
+        duration_minutes: durationMinutes,
+        calories,
+        log_date: today(),
+      });
 
     if (error) {
       console.error(error.message);
       return;
     }
 
+    // Optimistische update
     setBurnedCalories((prev) => {
-      const total = prev + calories;
-      setActivityScore(calculateActivityScore(total, activityGoal));
-      return total;
+      const next = prev + calories;
+      setActivityScore(
+        calculateActivityScore(next, activityGoal)
+      );
+      return next;
     });
 
     setLastAdded(
@@ -115,38 +166,32 @@ export default function ActivityCard() {
     window.dispatchEvent(new Event("activity-updated"));
   }
 
-  if (loading) {
+  if (loading || activityGoal === null) {
     return (
       <Card title="Activiteit">
-        <div className="text-sm text-gray-500">Activiteit laden…</div>
+        <div className="text-sm text-gray-500">
+          Activiteit laden…
+        </div>
       </Card>
     );
   }
 
-  const expectedProgress = getExpectedActivityProgress();
-  const actualProgress = Math.min(burnedCalories / activityGoal, 1);
-
-  let status: string;
-
-if (burnedCalories >= activityGoal) {
-  status = "Goed bezig, je hebt je dagdoel gehaald";
-} else {
-  const delta =
-    burnedCalories - activityGoal * expectedProgress;
-
-  if (delta < -30) {
-    status = `Je loopt ${Math.abs(Math.round(delta))} kcal achter op schema`;
-  } else if (delta > 30) {
-    status = `Je loopt ${Math.round(delta)} kcal voor op schema`;
-  } else {
-    status = "Je activiteit loopt op schema";
-  }
-}
+  const actualProgress = Math.min(
+    burnedCalories / activityGoal,
+    1
+  );
 
   return (
     <Card
       title="Activiteit"
-      icon={<Image src="/activity.svg" alt="" width={16} height={16} />}
+      icon={
+        <Image
+          src="/activity.svg"
+          alt=""
+          width={16}
+          height={16}
+        />
+      }
       action={
         <div
           className={`
@@ -154,8 +199,8 @@ if (burnedCalories >= activityGoal) {
             px-3 py-1
             text-xs
             font-semibold
-            text-white
-            ${getFitLifeScoreColor(activityScore)}
+            whitespace-nowrap
+            ${activityStatus.color}
           `}
         >
           FitLifeScore {activityScore} / 100
@@ -163,35 +208,43 @@ if (burnedCalories >= activityGoal) {
       }
     >
       <div className="h-full flex flex-col justify-between">
-        {/* Header */}
-        <div>
+        {/* Bovenkant */}
+        <div className="space-y-1">
           <div className="text-2xl font-semibold text-[#191970]">
             {burnedCalories} kcal
           </div>
+
           <div className="text-xs text-gray-500">
             Dagdoel: {activityGoal} kcal
           </div>
         </div>
 
-        {/* ÉÉN progressbar */}
+        {/* Progress */}
         <div className="mt-4 space-y-2">
-          <div className="relative h-2 w-full rounded-full bg-[#B8CAE0] overflow-hidden">
-            {/* schema */}
+          <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+            {/* Schema */}
             <div
               className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
-              style={{ width: `${expectedProgress * 100}%` }}
+              style={{
+                width: `${activityStatus.expectedProgress * 100}%`,
+              }}
             />
 
-            {/* actueel */}
+            {/* Actueel */}
             <div
-              className={`absolute left-0 top-0 h-full transition-all ${getFitLifeScoreColor(
-                activityScore
+              className={`absolute left-0 top-0 h-full transition-all ${activityStatus.color.replace(
+                "text-white",
+                ""
               )}`}
-              style={{ width: `${actualProgress * 100}%` }}
+              style={{
+                width: `${actualProgress * 100}%`,
+              }}
             />
           </div>
 
-          <div className="text-xs text-gray-600">{status}</div>
+          <div className="text-xs text-gray-600">
+            {activityStatus.message}
+          </div>
 
           {lastAdded && (
             <div className="text-xs text-green-600">
@@ -223,26 +276,37 @@ if (burnedCalories >= activityGoal) {
 
         {/* Activiteiten */}
         <div className="mt-4 grid grid-cols-2 gap-2">
-          {(Object.keys(ACTIVITY_TYPES) as ActivityType[]).map((type) => {
-            const kcal = calculateActivityCalories(
-              ACTIVITY_TYPES[type].met,
-              user?.user_metadata?.weight_kg ?? 75,
-              durationMinutes
-            );
+          {(Object.keys(ACTIVITY_TYPES) as ActivityType[]).map(
+            (type) => {
+              const kcal = calculateActivityCalories(
+                ACTIVITY_TYPES[type].met,
+                user?.user_metadata?.weight_kg ?? 75,
+                durationMinutes
+              );
 
-            return (
-              <button
-                key={type}
-                onClick={() => addActivity(type)}
-                className="rounded-[var(--radius)] border border-[#0095D3] px-2 py-2 text-xs font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
-              >
-                + {ACTIVITY_TYPES[type].label}
-                <div className="text-[10px] opacity-70">
-                  {durationMinutes} min · {kcal} kcal
-                </div>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={type}
+                  onClick={() => addActivity(type)}
+                  className="
+                    rounded-[var(--radius)]
+                    border border-[#0095D3]
+                    px-2 py-2
+                    text-xs font-medium
+                    text-[#0095D3]
+                    hover:bg-[#0095D3]
+                    hover:text-white
+                    transition
+                  "
+                >
+                  + {ACTIVITY_TYPES[type].label}
+                  <div className="text-[10px] opacity-70">
+                    {durationMinutes} min · {kcal} kcal
+                  </div>
+                </button>
+              );
+            }
+          )}
         </div>
       </div>
     </Card>

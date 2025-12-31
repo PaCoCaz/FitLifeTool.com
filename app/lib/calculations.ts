@@ -7,7 +7,13 @@ type ActivityLevel =
   | "active"
   | "very_active";
 
-type Goal = "lose_weight" | "maintain" | "gain_weight";
+type Goal =
+  | "lose_weight"
+  | "maintain"
+  | "gain_weight"
+  | "build_muscle";
+
+/* ───────────────── Leeftijd ───────────────── */
 
 export function calculateAge(birthdate: string): number {
   const birth = new Date(birthdate);
@@ -20,6 +26,8 @@ export function calculateAge(birthdate: string): number {
   return age;
 }
 
+/* ───────────────── BMR ───────────────── */
+
 export function calculateBMR(
   sex: CalculationSex,
   weightKg: number,
@@ -31,6 +39,8 @@ export function calculateBMR(
   }
   return 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
 }
+
+/* ───────────────── Activity multiplier ───────────────── */
 
 export function activityMultiplier(level: ActivityLevel): number {
   switch (level) {
@@ -48,6 +58,8 @@ export function activityMultiplier(level: ActivityLevel): number {
       return 1.2;
   }
 }
+
+/* ───────────────── Calorie adjustment for goal ───────────────── */
 
 export function adjustForGoal(
   tdee: number,
@@ -71,11 +83,15 @@ export function adjustForGoal(
   }
 }
 
+/* ───────────────── Water goal ───────────────── */
+
 export function calculateWaterGoal(
   weightKg: number
 ): number {
   return Math.round(weightKg * 35); // ml per dag
 }
+
+/* ───────────────── BMI ───────────────── */
 
 export function calculateBMI(
   weightKg: number,
@@ -84,4 +100,52 @@ export function calculateBMI(
   const heightM = heightCm / 100;
   const bmi = weightKg / (heightM * heightM);
   return Math.round(bmi * 10) / 10; // 1 decimaal
+}
+
+/* ───────────────── Activity goal (NIEUW) ───────────────── */
+
+/**
+ * Dagelijks activiteitsdoel (kcal)
+ * Afgeleid van TDEE en gebruikersdoel
+ *
+ * - lose_weight  → 20% van TDEE
+ * - maintain     → 15% van TDEE
+ * - gain_weight  → 10% van TDEE
+ * - build_muscle → 15% van TDEE
+ *
+ * Met veiligheidsgrenzen:
+ * - min 200 kcal
+ * - max 800 kcal
+ */
+export function calculateActivityGoal(
+  tdee: number,
+  goal: Goal
+): number {
+  let ratio: number;
+
+  switch (goal) {
+    case "lose_weight":
+      ratio = 0.20;
+      break;
+
+    case "gain_weight":
+      ratio = 0.10;
+      break;
+
+    case "build_muscle":
+      ratio = 0.15;
+      break;
+
+    default: // maintain
+      ratio = 0.15;
+  }
+
+  const raw = tdee * ratio;
+
+  return Math.round(
+    Math.min(
+      800,
+      Math.max(200, raw)
+    )
+  );
 }
