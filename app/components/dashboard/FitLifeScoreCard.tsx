@@ -5,13 +5,12 @@ import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
 
+import { calculateHydrationScore } from "../../lib/hydrationScore";
+import { calculateActivityScore } from "../../lib/activityScore";
 import {
-  calculateHydrationScore,
-  calculateNutritionScore,
+  calculateDailyFitLifeScore,
   getFitLifeScoreColor,
 } from "../../lib/fitlifeScore";
-
-import { calculateActivityScore } from "../../lib/activityScore";
 
 /* ───────────────── Types ───────────────── */
 
@@ -92,33 +91,22 @@ export default function FitLifeScoreCard() {
         0
       ) ?? 0;
 
+    // TODO: activityGoal later uit profiles halen
     const activityScore = calculateActivityScore(
       burnedCalories,
       300
     );
 
     /* ───── Nutrition (tijdelijk neutraal) ───── */
-    const nutritionScore = calculateNutritionScore(
-      0,
-      1
-    );
+    // Totdat food logging bestaat:
+    const nutritionScore = 100;
 
     /* ───── Dagscore ───── */
-    const scores: number[] = [
+    const dailyScore = calculateDailyFitLifeScore({
       hydrationScore,
-      activityScore,
       nutritionScore,
-    ].filter((s: number) => s > 0);
-
-    const dailyScore =
-      scores.length > 0
-        ? Math.round(
-            scores.reduce(
-              (sum: number, s: number) => sum + s,
-              0
-            ) / scores.length
-          )
-        : 0;
+      activityScore,
+    });
 
     setScore(dailyScore);
     setLoading(false);
@@ -210,4 +198,3 @@ export default function FitLifeScoreCard() {
     </Card>
   );
 }
-

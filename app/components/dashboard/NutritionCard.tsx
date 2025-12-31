@@ -1,38 +1,43 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
+
 import {
   calculateNutritionScore,
-  getNutritionScoreColor,
-  NutritionGoal,
-} from "../../lib/fitlifeScore";
+  getNutritionStatus,
+} from "../../lib/nutritionScore";
 
-/**
- * Types
- */
+/* ───────────────── Types ───────────────── */
+
 type ActivityLog = {
   calories: number;
 };
 
 type NutritionProfile = {
   calorie_goal: number;
-  goal: NutritionGoal;
+  goal: "lose_weight" | "maintain" | "gain_weight";
 };
+
+/* ───────────────── Utils ───────────────── */
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/* ───────────────── Component ───────────────── */
+
 export default function NutritionCard() {
   const { user } = useUser();
 
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
-  const [goal, setGoal] = useState<NutritionGoal>("maintain");
-  const [activityBonus, setActivityBonus] = useState<number>(0);
+  const [goal, setGoal] =
+    useState<NutritionProfile["goal"]>("maintain");
+  const [activityBonus, setActivityBonus] =
+    useState<number>(0);
 
   // Tijdelijk totdat food logging bestaat
   const [currentCalories, setCurrentCalories] =
@@ -43,81 +48,66 @@ export default function NutritionCard() {
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  /**
-   * Data laden
-   */
-  async function loadData(userId: string) {
-    setLoading(true);
+  /** 🔁 Tijd – alleen voor schema (identiek aan andere cards) */
+  const [now, setNow] = useState<Date>(new Date());
 
-    // Profiel
-    const {
-      data: profile,
-      error: profileError,
-    }: {
-      data: NutritionProfile | null;
-      error: { message: string } | null;
-    } = await supabase
-      .from("profiles")
-      .select("calorie_goal, goal")
-      .eq("id", userId)
-      .single();
+  /* ⏱ Minute tick */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 60_000);
 
-    if (profileError || !profile) {
-      console.error(
-        profileError?.message ??
-          "Geen nutrition profiel gevonden"
-      );
-      setLoading(false);
-      return;
-    }
+    return () => clearInterval(interval);
+  }, []);
 
-    setBaseGoal(profile.calorie_goal);
-    setGoal(profile.goal);
-
-    // Activiteit vandaag
-    const {
-      data: activities,
-      error: activityError,
-    }: {
-      data: ActivityLog[] | null;
-      error: { message: string } | null;
-    } = await supabase
-      .from("activity_logs")
-      .select("calories")
-      .eq("user_id", userId)
-      .eq("log_date", today());
-
-    if (activityError) {
-      console.error(activityError.message);
-      setLoading(false);
-      return;
-    }
-
-    const burned =
-      activities?.reduce(
-        (sum: number, a: ActivityLog) =>
-          sum + a.calories,
-        0
-      ) ?? 0;
-
-    setActivityBonus(burned);
-    setLoading(false);
-  }
-
-  /**
-   * Init + updates
-   */
+  /* 📥 Data laden (profiel + activiteit) */
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    const userId = user.id;
-    loadData(userId);
+    const loadData = async () => {
+      setLoading(true);
+      const userId = user.id;
+
+      const [{ data: profile }, { data: activities }] =
+        await Promise.all([
+          supabase
+            .from("profiles")
+            .select("calorie_goal, goal")
+            .eq("id", userId)
+            .single(),
+
+          supabase
+            .from("activity_logs")
+            .select("calories")
+            .eq("user_id", userId)
+            .eq("log_date", today()),
+        ]);
+
+      if (!profile?.calorie_goal) {
+        setLoading(false);
+        return;
+      }
+
+      setBaseGoal(profile.calorie_goal);
+      setGoal(profile.goal);
+
+      const burned =
+        (activities as ActivityLog[] | null)?.reduce(
+          (sum, a) => sum + a.calories,
+          0
+        ) ?? 0;
+
+      setActivityBonus(burned);
+      setLoading(false);
+    };
+
+    loadData();
 
     function handleActivityUpdate() {
-      loadData(userId);
+      loadData();
     }
 
     window.addEventListener(
@@ -133,21 +123,38 @@ export default function NutritionCard() {
     };
   }, [user]);
 
-  /**
-   * Score berekenen
-   */
+  /** 🧠 Daglimiet + status (memoized) */
   const dailyLimit =
     baseGoal !== null ? baseGoal + activityBonus : 0;
 
+  const nutritionStatus = useMemo(() => {
+    if (!dailyLimit) {
+      return {
+        color: "bg-gray-400 text-white",
+        message: "",
+        expectedProgress: 0,
+      };
+    }
+
+    return getNutritionStatus(
+      currentCalories,
+      dailyLimit,
+      goal,
+      now
+    );
+  }, [currentCalories, dailyLimit, now]);
+
+  /** 📊 Score */
   useEffect(() => {
     if (!dailyLimit) return;
 
-    const score = calculateNutritionScore(
-      currentCalories,
-      dailyLimit
-    );
-
-    setNutritionScore(score);
+    setNutritionScore(
+      calculateNutritionScore(
+        currentCalories,
+        dailyLimit,
+        goal
+      )
+    );    
   }, [currentCalories, dailyLimit]);
 
   if (loading || baseGoal === null) {
@@ -160,31 +167,20 @@ export default function NutritionCard() {
     );
   }
 
-  const progress = Math.min(
+  const actualProgress = Math.min(
     currentCalories / dailyLimit,
     1
   );
-
-  const isEmpty = currentCalories === 0;
-  const isOver = currentCalories > dailyLimit;
 
   const limitLabel =
     goal === "gain_weight"
       ? "Dagdoel"
       : "Daglimiet";
 
-  /**
-   * Tijdelijke testactie
-   */
+  /* Tijdelijke testactie */
   function addCalories(amount: number) {
     setCurrentCalories((prev) => prev + amount);
   }
-
-  const scoreColorClass = getNutritionScoreColor(
-    currentCalories,
-    dailyLimit,
-    goal
-  );
 
   return (
     <Card
@@ -205,7 +201,7 @@ export default function NutritionCard() {
             text-xs
             font-semibold
             whitespace-nowrap
-            ${scoreColorClass}
+            ${nutritionStatus.color}
           `}
         >
           FitLifeScore {nutritionScore} / 100
@@ -231,20 +227,29 @@ export default function NutritionCard() {
 
         {/* Progress */}
         <div className="mt-4 space-y-2">
-          <div className="h-2 w-full rounded-full bg-gray-200">
+          <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+            {/* Schema */}
             <div
-              className={`h-2 rounded-full transition-all ${scoreColorClass}`}
+              className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
               style={{
-                width: `${progress * 100}%`,
+                width: `${nutritionStatus.expectedProgress * 100}%`,
+              }}
+            />
+
+            {/* Actueel */}
+            <div
+              className={`absolute left-0 top-0 h-full transition-all ${nutritionStatus.color.replace(
+                "text-white",
+                ""
+              )}`}
+              style={{
+                width: `${actualProgress * 100}%`,
               }}
             />
           </div>
 
           <div className="text-xs text-gray-600">
-            {isEmpty && "Nog geen voeding gelogd"}
-            {!isEmpty && !isOver &&
-              "Binnen je daglimiet"}
-            {isOver && "Boven je daglimiet"}
+            {nutritionStatus.message}
           </div>
         </div>
 
