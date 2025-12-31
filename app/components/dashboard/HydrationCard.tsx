@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
@@ -10,6 +10,18 @@ import {
   calculateHydrationScore,
   getHydrationStatus,
 } from "../../lib/hydrationScore";
+
+/* ───────────────── Constants ───────────────── */
+
+const DRINK_TYPES = {
+  water: {
+    label: "Water",
+    factor: 1.0,
+    icon: "/water_drop.svg",
+  },
+} as const;
+
+const QUICK_AMOUNTS = [50, 150, 200, 250, 300, 500];
 
 /* ───────────────── Types ───────────────── */
 
@@ -24,33 +36,28 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/* ───────────────── Constants ───────────────── */
-
-const DRINK_TYPES = {
-  water: {
-    label: "Water",
-    factor: 1.0,
-    icon: "/water_drop.svg",
-  },
-} as const;
-
-const QUICK_AMOUNTS = [50, 150, 200, 250, 300, 500];
-
 /* ───────────────── Component ───────────────── */
 
 export default function HydrationCard() {
   const { user } = useUser();
 
   const [hydrationGoal, setHydrationGoal] = useState<number | null>(null);
-  const [current, setCurrent] = useState<number>(0);
-  const [score, setScore] = useState<number>(0);
-  const [statusText, setStatusText] = useState<string>("");
-  const [statusColor, setStatusColor] = useState<string>("bg-gray-400 text-white");
-  const [schemaProgress, setSchemaProgress] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
+  const [currentMl, setCurrentMl] = useState<number>(0);
+  const [hydrationScore, setHydrationScore] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  /* ───────────────── Load data ───────────────── */
+  /** 🔁 Tijd – alleen voor schema (update elke minuut) */
+  const [now, setNow] = useState<Date>(new Date());
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 60_000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /** 📥 Data laden (1x + bij activity updates) */
   useEffect(() => {
     if (!user) return;
 
@@ -73,6 +80,9 @@ export default function HydrationCard() {
             .eq("log_date", date),
         ]);
 
+      const goal = profile?.water_goal_ml ?? null;
+      setHydrationGoal(goal);
+
       const total =
         (logs as HydrationLogRow[] | null)?.reduce(
           (sum: number, row: HydrationLogRow) =>
@@ -81,41 +91,40 @@ export default function HydrationCard() {
         ) ?? 0;
 
       const rounded = Math.round(total);
-      setCurrent(rounded);
-      setHydrationGoal(profile?.water_goal_ml ?? null);
+      setCurrentMl(rounded);
 
-      if (profile?.water_goal_ml) {
-        const scoreValue = calculateHydrationScore(
-          rounded,
-          profile.water_goal_ml
+      if (goal) {
+        setHydrationScore(
+          calculateHydrationScore(rounded, goal)
         );
-
-        const status = getHydrationStatus(
-          rounded,
-          profile.water_goal_ml,
-          new Date()
-        );
-
-        setScore(scoreValue);
-        setStatusText(status.message);
-        setStatusColor(status.color);
-        setSchemaProgress(status.expectedProgress);
       }
 
       setLoading(false);
     };
 
     loadHydration();
-
-    /* ⏱ Live update elke minuut */
-    const interval = setInterval(loadHydration, 60_000);
-    return () => clearInterval(interval);
   }, [user]);
 
-  /* ───────────────── Add drink ───────────────── */
+  /** 🧠 Schema-status (memoized → geen card-jump) */
+  const hydrationStatus = useMemo(() => {
+    if (!hydrationGoal) {
+      return {
+        color: "bg-gray-400 text-white",
+        message: "",
+        expectedProgress: 0,
+      };
+    }
 
+    return getHydrationStatus(
+      currentMl,
+      hydrationGoal,
+      now
+    );
+  }, [currentMl, hydrationGoal, now]);
+
+  /** ➕ Drink toevoegen */
   async function addDrink(amount: number) {
-    if (!user || !hydrationGoal) return;
+    if (!user) return;
 
     const { error } = await supabase
       .from("hydration_logs")
@@ -132,39 +141,32 @@ export default function HydrationCard() {
       return;
     }
 
-    const newTotal = current + amount;
-    setCurrent(newTotal);
-
-    const scoreValue = calculateHydrationScore(
-      newTotal,
-      hydrationGoal
-    );
-
-    const status = getHydrationStatus(
-      newTotal,
-      hydrationGoal,
-      new Date()
-    );
-
-    setScore(scoreValue);
-    setStatusText(status.message);
-    setStatusColor(status.color);
-    setSchemaProgress(status.expectedProgress);
+    // Optimistische update
+    setCurrentMl((prev) => {
+      const next = prev + amount;
+      if (hydrationGoal) {
+        setHydrationScore(
+          calculateHydrationScore(next, hydrationGoal)
+        );
+      }
+      return next;
+    });
   }
-
-  /* ───────────────── Render ───────────────── */
 
   if (loading || hydrationGoal === null) {
     return (
       <Card title="Hydratatie">
-        <div className="text-sm text-gray-400">
+        <div className="text-sm text-gray-500">
           Hydratatie laden…
         </div>
       </Card>
     );
   }
 
-  const actualProgress = Math.min(current / hydrationGoal, 1);
+  const actualProgress = Math.min(
+    currentMl / hydrationGoal,
+    1
+  );
 
   return (
     <Card
@@ -185,49 +187,55 @@ export default function HydrationCard() {
             text-xs
             font-semibold
             whitespace-nowrap
-            ${statusColor}
+            ${hydrationStatus.color}
           `}
         >
-          FitLifeScore {score} / 100
+          FitLifeScore {hydrationScore} / 100
         </div>
       }
     >
-      <div className="space-y-4">
+      <div className="h-full flex flex-col justify-between">
         {/* Bovenkant */}
-        <div>
+        <div className="space-y-1">
           <div className="text-2xl font-semibold text-[#191970]">
-            {current.toLocaleString()} ml
+            {currentMl.toLocaleString()} ml
           </div>
+
           <div className="text-xs text-gray-500">
             Dagdoel: {hydrationGoal.toLocaleString()} ml
           </div>
         </div>
 
         {/* Progress */}
-        <div className="space-y-2">
+        <div className="mt-4 space-y-2">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-            {/* Schema (verwacht) */}
+            {/* Schema */}
             <div
               className="absolute left-0 top-0 h-2 bg-[#B8CAE0]"
-              style={{ width: `${schemaProgress * 100}%` }}
+              style={{
+                width: `${hydrationStatus.expectedProgress * 100}%`,
+              }}
             />
 
             {/* Actueel */}
             <div
-              className={`absolute left-0 top-0 h-2 transition-all ${
-                statusColor.replace("text-white", "")
-              }`}
-              style={{ width: `${actualProgress * 100}%` }}
+              className={`absolute left-0 top-0 h-2 transition-all ${hydrationStatus.color.replace(
+                "text-white",
+                ""
+              )}`}
+              style={{
+                width: `${actualProgress * 100}%`,
+              }}
             />
           </div>
 
           <div className="text-xs text-gray-600">
-            {statusText}
+            {hydrationStatus.message}
           </div>
         </div>
 
         {/* Acties */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="mt-4 grid grid-cols-3 gap-2">
           {QUICK_AMOUNTS.map((amount) => (
             <button
               key={amount}
