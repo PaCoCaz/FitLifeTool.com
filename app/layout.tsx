@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./styles/globals.css";
 import { AuthProvider } from "./lib/AuthProvider";
+import { TimeProvider } from "./lib/TimeProvider";
+import { ToastProvider } from "./lib/ToastProvider";
 
 /* 🔴 DIT TOEVOEGEN */
 export const viewport = {
@@ -23,7 +25,11 @@ export default function RootLayout({
     <html lang="nl">
       <body>
         <AuthProvider>
-          {children}
+          <TimeProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </TimeProvider>
         </AuthProvider>
       </body>
     </html>

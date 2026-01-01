@@ -9,7 +9,7 @@ import TipOfTheDayCard from "../dashboard/TipOfTheDayCard";
 
 export default function DashboardGrid() {
   return (
-    <section className="grid grid-cols-12 auto-rows-auto gap-4">
+    <section className="grid grid-cols-12 auto-rows-auto gap-4 items-start">
 
       {/* Rij 0 — Dagscore */}
       <div className="col-span-12">

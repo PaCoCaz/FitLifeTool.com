@@ -5,6 +5,7 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
+import { useNow } from "../../lib/TimeProvider";
 
 import {
   calculateHydrationScore,
@@ -32,38 +33,31 @@ type HydrationLogRow = {
 
 /* ───────────────── Utils ───────────────── */
 
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
+function todayFromDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 /* ───────────────── Component ───────────────── */
 
 export default function HydrationCard() {
   const { user } = useUser();
+  const now = useNow();
 
+  /* ───── State ───── */
   const [hydrationGoal, setHydrationGoal] = useState<number | null>(null);
   const [currentMl, setCurrentMl] = useState<number>(0);
   const [hydrationScore, setHydrationScore] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
-  /** 🔁 Tijd – alleen voor schema (update elke minuut) */
-  const [now, setNow] = useState<Date>(new Date());
+  /* ───── Dag-key (reset exact om 00:00) ───── */
+  const dayKey = todayFromDate(now);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 60_000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  /** 📥 Data laden (1x + bij activity updates) */
+  /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
     if (!user) return;
 
     const loadHydration = async () => {
       setLoading(true);
-      const date = today();
 
       const [{ data: profile }, { data: logs }] =
         await Promise.all([
@@ -77,7 +71,7 @@ export default function HydrationCard() {
             .from("hydration_logs")
             .select("amount_ml, hydration_factor")
             .eq("user_id", user.id)
-            .eq("log_date", date),
+            .eq("log_date", dayKey),
         ]);
 
       const goal = profile?.water_goal_ml ?? null;
@@ -103,9 +97,9 @@ export default function HydrationCard() {
     };
 
     loadHydration();
-  }, [user]);
+  }, [user, dayKey]);
 
-  /** 🧠 Schema-status (memoized → geen card-jump) */
+  /* ───── Live status (tijd-gevoelig, géén fetch) ───── */
   const hydrationStatus = useMemo(() => {
     if (!hydrationGoal) {
       return {
@@ -122,7 +116,7 @@ export default function HydrationCard() {
     );
   }, [currentMl, hydrationGoal, now]);
 
-  /** ➕ Drink toevoegen */
+  /* ───── Drink toevoegen ───── */
   async function addDrink(amount: number) {
     if (!user) return;
 
@@ -133,7 +127,7 @@ export default function HydrationCard() {
         drink_type: "water",
         amount_ml: amount,
         hydration_factor: 1,
-        log_date: today(),
+        log_date: dayKey,
       });
 
     if (error) {
@@ -151,6 +145,8 @@ export default function HydrationCard() {
       }
       return next;
     });
+
+    window.dispatchEvent(new Event("hydration-updated"));
   }
 
   if (loading || hydrationGoal === null) {

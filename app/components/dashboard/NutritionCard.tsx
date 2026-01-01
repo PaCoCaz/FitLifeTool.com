@@ -5,6 +5,7 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
+import { useNow } from "../../lib/TimeProvider";
 
 import {
   calculateNutritionScore,
@@ -24,15 +25,17 @@ type NutritionProfile = {
 
 /* ───────────────── Utils ───────────────── */
 
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
+function todayFromDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 /* ───────────────── Component ───────────────── */
 
 export default function NutritionCard() {
   const { user } = useUser();
+  const now = useNow();
 
+  /* ───── State ───── */
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
   const [goal, setGoal] =
     useState<NutritionProfile["goal"]>("maintain");
@@ -46,31 +49,19 @@ export default function NutritionCard() {
   const [nutritionScore, setNutritionScore] =
     useState<number>(0);
 
-  const [loading, setLoading] = useState<boolean>(true);
+  /** ❗️Loading alleen voor INIT */
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  /** 🔁 Tijd – alleen voor schema (identiek aan andere cards) */
-  const [now, setNow] = useState<Date>(new Date());
+  /* ───── Dag-key (reset exact om 00:00) ───── */
+  const dayKey = todayFromDate(now);
 
-  /* ⏱ Minute tick */
+  /* ───── INIT load (1x + dagwissel) ───── */
   useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 60_000);
+    if (!user) return;
 
-    return () => clearInterval(interval);
-  }, []);
+    const userId = user.id;
 
-  /* 📥 Data laden (profiel + activiteit) */
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const loadData = async () => {
-      setLoading(true);
-      const userId = user.id;
-
+    const loadInitial = async () => {
       const [{ data: profile }, { data: activities }] =
         await Promise.all([
           supabase
@@ -83,31 +74,49 @@ export default function NutritionCard() {
             .from("activity_logs")
             .select("calories")
             .eq("user_id", userId)
-            .eq("log_date", today()),
+            .eq("log_date", dayKey),
         ]);
 
-      if (!profile?.calorie_goal) {
-        setLoading(false);
-        return;
-      }
+      if (!profile?.calorie_goal) return;
 
       setBaseGoal(profile.calorie_goal);
       setGoal(profile.goal);
 
       const burned =
         (activities as ActivityLog[] | null)?.reduce(
-          (sum, a) => sum + a.calories,
+          (sum: number, a: ActivityLog) =>
+            sum + a.calories,
           0
         ) ?? 0;
 
       setActivityBonus(burned);
-      setLoading(false);
+      setHasLoaded(true);
     };
 
-    loadData();
+    loadInitial();
+  }, [user, dayKey]);
 
-    function handleActivityUpdate() {
-      loadData();
+  /* ───── Activity updates → ALLEEN bonus bijwerken ───── */
+  useEffect(() => {
+    if (!user || !hasLoaded) return;
+
+    const userId = user.id;
+
+    async function handleActivityUpdate() {
+      const { data: activities } = await supabase
+        .from("activity_logs")
+        .select("calories")
+        .eq("user_id", userId)
+        .eq("log_date", dayKey);
+
+      const burned =
+        (activities as ActivityLog[] | null)?.reduce(
+          (sum: number, a: ActivityLog) =>
+            sum + a.calories,
+          0
+        ) ?? 0;
+
+      setActivityBonus(burned);
     }
 
     window.addEventListener(
@@ -121,12 +130,13 @@ export default function NutritionCard() {
         handleActivityUpdate
       );
     };
-  }, [user]);
+  }, [user, hasLoaded, dayKey]);
 
-  /** 🧠 Daglimiet + status (memoized) */
+  /* ───── Daglimiet ───── */
   const dailyLimit =
     baseGoal !== null ? baseGoal + activityBonus : 0;
 
+  /* ───── Status (tijd-gevoelig, géén fetch) ───── */
   const nutritionStatus = useMemo(() => {
     if (!dailyLimit) {
       return {
@@ -142,9 +152,9 @@ export default function NutritionCard() {
       goal,
       now
     );
-  }, [currentCalories, dailyLimit, now]);
+  }, [currentCalories, dailyLimit, goal, now]);
 
-  /** 📊 Score */
+  /* ───── Score ───── */
   useEffect(() => {
     if (!dailyLimit) return;
 
@@ -154,10 +164,10 @@ export default function NutritionCard() {
         dailyLimit,
         goal
       )
-    );    
-  }, [currentCalories, dailyLimit]);
+    );
+  }, [currentCalories, dailyLimit, goal]);
 
-  if (loading || baseGoal === null) {
+  if (!hasLoaded || baseGoal === null) {
     return (
       <Card title="Voeding">
         <div className="text-sm text-gray-500">
@@ -180,6 +190,7 @@ export default function NutritionCard() {
   /* Tijdelijke testactie */
   function addCalories(amount: number) {
     setCurrentCalories((prev) => prev + amount);
+    window.dispatchEvent(new Event("nutrition-updated"));
   }
 
   return (
@@ -220,8 +231,7 @@ export default function NutritionCard() {
           </div>
 
           <div className="text-[11px] text-gray-400">
-            Basis {baseGoal} + activiteit{" "}
-            {activityBonus}
+            Basis {baseGoal} + activiteit {activityBonus}
           </div>
         </div>
 

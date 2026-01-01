@@ -5,6 +5,8 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
+import { useNow } from "../../lib/TimeProvider";
+import { useToast } from "../../lib/ToastProvider";
 
 import {
   ACTIVITY_TYPES,
@@ -26,41 +28,33 @@ type ActivityGoalProfileRow = {
 
 /* ───────────────── Utils ───────────────── */
 
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
+function todayFromDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 /* ───────────────── Component ───────────────── */
 
 export default function ActivityCard() {
   const { user } = useUser();
+  const now = useNow();
+  const { showToast } = useToast();
 
+  /* ───── State ───── */
   const [burnedCalories, setBurnedCalories] = useState<number>(0);
   const [activityScore, setActivityScore] = useState<number>(0);
   const [activityGoal, setActivityGoal] = useState<number | null>(null);
   const [durationMinutes, setDurationMinutes] = useState<number>(30);
-  const [lastAdded, setLastAdded] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  /** 🔁 Tijd – alleen voor schema (update elke minuut) */
-  const [now, setNow] = useState<Date>(new Date());
+  /* ───── Dag-key (reset exact om 00:00) ───── */
+  const dayKey = todayFromDate(now);
 
-  /* ⏱ Minute tick (identiek aan Hydration) */
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 60_000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  /* 📥 Activiteit + goal laden (Hydration-conform) */
+  /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
     if (!user) return;
 
     const loadActivity = async () => {
       setLoading(true);
-      const date = today();
 
       const [{ data: profile }, { data: logs }] =
         await Promise.all([
@@ -74,7 +68,7 @@ export default function ActivityCard() {
             .from("activity_logs")
             .select("calories")
             .eq("user_id", user.id)
-            .eq("log_date", date),
+            .eq("log_date", dayKey),
         ]);
 
       const goal =
@@ -102,9 +96,9 @@ export default function ActivityCard() {
     };
 
     loadActivity();
-  }, [user]);
+  }, [user, dayKey]);
 
-  /** 🧠 Schema-status (memoized → stabiele UI) */
+  /* ───── Live status (tijd-gevoelig, géén fetch) ───── */
   const activityStatus = useMemo(() => {
     if (!activityGoal) {
       return {
@@ -121,7 +115,7 @@ export default function ActivityCard() {
     );
   }, [burnedCalories, activityGoal, now]);
 
-  /** ➕ Activiteit toevoegen */
+  /* ───── Activiteit toevoegen ───── */
   async function addActivity(type: ActivityType) {
     if (!user || !activityGoal) return;
 
@@ -141,7 +135,7 @@ export default function ActivityCard() {
         activity_type: type,
         duration_minutes: durationMinutes,
         calories,
-        log_date: today(),
+        log_date: dayKey,
       });
 
     if (error) {
@@ -158,11 +152,10 @@ export default function ActivityCard() {
       return next;
     });
 
-    setLastAdded(
-      `${ACTIVITY_TYPES[type].label} (${durationMinutes} min · ${calories} kcal)`
+    showToast(
+      `✓ ${ACTIVITY_TYPES[type].label} · ${durationMinutes} min · ${calories} kcal`
     );
 
-    setTimeout(() => setLastAdded(null), 2000);
     window.dispatchEvent(new Event("activity-updated"));
   }
 
@@ -222,15 +215,12 @@ export default function ActivityCard() {
         {/* Progress */}
         <div className="mt-4 space-y-2">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-            {/* Schema */}
             <div
               className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
               style={{
                 width: `${activityStatus.expectedProgress * 100}%`,
               }}
             />
-
-            {/* Actueel */}
             <div
               className={`absolute left-0 top-0 h-full transition-all ${activityStatus.color.replace(
                 "text-white",
@@ -245,12 +235,6 @@ export default function ActivityCard() {
           <div className="text-xs text-gray-600">
             {activityStatus.message}
           </div>
-
-          {lastAdded && (
-            <div className="text-xs text-green-600">
-              ✓ {lastAdded}
-            </div>
-          )}
         </div>
 
         {/* Duur */}
@@ -261,7 +245,7 @@ export default function ActivityCard() {
               onClick={() => setDurationMinutes(d)}
               className={`
                 flex-1 rounded-[var(--radius)]
-                px-2 py-1 text-xs font-medium border
+                px-2 py-2 text-xs font-medium border
                 ${
                   durationMinutes === d
                     ? "bg-[#0095D3] text-white border-[#0095D3]"
