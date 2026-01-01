@@ -66,7 +66,7 @@ export function ToastProvider({
               flex
               items-start
               justify-center
-              pt-40
+              pt-32
             "
           >
             <div className="space-y-2">
