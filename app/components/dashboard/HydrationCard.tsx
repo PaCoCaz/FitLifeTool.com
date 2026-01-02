@@ -8,6 +8,7 @@ import { useUser } from "../../lib/AuthProvider";
 
 import { useDayNow } from "../../lib/useDayNow";
 import { getLocalDayKey } from "../../lib/dayKey";
+import { useNow } from "../../lib/TimeProvider";
 
 import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
 
@@ -40,9 +41,12 @@ type HydrationLogRow = {
 export default function HydrationCard() {
   const { user } = useUser();
 
-  // 🔒 Logische dag (reset exact om 00:00 lokaal)
+  // 🔒 Logische dag (DB + reset)
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
+
+  // ⏱️ Live tijd (schema)
+  const now = useNow();
 
   /* ───── State ───── */
   const [hydrationGoal, setHydrationGoal] =
@@ -100,7 +104,7 @@ export default function HydrationCard() {
     loadHydration();
   }, [user, dayKey]);
 
-  /* ───── Live status (tijd-gevoelig, géén fetch) ───── */
+  /* ───── Live status (schema loopt mee met tijd) ───── */
   const hydrationStatus = useMemo(() => {
     if (!hydrationGoal) {
       return {
@@ -113,15 +117,15 @@ export default function HydrationCard() {
     return getHydrationStatus(
       currentMl,
       hydrationGoal,
-      dayNow
+      now
     );
-  }, [currentMl, hydrationGoal, dayNow]);
+  }, [currentMl, hydrationGoal, now]);
 
   /* ───── Drink toevoegen ───── */
   async function addDrink(amount: number) {
     if (!user) return;
 
-    const now = new Date(); // ✅ stap 9.5
+    const nowTs = new Date();
 
     const { error } = await supabase
       .from("hydration_logs")
@@ -131,11 +135,10 @@ export default function HydrationCard() {
         amount_ml: amount,
         hydration_factor: 1,
 
-        // 🔒 Daglogica
         log_date: dayKey,
-
-        // ✅ stap 9.5 — expliciete logtijd
-        log_time_local: now.toTimeString().slice(0, 8),
+        log_time_local: nowTs
+          .toTimeString()
+          .slice(0, 8),
         timezone:
           Intl.DateTimeFormat().resolvedOptions()
             .timeZone,
@@ -151,14 +154,19 @@ export default function HydrationCard() {
       const next = prev + amount;
       if (hydrationGoal) {
         setHydrationScore(
-          calculateHydrationScore(next, hydrationGoal)
+          calculateHydrationScore(
+            next,
+            hydrationGoal
+          )
         );
       }
       return next;
     });
 
-    // Typed dashboard event
-    dispatchDashboardEvent("hydration-updated", undefined);
+    dispatchDashboardEvent(
+      "hydration-updated",
+      undefined
+    );
   }
 
   if (loading || hydrationGoal === null) {

@@ -68,8 +68,8 @@ function formatTime(now: Date): string {
 export default function FitLifeScoreCard() {
   const { user } = useUser();
 
-  const dayNow = useDayNow();
-  const clockNow = useClockNow();
+  const dayNow = useDayNow();      // reset-logica
+  const clockNow = useClockNow();  // 🔴 LIVE tijd
 
   /* ───── Ruwe data ───── */
   const [hydrationTotal, setHydrationTotal] = useState(0);
@@ -129,7 +129,7 @@ export default function FitLifeScoreCard() {
         .eq("log_date", date),
     ]);
 
-    /* ───── Hydration ───── */
+    /* Hydration */
     const hydrationLogs: HydrationLog[] =
       (hydrationLogsRaw as HydrationLog[]) ?? [];
 
@@ -147,7 +147,7 @@ export default function FitLifeScoreCard() {
       calculateHydrationScore(hydrationSum, waterGoal)
     );
 
-    /* ───── Activity ───── */
+    /* Activity */
     const activityLogs: ActivityLog[] =
       (activityLogsRaw as ActivityLog[]) ?? [];
 
@@ -167,7 +167,7 @@ export default function FitLifeScoreCard() {
       );
     }
 
-    /* ───── Nutrition (⬅️ NIEUW) ───── */
+    /* Nutrition */
     const nutritionLogs: NutritionLog[] =
       (nutritionLogsRaw as NutritionLog[]) ?? [];
 
@@ -193,7 +193,7 @@ export default function FitLifeScoreCard() {
         eaten,
         nutritionGoal,
         profile.goal,
-        dayNow
+        clockNow // ✅ LIVE tijd
       );
 
       setNutritionScore(score);
@@ -219,18 +219,12 @@ export default function FitLifeScoreCard() {
     window.addEventListener("activity-updated", handleUpdate);
 
     return () => {
-      window.removeEventListener(
-        "hydration-updated",
-        handleUpdate
-      );
-      window.removeEventListener(
-        "activity-updated",
-        handleUpdate
-      );
+      window.removeEventListener("hydration-updated", handleUpdate);
+      window.removeEventListener("activity-updated", handleUpdate);
     };
   }, [hasLoaded]);
 
-  /* Nutrition events (live) */
+  /* Nutrition events */
   useEffect(() => {
     const handler = (
       e: CustomEvent<DashboardEventMap["nutrition-updated"]>
@@ -252,15 +246,15 @@ export default function FitLifeScoreCard() {
     };
   }, []);
 
-  /* Status */
+  /* Status (🔴 LIVE tijd) */
   const hydrationStatus = useMemo(
     () =>
       getHydrationStatus(
         hydrationTotal,
         hydrationGoal,
-        dayNow
+        clockNow
       ),
-    [hydrationTotal, hydrationGoal, dayNow]
+    [hydrationTotal, hydrationGoal, clockNow]
   );
 
   const activityStatus = useMemo(
@@ -268,9 +262,9 @@ export default function FitLifeScoreCard() {
       getActivityStatus(
         burnedCalories,
         activityGoal,
-        dayNow
+        clockNow
       ),
-    [burnedCalories, activityGoal, dayNow]
+    [burnedCalories, activityGoal, clockNow]
   );
 
   /* Dagscore */
@@ -309,7 +303,7 @@ export default function FitLifeScoreCard() {
 
   /* Progress */
   const expectedProgress =
-    getExpectedHydrationProgress(dayNow);
+    getExpectedHydrationProgress(clockNow);
 
   const actualProgress = Math.min(dailyScore / 100, 1);
 

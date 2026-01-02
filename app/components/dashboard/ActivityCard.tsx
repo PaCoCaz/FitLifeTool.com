@@ -9,6 +9,7 @@ import { useToast } from "../../lib/ToastProvider";
 
 import { useDayNow } from "../../lib/useDayNow";
 import { getLocalDayKey } from "../../lib/dayKey";
+import { useNow } from "../../lib/TimeProvider";
 
 import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
 
@@ -36,9 +37,12 @@ export default function ActivityCard() {
   const { user } = useUser();
   const { showToast } = useToast();
 
-  // 🔒 Logische dag (reset exact om 00:00 lokaal)
+  // 🔒 Logische dag (DB + reset)
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
+
+  // ⏱️ Live tijd (schema)
+  const now = useNow();
 
   /* ───── State ───── */
   const [burnedCalories, setBurnedCalories] =
@@ -100,7 +104,7 @@ export default function ActivityCard() {
     loadActivity();
   }, [user, dayKey]);
 
-  /* ───── Live status (tijd-gevoelig, géén fetch) ───── */
+  /* ───── Live status (schema loopt mee met tijd) ───── */
   const activityStatus = useMemo(() => {
     if (!activityGoal) {
       return {
@@ -113,9 +117,9 @@ export default function ActivityCard() {
     return getActivityStatus(
       burnedCalories,
       activityGoal,
-      dayNow
+      now
     );
-  }, [burnedCalories, activityGoal, dayNow]);
+  }, [burnedCalories, activityGoal, now]);
 
   /* ───── Activiteit toevoegen ───── */
   async function addActivity(type: ActivityType) {
@@ -130,7 +134,7 @@ export default function ActivityCard() {
       durationMinutes
     );
 
-    const now = new Date(); // ✅ stap 9.5
+    const nowTs = new Date();
 
     const { error } = await supabase
       .from("activity_logs")
@@ -143,8 +147,10 @@ export default function ActivityCard() {
         // 🔒 Daglogica
         log_date: dayKey,
 
-        // ✅ stap 9.5 — expliciete logtijd
-        log_time_local: now.toTimeString().slice(0, 8),
+        // ✅ expliciete logtijd
+        log_time_local: nowTs
+          .toTimeString()
+          .slice(0, 8),
         timezone:
           Intl.DateTimeFormat().resolvedOptions()
             .timeZone,
@@ -168,8 +174,10 @@ export default function ActivityCard() {
       `✓ ${ACTIVITY_TYPES[type].label} · ${durationMinutes} min · ${calories} kcal`
     );
 
-    // ✅ Stap 8 — typed dashboard event
-    dispatchDashboardEvent("activity-updated", undefined);
+    dispatchDashboardEvent(
+      "activity-updated",
+      undefined
+    );
   }
 
   if (loading || activityGoal === null) {

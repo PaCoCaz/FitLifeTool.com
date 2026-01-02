@@ -110,7 +110,7 @@
     if (delta >= 0) {
       return {
         color: "bg-green-600 text-white",
-        message: `Goed bezig, je hydratatie loopt ${delta} ml voor op jw dagschema`,
+        message: `Goed bezig, je hydratatie loopt ${delta} ml voor op je dagschema`,
         expectedProgress,
       };
     }

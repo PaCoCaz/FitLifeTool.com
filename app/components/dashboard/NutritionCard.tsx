@@ -8,6 +8,7 @@ import { useUser } from "../../lib/AuthProvider";
 
 import { useDayNow } from "../../lib/useDayNow";
 import { getLocalDayKey } from "../../lib/dayKey";
+import { useNow } from "../../lib/TimeProvider";
 import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
 
 import {
@@ -35,15 +36,20 @@ type NutritionProfile = {
 export default function NutritionCard() {
   const { user } = useUser();
 
-  // 🔒 Logische dag (reset exact om 00:00 lokaal)
+  // 🔒 Logische dag (DB + reset)
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
 
+  // ⏱️ Live tijd (schema)
+  const now = useNow();
+
   /* ───── State ───── */
-  const [baseGoal, setBaseGoal] = useState<number | null>(null);
+  const [baseGoal, setBaseGoal] =
+    useState<number | null>(null);
   const [goal, setGoal] =
     useState<NutritionProfile["goal"]>("maintain");
-  const [activityBonus, setActivityBonus] = useState<number>(0);
+  const [activityBonus, setActivityBonus] =
+    useState<number>(0);
 
   const [currentCalories, setCurrentCalories] =
     useState<number>(0);
@@ -51,7 +57,8 @@ export default function NutritionCard() {
   const [nutritionScore, setNutritionScore] =
     useState<number>(0);
 
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [hasLoaded, setHasLoaded] =
+    useState(false);
 
   /* ───── INIT load (profile + activity + nutrition) ───── */
   useEffect(() => {
@@ -110,7 +117,7 @@ export default function NutritionCard() {
     loadInitial();
   }, [user, dayKey]);
 
-  /* ───── ✅ LIVE activity updates → bonus herberekenen ───── */
+  /* ───── LIVE activity updates → bonus herberekenen ───── */
   useEffect(() => {
     if (!user || !hasLoaded) return;
 
@@ -147,9 +154,11 @@ export default function NutritionCard() {
 
   /* ───── Daglimiet ───── */
   const dailyLimit =
-    baseGoal !== null ? baseGoal + activityBonus : 0;
+    baseGoal !== null
+      ? baseGoal + activityBonus
+      : 0;
 
-  /* ───── Status ───── */
+  /* ───── Status (LIVE schema) ───── */
   const nutritionStatus = useMemo(() => {
     if (!dailyLimit) {
       return {
@@ -163,11 +172,11 @@ export default function NutritionCard() {
       currentCalories,
       dailyLimit,
       goal,
-      dayNow
+      now
     );
-  }, [currentCalories, dailyLimit, goal, dayNow]);
+  }, [currentCalories, dailyLimit, goal, now]);
 
-  /* ───── Score + dashboard event (STAP 9.5) ───── */
+  /* ───── Score + dashboard event ───── */
   useEffect(() => {
     if (!dailyLimit) return;
 
@@ -194,7 +203,7 @@ export default function NutritionCard() {
   async function addCalories(amount: number) {
     if (!user) return;
 
-    const now = new Date();
+    const nowTs = new Date();
 
     const { error } = await supabase
       .from("nutrition_logs")
@@ -202,9 +211,12 @@ export default function NutritionCard() {
         user_id: user.id,
         calories: amount,
         log_date: dayKey,
-        log_time_local: now.toTimeString().slice(0, 8),
+        log_time_local: nowTs
+          .toTimeString()
+          .slice(0, 8),
         timezone:
-          Intl.DateTimeFormat().resolvedOptions().timeZone,
+          Intl.DateTimeFormat().resolvedOptions()
+            .timeZone,
       });
 
     if (error) {
@@ -231,7 +243,9 @@ export default function NutritionCard() {
   );
 
   const limitLabel =
-    goal === "gain_weight" ? "Dagdoel" : "Daglimiet";
+    goal === "gain_weight"
+      ? "Dagdoel"
+      : "Daglimiet";
 
   return (
     <Card
