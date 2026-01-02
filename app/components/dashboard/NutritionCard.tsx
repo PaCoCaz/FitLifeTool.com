@@ -17,7 +17,11 @@ import {
 
 /* ───────────────── Types ───────────────── */
 
-type ActivityLog = {
+type NutritionLogRow = {
+  calories: number;
+};
+
+type ActivityLogRow = {
   calories: number;
 };
 
@@ -36,45 +40,49 @@ export default function NutritionCard() {
   const dayKey = getLocalDayKey(dayNow);
 
   /* ───── State ───── */
-  const [baseGoal, setBaseGoal] =
-    useState<number | null>(null);
+  const [baseGoal, setBaseGoal] = useState<number | null>(null);
   const [goal, setGoal] =
     useState<NutritionProfile["goal"]>("maintain");
-  const [activityBonus, setActivityBonus] =
-    useState<number>(0);
+  const [activityBonus, setActivityBonus] = useState<number>(0);
 
-  // Tijdelijk totdat food logging bestaat
   const [currentCalories, setCurrentCalories] =
     useState<number>(0);
 
   const [nutritionScore, setNutritionScore] =
     useState<number>(0);
 
-  /** ❗️Loading alleen voor INIT */
-  const [hasLoaded, setHasLoaded] =
-    useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  /* ───── INIT load (1x + dagwissel) ───── */
+  /* ───── INIT load (profile + activity + nutrition) ───── */
   useEffect(() => {
     if (!user) return;
 
     const userId = user.id;
 
     const loadInitial = async () => {
-      const [{ data: profile }, { data: activities }] =
-        await Promise.all([
-          supabase
-            .from("profiles")
-            .select("calorie_goal, goal")
-            .eq("id", userId)
-            .single(),
+      const [
+        { data: profile },
+        { data: activityLogs },
+        { data: nutritionLogs },
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("calorie_goal, goal")
+          .eq("id", userId)
+          .single<NutritionProfile>(),
 
-          supabase
-            .from("activity_logs")
-            .select("calories")
-            .eq("user_id", userId)
-            .eq("log_date", dayKey),
-        ]);
+        supabase
+          .from("activity_logs")
+          .select("calories")
+          .eq("user_id", userId)
+          .eq("log_date", dayKey),
+
+        supabase
+          .from("nutrition_logs")
+          .select("calories")
+          .eq("user_id", userId)
+          .eq("log_date", dayKey),
+      ]);
 
       if (!profile?.calorie_goal) return;
 
@@ -82,36 +90,42 @@ export default function NutritionCard() {
       setGoal(profile.goal);
 
       const burned =
-        (activities as ActivityLog[] | null)?.reduce(
-          (sum: number, a: ActivityLog) =>
-            sum + a.calories,
+        (activityLogs as ActivityLogRow[] | null)?.reduce(
+          (sum, row) => sum + row.calories,
           0
         ) ?? 0;
 
       setActivityBonus(burned);
+
+      const eaten =
+        (nutritionLogs as NutritionLogRow[] | null)?.reduce(
+          (sum, row) => sum + row.calories,
+          0
+        ) ?? 0;
+
+      setCurrentCalories(eaten);
       setHasLoaded(true);
     };
 
     loadInitial();
   }, [user, dayKey]);
 
-  /* ───── Activity updates → ALLEEN bonus ───── */
+  /* ───── ✅ LIVE activity updates → bonus herberekenen ───── */
   useEffect(() => {
     if (!user || !hasLoaded) return;
 
     const userId = user.id;
 
     async function handleActivityUpdate() {
-      const { data: activities } = await supabase
+      const { data: activityLogs } = await supabase
         .from("activity_logs")
         .select("calories")
         .eq("user_id", userId)
         .eq("log_date", dayKey);
 
       const burned =
-        (activities as ActivityLog[] | null)?.reduce(
-          (sum: number, a: ActivityLog) =>
-            sum + a.calories,
+        (activityLogs as ActivityLogRow[] | null)?.reduce(
+          (sum, row) => sum + row.calories,
           0
         ) ?? 0;
 
@@ -133,11 +147,9 @@ export default function NutritionCard() {
 
   /* ───── Daglimiet ───── */
   const dailyLimit =
-    baseGoal !== null
-      ? baseGoal + activityBonus
-      : 0;
+    baseGoal !== null ? baseGoal + activityBonus : 0;
 
-  /* ───── Status (tijd-gevoelig, géén fetch) ───── */
+  /* ───── Status ───── */
   const nutritionStatus = useMemo(() => {
     if (!dailyLimit) {
       return {
@@ -155,7 +167,7 @@ export default function NutritionCard() {
     );
   }, [currentCalories, dailyLimit, goal, dayNow]);
 
-  /* ───── Score + dashboard event ───── */
+  /* ───── Score + dashboard event (STAP 9.5) ───── */
   useEffect(() => {
     if (!dailyLimit) return;
 
@@ -167,7 +179,6 @@ export default function NutritionCard() {
 
     setNutritionScore(score);
 
-    // ✅ Stap 8 — typed event met score + kleur
     dispatchDashboardEvent("nutrition-updated", {
       score,
       color: nutritionStatus.color,
@@ -178,6 +189,31 @@ export default function NutritionCard() {
     goal,
     nutritionStatus.color,
   ]);
+
+  /* ───── Calorie toevoegen (DB-first) ───── */
+  async function addCalories(amount: number) {
+    if (!user) return;
+
+    const now = new Date();
+
+    const { error } = await supabase
+      .from("nutrition_logs")
+      .insert({
+        user_id: user.id,
+        calories: amount,
+        log_date: dayKey,
+        log_time_local: now.toTimeString().slice(0, 8),
+        timezone:
+          Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+
+    if (error) {
+      console.error(error.message);
+      return;
+    }
+
+    setCurrentCalories((prev) => prev + amount);
+  }
 
   if (!hasLoaded || baseGoal === null) {
     return (
@@ -195,14 +231,7 @@ export default function NutritionCard() {
   );
 
   const limitLabel =
-    goal === "gain_weight"
-      ? "Dagdoel"
-      : "Daglimiet";
-
-  /* Tijdelijke testactie */
-  function addCalories(amount: number) {
-    setCurrentCalories((prev) => prev + amount);
-  }
+    goal === "gain_weight" ? "Dagdoel" : "Daglimiet";
 
   return (
     <Card
@@ -231,7 +260,6 @@ export default function NutritionCard() {
       }
     >
       <div className="h-full flex flex-col justify-between">
-        {/* Bovenkant */}
         <div className="space-y-1">
           <div className="text-2xl font-semibold text-[#191970]">
             {currentCalories.toLocaleString()} kcal
@@ -246,7 +274,6 @@ export default function NutritionCard() {
           </div>
         </div>
 
-        {/* Progress */}
         <div className="mt-4 space-y-2">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
             <div
@@ -271,19 +298,13 @@ export default function NutritionCard() {
           </div>
         </div>
 
-        <div className="mt-2 text-[11px] text-gray-400">
-          FitLifeScore gebaseerd op calorie-inname
-        </div>
-
-        {/* Tijdelijke test-acties */}
         <div className="mt-4 flex gap-2">
           {[200, 500].map((amount) => (
             <button
               key={amount}
               onClick={() => addCalories(amount)}
               className="
-                flex-1
-                rounded-[var(--radius)]
+                flex-1 rounded-[var(--radius)]
                 border border-[#0095D3]
                 px-3 py-2
                 text-xs font-medium

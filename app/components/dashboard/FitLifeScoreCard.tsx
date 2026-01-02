@@ -19,6 +19,11 @@ import {
   getActivityStatus,
 } from "../../lib/activityScore";
 
+import {
+  calculateNutritionScore,
+  getNutritionStatus,
+} from "../../lib/nutritionScore";
+
 import { calculateDailyFitLifeScore } from "../../lib/fitlifeScore";
 import { DashboardEventMap } from "../../lib/dashboardEvents";
 
@@ -33,9 +38,15 @@ type ActivityLog = {
   calories: number;
 };
 
+type NutritionLog = {
+  calories: number;
+};
+
 type Profile = {
   water_goal_ml: number;
   activity_goal_kcal: number | null;
+  calorie_goal: number;
+  goal: "lose_weight" | "maintain" | "gain_weight";
 };
 
 /* ───────────────── Utils ───────────────── */
@@ -67,10 +78,12 @@ export default function FitLifeScoreCard() {
   const [burnedCalories, setBurnedCalories] = useState(0);
   const [activityGoal, setActivityGoal] = useState(0);
 
+  const [nutritionCalories, setNutritionCalories] = useState(0);
+  const [nutritionLimit, setNutritionLimit] = useState(0);
+
   /* Scores */
   const [hydrationScore, setHydrationScore] = useState(0);
   const [activityScore, setActivityScore] = useState(0);
-
   const [nutritionScore, setNutritionScore] = useState(100);
   const [nutritionStatusColor, setNutritionStatusColor] =
     useState("bg-green-600 text-white");
@@ -87,10 +100,13 @@ export default function FitLifeScoreCard() {
       { data: profile },
       { data: hydrationLogsRaw },
       { data: activityLogsRaw },
+      { data: nutritionLogsRaw },
     ] = await Promise.all([
       supabase
         .from("profiles")
-        .select("water_goal_ml, activity_goal_kcal")
+        .select(
+          "water_goal_ml, activity_goal_kcal, calorie_goal, goal"
+        )
         .eq("id", user.id)
         .single<Profile>(),
 
@@ -105,9 +121,15 @@ export default function FitLifeScoreCard() {
         .select("calories")
         .eq("user_id", user.id)
         .eq("log_date", date),
+
+      supabase
+        .from("nutrition_logs")
+        .select("calories")
+        .eq("user_id", user.id)
+        .eq("log_date", date),
     ]);
 
-    /* Hydration */
+    /* ───── Hydration ───── */
     const hydrationLogs: HydrationLog[] =
       (hydrationLogsRaw as HydrationLog[]) ?? [];
 
@@ -125,7 +147,7 @@ export default function FitLifeScoreCard() {
       calculateHydrationScore(hydrationSum, waterGoal)
     );
 
-    /* Activity */
+    /* ───── Activity ───── */
     const activityLogs: ActivityLog[] =
       (activityLogsRaw as ActivityLog[]) ?? [];
 
@@ -143,6 +165,39 @@ export default function FitLifeScoreCard() {
       setActivityScore(
         calculateActivityScore(burned, aGoal)
       );
+    }
+
+    /* ───── Nutrition (⬅️ NIEUW) ───── */
+    const nutritionLogs: NutritionLog[] =
+      (nutritionLogsRaw as NutritionLog[]) ?? [];
+
+    const eaten = nutritionLogs.reduce(
+      (sum, row) => sum + row.calories,
+      0
+    );
+
+    const baseGoal = profile?.calorie_goal ?? 0;
+    const nutritionGoal = baseGoal + burned;
+
+    setNutritionCalories(eaten);
+    setNutritionLimit(nutritionGoal);
+
+    if (nutritionGoal > 0 && profile) {
+      const score = calculateNutritionScore(
+        eaten,
+        nutritionGoal,
+        profile.goal
+      );
+
+      const status = getNutritionStatus(
+        eaten,
+        nutritionGoal,
+        profile.goal,
+        dayNow
+      );
+
+      setNutritionScore(score);
+      setNutritionStatusColor(status.color);
     }
 
     if (initial) setHasLoaded(true);
@@ -164,12 +219,18 @@ export default function FitLifeScoreCard() {
     window.addEventListener("activity-updated", handleUpdate);
 
     return () => {
-      window.removeEventListener("hydration-updated", handleUpdate);
-      window.removeEventListener("activity-updated", handleUpdate);
+      window.removeEventListener(
+        "hydration-updated",
+        handleUpdate
+      );
+      window.removeEventListener(
+        "activity-updated",
+        handleUpdate
+      );
     };
   }, [hasLoaded]);
 
-  /* 🔔 Nutrition — STAP 8 (type-safe) */
+  /* Nutrition events (live) */
   useEffect(() => {
     const handler = (
       e: CustomEvent<DashboardEventMap["nutrition-updated"]>

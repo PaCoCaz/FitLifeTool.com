@@ -130,6 +130,8 @@ export default function ActivityCard() {
       durationMinutes
     );
 
+    const now = new Date(); // ✅ stap 9.5
+
     const { error } = await supabase
       .from("activity_logs")
       .insert({
@@ -137,7 +139,15 @@ export default function ActivityCard() {
         activity_type: type,
         duration_minutes: durationMinutes,
         calories,
+
+        // 🔒 Daglogica
         log_date: dayKey,
+
+        // ✅ stap 9.5 — expliciete logtijd
+        log_time_local: now.toTimeString().slice(0, 8),
+        timezone:
+          Intl.DateTimeFormat().resolvedOptions()
+            .timeZone,
       });
 
     if (error) {
@@ -204,7 +214,6 @@ export default function ActivityCard() {
       }
     >
       <div className="h-full flex flex-col justify-between">
-        {/* Bovenkant */}
         <div className="space-y-1">
           <div className="text-2xl font-semibold text-[#191970]">
             {burnedCalories} kcal
@@ -215,7 +224,6 @@ export default function ActivityCard() {
           </div>
         </div>
 
-        {/* Progress */}
         <div className="mt-4 space-y-2">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
             <div
@@ -240,7 +248,6 @@ export default function ActivityCard() {
           </div>
         </div>
 
-        {/* Duur */}
         <div className="mt-4 flex gap-2">
           {[15, 30, 45].map((d) => (
             <button
@@ -261,7 +268,6 @@ export default function ActivityCard() {
           ))}
         </div>
 
-        {/* Activiteiten */}
         <div className="mt-4 grid grid-cols-2 gap-2">
           {(Object.keys(ACTIVITY_TYPES) as ActivityType[]).map(
             (type) => {
