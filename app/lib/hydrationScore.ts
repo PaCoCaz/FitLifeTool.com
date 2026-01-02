@@ -110,7 +110,7 @@
     if (delta >= 0) {
       return {
         color: "bg-green-600 text-white",
-        message: `Goed bezig, je hydratatie loopt ${delta} ml voor op schema`,
+        message: `Goed bezig, je hydratatie loopt ${delta} ml voor op jw dagschema`,
         expectedProgress,
       };
     }
@@ -121,7 +121,7 @@
         color: "bg-orange-500 text-white",
         message: `Je hydratatie loopt ${Math.abs(
           delta
-        )} ml achter op schema`,
+        )} ml achter op je dagschema`,
         expectedProgress,
       };
     }
@@ -131,7 +131,7 @@
       color: "bg-[#C80000] text-white",
       message: `Je hydratatie loopt ${Math.abs(
         delta
-      )} ml achter op schema`,
+      )} ml achter op je dagschema`,
       expectedProgress,
     };
   }

@@ -5,7 +5,10 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
-import { useNow } from "../../lib/TimeProvider";
+
+import { useDayNow } from "../../lib/useDayNow";
+import { getLocalDayKey } from "../../lib/dayKey";
+import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
 
 import {
   calculateNutritionScore,
@@ -23,20 +26,18 @@ type NutritionProfile = {
   goal: "lose_weight" | "maintain" | "gain_weight";
 };
 
-/* ───────────────── Utils ───────────────── */
-
-function todayFromDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
 /* ───────────────── Component ───────────────── */
 
 export default function NutritionCard() {
   const { user } = useUser();
-  const now = useNow();
+
+  // 🔒 Logische dag (reset exact om 00:00 lokaal)
+  const dayNow = useDayNow();
+  const dayKey = getLocalDayKey(dayNow);
 
   /* ───── State ───── */
-  const [baseGoal, setBaseGoal] = useState<number | null>(null);
+  const [baseGoal, setBaseGoal] =
+    useState<number | null>(null);
   const [goal, setGoal] =
     useState<NutritionProfile["goal"]>("maintain");
   const [activityBonus, setActivityBonus] =
@@ -50,10 +51,8 @@ export default function NutritionCard() {
     useState<number>(0);
 
   /** ❗️Loading alleen voor INIT */
-  const [hasLoaded, setHasLoaded] = useState(false);
-
-  /* ───── Dag-key (reset exact om 00:00) ───── */
-  const dayKey = todayFromDate(now);
+  const [hasLoaded, setHasLoaded] =
+    useState(false);
 
   /* ───── INIT load (1x + dagwissel) ───── */
   useEffect(() => {
@@ -96,7 +95,7 @@ export default function NutritionCard() {
     loadInitial();
   }, [user, dayKey]);
 
-  /* ───── Activity updates → ALLEEN bonus bijwerken ───── */
+  /* ───── Activity updates → ALLEEN bonus ───── */
   useEffect(() => {
     if (!user || !hasLoaded) return;
 
@@ -134,7 +133,9 @@ export default function NutritionCard() {
 
   /* ───── Daglimiet ───── */
   const dailyLimit =
-    baseGoal !== null ? baseGoal + activityBonus : 0;
+    baseGoal !== null
+      ? baseGoal + activityBonus
+      : 0;
 
   /* ───── Status (tijd-gevoelig, géén fetch) ───── */
   const nutritionStatus = useMemo(() => {
@@ -150,22 +151,33 @@ export default function NutritionCard() {
       currentCalories,
       dailyLimit,
       goal,
-      now
+      dayNow
     );
-  }, [currentCalories, dailyLimit, goal, now]);
+  }, [currentCalories, dailyLimit, goal, dayNow]);
 
-  /* ───── Score ───── */
+  /* ───── Score + dashboard event ───── */
   useEffect(() => {
     if (!dailyLimit) return;
 
-    setNutritionScore(
-      calculateNutritionScore(
-        currentCalories,
-        dailyLimit,
-        goal
-      )
+    const score = calculateNutritionScore(
+      currentCalories,
+      dailyLimit,
+      goal
     );
-  }, [currentCalories, dailyLimit, goal]);
+
+    setNutritionScore(score);
+
+    // ✅ Stap 8 — typed event met score + kleur
+    dispatchDashboardEvent("nutrition-updated", {
+      score,
+      color: nutritionStatus.color,
+    });
+  }, [
+    currentCalories,
+    dailyLimit,
+    goal,
+    nutritionStatus.color,
+  ]);
 
   if (!hasLoaded || baseGoal === null) {
     return (
@@ -190,7 +202,6 @@ export default function NutritionCard() {
   /* Tijdelijke testactie */
   function addCalories(amount: number) {
     setCurrentCalories((prev) => prev + amount);
-    window.dispatchEvent(new Event("nutrition-updated"));
   }
 
   return (
@@ -238,15 +249,12 @@ export default function NutritionCard() {
         {/* Progress */}
         <div className="mt-4 space-y-2">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-            {/* Schema */}
             <div
               className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
               style={{
                 width: `${nutritionStatus.expectedProgress * 100}%`,
               }}
             />
-
-            {/* Actueel */}
             <div
               className={`absolute left-0 top-0 h-full transition-all ${nutritionStatus.color.replace(
                 "text-white",

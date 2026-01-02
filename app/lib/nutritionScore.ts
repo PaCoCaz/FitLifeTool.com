@@ -177,7 +177,7 @@ export function getNutritionStatus(
     if (delta >= 0) {
       return {
         color: "bg-green-600 text-white",
-        message: "Je ligt op schema voor aankomen",
+        message: "Je ligt op dagschema voor aankomen",
         expectedProgress,
       };
     }
@@ -187,14 +187,14 @@ export function getNutritionStatus(
     if (shortageCalories <= dailyLimit * 0.15) {
       return {
         color: "bg-orange-500 text-white",
-        message: "Je zit iets onder je voedingsschema",
+        message: "Je zit iets onder je dagschema",
         expectedProgress,
       };
     }
 
     return {
       color: "bg-[#C80000] text-white",
-      message: "Je loopt duidelijk achter op je voedingsschema",
+      message: "Je loopt duidelijk achter op je dagschema",
       expectedProgress,
     };
   }

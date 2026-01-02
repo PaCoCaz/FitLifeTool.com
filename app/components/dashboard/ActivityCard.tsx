@@ -5,8 +5,12 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
-import { useNow } from "../../lib/TimeProvider";
 import { useToast } from "../../lib/ToastProvider";
+
+import { useDayNow } from "../../lib/useDayNow";
+import { getLocalDayKey } from "../../lib/dayKey";
+
+import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
 
 import {
   ACTIVITY_TYPES,
@@ -26,28 +30,27 @@ type ActivityGoalProfileRow = {
   activity_goal_kcal: number | null;
 };
 
-/* ───────────────── Utils ───────────────── */
-
-function todayFromDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
 /* ───────────────── Component ───────────────── */
 
 export default function ActivityCard() {
   const { user } = useUser();
-  const now = useNow();
   const { showToast } = useToast();
 
-  /* ───── State ───── */
-  const [burnedCalories, setBurnedCalories] = useState<number>(0);
-  const [activityScore, setActivityScore] = useState<number>(0);
-  const [activityGoal, setActivityGoal] = useState<number | null>(null);
-  const [durationMinutes, setDurationMinutes] = useState<number>(30);
-  const [loading, setLoading] = useState<boolean>(true);
+  // 🔒 Logische dag (reset exact om 00:00 lokaal)
+  const dayNow = useDayNow();
+  const dayKey = getLocalDayKey(dayNow);
 
-  /* ───── Dag-key (reset exact om 00:00) ───── */
-  const dayKey = todayFromDate(now);
+  /* ───── State ───── */
+  const [burnedCalories, setBurnedCalories] =
+    useState<number>(0);
+  const [activityScore, setActivityScore] =
+    useState<number>(0);
+  const [activityGoal, setActivityGoal] =
+    useState<number | null>(null);
+  const [durationMinutes, setDurationMinutes] =
+    useState<number>(30);
+  const [loading, setLoading] =
+    useState<boolean>(true);
 
   /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
@@ -79,8 +82,7 @@ export default function ActivityCard() {
 
       const total =
         (logs as ActivityLogRow[] | null)?.reduce(
-          (sum: number, row: ActivityLogRow) =>
-            sum + row.calories,
+          (sum, row) => sum + row.calories,
           0
         ) ?? 0;
 
@@ -111,9 +113,9 @@ export default function ActivityCard() {
     return getActivityStatus(
       burnedCalories,
       activityGoal,
-      now
+      dayNow
     );
-  }, [burnedCalories, activityGoal, now]);
+  }, [burnedCalories, activityGoal, dayNow]);
 
   /* ───── Activiteit toevoegen ───── */
   async function addActivity(type: ActivityType) {
@@ -156,7 +158,8 @@ export default function ActivityCard() {
       `✓ ${ACTIVITY_TYPES[type].label} · ${durationMinutes} min · ${calories} kcal`
     );
 
-    window.dispatchEvent(new Event("activity-updated"));
+    // ✅ Stap 8 — typed dashboard event
+    dispatchDashboardEvent("activity-updated", undefined);
   }
 
   if (loading || activityGoal === null) {

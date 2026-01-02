@@ -5,7 +5,11 @@ import Image from "next/image";
 import Card from "../ui/Card";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
-import { useNow } from "../../lib/TimeProvider";
+
+import { useDayNow } from "../../lib/useDayNow";
+import { getLocalDayKey } from "../../lib/dayKey";
+
+import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
 
 import {
   calculateHydrationScore,
@@ -31,26 +35,22 @@ type HydrationLogRow = {
   hydration_factor: number;
 };
 
-/* ───────────────── Utils ───────────────── */
-
-function todayFromDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
 /* ───────────────── Component ───────────────── */
 
 export default function HydrationCard() {
   const { user } = useUser();
-  const now = useNow();
+
+  // 🔒 Logische dag (reset exact om 00:00 lokaal)
+  const dayNow = useDayNow();
+  const dayKey = getLocalDayKey(dayNow);
 
   /* ───── State ───── */
-  const [hydrationGoal, setHydrationGoal] = useState<number | null>(null);
+  const [hydrationGoal, setHydrationGoal] =
+    useState<number | null>(null);
   const [currentMl, setCurrentMl] = useState<number>(0);
-  const [hydrationScore, setHydrationScore] = useState<number>(0);
+  const [hydrationScore, setHydrationScore] =
+    useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
-
-  /* ───── Dag-key (reset exact om 00:00) ───── */
-  const dayKey = todayFromDate(now);
 
   /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
@@ -79,8 +79,9 @@ export default function HydrationCard() {
 
       const total =
         (logs as HydrationLogRow[] | null)?.reduce(
-          (sum: number, row: HydrationLogRow) =>
-            sum + row.amount_ml * row.hydration_factor,
+          (sum, row) =>
+            sum +
+            row.amount_ml * row.hydration_factor,
           0
         ) ?? 0;
 
@@ -112,9 +113,9 @@ export default function HydrationCard() {
     return getHydrationStatus(
       currentMl,
       hydrationGoal,
-      now
+      dayNow
     );
-  }, [currentMl, hydrationGoal, now]);
+  }, [currentMl, hydrationGoal, dayNow]);
 
   /* ───── Drink toevoegen ───── */
   async function addDrink(amount: number) {
@@ -146,7 +147,8 @@ export default function HydrationCard() {
       return next;
     });
 
-    window.dispatchEvent(new Event("hydration-updated"));
+    // ✅ Stap 8 — typed dashboard event
+    dispatchDashboardEvent("hydration-updated", undefined);
   }
 
   if (loading || hydrationGoal === null) {
@@ -198,22 +200,20 @@ export default function HydrationCard() {
           </div>
 
           <div className="text-xs text-gray-500">
-            Dagdoel: {hydrationGoal.toLocaleString()} ml
+            Dagdoel:{" "}
+            {hydrationGoal.toLocaleString()} ml
           </div>
         </div>
 
         {/* Progress */}
         <div className="mt-4 space-y-2">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-            {/* Schema */}
             <div
               className="absolute left-0 top-0 h-2 bg-[#B8CAE0]"
               style={{
                 width: `${hydrationStatus.expectedProgress * 100}%`,
               }}
             />
-
-            {/* Actueel */}
             <div
               className={`absolute left-0 top-0 h-2 transition-all ${hydrationStatus.color.replace(
                 "text-white",

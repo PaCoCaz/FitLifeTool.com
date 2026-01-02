@@ -99,7 +99,7 @@ export function getActivityStatus(
   if (delta >= 0) {
     return {
       color: "bg-green-600 text-white",
-      message: `Goed bezig, je activiteit loopt ${delta} kcal voor op schema`,
+      message: `Goed bezig, je activiteit loopt ${delta} kcal voor op je dagschema`,
       expectedProgress,
     };
   }
@@ -110,7 +110,7 @@ export function getActivityStatus(
       color: "bg-orange-500 text-white",
       message: `Je activiteit loopt ${Math.abs(
         delta
-      )} kcal achter op schema`,
+      )} kcal achter op je dagschema`,
       expectedProgress,
     };
   }
@@ -120,7 +120,7 @@ export function getActivityStatus(
     color: "bg-[#C80000] text-white",
     message: `Je activiteit loopt ${Math.abs(
       delta
-    )} kcal achter op schema`,
+    )} kcal achter op je dagschema`,
     expectedProgress,
   };
 }

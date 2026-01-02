@@ -19,9 +19,8 @@ import {
   getActivityStatus,
 } from "../../lib/activityScore";
 
-import {
-  calculateDailyFitLifeScore,
-} from "../../lib/fitlifeScore";
+import { calculateDailyFitLifeScore } from "../../lib/fitlifeScore";
+import { DashboardEventMap } from "../../lib/dashboardEvents";
 
 /* ───────────────── Types ───────────────── */
 
@@ -36,6 +35,7 @@ type ActivityLog = {
 
 type Profile = {
   water_goal_ml: number;
+  activity_goal_kcal: number | null;
 };
 
 /* ───────────────── Utils ───────────────── */
@@ -57,10 +57,7 @@ function formatTime(now: Date): string {
 export default function FitLifeScoreCard() {
   const { user } = useUser();
 
-  // 🔒 Logische tijd (schema / reset / DB)
   const dayNow = useDayNow();
-
-  // 👁️ UI-tijd (exact synchroon met systeem)
   const clockNow = useClockNow();
 
   /* ───── Ruwe data ───── */
@@ -68,93 +65,100 @@ export default function FitLifeScoreCard() {
   const [hydrationGoal, setHydrationGoal] = useState(0);
 
   const [burnedCalories, setBurnedCalories] = useState(0);
-  const activityGoal = 300;
+  const [activityGoal, setActivityGoal] = useState(0);
 
   /* Scores */
   const [hydrationScore, setHydrationScore] = useState(0);
   const [activityScore, setActivityScore] = useState(0);
-  const nutritionScore = 100; // tijdelijk neutraal
 
-  /* Init flag */
+  const [nutritionScore, setNutritionScore] = useState(100);
+  const [nutritionStatusColor, setNutritionStatusColor] =
+    useState("bg-green-600 text-white");
+
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  /* ───── Data laden (init + events) ───── */
+  /* ───── Data laden ───── */
   async function loadData(initial = false) {
     if (!user) return;
 
     const date = dayKeyFromNow(dayNow);
 
+    const [
+      { data: profile },
+      { data: hydrationLogsRaw },
+      { data: activityLogsRaw },
+    ] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("water_goal_ml, activity_goal_kcal")
+        .eq("id", user.id)
+        .single<Profile>(),
+
+      supabase
+        .from("hydration_logs")
+        .select("amount_ml, hydration_factor")
+        .eq("user_id", user.id)
+        .eq("log_date", date),
+
+      supabase
+        .from("activity_logs")
+        .select("calories")
+        .eq("user_id", user.id)
+        .eq("log_date", date),
+    ]);
+
     /* Hydration */
-    const [{ data: profile }, { data: hydrationLogs }] =
-      await Promise.all([
-        supabase
-          .from("profiles")
-          .select("water_goal_ml")
-          .eq("id", user.id)
-          .single<Profile>(),
+    const hydrationLogs: HydrationLog[] =
+      (hydrationLogsRaw as HydrationLog[]) ?? [];
 
-        supabase
-          .from("hydration_logs")
-          .select("amount_ml, hydration_factor")
-          .eq("user_id", user.id)
-          .eq("log_date", date)
-          .returns<HydrationLog[]>(),
-      ]);
+    const hydrationSum = hydrationLogs.reduce(
+      (sum, row) =>
+        sum + row.amount_ml * row.hydration_factor,
+      0
+    );
 
-    const hydrationSum =
-      hydrationLogs?.reduce(
-        (sum: number, row: HydrationLog) =>
-          sum + row.amount_ml * row.hydration_factor,
-        0
-      ) ?? 0;
-
-    const goal = profile?.water_goal_ml ?? 0;
+    const waterGoal = profile?.water_goal_ml ?? 0;
 
     setHydrationTotal(hydrationSum);
-    setHydrationGoal(goal);
+    setHydrationGoal(waterGoal);
     setHydrationScore(
-      calculateHydrationScore(hydrationSum, goal)
+      calculateHydrationScore(hydrationSum, waterGoal)
     );
 
     /* Activity */
-    const { data: activityLogs } = await supabase
-      .from("activity_logs")
-      .select("calories")
-      .eq("user_id", user.id)
-      .eq("log_date", date)
-      .returns<ActivityLog[]>();
+    const activityLogs: ActivityLog[] =
+      (activityLogsRaw as ActivityLog[]) ?? [];
 
-    const burned =
-      activityLogs?.reduce(
-        (sum: number, row: ActivityLog) =>
-          sum + row.calories,
-        0
-      ) ?? 0;
-
-    setBurnedCalories(burned);
-    setActivityScore(
-      calculateActivityScore(burned, activityGoal)
+    const burned = activityLogs.reduce(
+      (sum, row) => sum + row.calories,
+      0
     );
 
-    if (initial) {
-      setHasLoaded(true);
+    const aGoal = profile?.activity_goal_kcal ?? 0;
+
+    setBurnedCalories(burned);
+    setActivityGoal(aGoal);
+
+    if (aGoal > 0) {
+      setActivityScore(
+        calculateActivityScore(burned, aGoal)
+      );
     }
+
+    if (initial) setHasLoaded(true);
   }
 
   /* Init */
   useEffect(() => {
     if (!user) return;
     loadData(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  /* Live updates (events only) */
+  /* Hydration + Activity updates */
   useEffect(() => {
     if (!hasLoaded) return;
 
-    function handleUpdate() {
-      loadData(false);
-    }
+    const handleUpdate = () => loadData(false);
 
     window.addEventListener("hydration-updated", handleUpdate);
     window.addEventListener("activity-updated", handleUpdate);
@@ -163,66 +167,90 @@ export default function FitLifeScoreCard() {
       window.removeEventListener("hydration-updated", handleUpdate);
       window.removeEventListener("activity-updated", handleUpdate);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasLoaded]);
 
-  /* ───── Status (tijd-gevoelig) ───── */
+  /* 🔔 Nutrition — STAP 8 (type-safe) */
+  useEffect(() => {
+    const handler = (
+      e: CustomEvent<DashboardEventMap["nutrition-updated"]>
+    ) => {
+      setNutritionScore(e.detail.score);
+      setNutritionStatusColor(e.detail.color);
+    };
 
-  const hydrationStatus = useMemo(() => {
-    return getHydrationStatus(
-      hydrationTotal,
-      hydrationGoal,
-      dayNow
+    window.addEventListener(
+      "nutrition-updated",
+      handler as EventListener
     );
-  }, [hydrationTotal, hydrationGoal, dayNow]);
 
-  const activityStatus = useMemo(() => {
-    return getActivityStatus(
-      burnedCalories,
-      activityGoal,
-      dayNow
-    );
-  }, [burnedCalories, activityGoal, dayNow]);
+    return () => {
+      window.removeEventListener(
+        "nutrition-updated",
+        handler as EventListener
+      );
+    };
+  }, []);
 
-  /* ───── Dagscore ───── */
+  /* Status */
+  const hydrationStatus = useMemo(
+    () =>
+      getHydrationStatus(
+        hydrationTotal,
+        hydrationGoal,
+        dayNow
+      ),
+    [hydrationTotal, hydrationGoal, dayNow]
+  );
+
+  const activityStatus = useMemo(
+    () =>
+      getActivityStatus(
+        burnedCalories,
+        activityGoal,
+        dayNow
+      ),
+    [burnedCalories, activityGoal, dayNow]
+  );
+
+  /* Dagscore */
   const dailyScore = useMemo(() => {
-    return calculateDailyFitLifeScore({
+    const raw = calculateDailyFitLifeScore({
       hydrationScore,
       nutritionScore,
       activityScore,
     });
-  }, [hydrationScore, activityScore]);
 
-  /* ───── Geaggregeerde statuskleur ───── */
+    const weakest = Math.min(
+      hydrationScore,
+      nutritionScore,
+      activityScore
+    );
+
+    return weakest === 100 ? 100 : Math.min(raw, weakest);
+  }, [hydrationScore, nutritionScore, activityScore]);
+
+  /* Statuskleur */
   const statusColor = useMemo(() => {
     const colors = [
       hydrationStatus.color,
       activityStatus.color,
-      "bg-green-600 text-white",
+      nutritionStatusColor,
     ];
 
-    if (colors.some((c) => c.includes("#C80000"))) {
+    if (colors.some((c) => c.includes("#C80000")))
       return "bg-[#C80000] text-white";
-    }
 
-    if (colors.some((c) => c.includes("orange"))) {
+    if (colors.some((c) => c.includes("orange")))
       return "bg-orange-500 text-white";
-    }
 
     return "bg-green-600 text-white";
-  }, [hydrationStatus, activityStatus]);
+  }, [hydrationStatus, activityStatus, nutritionStatusColor]);
 
-  /* ───── Progress ───── */
+  /* Progress */
   const expectedProgress =
     getExpectedHydrationProgress(dayNow);
 
-  const actualProgress = Math.min(
-    dailyScore / 100,
-    1
-  );
-
-  const progressColor =
-    statusColor.replace("text-white", "");
+  const actualProgress = Math.min(dailyScore / 100, 1);
 
   if (!hasLoaded) {
     return (
@@ -255,31 +283,23 @@ export default function FitLifeScoreCard() {
       }
     >
       <div className="h-full flex flex-col justify-between">
-        <div className="space-y-1">
-          <div className="text-3xl font-semibold text-[#191970]">
-            {dailyScore}
-          </div>
+        <div className="text-3xl font-semibold text-[#191970]">
+          {dailyScore}
         </div>
 
         <div className="mt-4 space-y-2">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
             <div
               className="absolute left-0 top-0 h-2 bg-[#B8CAE0]"
-              style={{
-                width: `${expectedProgress * 100}%`,
-              }}
+              style={{ width: `${expectedProgress * 100}%` }}
             />
             <div
-              className={`absolute left-0 top-0 h-2 transition-all ${progressColor}`}
-              style={{
-                width: `${actualProgress * 100}%`,
-              }}
+              className={`absolute left-0 top-0 h-2 transition-all ${statusColor.replace(
+                "text-white",
+                ""
+              )}`}
+              style={{ width: `${actualProgress * 100}%` }}
             />
-          </div>
-
-          <div className="text-xs text-gray-600">
-            Samengestelde score op basis van hydratatie,
-            voeding en activiteit
           </div>
         </div>
       </div>

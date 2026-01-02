@@ -100,7 +100,7 @@ export function getFitLifeStatusColor(
  * De LIVE statuskleur wordt bepaald via
  * `getFitLifeStatusColor`.
  */
-export function calculateDailyFitLifeScore({
+ export function calculateDailyFitLifeScore({
   hydrationScore,
   nutritionScore,
   activityScore,
@@ -114,5 +114,5 @@ export function calculateDailyFitLifeScore({
     nutritionScore * 0.4 +
     activityScore * 0.3;
 
-  return Math.round(weighted);
+  return Math.floor(weighted); // ⬅️ cruciaal
 }
