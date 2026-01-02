@@ -1,7 +1,13 @@
 // app/lib/TimeProvider.tsx
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 const TimeContext = createContext<Date>(new Date());
 
@@ -12,7 +18,6 @@ export function TimeProvider({
 }) {
   const [now, setNow] = useState<Date>(() => new Date());
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -20,22 +25,18 @@ export function TimeProvider({
       setNow(new Date());
     };
 
+    // Init direct
     updateNow();
 
-    const msToNextMinute =
-      60_000 - (Date.now() % 60_000);
-
-    timeoutRef.current = setTimeout(() => {
+    // ✅ Optie A: snellere tick voor live schema’s
+    intervalRef.current = setInterval(() => {
       updateNow();
-
-      intervalRef.current = setInterval(() => {
-        updateNow();
-      }, 60_000);
-    }, msToNextMinute);
+    }, 10_000); // elke 10 seconden
 
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, []);
 
