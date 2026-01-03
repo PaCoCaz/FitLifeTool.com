@@ -34,23 +34,44 @@
     );
   }
 
-  // Wordt in praktijk niet geraakt
   return 1;
 }
 
 /**
- * Absolute activityscore (0–100)
+ * Live activityscore (0–100) op basis van dagschema
+ *
+ * 100 = op of voor dagschema
+ * <100 = achter dagschema (proportioneel)
  */
 export function calculateActivityScore(
   burnedCalories: number,
-  dailyGoal: number
+  dailyGoal: number,
+  now: Date = new Date()
 ): number {
   if (dailyGoal <= 0) return 0;
 
-  return Math.min(
-    100,
-    Math.round((burnedCalories / dailyGoal) * 100)
-  );
+  const expectedProgress =
+    getExpectedActivityProgress(now);
+
+  const expectedCalories =
+    dailyGoal * expectedProgress;
+
+  // Nog niets verwacht → geen straf
+  if (expectedCalories <= 0) return 0;
+
+  const delta =
+    burnedCalories - expectedCalories;
+
+  // Op of voor schema
+  if (delta >= 0) {
+    return 100;
+  }
+
+  // Achter schema → score proportioneel
+  const ratio =
+    Math.max(0, burnedCalories / expectedCalories);
+
+  return Math.round(ratio * 100);
 }
 
 /**

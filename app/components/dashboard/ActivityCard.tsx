@@ -144,10 +144,7 @@ export default function ActivityCard() {
         duration_minutes: durationMinutes,
         calories,
 
-        // 🔒 Daglogica
         log_date: dayKey,
-
-        // ✅ expliciete logtijd
         log_time_local: nowTs
           .toTimeString()
           .slice(0, 8),
@@ -161,22 +158,32 @@ export default function ActivityCard() {
       return;
     }
 
-    // Optimistische update
+    // ✅ Optimistische update — CORRECT
     setBurnedCalories((prev) => {
       const next = prev + calories;
-      setActivityScore(
-        calculateActivityScore(next, activityGoal)
+
+      const nextScore =
+        calculateActivityScore(next, activityGoal);
+
+      setActivityScore(nextScore);
+
+      // ✅ STATUS opnieuw berekenen op basis van `next`
+      const nextStatus = getActivityStatus(
+        next,
+        activityGoal,
+        now
       );
+
+      dispatchDashboardEvent("activity-updated", {
+        score: nextScore,
+        color: nextStatus.color,
+      });
+
       return next;
     });
 
     showToast(
       `✓ ${ACTIVITY_TYPES[type].label} · ${durationMinutes} min · ${calories} kcal`
-    );
-
-    dispatchDashboardEvent(
-      "activity-updated",
-      undefined
     );
   }
 

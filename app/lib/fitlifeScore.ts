@@ -49,47 +49,50 @@ export function getFitLifeProgressColor(score: number) {
   return "bg-green-600";
 }
 
-/* ───────────────── Status-kleur aggregatie ───────────────── */
+/* ───────────────── Status-kleur aggregatie (LIVE) ───────────────── */
 
 /**
- * Combineert meerdere status-kleuren tot één dagstatus.
+ * Combineert meerdere card-statussen tot één LIVE dagstatus.
  *
- * Prioriteit:
- * 🔴 rood   → altijd rood
- * 🟠 oranje → als niets rood is
- * 🟢 groen  → alleen als alles groen is
+ * REGELS (definitief):
+ * - 🔴 rood   → als één card rood is
+ * - 🟠 oranje → als niets rood is, maar ≥1 card oranje
+ * - 🟢 groen  → ALLE cards groen
+ * - ⚪ grijs  → zolang niet alle cards een status hebben
  *
- * Verwacht Tailwind classes zoals:
- * - "bg-green-600 text-white"
- * - "bg-orange-500 text-white"
- * - "bg-[#C80000] text-white"
+ * ⚠️ DEFENSIEF:
+ * - veilig bij async laden
+ * - veilig bij dagreset (00:00)
+ * - geen false positives
  */
 export function getFitLifeStatusColor(
-  statusColors: string[]
+  statusColors: Array<string | undefined | null>
 ): string {
-  if (
-    statusColors.some((c) =>
-      c.includes("bg-[#C80000]")
-    )
-  ) {
+  // ❗ Zolang niet alle cards een status hebben → grijs
+  if (statusColors.some((c) => typeof c !== "string")) {
+    return "bg-gray-400 text-white";
+  }
+
+  const colors = statusColors as string[];
+
+  // 🔴 Rood heeft altijd prioriteit
+  if (colors.some((c) => c.includes("bg-[#C80000]"))) {
     return "bg-[#C80000] text-white";
   }
 
-  if (
-    statusColors.some((c) =>
-      c.includes("bg-orange-500")
-    )
-  ) {
+  // 🟠 Daarna oranje
+  if (colors.some((c) => c.includes("bg-orange-500"))) {
     return "bg-orange-500 text-white";
   }
 
+  // 🟢 Alleen als ALLES groen is
   return "bg-green-600 text-white";
 }
 
 /* ───────────────── Dagelijkse FitLifeScore ───────────────── */
 
 /**
- * Dagelijkse FitLifeScore
+ * Dagelijkse FitLifeScore (numeriek)
  *
  * Weegfactoren:
  * - Hydration: 30%
@@ -97,10 +100,10 @@ export function getFitLifeStatusColor(
  * - Activity: 30%
  *
  * ⚠️ Dit getal is informatief.
- * De LIVE statuskleur wordt bepaald via
+ * LIVE statuskleur wordt bepaald via
  * `getFitLifeStatusColor`.
  */
- export function calculateDailyFitLifeScore({
+export function calculateDailyFitLifeScore({
   hydrationScore,
   nutritionScore,
   activityScore,
@@ -114,5 +117,6 @@ export function getFitLifeStatusColor(
     nutritionScore * 0.4 +
     activityScore * 0.3;
 
-  return Math.floor(weighted); // ⬅️ cruciaal
+  // Bewust afronden naar beneden
+  return Math.floor(weighted);
 }

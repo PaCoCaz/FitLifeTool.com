@@ -13,8 +13,8 @@ import { useNow } from "../../lib/TimeProvider";
 import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
 
 import {
-  calculateHydrationScore,
   getHydrationStatus,
+  getExpectedHydrationProgress,
 } from "../../lib/hydrationScore";
 
 /* ───────────────── Constants ───────────────── */
@@ -56,6 +56,12 @@ export default function HydrationCard() {
     useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
+  /* ───── HARD RESET BIJ DAGWISSEL ───── */
+  useEffect(() => {
+    setCurrentMl(0);
+    setHydrationScore(0);
+  }, [dayKey]);
+
   /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
     if (!user) return;
@@ -92,19 +98,13 @@ export default function HydrationCard() {
       const rounded = Math.round(total);
       setCurrentMl(rounded);
 
-      if (goal) {
-        setHydrationScore(
-          calculateHydrationScore(rounded, goal)
-        );
-      }
-
       setLoading(false);
     };
 
     loadHydration();
   }, [user, dayKey]);
 
-  /* ───── Live status (schema loopt mee met tijd) ───── */
+  /* ───── Live status (schema) ───── */
   const hydrationStatus = useMemo(() => {
     if (!hydrationGoal) {
       return {
@@ -119,6 +119,35 @@ export default function HydrationCard() {
       hydrationGoal,
       now
     );
+  }, [currentMl, hydrationGoal, now]);
+
+  /* ───── Moment-score (0–100 t.o.v. dagschema) ───── */
+  useEffect(() => {
+    if (!hydrationGoal) return;
+
+    const expectedProgress =
+      getExpectedHydrationProgress(now);
+
+    const expectedMl =
+      hydrationGoal * expectedProgress;
+
+    if (expectedMl <= 0) {
+      setHydrationScore(0);
+      return;
+    }
+
+    const ratio = currentMl / expectedMl;
+    const score = Math.min(
+      100,
+      Math.round(ratio * 100)
+    );
+
+    setHydrationScore(score);
+
+    // 🔒 Alleen score publiceren
+    dispatchDashboardEvent("hydration-updated", {
+      score,
+    });
   }, [currentMl, hydrationGoal, now]);
 
   /* ───── Drink toevoegen ───── */
@@ -150,23 +179,7 @@ export default function HydrationCard() {
     }
 
     // Optimistische update
-    setCurrentMl((prev) => {
-      const next = prev + amount;
-      if (hydrationGoal) {
-        setHydrationScore(
-          calculateHydrationScore(
-            next,
-            hydrationGoal
-          )
-        );
-      }
-      return next;
-    });
-
-    dispatchDashboardEvent(
-      "hydration-updated",
-      undefined
-    );
+    setCurrentMl((prev) => prev + amount);
   }
 
   if (loading || hydrationGoal === null) {

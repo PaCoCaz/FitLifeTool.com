@@ -44,12 +44,10 @@ export default function NutritionCard() {
   const now = useNow();
 
   /* ───── State ───── */
-  const [baseGoal, setBaseGoal] =
-    useState<number | null>(null);
+  const [baseGoal, setBaseGoal] = useState<number | null>(null);
   const [goal, setGoal] =
     useState<NutritionProfile["goal"]>("maintain");
-  const [activityBonus, setActivityBonus] =
-    useState<number>(0);
+  const [activityBonus, setActivityBonus] = useState<number>(0);
 
   const [currentCalories, setCurrentCalories] =
     useState<number>(0);
@@ -57,8 +55,7 @@ export default function NutritionCard() {
   const [nutritionScore, setNutritionScore] =
     useState<number>(0);
 
-  const [hasLoaded, setHasLoaded] =
-    useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   /* ───── INIT load (profile + activity + nutrition) ───── */
   useEffect(() => {
@@ -111,6 +108,16 @@ export default function NutritionCard() {
         ) ?? 0;
 
       setCurrentCalories(eaten);
+
+      const initialLimit = profile.calorie_goal + burned;
+
+      const initialScore = calculateNutritionScore(
+        eaten,
+        initialLimit,
+        profile.goal
+      );
+
+      setNutritionScore(initialScore);
       setHasLoaded(true);
     };
 
@@ -154,9 +161,7 @@ export default function NutritionCard() {
 
   /* ───── Daglimiet ───── */
   const dailyLimit =
-    baseGoal !== null
-      ? baseGoal + activityBonus
-      : 0;
+    baseGoal !== null ? baseGoal + activityBonus : 0;
 
   /* ───── Status (LIVE schema) ───── */
   const nutritionStatus = useMemo(() => {
@@ -176,32 +181,9 @@ export default function NutritionCard() {
     );
   }, [currentCalories, dailyLimit, goal, now]);
 
-  /* ───── Score + dashboard event ───── */
-  useEffect(() => {
-    if (!dailyLimit) return;
-
-    const score = calculateNutritionScore(
-      currentCalories,
-      dailyLimit,
-      goal
-    );
-
-    setNutritionScore(score);
-
-    dispatchDashboardEvent("nutrition-updated", {
-      score,
-      color: nutritionStatus.color,
-    });
-  }, [
-    currentCalories,
-    dailyLimit,
-    goal,
-    nutritionStatus.color,
-  ]);
-
   /* ───── Calorie toevoegen (DB-first) ───── */
   async function addCalories(amount: number) {
-    if (!user) return;
+    if (!user || !dailyLimit) return;
 
     const nowTs = new Date();
 
@@ -224,7 +206,31 @@ export default function NutritionCard() {
       return;
     }
 
-    setCurrentCalories((prev) => prev + amount);
+    setCurrentCalories((prev) => {
+      const next = prev + amount;
+
+      const nextScore = calculateNutritionScore(
+        next,
+        dailyLimit,
+        goal
+      );
+
+      const nextStatus = getNutritionStatus(
+        next,
+        dailyLimit,
+        goal,
+        now
+      );
+
+      setNutritionScore(nextScore);
+
+      dispatchDashboardEvent("nutrition-updated", {
+        score: nextScore,
+        color: nextStatus.color,
+      });
+
+      return next;
+    });
   }
 
   if (!hasLoaded || baseGoal === null) {
@@ -243,9 +249,7 @@ export default function NutritionCard() {
   );
 
   const limitLabel =
-    goal === "gain_weight"
-      ? "Dagdoel"
-      : "Daglimiet";
+    goal === "gain_weight" ? "Dagdoel" : "Daglimiet";
 
   return (
     <Card

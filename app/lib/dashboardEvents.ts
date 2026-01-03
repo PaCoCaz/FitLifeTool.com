@@ -1,13 +1,16 @@
-// app/lib/dashboardEvents.ts
-
 export type DashboardEventMap = {
-    "hydration-updated": void;
-  
-    "activity-updated": void;
-  
-    "nutrition-updated": {
-      score: number;
-      color: string;
-    };
+  "hydration-updated": {
+    score: number;
+    color: string;
   };
-  
+
+  "activity-updated": {
+    score: number;
+    color: string;
+  };
+
+  "nutrition-updated": {
+    score: number;
+    color: string;
+  };
+};

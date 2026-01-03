@@ -8,8 +8,8 @@
  * bedoeld voor feedback-timing — niet als voedingsadvies.
  *
  * Nutrition wijkt bewust af van Hydration & Activity:
- * - Afvallen / onderhouden → DAGLIMIET (harde grens)
- * - Aankomen → DAGDOEL
+ * - Afvallen / onderhouden → DAGLIMIET (bandbreedte)
+ * - Aankomen → DAGDOEL (ondergrens)
  *
  * Activiteit kan het calorie-budget verhogen (activity bonus).
  * ─────────────────────────────────────────────
@@ -67,33 +67,67 @@ export function getExpectedNutritionProgress(
 
 /* ───────────────── NutritionScore (0–100) ───────────────── */
 
+/**
+ * Live dagschema-score (0–100)
+ * 100 = op schema
+ */
 export function calculateNutritionScore(
   consumedCalories: number,
   dailyLimit: number,
-  goal: NutritionGoal
+  goal: NutritionGoal,
+  now: Date = new Date()
 ): number {
   if (dailyLimit <= 0) return 0;
 
-  const ratio = consumedCalories / dailyLimit;
+  const expectedProgress =
+    getExpectedNutritionProgress(now);
 
-  switch (goal) {
-    case "lose_weight":
-    case "maintain":
-      if (ratio <= 1) return 100;
-      if (ratio <= 1.2) {
-        return Math.round((1.2 - ratio) * 100);
-      }
-      return 0;
+  const expectedCalories =
+    dailyLimit * expectedProgress;
 
-    case "gain_weight":
-      if (ratio < 1) {
-        return Math.round(ratio * 100);
-      }
+  /* ───── Aankomen in gewicht ───── */
+  if (goal === "gain_weight") {
+    if (expectedCalories <= 0) return 0;
+
+    if (consumedCalories >= expectedCalories) {
       return 100;
+    }
 
-    default:
-      return 0;
+    return Math.round(
+      (consumedCalories / expectedCalories) * 100
+    );
   }
+
+  /* ───── Afvallen / onderhouden ───── */
+
+  // Gezonde bandbreedte ±15%
+  const lowerBound = expectedCalories * 0.85;
+  const upperBound = expectedCalories * 1.15;
+
+  // Te weinig gegeten → onder schema
+  if (consumedCalories < lowerBound) {
+    if (expectedCalories === 0) return 0;
+
+    return Math.round(
+      (consumedCalories / expectedCalories) * 100
+    );
+  }
+
+  // Op schema
+  if (consumedCalories <= upperBound) {
+    return 100;
+  }
+
+  // Te veel gegeten → boven schema
+  const excess =
+    consumedCalories - expectedCalories;
+
+  return Math.max(
+    0,
+    Math.round(
+      (1 - excess / dailyLimit) * 100
+    )
+  );
 }
 
 /* ───────────────── Score kleur (Nutrition-specifiek) ───────────────── */
@@ -101,28 +135,37 @@ export function calculateNutritionScore(
 export function getNutritionScoreColor(
   consumedCalories: number,
   dailyLimit: number,
-  goal: NutritionGoal
+  goal: NutritionGoal,
+  now: Date = new Date()
 ): string {
   if (dailyLimit <= 0) {
     return "bg-gray-400 text-white";
   }
 
-  const ratio = consumedCalories / dailyLimit;
+  const expectedProgress =
+    getExpectedNutritionProgress(now);
 
-  switch (goal) {
-    case "lose_weight":
-    case "maintain":
-      if (ratio <= 1) return "bg-green-600 text-white";
+  const expectedCalories =
+    dailyLimit * expectedProgress;
+
+  if (goal === "gain_weight") {
+    if (consumedCalories < expectedCalories * 0.85)
       return "bg-[#C80000] text-white";
 
-    case "gain_weight":
-      if (ratio < 0.9) return "bg-[#C80000] text-white";
-      if (ratio < 1) return "bg-orange-500 text-white";
-      return "bg-green-600 text-white";
+    if (consumedCalories < expectedCalories)
+      return "bg-orange-500 text-white";
 
-    default:
-      return "bg-gray-400 text-white";
+    return "bg-green-600 text-white";
   }
+
+  // Afvallen / onderhouden
+  if (consumedCalories < expectedCalories * 0.85)
+    return "bg-[#C80000] text-white";
+
+  if (consumedCalories > expectedCalories * 1.15)
+    return "bg-[#C80000] text-white";
+
+  return "bg-green-600 text-white";
 }
 
 /* ───────────────── Status (tekst + schema-feedback) ───────────────── */
@@ -153,21 +196,28 @@ export function getNutritionStatus(
 
   /* ───── Afvallen / onderhouden ───── */
   if (goal === "lose_weight" || goal === "maintain") {
-    if (consumedCalories <= dailyLimit) {
+    if (
+      consumedCalories >= expectedCalories * 0.85 &&
+      consumedCalories <= expectedCalories * 1.15
+    ) {
       return {
         color: "bg-green-600 text-white",
-        message: "Je zit binnen je daglimiet",
+        message: "Je ligt op je dagschema",
         expectedProgress,
       };
     }
 
-    const excessCalories = Math.round(
-      consumedCalories - dailyLimit
-    );
+    if (delta < 0) {
+      return {
+        color: "bg-[#C80000] text-white",
+        message: "Je loopt achter op je dagschema",
+        expectedProgress,
+      };
+    }
 
     return {
       color: "bg-[#C80000] text-white",
-      message: `Je zit ${excessCalories} kcal boven je daglimiet!`,
+      message: "Je zit boven je dagschema",
       expectedProgress,
     };
   }
@@ -182,9 +232,7 @@ export function getNutritionStatus(
       };
     }
 
-    const shortageCalories = Math.abs(delta);
-
-    if (shortageCalories <= dailyLimit * 0.15) {
+    if (Math.abs(delta) <= dailyLimit * 0.15) {
       return {
         color: "bg-orange-500 text-white",
         message: "Je zit iets onder je dagschema",

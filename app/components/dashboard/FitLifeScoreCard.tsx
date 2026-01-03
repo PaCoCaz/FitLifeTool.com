@@ -2,51 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Card from "../ui/Card";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
-
 import { useDayNow } from "../../lib/useDayNow";
 import { useClockNow } from "../../lib/useClockNow";
-
-import {
-  getHydrationStatus,
-  getExpectedHydrationProgress,
-} from "../../lib/hydrationScore";
-
-import { getActivityStatus } from "../../lib/activityScore";
-import { getNutritionStatus } from "../../lib/nutritionScore";
-
-import {
-  getFitLifeStatusColor,
-} from "../../lib/fitlifeScore";
-
-/* ───────────────── Types ───────────────── */
-
-type HydrationLog = {
-  amount_ml: number;
-  hydration_factor: number;
-};
-
-type ActivityLog = {
-  calories: number;
-};
-
-type NutritionLog = {
-  calories: number;
-};
-
-type Profile = {
-  water_goal_ml: number;
-  activity_goal_kcal: number | null;
-  calorie_goal: number;
-  goal: "lose_weight" | "maintain" | "gain_weight";
-};
+import { getFitLifeStatusColor } from "../../lib/fitlifeScore";
+import { DashboardEventMap } from "../../lib/dashboardEvents";
 
 /* ───────────────── Utils ───────────────── */
-
-function dayKeyFromNow(now: Date): string {
-  return now.toISOString().slice(0, 10);
-}
 
 function formatTime(now: Date): string {
   return now.toLocaleTimeString("nl-NL", {
@@ -59,173 +20,74 @@ function formatTime(now: Date): string {
 /* ───────────────── Component ───────────────── */
 
 export default function FitLifeScoreCard() {
-  const { user } = useUser();
+  const dayNow = useDayNow();
+  const clockNow = useClockNow();
 
-  const dayNow = useDayNow();      // ✅ dagreset om 00:00
-  const clockNow = useClockNow();  // ⏱️ live tijd
+  const [hydrationScore, setHydrationScore] = useState<number | null>(null);
+  const [activityScore, setActivityScore] = useState<number | null>(null);
+  const [nutritionScore, setNutritionScore] = useState<number | null>(null);
 
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [hydrationColor, setHydrationColor] = useState<string | null>(null);
+  const [activityColor, setActivityColor] = useState<string | null>(null);
+  const [nutritionColor, setNutritionColor] = useState<string | null>(null);
 
-  /* Schema-scores (0–100) */
-  const [hydrationScore, setHydrationScore] = useState(100);
-  const [activityScore, setActivityScore] = useState(100);
-  const [nutritionScore, setNutritionScore] = useState(100);
-
-  /* Statuskleuren per component */
-  const [hydrationColor, setHydrationColor] =
-    useState("bg-green-600 text-white");
-  const [activityColor, setActivityColor] =
-    useState("bg-green-600 text-white");
-  const [nutritionColor, setNutritionColor] =
-    useState("bg-green-600 text-white");
-
-  /* ───────────────── Data laden ───────────────── */
-
-  async function loadData(initial = false) {
-    if (!user) return;
-
-    const date = dayKeyFromNow(dayNow);
-
-    const [
-      { data: profile },
-      { data: hydrationLogs },
-      { data: activityLogs },
-      { data: nutritionLogs },
-    ] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select(
-          "water_goal_ml, activity_goal_kcal, calorie_goal, goal"
-        )
-        .eq("id", user.id)
-        .single<Profile>(),
-
-      supabase
-        .from("hydration_logs")
-        .select("amount_ml, hydration_factor")
-        .eq("user_id", user.id)
-        .eq("log_date", date),
-
-      supabase
-        .from("activity_logs")
-        .select("calories")
-        .eq("user_id", user.id)
-        .eq("log_date", date),
-
-      supabase
-        .from("nutrition_logs")
-        .select("calories")
-        .eq("user_id", user.id)
-        .eq("log_date", date),
-    ]);
-
-    if (!profile) return;
-
-    /* ───── Hydration ───── */
-    const hydrationSum =
-      (hydrationLogs as HydrationLog[] | null)?.reduce(
-        (sum, r) =>
-          sum + r.amount_ml * r.hydration_factor,
-        0
-      ) ?? 0;
-
-    const hydrationStatus = getHydrationStatus(
-      hydrationSum,
-      profile.water_goal_ml,
-      clockNow
-    );
-
-    setHydrationColor(hydrationStatus.color);
-    setHydrationScore(
-      hydrationStatus.color.includes("#C80000")
-        ? 60
-        : hydrationStatus.color.includes("orange")
-        ? 85
-        : 100
-    );
-
-    /* ───── Activity ───── */
-    const burned =
-      (activityLogs as ActivityLog[] | null)?.reduce(
-        (sum, r) => sum + r.calories,
-        0
-      ) ?? 0;
-
-    const activityStatus = getActivityStatus(
-      burned,
-      profile.activity_goal_kcal ?? 0,
-      clockNow
-    );
-
-    setActivityColor(activityStatus.color);
-    setActivityScore(
-      activityStatus.color.includes("#C80000")
-        ? 60
-        : activityStatus.color.includes("orange")
-        ? 85
-        : 100
-    );
-
-    /* ───── Nutrition ───── */
-    const eaten =
-      (nutritionLogs as NutritionLog[] | null)?.reduce(
-        (sum, r) => sum + r.calories,
-        0
-      ) ?? 0;
-
-    const nutritionStatus = getNutritionStatus(
-      eaten,
-      profile.calorie_goal + burned,
-      profile.goal,
-      clockNow
-    );
-
-    setNutritionColor(nutritionStatus.color);
-    setNutritionScore(
-      nutritionStatus.color.includes("#C80000")
-        ? 60
-        : nutritionStatus.color.includes("orange")
-        ? 85
-        : 100
-    );
-
-    if (initial) setHasLoaded(true);
-  }
-
-  /* Init + dagwissel */
+  /* Dagreset */
   useEffect(() => {
-    if (!user) return;
-    setHasLoaded(false);
-    loadData(true);
-  }, [user, dayNow]);
+    setHydrationScore(null);
+    setActivityScore(null);
+    setNutritionScore(null);
 
-  /* Updates na logs */
+    setHydrationColor(null);
+    setActivityColor(null);
+    setNutritionColor(null);
+  }, [dayNow]);
+
+  /* Events */
   useEffect(() => {
-    if (!hasLoaded) return;
+    const hydrationHandler = (
+      e: CustomEvent<DashboardEventMap["hydration-updated"]>
+    ) => {
+      setHydrationScore(e.detail.score);
+      setHydrationColor(e.detail.color);
+    };
 
-    const handleUpdate = () => loadData(false);
+    const activityHandler = (
+      e: CustomEvent<DashboardEventMap["activity-updated"]>
+    ) => {
+      setActivityScore(e.detail.score);
+      setActivityColor(e.detail.color);
+    };
 
-    window.addEventListener("hydration-updated", handleUpdate);
-    window.addEventListener("activity-updated", handleUpdate);
-    window.addEventListener("nutrition-updated", handleUpdate);
+    const nutritionHandler = (
+      e: CustomEvent<DashboardEventMap["nutrition-updated"]>
+    ) => {
+      setNutritionScore(e.detail.score);
+      setNutritionColor(e.detail.color);
+    };
+
+    window.addEventListener("hydration-updated", hydrationHandler as EventListener);
+    window.addEventListener("activity-updated", activityHandler as EventListener);
+    window.addEventListener("nutrition-updated", nutritionHandler as EventListener);
 
     return () => {
-      window.removeEventListener("hydration-updated", handleUpdate);
-      window.removeEventListener("activity-updated", handleUpdate);
-      window.removeEventListener("nutrition-updated", handleUpdate);
+      window.removeEventListener("hydration-updated", hydrationHandler as EventListener);
+      window.removeEventListener("activity-updated", activityHandler as EventListener);
+      window.removeEventListener("nutrition-updated", nutritionHandler as EventListener);
     };
-  }, [hasLoaded]);
+  }, []);
 
-  /* Totale FitLifeScore (gewogen dagschema) */
-  const dailyScore = useMemo(() => {
-    return Math.floor(
-      hydrationScore * 0.3 +
-      activityScore * 0.3 +
-      nutritionScore * 0.4
+  /* 🔢 Score = laagste card (100 alleen als alles 100 is) */
+  const fitLifeScore = useMemo(() => {
+    const scores = [hydrationScore, activityScore, nutritionScore].filter(
+      (s): s is number => typeof s === "number"
     );
+
+    if (scores.length === 0) return 0;
+
+    return Math.min(...scores);
   }, [hydrationScore, activityScore, nutritionScore]);
 
-  /* Totale statuskleur – centrale helper */
+  /* 🎨 Kleur = aggregatie van card-status */
   const statusColor = useMemo(() => {
     return getFitLifeStatusColor([
       hydrationColor,
@@ -234,20 +96,7 @@ export default function FitLifeScoreCard() {
     ]);
   }, [hydrationColor, activityColor, nutritionColor]);
 
-  /* Progress */
-  const expectedProgress =
-    getExpectedHydrationProgress(clockNow);
-  const actualProgress = Math.min(dailyScore / 100, 1);
-
-  if (!hasLoaded) {
-    return (
-      <Card title="FitLifeScore">
-        <div className="text-sm text-gray-400">
-          Score berekenen…
-        </div>
-      </Card>
-    );
-  }
+  const actualProgress = fitLifeScore / 100;
 
   return (
     <Card
@@ -271,17 +120,13 @@ export default function FitLifeScoreCard() {
     >
       <div className="h-full flex flex-col justify-between">
         <div className="text-3xl font-semibold text-[#191970]">
-          {dailyScore}
+          {fitLifeScore}
         </div>
 
-        <div className="mt-4 space-y-2">
+        <div className="mt-4">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
             <div
-              className="absolute left-0 top-0 h-2 bg-[#B8CAE0]"
-              style={{ width: `${expectedProgress * 100}%` }}
-            />
-            <div
-              className={`absolute left-0 top-0 h-2 transition-all ${statusColor.replace(
+              className={`absolute left-0 top-0 h-2 transition-all ${statusColor?.replace(
                 "text-white",
                 ""
               )}`}
