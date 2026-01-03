@@ -31,7 +31,7 @@ export default function FitLifeScoreCard() {
   const [activityColor, setActivityColor] = useState<string | null>(null);
   const [nutritionColor, setNutritionColor] = useState<string | null>(null);
 
-  /* Dagreset */
+  /* ───── Dagreset (00:00) ───── */
   useEffect(() => {
     setHydrationScore(null);
     setActivityScore(null);
@@ -42,27 +42,30 @@ export default function FitLifeScoreCard() {
     setNutritionColor(null);
   }, [dayNow]);
 
-  /* Events */
+  /* ───── Dashboard events ───── */
   useEffect(() => {
     const hydrationHandler = (
       e: CustomEvent<DashboardEventMap["hydration-updated"]>
     ) => {
+      if (!e.detail) return;
       setHydrationScore(e.detail.score);
-      setHydrationColor(e.detail.color);
+      if (e.detail.color) setHydrationColor(e.detail.color);
     };
 
     const activityHandler = (
       e: CustomEvent<DashboardEventMap["activity-updated"]>
     ) => {
+      if (!e.detail) return;
       setActivityScore(e.detail.score);
-      setActivityColor(e.detail.color);
+      if (e.detail.color) setActivityColor(e.detail.color);
     };
 
     const nutritionHandler = (
       e: CustomEvent<DashboardEventMap["nutrition-updated"]>
     ) => {
+      if (!e.detail) return;
       setNutritionScore(e.detail.score);
-      setNutritionColor(e.detail.color);
+      if (e.detail.color) setNutritionColor(e.detail.color);
     };
 
     window.addEventListener("hydration-updated", hydrationHandler as EventListener);
@@ -76,18 +79,18 @@ export default function FitLifeScoreCard() {
     };
   }, []);
 
-  /* 🔢 Score = laagste card (100 alleen als alles 100 is) */
+  /* ───── FitLifeScore = minimum van cards ───── */
   const fitLifeScore = useMemo(() => {
     const scores = [hydrationScore, activityScore, nutritionScore].filter(
       (s): s is number => typeof s === "number"
     );
 
-    if (scores.length === 0) return 0;
+    if (scores.length < 3) return 0; // ⬅️ pas geldig als ALLE cards hebben gemeld
 
     return Math.min(...scores);
   }, [hydrationScore, activityScore, nutritionScore]);
 
-  /* 🎨 Kleur = aggregatie van card-status */
+  /* ───── Kleur = aggregatie van card-status ───── */
   const statusColor = useMemo(() => {
     return getFitLifeStatusColor([
       hydrationColor,
@@ -126,10 +129,9 @@ export default function FitLifeScoreCard() {
         <div className="mt-4">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
             <div
-              className={`absolute left-0 top-0 h-2 transition-all ${statusColor?.replace(
-                "text-white",
-                ""
-              )}`}
+              className={`absolute left-0 top-0 h-2 transition-all ${
+                statusColor.replace("text-white", "")
+              }`}
               style={{ width: `${actualProgress * 100}%` }}
             />
           </div>

@@ -37,24 +37,19 @@ export default function ActivityCard() {
   const { user } = useUser();
   const { showToast } = useToast();
 
-  // 🔒 Logische dag (DB + reset)
+  // 🔒 Logische dag
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
 
-  // ⏱️ Live tijd (schema)
+  // ⏱️ Live tijd
   const now = useNow();
 
   /* ───── State ───── */
-  const [burnedCalories, setBurnedCalories] =
-    useState<number>(0);
-  const [activityScore, setActivityScore] =
-    useState<number>(0);
-  const [activityGoal, setActivityGoal] =
-    useState<number | null>(null);
-  const [durationMinutes, setDurationMinutes] =
-    useState<number>(30);
-  const [loading, setLoading] =
-    useState<boolean>(true);
+  const [burnedCalories, setBurnedCalories] = useState<number>(0);
+  const [activityScore, setActivityScore] = useState<number>(0);
+  const [activityGoal, setActivityGoal] = useState<number | null>(null);
+  const [durationMinutes, setDurationMinutes] = useState<number>(30);
+  const [loading, setLoading] = useState<boolean>(true);
 
   /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
@@ -63,20 +58,19 @@ export default function ActivityCard() {
     const loadActivity = async () => {
       setLoading(true);
 
-      const [{ data: profile }, { data: logs }] =
-        await Promise.all([
-          supabase
-            .from("profiles")
-            .select("activity_goal_kcal")
-            .eq("id", user.id)
-            .single(),
+      const [{ data: profile }, { data: logs }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("activity_goal_kcal")
+          .eq("id", user.id)
+          .single(),
 
-          supabase
-            .from("activity_logs")
-            .select("calories")
-            .eq("user_id", user.id)
-            .eq("log_date", dayKey),
-        ]);
+        supabase
+          .from("activity_logs")
+          .select("calories")
+          .eq("user_id", user.id)
+          .eq("log_date", dayKey),
+      ]);
 
       const goal =
         (profile as ActivityGoalProfileRow | null)
@@ -92,19 +86,26 @@ export default function ActivityCard() {
 
       setBurnedCalories(total);
 
-      if (goal) {
-        setActivityScore(
-          calculateActivityScore(total, goal)
-        );
+      if (goal !== null) {
+        const score = calculateActivityScore(total, goal);
+        setActivityScore(score);
+
+        const status = getActivityStatus(total, goal, now);
+
+        // ✅ VEILIGE dispatch NA load
+        dispatchDashboardEvent("activity-updated", {
+          score,
+          color: status.color,
+        });
       }
 
       setLoading(false);
     };
 
     loadActivity();
-  }, [user, dayKey]);
+  }, [user, dayKey, now]);
 
-  /* ───── Live status (schema loopt mee met tijd) ───── */
+  /* ───── Live status (schema) ───── */
   const activityStatus = useMemo(() => {
     if (!activityGoal) {
       return {
@@ -125,8 +126,7 @@ export default function ActivityCard() {
   async function addActivity(type: ActivityType) {
     if (!user || !activityGoal) return;
 
-    const weightKg =
-      user.user_metadata?.weight_kg ?? 75;
+    const weightKg = user.user_metadata?.weight_kg ?? 75;
 
     const calories = calculateActivityCalories(
       ACTIVITY_TYPES[type].met,
@@ -143,14 +143,9 @@ export default function ActivityCard() {
         activity_type: type,
         duration_minutes: durationMinutes,
         calories,
-
         log_date: dayKey,
-        log_time_local: nowTs
-          .toTimeString()
-          .slice(0, 8),
-        timezone:
-          Intl.DateTimeFormat().resolvedOptions()
-            .timeZone,
+        log_time_local: nowTs.toTimeString().slice(0, 8),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
 
     if (error) {
@@ -158,16 +153,12 @@ export default function ActivityCard() {
       return;
     }
 
-    // ✅ Optimistische update — CORRECT
     setBurnedCalories((prev) => {
       const next = prev + calories;
 
-      const nextScore =
-        calculateActivityScore(next, activityGoal);
-
+      const nextScore = calculateActivityScore(next, activityGoal);
       setActivityScore(nextScore);
 
-      // ✅ STATUS opnieuw berekenen op basis van `next`
       const nextStatus = getActivityStatus(
         next,
         activityGoal,

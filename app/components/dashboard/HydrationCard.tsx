@@ -41,11 +41,11 @@ type HydrationLogRow = {
 export default function HydrationCard() {
   const { user } = useUser();
 
-  // 🔒 Logische dag (DB + reset)
+  // 🔒 Logische dag
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
 
-  // ⏱️ Live tijd (schema)
+  // ⏱️ Live tijd
   const now = useNow();
 
   /* ───── State ───── */
@@ -56,19 +56,23 @@ export default function HydrationCard() {
     useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
-  /* ───── HARD RESET BIJ DAGWISSEL ───── */
+  /* ───── ✅ DAGRESET (identiek aan Nutrition) ───── */
   useEffect(() => {
     setCurrentMl(0);
     setHydrationScore(0);
-  }, [dayKey]);
+    setLoading(true);
+
+    dispatchDashboardEvent("hydration-updated", {
+      score: 0,
+      color: "bg-gray-400 text-white",
+    });
+  }, [dayNow]);
 
   /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
     if (!user) return;
 
     const loadHydration = async () => {
-      setLoading(true);
-
       const [{ data: profile }, { data: logs }] =
         await Promise.all([
           supabase
@@ -95,16 +99,14 @@ export default function HydrationCard() {
           0
         ) ?? 0;
 
-      const rounded = Math.round(total);
-      setCurrentMl(rounded);
-
+      setCurrentMl(Math.round(total));
       setLoading(false);
     };
 
     loadHydration();
   }, [user, dayKey]);
 
-  /* ───── Live status (schema) ───── */
+  /* ───── Status (LIVE schema) ───── */
   const hydrationStatus = useMemo(() => {
     if (!hydrationGoal) {
       return {
@@ -121,7 +123,7 @@ export default function HydrationCard() {
     );
   }, [currentMl, hydrationGoal, now]);
 
-  /* ───── Moment-score (0–100 t.o.v. dagschema) ───── */
+  /* ───── Moment-score + dashboard event ───── */
   useEffect(() => {
     if (!hydrationGoal) return;
 
@@ -131,10 +133,7 @@ export default function HydrationCard() {
     const expectedMl =
       hydrationGoal * expectedProgress;
 
-    if (expectedMl <= 0) {
-      setHydrationScore(0);
-      return;
-    }
+    if (expectedMl <= 0) return;
 
     const ratio = currentMl / expectedMl;
     const score = Math.min(
@@ -144,11 +143,11 @@ export default function HydrationCard() {
 
     setHydrationScore(score);
 
-    // 🔒 Alleen score publiceren
     dispatchDashboardEvent("hydration-updated", {
       score,
+      color: hydrationStatus.color,
     });
-  }, [currentMl, hydrationGoal, now]);
+  }, [currentMl, hydrationGoal, now, hydrationStatus.color]);
 
   /* ───── Drink toevoegen ───── */
   async function addDrink(amount: number) {
@@ -163,7 +162,6 @@ export default function HydrationCard() {
         drink_type: "water",
         amount_ml: amount,
         hydration_factor: 1,
-
         log_date: dayKey,
         log_time_local: nowTs
           .toTimeString()
@@ -173,13 +171,9 @@ export default function HydrationCard() {
             .timeZone,
       });
 
-    if (error) {
-      console.error(error.message);
-      return;
+    if (!error) {
+      setCurrentMl((prev) => prev + amount);
     }
-
-    // Optimistische update
-    setCurrentMl((prev) => prev + amount);
   }
 
   if (loading || hydrationGoal === null) {
@@ -228,10 +222,8 @@ export default function HydrationCard() {
           <div className="text-2xl font-semibold text-[#191970]">
             {currentMl.toLocaleString()} ml
           </div>
-
           <div className="text-xs text-gray-500">
-            Dagdoel:{" "}
-            {hydrationGoal.toLocaleString()} ml
+            Dagdoel: {hydrationGoal.toLocaleString()} ml
           </div>
         </div>
 

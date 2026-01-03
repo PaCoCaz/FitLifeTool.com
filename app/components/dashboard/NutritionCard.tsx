@@ -57,6 +57,14 @@ export default function NutritionCard() {
 
   const [hasLoaded, setHasLoaded] = useState(false);
 
+  /* ───── ✅ DAGRESET (00:00) ───── */
+  useEffect(() => {
+    setCurrentCalories(0);
+    setActivityBonus(0);
+    setNutritionScore(0);
+    setHasLoaded(false);
+  }, [dayNow]);
+
   /* ───── INIT load (profile + activity + nutrition) ───── */
   useEffect(() => {
     if (!user) return;
