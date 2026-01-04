@@ -132,7 +132,7 @@ export function getHydrationStatus(
   if (delta >= 0) {
     return {
       color: "bg-green-600 text-white",
-      message: `Goed bezig, je hydratatie loopt ${delta} ml voor op je dagschema`,
+      message: `Goed bezig, hydratatie loopt ${delta} ml voor op je dagschema`,
       expectedProgress,
     };
   }
@@ -141,7 +141,7 @@ export function getHydrationStatus(
   if (deviationRatio <= 0.15) {
     return {
       color: "bg-orange-500 text-white",
-      message: `Je hydratatie loopt ${Math.abs(
+      message: `Hydratatie loopt ${Math.abs(
         delta
       )} ml achter op je dagschema`,
       expectedProgress,
@@ -151,7 +151,7 @@ export function getHydrationStatus(
   // 🔴 Meer dan 15% achterstand
   return {
     color: "bg-[#C80000] text-white",
-    message: `Je hydratatie loopt ${Math.abs(
+    message: `Hydratatie loopt ${Math.abs(
       delta
     )} ml achter op je dagschema`,
     expectedProgress,

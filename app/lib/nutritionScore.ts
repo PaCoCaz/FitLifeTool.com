@@ -214,7 +214,7 @@ export function getNutritionStatus(
 
       return {
         color: "bg-[#C80000] text-white",
-        message: `Je voeding loopt ${shortage} kcal achter op je dagschema`,
+        message: `Voeding loopt ${shortage} kcal achter op je dagschema`,
         expectedProgress,
       };
     }
@@ -224,7 +224,7 @@ export function getNutritionStatus(
 
     return {
       color: "bg-[#C80000] text-white",
-      message: `Je voeding zit ${excess} kcal boven je dagschema`,
+      message: `Voeding zit ${excess} kcal boven je dagschema`,
       expectedProgress,
     };
   }
@@ -244,14 +244,14 @@ export function getNutritionStatus(
     if (shortage <= dailyLimit * 0.15) {
       return {
         color: "bg-orange-500 text-white",
-        message: `Je voeding loopt ${shortage} kcal achter op je dagschema`,
+        message: `Voeding loopt ${shortage} kcal achter op je dagschema`,
         expectedProgress,
       };
     }
 
     return {
       color: "bg-[#C80000] text-white",
-      message: `Je voeding loopt ${shortage} kcal achter op je dagschema`,
+      message: `Voeding loopt ${shortage} kcal achter op je dagschema`,
       expectedProgress,
     };
   }
