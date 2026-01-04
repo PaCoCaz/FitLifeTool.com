@@ -56,17 +56,13 @@ export default function HydrationCard() {
     useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
-  /* ───── ✅ DAGRESET (identiek aan Nutrition) ───── */
+  /* ───── ✅ DAGRESET (LOKAAL, GEEN EVENTS) ───── */
   useEffect(() => {
     setCurrentMl(0);
     setHydrationScore(0);
+    setHydrationGoal(null);
     setLoading(true);
-
-    dispatchDashboardEvent("hydration-updated", {
-      score: 0,
-      color: "bg-gray-400 text-white",
-    });
-  }, [dayNow]);
+  }, [dayKey]);
 
   /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
@@ -123,7 +119,7 @@ export default function HydrationCard() {
     );
   }, [currentMl, hydrationGoal, now]);
 
-  /* ───── Moment-score + dashboard event ───── */
+  /* ───── Moment-score (GEEN EVENT) ───── */
   useEffect(() => {
     if (!hydrationGoal) return;
 
@@ -142,16 +138,11 @@ export default function HydrationCard() {
     );
 
     setHydrationScore(score);
+  }, [currentMl, hydrationGoal, now]);
 
-    dispatchDashboardEvent("hydration-updated", {
-      score,
-      color: hydrationStatus.color,
-    });
-  }, [currentMl, hydrationGoal, now, hydrationStatus.color]);
-
-  /* ───── Drink toevoegen ───── */
+  /* ───── Drink toevoegen (USER ACTIE) ───── */
   async function addDrink(amount: number) {
-    if (!user) return;
+    if (!user || !hydrationGoal) return;
 
     const nowTs = new Date();
 
@@ -171,9 +162,41 @@ export default function HydrationCard() {
             .timeZone,
       });
 
-    if (!error) {
-      setCurrentMl((prev) => prev + amount);
-    }
+    if (error) return;
+
+    setCurrentMl((prev) => {
+      const next = prev + amount;
+
+      const expectedProgress =
+        getExpectedHydrationProgress(now);
+
+      const expectedMl =
+        hydrationGoal * expectedProgress;
+
+      const nextScore =
+        expectedMl > 0
+          ? Math.min(
+              100,
+              Math.round((next / expectedMl) * 100)
+            )
+          : 0;
+
+      setHydrationScore(nextScore);
+
+      const nextStatus = getHydrationStatus(
+        next,
+        hydrationGoal,
+        now
+      );
+
+      // ✅ EVENT ALLEEN HIER
+      dispatchDashboardEvent("hydration-updated", {
+        score: nextScore,
+        color: nextStatus.color,
+      });
+
+      return next;
+    });
   }
 
   if (loading || hydrationGoal === null) {

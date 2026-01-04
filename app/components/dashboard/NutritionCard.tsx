@@ -36,11 +36,11 @@ type NutritionProfile = {
 export default function NutritionCard() {
   const { user } = useUser();
 
-  // 🔒 Logische dag (DB + reset)
+  // 🔒 Logische dag
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
 
-  // ⏱️ Live tijd (schema)
+  // ⏱️ Live tijd
   const now = useNow();
 
   /* ───── State ───── */
@@ -57,15 +57,17 @@ export default function NutritionCard() {
 
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  /* ───── ✅ DAGRESET (00:00) ───── */
+  /* ───── ✅ DAGRESET (LOKAAL, GEEN EVENTS) ───── */
   useEffect(() => {
-    setCurrentCalories(0);
+    setBaseGoal(null);
+    setGoal("maintain");
     setActivityBonus(0);
+    setCurrentCalories(0);
     setNutritionScore(0);
     setHasLoaded(false);
-  }, [dayNow]);
+  }, [dayKey]);
 
-  /* ───── INIT load (profile + activity + nutrition) ───── */
+  /* ───── INIT load (stil) ───── */
   useEffect(() => {
     if (!user) return;
 
@@ -132,7 +134,7 @@ export default function NutritionCard() {
     loadInitial();
   }, [user, dayKey]);
 
-  /* ───── LIVE activity updates → bonus herberekenen ───── */
+  /* ───── LIVE activity updates → bonus (STIL) ───── */
   useEffect(() => {
     if (!user || !hasLoaded) return;
 
@@ -189,7 +191,7 @@ export default function NutritionCard() {
     );
   }, [currentCalories, dailyLimit, goal, now]);
 
-  /* ───── Calorie toevoegen (DB-first) ───── */
+  /* ───── Calorie toevoegen (ENIGE EVENT-PUNT) ───── */
   async function addCalories(amount: number) {
     if (!user || !dailyLimit) return;
 
@@ -209,10 +211,7 @@ export default function NutritionCard() {
             .timeZone,
       });
 
-    if (error) {
-      console.error(error.message);
-      return;
-    }
+    if (error) return;
 
     setCurrentCalories((prev) => {
       const next = prev + amount;
@@ -223,6 +222,8 @@ export default function NutritionCard() {
         goal
       );
 
+      setNutritionScore(nextScore);
+
       const nextStatus = getNutritionStatus(
         next,
         dailyLimit,
@@ -230,8 +231,7 @@ export default function NutritionCard() {
         now
       );
 
-      setNutritionScore(nextScore);
-
+      // ✅ EVENT ALLEEN HIER
       dispatchDashboardEvent("nutrition-updated", {
         score: nextScore,
         color: nextStatus.color,
