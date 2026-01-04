@@ -43,7 +43,7 @@
  * 100 = op of voor dagschema
  * <100 = achter dagschema (proportioneel)
  */
-export function calculateActivityScore(
+ export function calculateActivityScore(
   burnedCalories: number,
   dailyGoal: number,
   now: Date = new Date()
@@ -56,22 +56,22 @@ export function calculateActivityScore(
   const expectedCalories =
     dailyGoal * expectedProgress;
 
-  // Nog niets verwacht → geen straf
   if (expectedCalories <= 0) return 0;
 
   const delta =
     burnedCalories - expectedCalories;
 
-  // Op of voor schema
+  // ✅ Alleen 100 als je op of voor dagschema ligt
   if (delta >= 0) {
     return 100;
   }
 
-  // Achter schema → score proportioneel
+  // ❗ Zodra je achter ligt: altijd naar beneden afronden
+  // 99,99 → 99 | 59,99 → 59 | NOOIT 100
   const ratio =
     Math.max(0, burnedCalories / expectedCalories);
 
-  return Math.round(ratio * 100);
+  return Math.max(0, Math.min(99, Math.floor(ratio * 100)));
 }
 
 /**
@@ -120,7 +120,7 @@ export function getActivityStatus(
   if (delta >= 0) {
     return {
       color: "bg-green-600 text-white",
-      message: `Goed bezig, je activiteit loopt ${delta} kcal voor op je dagschema`,
+      message: `Goed bezig, activiteiten loopt ${delta} kcal voor op je dagschema`,
       expectedProgress,
     };
   }
@@ -129,7 +129,7 @@ export function getActivityStatus(
   if (deviationRatio <= 0.15) {
     return {
       color: "bg-orange-500 text-white",
-      message: `Je activiteit loopt ${Math.abs(
+      message: `Activiteiten loopt ${Math.abs(
         delta
       )} kcal achter op je dagschema`,
       expectedProgress,
@@ -139,7 +139,7 @@ export function getActivityStatus(
   // 🔴 Meer dan 15% achterstand
   return {
     color: "bg-[#C80000] text-white",
-    message: `Je activiteit loopt ${Math.abs(
+    message: `Activiteiten loopt ${Math.abs(
       delta
     )} kcal achter op je dagschema`,
     expectedProgress,

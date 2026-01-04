@@ -194,55 +194,64 @@ export function getNutritionStatus(
     consumedCalories - expectedCalories
   );
 
-  /* ───── Afvallen / onderhouden ───── */
+  /* ───── Afvallen / onderhouden (DAGLIMIET = HARD) ───── */
   if (goal === "lose_weight" || goal === "maintain") {
+    // ✅ Binnen dagschema-bandbreedte
     if (
       consumedCalories >= expectedCalories * 0.85 &&
       consumedCalories <= expectedCalories * 1.15
     ) {
       return {
         color: "bg-green-600 text-white",
-        message: "Je ligt op je dagschema",
+        message: "Je ligt op dagschema",
         expectedProgress,
       };
     }
 
+    // 🔴 Achter op schema
     if (delta < 0) {
+      const shortage = Math.abs(delta);
+
       return {
         color: "bg-[#C80000] text-white",
-        message: "Je loopt achter op je dagschema",
+        message: `Je voeding loopt ${shortage} kcal achter op je dagschema`,
         expectedProgress,
       };
     }
+
+    // 🔴 Boven schema (NOOIT toegestaan bij afvallen/onderhouden)
+    const excess = delta;
 
     return {
       color: "bg-[#C80000] text-white",
-      message: "Je zit boven je dagschema",
+      message: `Je voeding zit ${excess} kcal boven je dagschema`,
       expectedProgress,
     };
   }
 
-  /* ───── Aankomen ───── */
+  /* ───── Aankomen (DAGDOEL = ONDERGRENS) ───── */
   if (goal === "gain_weight") {
     if (delta >= 0) {
       return {
         color: "bg-green-600 text-white",
-        message: "Je ligt op dagschema voor aankomen",
+        message: "Je ligt op dagschema",
         expectedProgress,
       };
     }
 
-    if (Math.abs(delta) <= dailyLimit * 0.15) {
+    const shortage = Math.abs(delta);
+
+    if (shortage <= dailyLimit * 0.15) {
       return {
         color: "bg-orange-500 text-white",
-        message: "Je zit iets onder je dagschema",
+        message: `Je voeding loopt ${shortage} kcal achter op je dagschema`,
         expectedProgress,
       };
     }
 
     return {
       color: "bg-[#C80000] text-white",
-      message: "Je loopt duidelijk achter op je dagschema",
+      message: `Je voeding loopt ${shortage} kcal achter op je dagschema`,
       expectedProgress,
     };
   }

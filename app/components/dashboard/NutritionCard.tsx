@@ -36,28 +36,18 @@ type NutritionProfile = {
 export default function NutritionCard() {
   const { user } = useUser();
 
-  // 🔒 Logische dag
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
-
-  // ⏱️ Live tijd
   const now = useNow();
 
-  /* ───── State ───── */
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
   const [goal, setGoal] =
     useState<NutritionProfile["goal"]>("maintain");
   const [activityBonus, setActivityBonus] = useState<number>(0);
-
-  const [currentCalories, setCurrentCalories] =
-    useState<number>(0);
-
-  const [nutritionScore, setNutritionScore] =
-    useState<number>(0);
-
+  const [currentCalories, setCurrentCalories] = useState<number>(0);
+  const [nutritionScore, setNutritionScore] = useState<number>(0);
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  /* ───── ✅ DAGRESET (LOKAAL, GEEN EVENTS) ───── */
   useEffect(() => {
     setBaseGoal(null);
     setGoal("maintain");
@@ -67,7 +57,6 @@ export default function NutritionCard() {
     setHasLoaded(false);
   }, [dayKey]);
 
-  /* ───── INIT load (stil) ───── */
   useEffect(() => {
     if (!user) return;
 
@@ -134,7 +123,6 @@ export default function NutritionCard() {
     loadInitial();
   }, [user, dayKey]);
 
-  /* ───── LIVE activity updates → bonus (STIL) ───── */
   useEffect(() => {
     if (!user || !hasLoaded) return;
 
@@ -156,24 +144,16 @@ export default function NutritionCard() {
       setActivityBonus(burned);
     }
 
-    window.addEventListener(
-      "activity-updated",
-      handleActivityUpdate
-    );
+    window.addEventListener("activity-updated", handleActivityUpdate);
 
     return () => {
-      window.removeEventListener(
-        "activity-updated",
-        handleActivityUpdate
-      );
+      window.removeEventListener("activity-updated", handleActivityUpdate);
     };
   }, [user, hasLoaded, dayKey]);
 
-  /* ───── Daglimiet ───── */
   const dailyLimit =
     baseGoal !== null ? baseGoal + activityBonus : 0;
 
-  /* ───── Status (LIVE schema) ───── */
   const nutritionStatus = useMemo(() => {
     if (!dailyLimit) {
       return {
@@ -191,7 +171,21 @@ export default function NutritionCard() {
     );
   }, [currentCalories, dailyLimit, goal, now]);
 
-  /* ───── Calorie toevoegen (ENIGE EVENT-PUNT) ───── */
+  /* ───── ✅ ENIGE WIJZIGING: pill-score blokkade ───── */
+  const pillScore =
+    nutritionStatus.color === "bg-green-600 text-white"
+      ? nutritionScore
+      : Math.min(nutritionScore, 99);
+
+  useEffect(() => {
+    if (!hasLoaded || !dailyLimit) return;
+
+    dispatchDashboardEvent("nutrition-updated", {
+      score: nutritionScore,
+      color: nutritionStatus.color,
+    });
+  }, [hasLoaded, dailyLimit, nutritionScore, nutritionStatus.color]);
+
   async function addCalories(amount: number) {
     if (!user || !dailyLimit) return;
 
@@ -213,31 +207,27 @@ export default function NutritionCard() {
 
     if (error) return;
 
-    setCurrentCalories((prev) => {
-      const next = prev + amount;
+    const nextCalories = currentCalories + amount;
 
-      const nextScore = calculateNutritionScore(
-        next,
-        dailyLimit,
-        goal
-      );
+    const nextScore = calculateNutritionScore(
+      nextCalories,
+      dailyLimit,
+      goal
+    );
 
-      setNutritionScore(nextScore);
+    const nextStatus = getNutritionStatus(
+      nextCalories,
+      dailyLimit,
+      goal,
+      now
+    );
 
-      const nextStatus = getNutritionStatus(
-        next,
-        dailyLimit,
-        goal,
-        now
-      );
+    setCurrentCalories(nextCalories);
+    setNutritionScore(nextScore);
 
-      // ✅ EVENT ALLEEN HIER
-      dispatchDashboardEvent("nutrition-updated", {
-        score: nextScore,
-        color: nextStatus.color,
-      });
-
-      return next;
+    dispatchDashboardEvent("nutrition-updated", {
+      score: nextScore,
+      color: nextStatus.color,
     });
   }
 
@@ -258,6 +248,9 @@ export default function NutritionCard() {
 
   const limitLabel =
     goal === "gain_weight" ? "Dagdoel" : "Daglimiet";
+
+  const progressBarColor =
+    nutritionStatus.color.replace("text-white", "");
 
   return (
     <Card
@@ -281,7 +274,7 @@ export default function NutritionCard() {
             ${nutritionStatus.color}
           `}
         >
-          FitLifeScore {nutritionScore} / 100
+          FitLifeScore {pillScore} / 100
         </div>
       }
     >
@@ -309,10 +302,7 @@ export default function NutritionCard() {
               }}
             />
             <div
-              className={`absolute left-0 top-0 h-full transition-all ${nutritionStatus.color.replace(
-                "text-white",
-                ""
-              )}`}
+              className={`absolute left-0 top-0 h-full transition-all ${progressBarColor}`}
               style={{
                 width: `${actualProgress * 100}%`,
               }}

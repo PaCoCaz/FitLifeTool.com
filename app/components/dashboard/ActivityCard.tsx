@@ -37,21 +37,16 @@ export default function ActivityCard() {
   const { user } = useUser();
   const { showToast } = useToast();
 
-  // 🔒 Logische dag
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
-
-  // ⏱️ Live tijd
   const now = useNow();
 
-  /* ───── State ───── */
   const [burnedCalories, setBurnedCalories] = useState<number>(0);
   const [activityScore, setActivityScore] = useState<number>(0);
   const [activityGoal, setActivityGoal] = useState<number | null>(null);
   const [durationMinutes, setDurationMinutes] = useState<number>(30);
   const [loading, setLoading] = useState<boolean>(true);
 
-  /* ───── ✅ DAGRESET (LOKAAL, GEEN EVENTS) ───── */
   useEffect(() => {
     setBurnedCalories(0);
     setActivityScore(0);
@@ -59,7 +54,6 @@ export default function ActivityCard() {
     setLoading(true);
   }, [dayKey]);
 
-  /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
     if (!user) return;
 
@@ -105,7 +99,6 @@ export default function ActivityCard() {
     loadActivity();
   }, [user, dayKey]);
 
-  /* ───── Live status (schema) ───── */
   const activityStatus = useMemo(() => {
     if (!activityGoal) {
       return {
@@ -122,7 +115,23 @@ export default function ActivityCard() {
     );
   }, [burnedCalories, activityGoal, now]);
 
-  /* ───── Activiteit toevoegen (USER ACTIE) ───── */
+  /* ───── ✅ ENIGE WIJZIGING ───── */
+  const pillScore =
+    activityScore === 100 &&
+    activityStatus.color !== "bg-green-600 text-white"
+      ? 99
+      : activityScore;
+
+  useEffect(() => {
+    if (loading) return;
+    if (!activityGoal) return;
+
+    dispatchDashboardEvent("activity-updated", {
+      score: activityScore,
+      color: activityStatus.color,
+    });
+  }, [loading, activityGoal, activityScore, activityStatus.color]);
+
   async function addActivity(type: ActivityType) {
     if (!user || !activityGoal) return;
 
@@ -158,27 +167,23 @@ export default function ActivityCard() {
       return;
     }
 
-    // ✅ Optimistische update + EVENT (CORRECT)
-    setBurnedCalories((prev) => {
-      const next = prev + calories;
+    const nextBurned = burnedCalories + calories;
+    const nextScore = calculateActivityScore(
+      nextBurned,
+      activityGoal
+    );
+    const nextStatus = getActivityStatus(
+      nextBurned,
+      activityGoal,
+      now
+    );
 
-      const nextScore =
-        calculateActivityScore(next, activityGoal);
+    setBurnedCalories(nextBurned);
+    setActivityScore(nextScore);
 
-      setActivityScore(nextScore);
-
-      const nextStatus = getActivityStatus(
-        next,
-        activityGoal,
-        now
-      );
-
-      dispatchDashboardEvent("activity-updated", {
-        score: nextScore,
-        color: nextStatus.color,
-      });
-
-      return next;
+    dispatchDashboardEvent("activity-updated", {
+      score: nextScore,
+      color: nextStatus.color,
     });
 
     showToast(
@@ -188,9 +193,9 @@ export default function ActivityCard() {
 
   if (loading || activityGoal === null) {
     return (
-      <Card title="Activiteit">
+      <Card title="Activiteiten">
         <div className="text-sm text-gray-500">
-          Activiteit laden…
+          Activiteiten laden…
         </div>
       </Card>
     );
@@ -203,7 +208,7 @@ export default function ActivityCard() {
 
   return (
     <Card
-      title="Activiteit"
+      title="Activiteiten"
       icon={
         <Image
           src="/activity.svg"
@@ -223,7 +228,7 @@ export default function ActivityCard() {
             ${activityStatus.color}
           `}
         >
-          FitLifeScore {activityScore} / 100
+          FitLifeScore {pillScore} / 100
         </div>
       }
     >

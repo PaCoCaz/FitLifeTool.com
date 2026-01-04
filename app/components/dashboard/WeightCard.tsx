@@ -57,10 +57,15 @@ function BMIBar({ bmi }: { bmi: number }) {
       <div className="relative w-full">
         {/* Balk (identiek aan Hydration progressbar) */}
         <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-          <div className="absolute left-0 top-0 h-2 w-[22%] bg-blue-300" />
-          <div className="absolute left-[22%] top-0 h-2 w-[28%] bg-green-400" />
-          <div className="absolute left-[50%] top-0 h-2 w-[25%] bg-orange-400" />
-          <div className="absolute left-[75%] top-0 h-2 w-[25%] bg-red-500" />
+          <div className="absolute left-0 top-0 h-2 w-[22%] bg-[#0095D3]" />
+          <div className="absolute left-[22%] top-0 h-2 w-[28%] bg-green-600" />
+          <div className="absolute left-[50%] top-0 h-2 w-[25%] bg-orange-500" />
+          <div className="absolute left-[75%] top-0 h-2 w-[25%] bg-[#C80000]" />
+
+          {/* Witte separators */}
+          <div className="absolute left-[22%] top-0 h-2 w-[2px] bg-white" />
+          <div className="absolute left-[50%] top-0 h-2 w-[2px] bg-white" />
+          <div className="absolute left-[75%] top-0 h-2 w-[2px] bg-white" />
         </div>
 
         {/* Indicator (wijst naar de balk) */}

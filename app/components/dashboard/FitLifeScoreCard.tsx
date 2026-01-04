@@ -6,6 +6,7 @@ import { useDayNow } from "../../lib/useDayNow";
 import { useClockNow } from "../../lib/useClockNow";
 import { getFitLifeStatusColor } from "../../lib/fitlifeScore";
 import { DashboardEventMap } from "../../lib/dashboardEvents";
+import { getExpectedHydrationProgress } from "../../lib/hydrationScore";
 
 /* ───────────────── Utils ───────────────── */
 
@@ -31,7 +32,7 @@ export default function FitLifeScoreCard() {
   const [activityColor, setActivityColor] = useState<string | null>(null);
   const [nutritionColor, setNutritionColor] = useState<string | null>(null);
 
-  /* ───── Dagreset (00:00) ───── */
+  /* ───── Dagreset ───── */
   useEffect(() => {
     setHydrationScore(null);
     setActivityScore(null);
@@ -42,30 +43,27 @@ export default function FitLifeScoreCard() {
     setNutritionColor(null);
   }, [dayNow]);
 
-  /* ───── Dashboard events ───── */
+  /* ───── Events ───── */
   useEffect(() => {
     const hydrationHandler = (
       e: CustomEvent<DashboardEventMap["hydration-updated"]>
     ) => {
-      if (!e.detail) return;
       setHydrationScore(e.detail.score);
-      if (e.detail.color) setHydrationColor(e.detail.color);
+      setHydrationColor(e.detail.color);
     };
 
     const activityHandler = (
       e: CustomEvent<DashboardEventMap["activity-updated"]>
     ) => {
-      if (!e.detail) return;
       setActivityScore(e.detail.score);
-      if (e.detail.color) setActivityColor(e.detail.color);
+      setActivityColor(e.detail.color);
     };
 
     const nutritionHandler = (
       e: CustomEvent<DashboardEventMap["nutrition-updated"]>
     ) => {
-      if (!e.detail) return;
       setNutritionScore(e.detail.score);
-      if (e.detail.color) setNutritionColor(e.detail.color);
+      setNutritionColor(e.detail.color);
     };
 
     window.addEventListener("hydration-updated", hydrationHandler as EventListener);
@@ -79,18 +77,36 @@ export default function FitLifeScoreCard() {
     };
   }, []);
 
-  /* ───── FitLifeScore = minimum van cards ───── */
+  /* ───── Gewogen FitLifeScore (MET BLOKKADE) ───── */
   const fitLifeScore = useMemo(() => {
-    const scores = [hydrationScore, activityScore, nutritionScore].filter(
-      (s): s is number => typeof s === "number"
-    );
+    const h = hydrationScore ?? 0;
+    const a = activityScore ?? 0;
+    const n = nutritionScore ?? 0;
 
-    if (scores.length < 3) return 0; // ⬅️ pas geldig als ALLE cards hebben gemeld
+    const weighted = h * 0.3 + a * 0.3 + n * 0.4;
+    const floored = Math.floor(weighted);
 
-    return Math.min(...scores);
-  }, [hydrationScore, activityScore, nutritionScore]);
+    const allGreen =
+      hydrationColor === "bg-green-600 text-white" &&
+      activityColor === "bg-green-600 text-white" &&
+      nutritionColor === "bg-green-600 text-white";
 
-  /* ───── Kleur = aggregatie van card-status ───── */
+    // ✅ ENIGE WIJZIGING: harde blokkade
+    if (!allGreen) {
+      return Math.min(99, floored);
+    }
+
+    return floored;
+  }, [
+    hydrationScore,
+    activityScore,
+    nutritionScore,
+    hydrationColor,
+    activityColor,
+    nutritionColor,
+  ]);
+
+  /* ───── Aggregatiekleur (pill & bar) ───── */
   const statusColor = useMemo(() => {
     return getFitLifeStatusColor([
       hydrationColor,
@@ -99,7 +115,19 @@ export default function FitLifeScoreCard() {
     ]);
   }, [hydrationColor, activityColor, nutritionColor]);
 
-  const actualProgress = fitLifeScore / 100;
+  /* ───── Dagschema ───── */
+  const expectedProgress = getExpectedHydrationProgress(clockNow);
+
+  const actualProgressWithinSchedule =
+    expectedProgress * (fitLifeScore / 100);
+
+  /* ───── Pill-kleur ───── */
+  const pillColor =
+    fitLifeScore < expectedProgress * 100
+      ? "bg-[#C80000] text-white"
+      : statusColor;
+
+  const progressBarColor = statusColor.replace("text-white", "");
 
   return (
     <Card
@@ -114,7 +142,7 @@ export default function FitLifeScoreCard() {
             tabular-time
             min-w-[130px]
             text-center
-            ${statusColor}
+            ${pillColor}
           `}
         >
           Vandaag | {formatTime(clockNow)}
@@ -129,10 +157,15 @@ export default function FitLifeScoreCard() {
         <div className="mt-4">
           <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
             <div
-              className={`absolute left-0 top-0 h-2 transition-all ${
-                statusColor.replace("text-white", "")
-              }`}
-              style={{ width: `${actualProgress * 100}%` }}
+              className="absolute left-0 top-0 h-2 bg-[#B8CAE0]"
+              style={{ width: `${expectedProgress * 100}%` }}
+            />
+
+            <div
+              className={`absolute left-0 top-0 h-2 transition-all ${progressBarColor}`}
+              style={{
+                width: `${actualProgressWithinSchedule * 100}%`,
+              }}
             />
           </div>
         </div>

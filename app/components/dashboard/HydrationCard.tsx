@@ -41,14 +41,10 @@ type HydrationLogRow = {
 export default function HydrationCard() {
   const { user } = useUser();
 
-  // 🔒 Logische dag
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
-
-  // ⏱️ Live tijd
   const now = useNow();
 
-  /* ───── State ───── */
   const [hydrationGoal, setHydrationGoal] =
     useState<number | null>(null);
   const [currentMl, setCurrentMl] = useState<number>(0);
@@ -56,7 +52,6 @@ export default function HydrationCard() {
     useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
-  /* ───── ✅ DAGRESET (LOKAAL, GEEN EVENTS) ───── */
   useEffect(() => {
     setCurrentMl(0);
     setHydrationScore(0);
@@ -64,7 +59,6 @@ export default function HydrationCard() {
     setLoading(true);
   }, [dayKey]);
 
-  /* ───── Data laden (init + dagwissel) ───── */
   useEffect(() => {
     if (!user) return;
 
@@ -102,7 +96,6 @@ export default function HydrationCard() {
     loadHydration();
   }, [user, dayKey]);
 
-  /* ───── Status (LIVE schema) ───── */
   const hydrationStatus = useMemo(() => {
     if (!hydrationGoal) {
       return {
@@ -119,7 +112,6 @@ export default function HydrationCard() {
     );
   }, [currentMl, hydrationGoal, now]);
 
-  /* ───── Moment-score (GEEN EVENT) ───── */
   useEffect(() => {
     if (!hydrationGoal) return;
 
@@ -140,7 +132,22 @@ export default function HydrationCard() {
     setHydrationScore(score);
   }, [currentMl, hydrationGoal, now]);
 
-  /* ───── Drink toevoegen (USER ACTIE) ───── */
+  /* ───── ✅ ENIGE WIJZIGING: pill-score blokkade ───── */
+  const pillScore =
+    hydrationStatus.color === "bg-green-600 text-white"
+      ? hydrationScore
+      : Math.min(hydrationScore, 99);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!hydrationGoal) return;
+
+    dispatchDashboardEvent("hydration-updated", {
+      score: hydrationScore,
+      color: hydrationStatus.color,
+    });
+  }, [loading, hydrationGoal, hydrationScore, hydrationStatus.color]);
+
   async function addDrink(amount: number) {
     if (!user || !hydrationGoal) return;
 
@@ -164,39 +171,7 @@ export default function HydrationCard() {
 
     if (error) return;
 
-    setCurrentMl((prev) => {
-      const next = prev + amount;
-
-      const expectedProgress =
-        getExpectedHydrationProgress(now);
-
-      const expectedMl =
-        hydrationGoal * expectedProgress;
-
-      const nextScore =
-        expectedMl > 0
-          ? Math.min(
-              100,
-              Math.round((next / expectedMl) * 100)
-            )
-          : 0;
-
-      setHydrationScore(nextScore);
-
-      const nextStatus = getHydrationStatus(
-        next,
-        hydrationGoal,
-        now
-      );
-
-      // ✅ EVENT ALLEEN HIER
-      dispatchDashboardEvent("hydration-updated", {
-        score: nextScore,
-        color: nextStatus.color,
-      });
-
-      return next;
-    });
+    setCurrentMl((prev) => prev + amount);
   }
 
   if (loading || hydrationGoal === null) {
@@ -236,7 +211,7 @@ export default function HydrationCard() {
             ${hydrationStatus.color}
           `}
         >
-          FitLifeScore {hydrationScore} / 100
+          FitLifeScore {pillScore} / 100
         </div>
       }
     >
