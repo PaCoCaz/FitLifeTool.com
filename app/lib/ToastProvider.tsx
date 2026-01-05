@@ -9,19 +9,33 @@ import {
   useEffect,
 } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
+
+/* ───────────────── Types ───────────────── */
+
+type ToastType = "info";
 
 type Toast = {
   id: number;
   message: string;
+  type?: ToastType;
 };
 
 type ToastContextType = {
-  showToast: (message: string) => void;
+  showToast: (
+    message: string,
+    durationMs?: number,
+    type?: ToastType
+  ) => void;
 };
+
+/* ───────────────── Context ───────────────── */
 
 const ToastContext = createContext<ToastContextType | null>(
   null
 );
+
+/* ───────────────── Provider ───────────────── */
 
 export function ToastProvider({
   children,
@@ -31,25 +45,31 @@ export function ToastProvider({
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  // Zorgt ervoor dat portal pas rendert op client
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const showToast = useCallback((message: string) => {
-    const id = Date.now();
+  const showToast = useCallback(
+    (
+      message: string,
+      durationMs = 3000,
+      type?: ToastType
+    ) => {
+      const id = Date.now();
 
-    setToasts((prev) => [
-      ...prev,
-      { id, message },
-    ]);
+      setToasts((prev) => [
+        ...prev,
+        { id, message, type },
+      ]);
 
-    setTimeout(() => {
-      setToasts((prev) =>
-        prev.filter((t) => t.id !== id)
-      );
-    }, 2500);
-  }, []);
+      setTimeout(() => {
+        setToasts((prev) =>
+          prev.filter((t) => t.id !== id)
+        );
+      }, durationMs);
+    },
+    []
+  );
 
   return (
     <ToastContext.Provider value={{ showToast }}>
@@ -59,13 +79,9 @@ export function ToastProvider({
         createPortal(
           <div
             className="
-              fixed
-              inset-0
+              fixed inset-0 z-[9999]
               pointer-events-none
-              z-[9999]
-              flex
-              items-start
-              justify-center
+              flex items-start justify-center
               pt-32
             "
           >
@@ -75,18 +91,26 @@ export function ToastProvider({
                   key={toast.id}
                   className="
                     pointer-events-auto
+                    flex items-start gap-2
                     rounded-lg
                     bg-[#191970]
-                    px-4
-                    py-2
-                    text-sm
-                    font-medium
-                    text-white
+                    px-4 py-2
+                    text-sm font-medium text-white
                     shadow-lg
                     animate-fade-in
                   "
                 >
-                  {toast.message}
+                  {toast.type === "info" && (
+                    <Image
+                      src="/info_white.svg"
+                      alt=""
+                      width={16}
+                      height={16}
+                      className="mt-[2px] opacity-90"
+                    />
+                  )}
+
+                  <span>{toast.message}</span>
                 </div>
               ))}
             </div>
@@ -96,6 +120,8 @@ export function ToastProvider({
     </ToastContext.Provider>
   );
 }
+
+/* ───────────────── Hook ───────────────── */
 
 export function useToast() {
   const ctx = useContext(ToastContext);
