@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Voeding", href: "/dashboard#nutrition" },
   { label: "Activiteit", href: "/dashboard#activity" },
-  { label: "Gewicht", href: "/dashboard#weight" },
+  { label: "Gewicht", href: "/dashboard/weight" },
   { label: "Instellingen", href: "/settings" },
 ];
 
@@ -65,7 +65,10 @@ export default function TopNavigation() {
             className="flex flex-1 gap-6 overflow-x-auto no-scrollbar"
           >
             {NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive =
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);            
 
               return (
                 <button
@@ -78,6 +81,7 @@ export default function TopNavigation() {
                     font-medium
                     text-[#191970]
                     whitespace-nowrap
+                    cursor-pointer
                   "
                 >
                   {item.label}

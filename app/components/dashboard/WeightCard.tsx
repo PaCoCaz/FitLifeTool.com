@@ -14,6 +14,8 @@ import { getLocalDayKey } from "../../lib/dayKey";
 type WeightProfileResult = {
   weight_kg: number;
   bmi: number;
+  target_weight_kg: number | null;
+  height_cm: number;
 };
 
 /* ───────────────── Helpers ───────────────── */
@@ -25,7 +27,8 @@ function getBMICategory(bmi: number): string {
   return "Obesitas";
 }
 
-function calculateBMI(weightKg: number, heightM = 1.75): number {
+function calculateBMI(weightKg: number, heightCm: number): number {
+  const heightM = heightCm / 100;
   return weightKg / (heightM * heightM);
 }
 
@@ -134,52 +137,58 @@ export default function WeightCard() {
 
   const [weight, setWeight] = useState<number | null>(null);
   const [bmi, setBmi] = useState<number | null>(null);
+  const [targetWeight, setTargetWeight] = useState<number | null>(null);
+  const [heightCm, setHeightCm] = useState<number | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [draftWeight, setDraftWeight] = useState("");
+  const [draftTargetWeight, setDraftTargetWeight] = useState("");
 
   useEffect(() => {
     if (!user) return;
 
     supabase
       .from("profiles")
-      .select("weight_kg, bmi")
+      .select("weight_kg, bmi, target_weight_kg, height_cm")
       .eq("id", user.id)
       .single()
-      .then(
-        ({
-          data,
-          error,
-        }: {
-          data: WeightProfileResult | null;
-          error: { message: string } | null;
-        }) => {
-          if (error) return console.error(error.message);
-          if (data) {
-            setWeight(data.weight_kg);
-            setBmi(data.bmi);
-            setDraftWeight(String(data.weight_kg));
-          }
+      .then(({ data, error }: { data: WeightProfileResult | null; error: { message: string } | null }) => {
+        if (error) return console.error(error.message);
+        if (data) {
+          setWeight(data.weight_kg);
+          setBmi(data.bmi);
+          setTargetWeight(data.target_weight_kg);
+          setHeightCm(data.height_cm);
+          setDraftWeight(String(data.weight_kg));
+          setDraftTargetWeight(data.target_weight_kg ? String(data.target_weight_kg) : "");
         }
-      );
+      });
   }, [user]);
 
   async function saveWeight() {
-    if (!user || weight === null) return;
+    if (!user || weight === null || heightCm === null) return;
 
-    const parsed = parseFloat(draftWeight);
-    if (isNaN(parsed) || parsed <= 0) return;
+    const parsedWeight = parseFloat(draftWeight);
+    const parsedTarget =
+      draftTargetWeight.trim() === ""
+        ? null
+        : parseFloat(draftTargetWeight);
 
-    const newBMI = calculateBMI(parsed);
+    if (isNaN(parsedWeight) || parsedWeight <= 0) return;
+    if (parsedTarget !== null && parsedTarget <= 0) return;
+
+    const newBMI = calculateBMI(parsedWeight, heightCm);
 
     const { error } = await supabase
       .from("profiles")
-      .update({ weight_kg: parsed, bmi: newBMI })
+      .update({
+        weight_kg: parsedWeight,
+        bmi: newBMI,
+        target_weight_kg: parsedTarget,
+      })
       .eq("id", user.id);
 
     if (error) return console.error(error.message);
-
-    /* ───── 🔹 GEWICHT LOGGEN (UPSERT, 1x per dag) ───── */
 
     const nowTs = new Date();
 
@@ -188,42 +197,34 @@ export default function WeightCard() {
       .upsert(
         {
           user_id: user.id,
-          weight_kg: parsed,
+          weight_kg: parsedWeight,
           bmi: newBMI,
           log_date: dayKey,
-          log_time_local: nowTs
-            .toTimeString()
-            .slice(0, 8),
-          timezone:
-            Intl.DateTimeFormat().resolvedOptions()
-              .timeZone,
+          log_time_local: nowTs.toTimeString().slice(0, 8),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         },
-        {
-          onConflict: "user_id,log_date",
-        }
+        { onConflict: "user_id,log_date" }
       );
 
-    /* ───────────────────────────────────────── */
-
-    setWeight(parsed);
+    setWeight(parsedWeight);
     setBmi(newBMI);
+    setTargetWeight(parsedTarget);
     setIsEditing(false);
 
-    showToast("✓ Gewicht bijgewerkt · Nieuwe doelen vanaf morgen");
+    showToast("✓ Gewicht en streefgewicht bijgewerkt");
   }
 
   function cancelEdit() {
     if (weight === null) return;
     setDraftWeight(String(weight));
+    setDraftTargetWeight(targetWeight ? String(targetWeight) : "");
     setIsEditing(false);
   }
 
   if (weight === null || bmi === null) {
     return (
       <Card title="Gewicht">
-        <div className="text-sm text-gray-500">
-          Gegevens laden…
-        </div>
+        <div className="text-sm text-gray-500">Gegevens laden…</div>
       </Card>
     );
   }
@@ -239,18 +240,8 @@ export default function WeightCard() {
             className="group relative h-6 w-6"
             aria-label="Gewicht wijzigen"
           >
-            <Image
-              src="/plus_sign.svg"
-              alt=""
-              fill
-              className="object-contain group-hover:opacity-0"
-            />
-            <Image
-              src="/plus_sign_hover.svg"
-              alt=""
-              fill
-              className="object-contain opacity-0 group-hover:opacity-100"
-            />
+            <Image src="/plus_sign.svg" alt="" fill className="object-contain group-hover:opacity-0" />
+            <Image src="/plus_sign_hover.svg" alt="" fill className="object-contain opacity-0 group-hover:opacity-100" />
           </button>
         )
       }
@@ -258,34 +249,58 @@ export default function WeightCard() {
       <div className="h-full flex flex-col justify-between">
         <div className="space-y-1">
           {isEditing ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                step="0.1"
-                value={draftWeight}
-                onChange={(e) => setDraftWeight(e.target.value)}
-                className="w-24 rounded-[var(--radius)] border px-2 py-1 text-sm"
-              />
-              <span className="text-sm text-gray-500">kg</span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.1"
+                  value={draftWeight}
+                  onChange={(e) => setDraftWeight(e.target.value)}
+                  className="w-24 rounded-[var(--radius)] border px-2 py-1 text-sm"
+                />
+                <span className="text-sm text-gray-500">kg</span>
+              </div>
 
-              <button
-                onClick={saveWeight}
-                className="rounded-[var(--radius)] bg-[#0095D3] px-3 py-1 text-xs font-medium text-white"
-              >
-                Opslaan
-              </button>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.1"
+                  placeholder="Streefgewicht"
+                  value={draftTargetWeight}
+                  onChange={(e) => setDraftTargetWeight(e.target.value)}
+                  className="w-24 rounded-[var(--radius)] border px-2 py-1 text-sm"
+                />
+                <span className="text-sm text-gray-500">kg</span>
+              </div>
 
-              <button
-                onClick={cancelEdit}
-                className="rounded-[var(--radius)] border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-400"
-              >
-                Annuleren
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={saveWeight}
+                  className="rounded-[var(--radius)] bg-[#0095D3] px-3 py-1 text-xs font-medium text-white"
+                >
+                  Opslaan
+                </button>
+
+                <button
+                  onClick={cancelEdit}
+                  className="rounded-[var(--radius)] border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-400"
+                >
+                  Annuleren
+                </button>
+              </div>
             </div>
           ) : (
-            <div className="text-2xl font-semibold text-[#191970]">
-              {weight} kg
-            </div>
+            <>
+              <div className="text-2xl font-semibold text-[#191970]">
+                {weight} kg
+              </div>
+
+              {targetWeight && (
+                <div className="text-xs text-gray-500">
+                  Streefgewicht: {targetWeight} kg
+                </div>
+              )}
+            </>
           )}
 
           <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -304,18 +319,8 @@ export default function WeightCard() {
               className="group relative h-4 w-4"
               aria-label="BMI informatie"
             >
-              <Image
-                src="/info.svg"
-                alt=""
-                fill
-                className="object-contain group-hover:opacity-0"
-              />
-              <Image
-                src="/info_hover.svg"
-                alt=""
-                fill
-                className="object-contain opacity-0 group-hover:opacity-100"
-              />
+              <Image src="/info.svg" alt="" fill className="object-contain group-hover:opacity-0" />
+              <Image src="/info_hover.svg" alt="" fill className="object-contain opacity-0 group-hover:opacity-100" />
             </button>
           </div>
 

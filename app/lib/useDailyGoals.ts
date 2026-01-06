@@ -36,7 +36,7 @@ export function useDailyGoals() {
   const [goals, setGoals] = useState<DailyGoals | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // voorkomt herberekening meerdere keren per dag
+  // voorkomt herberekening meerdere keren per dag (runtime)
   const lastDayRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -48,43 +48,39 @@ export function useDailyGoals() {
       const dayKey = dayNow.toISOString().slice(0, 10);
       const isNewDay = lastDayRef.current !== dayKey;
 
-      /* 1️⃣ Profiel ophalen */
+      /* 1️⃣ Profiel ophalen (incl. ankergewicht) */
       const { data: profile, error } = await supabase
         .from("profiles")
         .select(
-          "weight_kg, water_goal_ml, activity_goal_kcal, calorie_goal"
+          `
+          weight_kg,
+          water_goal_ml,
+          activity_goal_kcal,
+          calorie_goal,
+          goals_calculated_for_weight
+        `
         )
         .eq("id", user.id)
         .single();
 
-      if (error || !profile) {
+      if (error || !profile || !profile.weight_kg) {
         setLoading(false);
         return;
       }
 
-      /* 🔹 GEWICHT BEPALEN VIA weight_logs (laatste vóór vandaag) */
-      const { data: lastWeightLog } = await supabase
-        .from("weight_logs")
-        .select("weight_kg")
-        .eq("user_id", user.id)
-        .lt("log_date", dayKey)
-        .order("log_date", { ascending: false })
-        .limit(1)
-        .single();
+      const weightKg = profile.weight_kg;
 
-      const weightKg =
-        lastWeightLog?.weight_kg ?? profile.weight_kg;
+      /* 2️⃣ Bepalen of herberekening nodig is */
+      const needsRecalc =
+        isNewDay ||
+        profile.goals_calculated_for_weight !== weightKg;
 
-      /* 2️⃣ Nieuwe dag → doelen herberekenen */
-      if (isNewDay && weightKg) {
+      if (needsRecalc) {
         const updates = {
           water_goal_ml: calculateWaterGoal(weightKg),
-          activity_goal_kcal: calculateActivityGoal(
-            weightKg
-          ),
-          calorie_goal: calculateCalorieGoal(
-            weightKg
-          ),
+          activity_goal_kcal: calculateActivityGoal(weightKg),
+          calorie_goal: calculateCalorieGoal(weightKg),
+          goals_calculated_for_weight: weightKg,
         };
 
         await supabase
@@ -104,7 +100,7 @@ export function useDailyGoals() {
         return;
       }
 
-      /* 3️⃣ Zelfde dag → bestaande doelen gebruiken */
+      /* 3️⃣ Geen herberekening → bestaande doelen gebruiken */
       setGoals({
         waterGoalMl: profile.water_goal_ml,
         activityGoalKcal: profile.activity_goal_kcal,
