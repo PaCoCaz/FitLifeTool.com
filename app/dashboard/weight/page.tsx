@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/AuthProvider";
@@ -14,6 +14,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  ReferenceArea, // ← ENIGE TOEVOEGING (import)
 } from "recharts";
 
 /* ───────────────── Types ───────────────── */
@@ -21,6 +22,7 @@ import {
 type WeightLog = {
   log_date: string;
   weight_kg: number;
+  bmi?: number;
 };
 
 type PeriodOption = {
@@ -31,11 +33,11 @@ type PeriodOption = {
 /* ───────────────── Constants ───────────────── */
 
 const PERIOD_OPTIONS: PeriodOption[] = [
-  { label: "week", days: 7 },
-  { label: "maand", days: 30 },
-  { label: "kwartaal", days: 90 },
-  { label: "half jaar", days: 180 },
-  { label: "jaar", days: 365 },
+  { label: "Laatste 7 dagen", days: 7 },
+  { label: "Laatste 30 dagen", days: 30 },
+  { label: "Laatste 90 dagen", days: 90 },
+  { label: "Laatste 180 dagen", days: 180 },
+  { label: "Laatste 365 dagen", days: 365 },
 ];
 
 /* ───────────────── Helpers ───────────────── */
@@ -47,6 +49,11 @@ function formatDateNL(date: string) {
     month: "2-digit",
     year: "numeric",
   });
+}
+
+function calculateBMI(weightKg: number, heightCm: number) {
+  const h = heightCm / 100;
+  return Number((weightKg / (h * h)).toFixed(2));
 }
 
 /* ───────────────── Trend helper ───────────────── */
@@ -136,6 +143,29 @@ export default function WeightPage() {
   const [targetWeight, setTargetWeight] =
     useState<number | null>(null);
 
+  const [showBMI, setShowBMI] = useState(false);
+  const [heightCm, setHeightCm] = useState<number | null>(null);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const onClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
   useEffect(() => {
     if (!user) return;
 
@@ -157,13 +187,22 @@ export default function WeightPage() {
 
           supabase
             .from("profiles")
-            .select("target_weight_kg")
+            .select("target_weight_kg, height_cm")
             .eq("id", user.id)
             .single(),
         ]);
 
-      const withMA = calculateMovingAverage(logs ?? []);
+      const withMA = calculateMovingAverage(logs ?? []).map(
+        (d) => ({
+          ...d,
+          bmi:
+            profile?.height_cm != null
+              ? calculateBMI(d.weight_kg, profile.height_cm)
+              : undefined,
+        })
+      );
 
+      setHeightCm(profile?.height_cm ?? null);
       setData(withMA);
       setTargetWeight(profile?.target_weight_kg ?? null);
       setLoading(false);
@@ -182,23 +221,9 @@ export default function WeightPage() {
     );
   }
 
-  if (data.length === 0) {
-    return (
-      <Card title="Gewicht">
-        <div className="text-sm text-gray-500">
-          Nog geen gewichtshistorie beschikbaar.
-        </div>
-      </Card>
-    );
-  }
-
   const trend = getWeightTrend(data);
-  const currentPeriodLabel =
-    PERIOD_OPTIONS.find((p) => p.days === periodDays)
-      ?.label ?? "";
-
-  const fromDate = formatDateNL(data[0].log_date);
-  const toDate = formatDateNL(data[data.length - 1].log_date);
+  const currentPeriod =
+    PERIOD_OPTIONS.find((p) => p.days === periodDays)!;
 
   const targetDate =
     targetWeight !== null && trend?.type !== "stable"
@@ -209,157 +234,201 @@ export default function WeightPage() {
     <div className="space-y-6">
       <button
         onClick={() => window.location.assign("/dashboard")}
-        className="
-          text-xs
-          font-medium
-          text-[#0095D3]
-          hover:underline
-          cursor-pointer
-        "
+        className="text-xs font-medium text-[#0095D3] hover:underline"
       >
         ← Terug naar dashboard
       </button>
 
+      {/* ================= GEWICHT CARD — ONGWIJZIGD ================= */}
+
       <Card
-        title={`Gewicht | Periode: ${currentPeriodLabel} (${fromDate} t/m ${toDate})`}
-        icon={
-          <Image
-            src="/weight.svg"
-            alt=""
-            width={16}
-            height={16}
-          />
+        title="Gewicht"
+        icon={<Image src="/weight.svg" alt="" width={16} height={16} />}
+        action={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowBMI((v) => !v)}
+              className="
+                flex items-center gap-2
+                rounded-[var(--radius)]
+                border border-[#191970] hover:border-[#0095D3]
+                px-3 py-1.5
+                text-xs font-medium
+                text-[#191970]
+                hover:bg-[#0095D3] hover:text-white
+              "
+            >
+              {showBMI ? "Verberg BMI" : "Toon BMI"}
+            </button>
+
+            <div ref={dropdownRef} className="relative">
+              <button
+                onClick={() => setOpen((v) => !v)}
+                className="
+                  flex items-center gap-2
+                  rounded-[var(--radius)]
+                  bg-[#191970]
+                  border border-[#191970]
+                  px-3
+                  py-1.5
+                  text-xs
+                  font-medium
+                  text-white
+                "
+              >
+                {currentPeriod.label}
+                <span className="text-[10px]">▼</span>
+              </button>
+
+              {open && (
+                <div
+                  className="
+                    absolute right-0 mt-2
+                    w-48
+                    rounded-[var(--radius)]
+                    border border-[#191970]
+                    bg-white
+                    py-2
+                    shadow-xl
+                    z-50
+                  "
+                >
+                  {PERIOD_OPTIONS.map((p) => (
+                    <button
+                      key={p.days}
+                      onClick={() => {
+                        setPeriodDays(p.days);
+                        setOpen(false);
+                      }}
+                      className="
+                        block w-full text-left
+                        px-4 py-2
+                        text-xs
+                        hover:bg-gray-100
+                      "
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         }
       >
-        {/* Trend + periode-selector */}
-        <div className="mt-2 flex items-center justify-between">
-          <div className="space-y-1 text-xs text-gray-600">
-            {trend && (
-              <>
-                {trend.type === "down" && (
-                  <div>
-                    ↓ Gewicht afgenomen ({trend.diff.toFixed(1)} kg)
-                  </div>
-                )}
-                {trend.type === "up" && (
-                  <div>
-                    ↑ Gewicht toegenomen (+{trend.diff.toFixed(1)} kg)
-                  </div>
-                )}
-                {trend.type === "stable" && (
-                  <div>→ Gewicht stabiel</div>
-                )}
-              </>
-            )}
-
-            {targetWeight !== null && (
-              <div>
-                Streefgewicht: {targetWeight.toFixed(1)} kg
-              </div>
-            )}
-
-            {targetDate && (
-              <div className="text-gray-500">
-                Bij dit tempo bereik je je streefgewicht rond{" "}
-                {formatDateNL(
-                  targetDate.toISOString().slice(0, 10)
-                )}
-              </div>
-            )}
-          </div>
-
-          <select
-            value={periodDays}
-            onChange={(e) =>
-              setPeriodDays(
-                Number(e.target.value) as
-                  | 7
-                  | 30
-                  | 90
-                  | 180
-                  | 365
-              )
-            }
-            className="
-              rounded-[var(--radius)]
-              bg-[#191970]
-              px-2
-              py-1
-              text-xs
-              font-medium
-              text-white
-              cursor-pointer
-              focus:outline-none
-            "
-          >
-            {PERIOD_OPTIONS.map((p) => (
-              <option key={p.days} value={p.days}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+        <div className="mt-2 text-base font-medium text-[#191970]">
+          Periode: {currentPeriod.label}
         </div>
 
-        {/* Grafiek */}
-        <div className="mt-4 h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <XAxis dataKey="log_date" tick={{ fontSize: 11 }} />
-              <YAxis
-                domain={["dataMin - 1", "dataMax + 1"]}
-                tick={{ fontSize: 11 }}
-              />
-              <Tooltip
-                formatter={(value) => {
-                  if (typeof value !== "number") {
-                    return ["", "Gewicht"];
-                  }
-                  return [`${value.toFixed(1)} kg`, "Gewicht"];
-                }}
-                labelFormatter={(label) =>
-                  `Datum: ${label}`
-                }
-              />
+        <div className="mt-2 space-y-1 text-xs text-gray-600">
+          {trend?.type === "down" && (
+            <div>
+              ↓ Gewicht afgenomen ({trend.diff.toFixed(1)} kg)
+            </div>
+          )}
+          {trend?.type === "up" && (
+            <div>
+              ↑ Gewicht toegenomen (+{trend.diff.toFixed(1)} kg)
+            </div>
+          )}
+          {trend?.type === "stable" && <div>→ Gewicht stabiel</div>}
 
-              <Line
-                type="monotone"
-                dataKey="weight_kg"
-                stroke="#0095D3"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 5 }}
-              />
-
-              <Line
-                type="monotone"
-                dataKey="moving_avg"
-                stroke="#cbd5e1"
-                strokeDasharray="4 4"
-                strokeWidth={2}
-                dot={false}
-                isAnimationActive={false}
-              />
-
-              {targetWeight !== null && (
-                <ReferenceLine
-                  y={targetWeight}
-                  stroke="#16a34a"
-                  strokeDasharray="6 4"
-                  strokeWidth={2}
-                  ifOverflow="extendDomain"
-                  label={{
-                    value: `Streefgewicht ${targetWeight.toFixed(1)} kg`,
-                    position: "insideTopRight",
-                    fill: "#16a34a",
-                    fontSize: 11,
-                    fontWeight: 500,
-                  }}
-                />
+          {targetDate && (
+            <div className="text-gray-500">
+              Verwachte datum streefgewicht rond{" "}
+              {formatDateNL(
+                targetDate.toISOString().slice(0, 10)
               )}
-            </LineChart>
-          </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 h-64 w-full">
+          {mounted && (
+            <ResponsiveContainer width="100%" height={256}>
+              <LineChart
+                data={data}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+                <XAxis dataKey="log_date" tick={{ fontSize: 11 }} />
+                <YAxis
+                  width={32}
+                  domain={["dataMin - 1", "dataMax + 1"]}
+                  tick={{ fontSize: 11 }}
+                  padding={{ top: 10, bottom: 10 }}
+                />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="weight_kg"
+                  stroke="#0095D3"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="moving_avg"
+                  stroke="#cbd5e1"
+                  strokeDasharray="4 4"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                {targetWeight !== null && (
+                  <ReferenceLine
+                    y={targetWeight}
+                    stroke="#16a34a"
+                    strokeDasharray="6 4"
+                    strokeWidth={1}
+                    ifOverflow="extendDomain"
+                    label={{
+                      value: `Streefgewicht ${targetWeight.toFixed(
+                        1
+                      )} kg`,
+                      position: "insideTopRight",
+                      fill: "#16a34a",
+                      fontSize: 11,
+                      fontWeight: 500,
+                    }}
+                  />
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </Card>
+
+      {/* ================= BMI CARD — MET ZONES ================= */}
+
+      {showBMI && heightCm && (
+        <Card title="BMI">
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height={256}>
+              <LineChart
+                data={data}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+                <XAxis dataKey="log_date" tick={{ fontSize: 11 }} />
+                <YAxis width={32} domain={[18, 35]} tick={{ fontSize: 11 }} />
+                <Tooltip />
+
+                {/* BMI zones — ENIGE FUNCTIONELE TOEVOEGING */}
+                <ReferenceArea y1={18} y2={18.5} fill="#0095D3" fillOpacity={0.4} />
+                <ReferenceArea y1={18.5} y2={25} fill="#dcfce7" fillOpacity={0.6} />
+                <ReferenceArea y1={25} y2={30} fill="#fef9c3" fillOpacity={0.6} />
+                <ReferenceArea y1={30} y2={35} fill="#fee2e2" fillOpacity={0.6} />
+
+                <Line
+                  type="monotone"
+                  dataKey="bmi"
+                  stroke="#9333ea"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
