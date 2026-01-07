@@ -57,7 +57,8 @@ export function useDailyGoals() {
           water_goal_ml,
           activity_goal_kcal,
           calorie_goal,
-          goals_calculated_for_weight
+          goals_calculated_for_weight,
+          goals_last_calculated_on
         `
         )
         .eq("id", user.id)
@@ -71,8 +72,10 @@ export function useDailyGoals() {
       const weightKg = profile.weight_kg;
 
       /* 2️⃣ Bepalen of herberekening nodig is */
+      const todayKey = dayKey; // yyyy-mm-dd
+
       const needsRecalc =
-        isNewDay ||
+        profile.goals_last_calculated_on !== todayKey ||
         profile.goals_calculated_for_weight !== weightKg;
 
       if (needsRecalc) {
@@ -81,6 +84,7 @@ export function useDailyGoals() {
           activity_goal_kcal: calculateActivityGoal(weightKg),
           calorie_goal: calculateCalorieGoal(weightKg),
           goals_calculated_for_weight: weightKg,
+          goals_last_calculated_on: todayKey,
         };
 
         await supabase
