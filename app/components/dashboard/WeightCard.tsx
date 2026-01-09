@@ -152,17 +152,27 @@ export default function WeightCard() {
       .select("weight_kg, bmi, target_weight_kg, height_cm")
       .eq("id", user.id)
       .single()
-      .then(({ data, error }: { data: WeightProfileResult | null; error: { message: string } | null }) => {
-        if (error) return console.error(error.message);
-        if (data) {
-          setWeight(data.weight_kg);
-          setBmi(data.bmi);
-          setTargetWeight(data.target_weight_kg);
-          setHeightCm(data.height_cm);
-          setDraftWeight(String(data.weight_kg));
-          setDraftTargetWeight(data.target_weight_kg ? String(data.target_weight_kg) : "");
+      .then(
+        ({
+          data,
+          error,
+        }: {
+          data: WeightProfileResult | null;
+          error: { message: string } | null;
+        }) => {
+          if (error) return console.error(error.message);
+          if (data) {
+            setWeight(data.weight_kg);
+            setBmi(data.bmi);
+            setTargetWeight(data.target_weight_kg);
+            setHeightCm(data.height_cm);
+            setDraftWeight(String(data.weight_kg));
+            setDraftTargetWeight(
+              data.target_weight_kg ? String(data.target_weight_kg) : ""
+            );
+          }
         }
-      });
+      );
   }, [user]);
 
   async function saveWeight() {
@@ -240,8 +250,18 @@ export default function WeightCard() {
             className="group relative h-6 w-6"
             aria-label="Gewicht wijzigen"
           >
-            <Image src="/plus_sign.svg" alt="" fill className="object-contain group-hover:opacity-0" />
-            <Image src="/plus_sign_hover.svg" alt="" fill className="object-contain opacity-0 group-hover:opacity-100" />
+            <Image
+              src="/plus_sign.svg"
+              alt=""
+              fill
+              className="object-contain group-hover:opacity-0"
+            />
+            <Image
+              src="/plus_sign_hover.svg"
+              alt=""
+              fill
+              className="object-contain opacity-0 group-hover:opacity-100"
+            />
           </button>
         )
       }
@@ -267,7 +287,9 @@ export default function WeightCard() {
                   step="0.1"
                   placeholder="Streefgewicht"
                   value={draftTargetWeight}
-                  onChange={(e) => setDraftTargetWeight(e.target.value)}
+                  onChange={(e) =>
+                    setDraftTargetWeight(e.target.value)
+                  }
                   className="w-24 rounded-[var(--radius)] border px-2 py-1 text-sm"
                 />
                 <span className="text-sm text-gray-500">kg</span>
@@ -319,8 +341,18 @@ export default function WeightCard() {
               className="group relative h-4 w-4"
               aria-label="BMI informatie"
             >
-              <Image src="/info.svg" alt="" fill className="object-contain group-hover:opacity-0" />
-              <Image src="/info_hover.svg" alt="" fill className="object-contain opacity-0 group-hover:opacity-100" />
+              <Image
+                src="/info.svg"
+                alt=""
+                fill
+                className="object-contain group-hover:opacity-0"
+              />
+              <Image
+                src="/info_hover.svg"
+                alt=""
+                fill
+                className="object-contain opacity-0 group-hover:opacity-100"
+              />
             </button>
           </div>
 
