@@ -5,6 +5,12 @@ import { supabase } from "./supabaseClient";
 import { useUser } from "./AuthProvider";
 import { useDayNow } from "./useDayNow";
 
+type Goal =
+  | "lose_weight"
+  | "maintain"
+  | "gain_weight"
+  | "build_muscle";
+
 type DailyGoals = {
   waterGoalMl: number;
   activityGoalKcal: number;
@@ -18,6 +24,10 @@ export function useDailyGoals() {
   const [goals, setGoals] = useState<DailyGoals | null>(null);
   const [loading, setLoading] = useState(true);
   const [isActiveDay, setIsActiveDay] = useState(false);
+
+  const [weightKg, setWeightKg] = useState<number | null>(null); // STAP 4E
+  const [tdee, setTdee] = useState<number | null>(null);         // STAP 4J
+  const [goal, setGoal] = useState<Goal | null>(null);           // STAP 4J
 
   useEffect(() => {
     if (!user) return;
@@ -35,7 +45,9 @@ export function useDailyGoals() {
           activity_goal_kcal,
           calorie_goal,
           goals_calculated_for_weight,
-          goals_last_calculated_on
+          goals_last_calculated_on,
+          tdee,
+          goal
         `)
         .eq("id", user.id)
         .single();
@@ -45,6 +57,13 @@ export function useDailyGoals() {
         setLoading(false);
         return;
       }
+
+      // STAP 4E — expose huidig gewicht (read-only)
+      setWeightKg(profile.weight_kg);
+
+      // STAP 4J — expose onboarding context (read-only)
+      setTdee(profile.tdee);
+      setGoal(profile.goal);
 
       // STAP 3D — herberekenen en schrijven ALLEEN bij nieuwe dag
       const needsRecalc =
@@ -98,5 +117,12 @@ export function useDailyGoals() {
     return () => clearInterval(interval);
   }, [user, dayNow]);
 
-  return { goals, loading, isActiveDay };
+  return {
+    goals,
+    loading,
+    isActiveDay,
+    weightKg,
+    tdee,   // STAP 4J
+    goal,   // STAP 4J
+  };
 }
