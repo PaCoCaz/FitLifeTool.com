@@ -87,7 +87,7 @@ export default function TopNavigation() {
                   {item.label}
 
                   {isActive && (
-                    <span className="absolute left-0 bottom-1 h-[3px] w-full rounded-full bg-[#C80000]" />
+                    <span className="absolute left-1/2 bottom-1 h-[2px] w-[90%] -translate-x-1/2 rounded-full bg-[#191970]/70" />
                   )}
                 </button>
               );
