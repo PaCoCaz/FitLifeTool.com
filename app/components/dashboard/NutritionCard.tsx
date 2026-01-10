@@ -2,19 +2,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Card from "../ui/Card";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
+import Card from "@/components/ui/Card";
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@/lib/AuthProvider";
 
-import { useDayNow } from "../../lib/useDayNow";
-import { getLocalDayKey } from "../../lib/dayKey";
-import { useNow } from "../../lib/TimeProvider";
-import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
+import { useDayNow } from "@/lib/useDayNow";
+import { getLocalDayKey } from "@/lib/dayKey";
+import { useNow } from "@/lib/TimeProvider";
+import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
 
 import {
   calculateNutritionScore,
   getNutritionStatus,
-} from "../../lib/nutritionScore";
+} from "@/lib/nutritionScore";
 
 /* ───────────────── Types ───────────────── */
 
@@ -289,7 +289,7 @@ export default function NutritionCard() {
           </div>
 
           <div className="text-[11px] text-gray-400">
-            Basis {baseGoal} + activiteit {activityBonus}
+            Basis {baseGoal} + dagelijkse activiteiten {activityBonus}
           </div>
         </div>
 

@@ -2,20 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Card from "../ui/Card";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
+import Card from "@/components/ui/Card";
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@/lib/AuthProvider";
 
-import { useDayNow } from "../../lib/useDayNow";
-import { getLocalDayKey } from "../../lib/dayKey";
-import { useNow } from "../../lib/TimeProvider";
+import { useDayNow } from "@/lib/useDayNow";
+import { getLocalDayKey } from "@/lib/dayKey";
+import { useNow } from "@/lib/TimeProvider";
 
-import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
+import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
 
 import {
   getHydrationStatus,
   getExpectedHydrationProgress,
-} from "../../lib/hydrationScore";
+} from "@/lib/hydrationScore";
 
 /* ───────────────── Constants ───────────────── */
 

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@/lib/AuthProvider";
 
 type Gender = "male" | "female" | "other";
 

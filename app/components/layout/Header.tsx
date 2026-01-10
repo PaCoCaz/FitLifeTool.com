@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
-import AvatarMenu from "./AvatarMenu";
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@/lib/AuthProvider";
+import AvatarMenu from "@/components/layout/AvatarMenu";
 
 export default function Header() {
   const { user, loading } = useUser();

@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Card from "../ui/Card";
-import { useLabels } from "../../lib/useLabels";
+import Card from "@/components/ui/Card";
+import { useLabels } from "@/lib/useLabels";
 
 export default function TipOfTheDayCard() {
   const t = useLabels("nl").tip;

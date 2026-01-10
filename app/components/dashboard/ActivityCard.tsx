@@ -2,16 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Card from "../ui/Card";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
-import { useToast } from "../../lib/ToastProvider";
+import Card from "@/components/ui/Card";
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@/lib/AuthProvider";
+import { useToast } from "@/lib/ToastProvider";
 
-import { useDayNow } from "../../lib/useDayNow";
-import { getLocalDayKey } from "../../lib/dayKey";
-import { useNow } from "../../lib/TimeProvider";
+import { useDayNow } from "@/lib/useDayNow";
+import { getLocalDayKey } from "@/lib/dayKey";
+import { useNow } from "@/lib/TimeProvider";
 
-import { dispatchDashboardEvent } from "../../lib/dispatchDashboardEvent";
+import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
 
 import {
   ACTIVITY_TYPES,
@@ -19,7 +19,7 @@ import {
   calculateActivityCalories,
   calculateActivityScore,
   getActivityStatus,
-} from "../../lib/activityScore";
+} from "@/lib/activityScore";
 
 /* ───────────────── Types ───────────────── */
 
@@ -208,7 +208,7 @@ export default function ActivityCard() {
 
   return (
     <Card
-      title="Activiteiten"
+      title="Dagelijkse activiteiten"
       icon={
         <Image
           src="/activity.svg"

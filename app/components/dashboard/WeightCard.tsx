@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Card from "../ui/Card";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
-import { useToast } from "../../lib/ToastProvider";
-import { useDayNow } from "../../lib/useDayNow";
-import { getLocalDayKey } from "../../lib/dayKey";
+import Card from "@/components/ui/Card";
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@/lib/AuthProvider";
+import { useToast } from "@/lib/ToastProvider";
+import { useDayNow } from "@/lib/useDayNow";
+import { getLocalDayKey } from "@/lib/dayKey";
 
 /* ───────────────── Types ───────────────── */
 

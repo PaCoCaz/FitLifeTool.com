@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Card from "../ui/Card";
-import { useLabels } from "../../lib/useLabels";
-import { useDailyGoals } from "../../lib/useDailyGoals";
-import { useTomorrowGoals } from "../../lib/useTomorrowGoals";
+import Card from "@/components/ui/Card";
+import { useLabels } from "@/lib/useLabels";
+import { useDailyGoals } from "@/lib/useDailyGoals";
+import { useTomorrowGoals } from "@/lib/useTomorrowGoals";
 
 export default function DailyGoalsCard() {
   const t = useLabels("nl").goals;

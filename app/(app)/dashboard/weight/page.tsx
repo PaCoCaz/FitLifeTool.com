@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
-import Card from "../../components/ui/Card";
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@/lib/AuthProvider";
+import Card from "@/components/ui/Card";
 
 import {
   LineChart,
@@ -231,13 +231,7 @@ export default function WeightPage() {
       : null;
 
   return (
-    <div className="space-y-6">
-      <button
-        onClick={() => window.location.assign("/dashboard")}
-        className="text-xs font-medium text-[#0095D3] hover:underline"
-      >
-        ← Terug naar dashboard
-      </button>
+    <div className="space-y-6 -mt-41 -mx-4">
 
       {/* ================= GEWICHT CARD — ONGWIJZIGD ================= */}
 

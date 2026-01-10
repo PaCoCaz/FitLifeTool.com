@@ -17,6 +17,14 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+
+    /* ───────── TOEGEVOEGD (Oplossing A) ───────── */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./app/*"]
+    },
+    /* ─────────────────────────────────────────── */
+
     "types": [
       "react",
       "react-dom"

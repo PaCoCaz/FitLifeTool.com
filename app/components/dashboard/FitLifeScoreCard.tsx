@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Card from "../ui/Card";
-import { useDayNow } from "../../lib/useDayNow";
-import { useClockNow } from "../../lib/useClockNow";
-import { getFitLifeStatusColor } from "../../lib/fitlifeScore";
-import { DashboardEventMap } from "../../lib/dashboardEvents";
-import { getExpectedHydrationProgress } from "../../lib/hydrationScore";
+import Card from "@/components/ui/Card";
+import { useDayNow } from "@/lib/useDayNow";
+import { useClockNow } from "@/lib/useClockNow";
+import { getFitLifeStatusColor } from "@/lib/fitlifeScore";
+import { DashboardEventMap } from "@/lib/dashboardEvents";
+import { getExpectedHydrationProgress } from "@/lib/hydrationScore";
 
 /* ───────────────── Utils ───────────────── */
 
@@ -23,6 +23,13 @@ function formatTime(now: Date): string {
 export default function FitLifeScoreCard() {
   const dayNow = useDayNow();
   const clockNow = useClockNow();
+
+  /* 🔒 Client-only render guard (NOODZAKELIJK VOOR HYDRATION) */
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [hydrationScore, setHydrationScore] = useState<number | null>(null);
   const [activityScore, setActivityScore] = useState<number | null>(null);
@@ -91,7 +98,6 @@ export default function FitLifeScoreCard() {
       activityColor === "bg-green-600 text-white" &&
       nutritionColor === "bg-green-600 text-white";
 
-    // ✅ ENIGE WIJZIGING: harde blokkade
     if (!allGreen) {
       return Math.min(99, floored);
     }
@@ -106,7 +112,7 @@ export default function FitLifeScoreCard() {
     nutritionColor,
   ]);
 
-  /* ───── Aggregatiekleur (pill & bar) ───── */
+  /* ───── Aggregatiekleur ───── */
   const statusColor = useMemo(() => {
     return getFitLifeStatusColor([
       hydrationColor,
@@ -117,11 +123,9 @@ export default function FitLifeScoreCard() {
 
   /* ───── Dagschema ───── */
   const expectedProgress = getExpectedHydrationProgress(clockNow);
-
   const actualProgressWithinSchedule =
     expectedProgress * (fitLifeScore / 100);
 
-  /* ───── Pill-kleur ───── */
   const pillColor =
     fitLifeScore < expectedProgress * 100
       ? "bg-[#C80000] text-white"
@@ -145,7 +149,7 @@ export default function FitLifeScoreCard() {
             ${pillColor}
           `}
         >
-          Vandaag | {formatTime(clockNow)}
+          Vandaag | {mounted ? formatTime(clockNow) : "—"}
         </div>
       }
     >
@@ -160,7 +164,6 @@ export default function FitLifeScoreCard() {
               className="absolute left-0 top-0 h-2 bg-[#B8CAE0]"
               style={{ width: `${expectedProgress * 100}%` }}
             />
-
             <div
               className={`absolute left-0 top-0 h-2 transition-all ${progressBarColor}`}
               style={{

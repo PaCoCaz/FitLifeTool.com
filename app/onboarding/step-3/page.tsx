@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabaseClient";
-import { useUser } from "../../lib/AuthProvider";
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@/lib/AuthProvider";
 
 import {
   calculateAge,
@@ -13,7 +13,7 @@ import {
   calculateWaterGoal,
   calculateBMI,
   calculateActivityGoal,
-} from "../../lib/calculations";
+} from "@/lib/calculations";
 
 /* ───────────────── Types ───────────────── */
 
