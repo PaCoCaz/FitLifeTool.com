@@ -1,32 +1,34 @@
+// app/handbook/navigation.tsx
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { handbookDocuments } from "./handbookRegistry";
+import {
+  hoofdstukken,
+  handbookDocuments,
+} from "./handbookRegistry";
 
 export default function HandbookNavigation() {
   const pathname = usePathname();
 
-  const grouped = handbookDocuments.reduce<Record<string, typeof handbookDocuments>>(
-    (acc, doc) => {
-      acc[doc.hoofdstuk] ??= [];
-      acc[doc.hoofdstuk].push(doc);
-      return acc;
-    },
-    {}
-  );
-
   return (
     <nav className="space-y-8 text-sm">
-      {Object.entries(grouped).map(([hoofdstuk, docs]) => {
-        const { hoofdstukTitel } = docs[0];
+      {hoofdstukken.map((hoofdstuk) => {
+        const docs = handbookDocuments.filter(
+          (doc) => doc.hoofdstuk === hoofdstuk.id
+        );
+
+        if (docs.length === 0) return null;
 
         return (
-          <div key={hoofdstuk}>
+          <div key={hoofdstuk.id}>
+            {/* Hoofdstuktitel */}
             <div className="font-semibold text-[#191970] mb-2">
-              {hoofdstuk}. {hoofdstukTitel}
+              {hoofdstuk.id}. {hoofdstuk.titel}
             </div>
 
+            {/* Documenten */}
             <ul className="space-y-1 pl-2 border-l border-gray-200">
               {docs.map((doc) => {
                 const isActive = pathname === doc.path;

@@ -3,8 +3,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { handbookDocuments } from "../../handbookRegistry";
 import Link from "next/link";
+import {
+  getDocumentsByHoofdstuk,
+  getHoofdstukById,
+} from "../../handbookRegistry";
 
 export default function HoofdstukPage() {
   const pathname = usePathname();
@@ -13,51 +16,40 @@ export default function HoofdstukPage() {
   const hoofdstukId = pathname.split("/").pop()?.toUpperCase();
 
   if (!hoofdstukId) {
-    return (
-      <div className="text-gray-600">
-        Ongeldig hoofdstuk.
-      </div>
-    );
+    return <p>Ongeldig hoofdstuk.</p>;
   }
 
-  const documenten = handbookDocuments.filter(
-    (doc) => doc.hoofdstuk === hoofdstukId
-  );
+  const hoofdstuk = getHoofdstukById(hoofdstukId);
 
-  if (documenten.length === 0) {
-    return (
-      <div className="text-gray-600">
-        Dit hoofdstuk bestaat niet.
-      </div>
-    );
+  if (!hoofdstuk) {
+    return <p>Dit hoofdstuk bestaat niet.</p>;
   }
 
-  const { hoofdstukTitel } = documenten[0];
+  const documenten = getDocumentsByHoofdstuk(hoofdstukId);
 
   return (
-    <div className="space-y-6">
+    <section className="handbook">
       <header>
-        <h1 className="text-2xl font-semibold text-[#191970]">
-          {hoofdstukId}. {hoofdstukTitel}
+        <h1>
+          {hoofdstuk.id}. {hoofdstuk.titel}
         </h1>
 
-        <p className="text-gray-600 mt-2">
-          Overzicht van alle documenten binnen dit hoofdstuk.
+        <p className="muted">
+          {hoofdstuk.intro}
         </p>
       </header>
 
-      <ul className="space-y-2">
-        {documenten.map((doc) => (
-          <li key={doc.id}>
-            <Link
-              href={doc.path}
-              className="text-gray-600 hover:text-[#0BA4E0]"
-            >
-              {doc.nummer} - {doc.titel}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <section>
+        <ul>
+          {documenten.map((doc) => (
+            <li key={doc.id}>
+              <Link href={doc.path}>
+                {doc.nummer} {doc.titel}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </section>
   );
 }
