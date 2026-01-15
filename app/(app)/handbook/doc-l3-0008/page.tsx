@@ -1,74 +1,53 @@
 // app/handbook/doc-l3-0008/page.tsx
 
-import DocumentPager from "../documentPager";
+import DocumentLayout from "../documentLayout";
 
 export default function DocL30008() {
   return (
-    <div className="space-y-10">
-      {/* ───────────────── Introductie ───────────────── */}
-      <section className="space-y-3">
-        <h1 className="text-xl font-semibold text-[#191970]">
-          3.4 Dagplanning vs Herstel
-        </h1>
+    <DocumentLayout>
 
-        <p className="text-gray-700">
-          Dit hoofdstuk beschrijft hoe FitLifeTool omgaat met
-          <strong> gedeeltelijke voltooiing </strong>
-          en gedrag dat pas later op de dag plaatsvindt.
+      <section>
+        <h1>3.4 Dagplanning vs Herstel</h1>
+
+        <p>
+          Dit hoofdstuk beschrijft hoe FitLifeTool omgaat met <strong>gedeeltelijke voltooiing</strong> en gedrag dat pas later op de dag plaatsvindt.
         </p>
 
-        <p className="text-gray-600">
-          Het doel is een systeem te ontwerpen dat
-          <em> coachend, eerlijk en motiverend </em>
-          blijft, ook wanneer gebruikers hun doelen
-          niet perfect of niet volgens planning behalen.
+        <p>
+          Het doel is een systeem te ontwerpen dat <em>coachend, eerlijk en motiverend</em> blijft, ook wanneer gebruikers hun doelen niet perfect of niet volgens planning behalen.
         </p>
       </section>
 
-      {/* ───────────────── Conceptueel model ───────────────── */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-[#191970]">
-          Conceptueel model
-        </h2>
+      <section>
+        <h2>Conceptueel model</h2>
 
         <p>
-          FitLifeTool hanteert het principe dat
-          <strong> voortgang gradueel is </strong>
-          en nooit binair (goed/fout).
+          FitLifeTool hanteert het principe dat <strong>voortgang gradueel is</strong> en nooit binair (goed/fout).
         </p>
 
-        <ul className="list-disc pl-5 text-gray-700 space-y-1">
+        <ul>
           <li>Elke actie draagt bij aan de dagscore</li>
           <li>Gedeeltelijke voltooiing heeft altijd waarde</li>
           <li>Late acties worden niet genegeerd</li>
           <li>De dag sluit pas af bij dagwissel, niet op tijdstip</li>
         </ul>
 
-        <p className="text-gray-600">
-          Hierdoor blijft het systeem psychologisch veilig:
-          gebruikers worden gestimuleerd om alsnog iets te doen,
-          in plaats van af te haken na een gemiste planning.
+        <p>
+          Hierdoor blijft het systeem psychologisch veilig: gebruikers worden gestimuleerd om alsnog iets te doen, in plaats van af te haken na een gemiste planning.
         </p>
       </section>
 
-      {/* ───────────────── Implementatie ───────────────── */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-[#191970]">
-          Implementatie
-        </h2>
+      <section>
+        <h2>Implementatie</h2>
 
         <p>
-          Technisch wordt partial completion verwerkt via
-          <strong> expected vs actual progress </strong>
-          per domein (hydratie, activiteit, voeding).
+          Technisch wordt partial completion verwerkt via <strong>expected vs actual progress</strong> per domein (hydratie, activiteit, voeding).
         </p>
 
-        <div className="bg-gray-50 border rounded p-4 space-y-2 text-sm">
-          <p className="font-medium text-gray-800">
-            Kernmechanismen:
-          </p>
+        <div className="info-box">
+          <p><strong>Kernmechanismen:</strong></p>
 
-          <ul className="list-disc pl-5 text-gray-700 space-y-1">
+          <ul>
             <li>Expected progress wordt berekend op basis van tijd</li>
             <li>Actual progress is de huidige gerealiseerde score</li>
             <li>Scores blijven stijgen zolang acties worden gelogd</li>
@@ -76,19 +55,15 @@ export default function DocL30008() {
           </ul>
         </div>
 
-        <p className="text-gray-600">
-          Hierdoor kan een gebruiker die ’s avonds alsnog hydrateert
-          of beweegt, zichtbaar herstellen in score en status.
+        <p>
+          Hierdoor kan een gebruiker die 's avonds alsnog hydrateert of beweegt, zichtbaar herstellen in score en status.
         </p>
       </section>
 
-      {/* ───────────────── Belangrijke beslissingen ───────────────── */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-[#191970]">
-          Belangrijke beslissingen
-        </h2>
+      <section>
+        <h2>Belangrijke beslissingen</h2>
 
-        <ul className="list-disc pl-5 text-gray-700 space-y-2">
+        <ul>
           <li>
             <strong>Geen harde deadlines per dagdeel</strong><br />
             De dag wordt pas afgesloten bij kalenderwissel.
@@ -110,14 +85,11 @@ export default function DocL30008() {
           </li>
         </ul>
 
-        <p className="text-gray-600">
-          Deze keuzes voorkomen afhaken en ondersteunen duurzaam gedrag,
-          wat essentieel is voor lange termijn gebruik.
+        <p>
+          Deze keuzes voorkomen afhaken en ondersteunen duurzaam gedrag, wat essentieel is voor lange termijn gebruik.
         </p>
       </section>
 
-      {/* ───────────────── Navigatie ───────────────── */}
-      <DocumentPager />
-    </div>
+    </DocumentLayout>
   );
 }

@@ -277,6 +277,17 @@ export const handbookDocuments: HandbookDocument[] = [
     titel: "Stabiliteit vs Innovatie",
     path: "/handbook/doc-l3-0019",
   },
+  {
+    id: "doc-l3-0020",
+    level: "l3",
+    hoofdstuk: "H5",
+    hoofdstukTitel: "Uitbreidbaarheid & Roadmap",
+    hoofdstukIntro:
+      "Hoe het interne handboek is opgebouwd en onderhouden.",
+    nummer: "5.6",
+    titel: "De opbouw van het handboek",
+    path: "/handbook/doc-l3-0020",
+  },
 ];
 
 /* ───────────────── Helpers ───────────────── */
