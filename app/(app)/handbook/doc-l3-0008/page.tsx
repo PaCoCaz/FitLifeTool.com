@@ -6,9 +6,11 @@ export default function DocL30008() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>3.4 Dagplanning vs Herstel</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft hoe FitLifeTool omgaat met <strong>gedeeltelijke voltooiing</strong> en gedrag dat pas later op de dag plaatsvindt.
         </p>

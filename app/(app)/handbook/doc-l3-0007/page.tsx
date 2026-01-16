@@ -6,9 +6,11 @@ export default function DocL30007() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>3.3 Verwacht vs Actueel</h1>
+      </header>
 
+      <section>
         <p>
           In FitLifeTool wordt voortgang nooit los gezien van tijd.
           Een gebruiker die om 09:00 “achterloopt” kan om 21:00 volledig op schema zijn.

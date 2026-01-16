@@ -6,9 +6,11 @@ export default function DocL30017() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>5.3 Aannames voor roadmap</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft de aannames die ten grondslag liggen
           aan de roadmap van FitLifeTool.

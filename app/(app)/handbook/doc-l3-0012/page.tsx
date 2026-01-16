@@ -6,9 +6,11 @@ export default function DocL30012() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>4.3 Layout & Responsiviteit</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft hoe de layout van FitLifeTool
           is opgebouwd met grid-systemen en hoe de UI zich

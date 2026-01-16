@@ -6,9 +6,11 @@ export default function DocL30019() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>5.5 Stabiliteit vs Innovatie</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft hoe FitLifeTool omgaat met backward
           compatibility en het gecontroleerd introduceren van breaking changes.

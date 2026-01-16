@@ -6,9 +6,11 @@ export default function DocL30005() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>3.1 Fundament FitLifeScore</h1>
+      </header>
 
+      <section>
         <p>
           De betekenis, opbouw en ontwerpprincipes van de FitLifeScore.
         </p>

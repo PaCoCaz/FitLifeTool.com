@@ -6,9 +6,11 @@ export default function DocL30010() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>4.1 UI-architectuur - Overzicht</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft de globale architectuur van de UI-laag
           van FitLifeTool. Het doel is inzicht geven in hoe layout,

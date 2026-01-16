@@ -6,9 +6,11 @@ export default function DocL30003() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>2.2 Dagstructuur & Logs</h1>
+      </header>
 
+      <section>
         <p>
           Hoe FitLifeTool dagen definieert, vastlegt en herberekent.
         </p>

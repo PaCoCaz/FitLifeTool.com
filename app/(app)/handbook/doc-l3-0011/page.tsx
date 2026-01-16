@@ -6,9 +6,11 @@ export default function DocL30011() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>4.2 Kaartsysteem & Compositie</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft het card-systeem van FitLifeTool:
           hoe informatieblokken zijn opgebouwd, hergebruikt en

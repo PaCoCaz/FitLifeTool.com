@@ -6,9 +6,11 @@ export default function DocL30001() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>1.1 Overzicht & Principes</h1>
+      </header>
 
+      <section>
         <p>
           FitLifeTool is ontworpen als een dag-gedreven gezondheidsplatform
           waarin alle logica, voortgang en feedback worden afgeleid van

@@ -6,9 +6,11 @@ export default function DocL30020() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>5.6 De opbouw van het handboek</h1>
+      </header>
 
+      <section>
         <p>
           Dit document beschrijft <strong>hoe het interne handboek van FitLifeTool structureel is opgebouwd</strong>, en vormt de canonieke leidraad voor iedereen die het handboek onderhoudt of uitbreidt.
         </p>
@@ -118,6 +120,17 @@ export default function DocL30020() {
 
         <p className="muted">
           Afwijkingen van deze structuur zijn niet toegestaan.
+        </p>
+
+        <p>
+          <strong>Structuurregel: documenttitel</strong><br />
+          Elk document bevat exact één <code>&lt;h1&gt;</code>.
+          Deze <code>&lt;h1&gt;</code> staat altijd direct binnen een semantische <code>&lt;header&gt;</code> en nooit binnen een <code>&lt;section&gt;</code>.
+        </p>
+
+        <p className="muted">
+          Deze regel is bindend voor alle documentpagina's.
+          Hoofdstukpagina's volgen een eigen layout en vallen buiten deze regel.
         </p>
 
         <p>
@@ -257,7 +270,7 @@ export default function DocL30020() {
         <h3>Architectonische regel</h3>
 
         <p>
-          Hoofdstukpagina's zijn <strong>structureel</strong>, documenten zijn  <strong>inhoudelijk</strong>. Deze verantwoordelijkheden mogen nooit vermengd worden.
+          Hoofdstukpagina's zijn <strong>structureel</strong>, documenten zijn <strong>inhoudelijk</strong>. Deze verantwoordelijkheden mogen nooit vermengd worden.
         </p>
       </section>
 

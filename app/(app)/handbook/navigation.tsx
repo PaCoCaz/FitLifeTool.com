@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   hoofdstukken,
-  handbookDocuments,
+  getDocumentsByHoofdstuk,
 } from "./handbookRegistry";
 
 export default function HandbookNavigation() {
@@ -15,40 +15,38 @@ export default function HandbookNavigation() {
   return (
     <nav className="space-y-8 text-sm">
       {hoofdstukken.map((hoofdstuk) => {
-        const docs = handbookDocuments.filter(
-          (doc) => doc.hoofdstuk === hoofdstuk.id
-        );
-
-        if (docs.length === 0) return null;
+        const docs = getDocumentsByHoofdstuk(hoofdstuk.id);
 
         return (
           <div key={hoofdstuk.id}>
-            {/* Hoofdstuktitel */}
+            {/* Hoofdstuk titel */}
             <div className="font-semibold text-[#191970] mb-2">
               {hoofdstuk.id}. {hoofdstuk.titel}
             </div>
 
             {/* Documenten */}
-            <ul className="space-y-1 pl-2 border-l border-gray-200">
-              {docs.map((doc) => {
-                const isActive = pathname === doc.path;
+            {docs.length > 0 && (
+              <ul className="space-y-1 pl-2 border-l border-gray-200">
+                {docs.map((doc) => {
+                  const isActive = pathname === doc.path;
 
-                return (
-                  <li key={doc.id}>
-                    <Link
-                      href={doc.path}
-                      className={
-                        isActive
-                          ? "text-[#0BA4E0] font-medium"
-                          : "text-gray-700 hover:text-[#0BA4E0] transition-colors"
-                      }
-                    >
-                      {doc.nummer} {doc.titel}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                  return (
+                    <li key={doc.id}>
+                      <Link
+                        href={doc.path}
+                        className={
+                          isActive
+                            ? "text-[#0BA4E0] font-medium"
+                            : "text-gray-700 hover:text-[#0BA4E0] transition-colors"
+                        }
+                      >
+                        {doc.nummer} {doc.titel}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         );
       })}

@@ -6,9 +6,11 @@ export default function DocL30002() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>2.1 Profielen & Autorisatie</h1>
+      </header>
 
+      <section>
         <p>
           Gebruikersidentiteit, rollen en toegangscontrole binnen FitLifeTool.
         </p>

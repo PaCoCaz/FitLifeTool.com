@@ -6,9 +6,11 @@ export default function DocL30018() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>5.4 Beheer van technische schuld</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft hoe FitLifeTool omgaat met technische schuld
           (technical debt) en waarom deze expliciet wordt beheerd in plaats van

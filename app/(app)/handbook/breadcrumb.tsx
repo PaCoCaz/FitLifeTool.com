@@ -5,8 +5,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  getDocumentByPath,
-  getHoofdstukById,
+  hoofdstukken,
+  handbookDocuments,
 } from "./handbookRegistry";
 
 export default function HandbookBreadcrumb() {
@@ -23,12 +23,14 @@ export default function HandbookBreadcrumb() {
     );
   }
 
-  /* ───────────────── Hoofdstuk-landingspagina ───────────────── */
+  /* ───────────────── Hoofdstukpagina ───────────────── */
   if (pathname.startsWith("/handbook/hoofdstuk/")) {
-    const hoofdstukId = pathname.split("/").pop()?.toUpperCase(); // h3 → H3
-    if (!hoofdstukId) return null;
+    const hoofdstukId = pathname.split("/").pop()?.toUpperCase();
 
-    const hoofdstuk = getHoofdstukById(hoofdstukId);
+    const hoofdstuk = hoofdstukken.find(
+      (h) => h.id === hoofdstukId
+    );
+
     if (!hoofdstuk) return null;
 
     return (
@@ -54,13 +56,17 @@ export default function HandbookBreadcrumb() {
   }
 
   /* ───────────────── Documentpagina ───────────────── */
-  const doc = getDocumentByPath(pathname);
+  const doc = handbookDocuments.find(
+    (d) => d.path === pathname
+  );
+
   if (!doc) return null;
 
-  const hoofdstuk = getHoofdstukById(doc.hoofdstuk);
-  if (!hoofdstuk) return null;
+  const hoofdstuk = hoofdstukken.find(
+    (h) => h.id === doc.hoofdstuk
+  );
 
-  const hoofdstukSlug = hoofdstuk.id.toLowerCase(); // H3 → h3
+  if (!hoofdstuk) return null;
 
   return (
     <nav className="text-sm">
@@ -80,7 +86,7 @@ export default function HandbookBreadcrumb() {
         {/* Hoofdstuk */}
         <li>
           <Link
-            href={`/handbook/hoofdstuk/${hoofdstukSlug}`}
+            href={hoofdstuk.path}
             className="hover:text-white transition-colors"
           >
             {hoofdstuk.id}. {hoofdstuk.titel}

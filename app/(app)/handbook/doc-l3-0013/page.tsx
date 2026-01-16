@@ -6,9 +6,11 @@ export default function DocL30013() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>4.4 Navigatie & Contextbewustzijn</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft hoe navigatie binnen FitLifeTool
           is ontworpen om contextbewust te zijn, zonder de gebruiker

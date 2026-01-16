@@ -6,9 +6,11 @@ export default function DocL30016() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>5.2 Feature flags & Uitrol</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft hoe nieuwe functionaliteit
           binnen FitLifeTool gecontroleerd wordt uitgerold

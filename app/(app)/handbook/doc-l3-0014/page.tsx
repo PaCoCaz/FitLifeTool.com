@@ -6,9 +6,11 @@ export default function DocL30014() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>4.5 Visuele hiërarchie & Status</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft hoe visuele hiërarchie en
           status-indicatie binnen FitLifeTool worden ingezet

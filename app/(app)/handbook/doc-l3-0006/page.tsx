@@ -6,9 +6,11 @@ export default function DocL30006() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>3.2 Status &amp; Kleuren</h1>
+      </header>
 
+      <section>
         <p>
           Naast numerieke scores gebruikt FitLifeTool kleurcodes om voortgang en status intuïtief zichtbaar te maken.<br/>
           Kleuren zijn geen decoratie, maar onderdeel van de logica.

@@ -6,9 +6,11 @@ export default function DocL30004() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>2.3 Dagdoelen & Herberekening</h1>
+      </header>
 
+      <section>
         <p>
           Hoe FitLifeTool dagdoelen bepaalt, herberekent en vooruitkijkt.
         </p>

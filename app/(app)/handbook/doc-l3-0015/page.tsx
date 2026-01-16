@@ -6,9 +6,11 @@ export default function DocL30015() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>5.1 Kernprincipes uitbreidbaarheid</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft de kernprincipes die bepalen
           hoe FitLifeTool uitbreidbaar blijft zonder dat

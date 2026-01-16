@@ -6,9 +6,11 @@ export default function DocL30009() {
   return (
     <DocumentLayout>
 
-      <section>
+      <header>
         <h1>3.5 Controle & Betrouwbaarheid</h1>
+      </header>
 
+      <section>
         <p>
           Dit hoofdstuk beschrijft hoe FitLifeTool individuele
           domeinscores samenvoegt tot één consistente dagstatus,
