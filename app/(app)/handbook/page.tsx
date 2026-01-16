@@ -1,22 +1,20 @@
+// app/handbook/page.tsx
+
 import Link from "next/link";
-import { handbookDocuments } from "./handbookRegistry";
+import {
+  hoofdstukken,
+  handbookDocuments,
+} from "./handbookRegistry";
 
 export default function HandbookIndexPage() {
-  const grouped = handbookDocuments.reduce<Record<string, typeof handbookDocuments>>(
-    (acc, doc) => {
-      acc[doc.hoofdstuk] ??= [];
-      acc[doc.hoofdstuk].push(doc);
-      return acc;
-    },
-    {}
-  );
-
   return (
     <div className="space-y-10">
+      {/* ───────────────── Header ───────────────── */}
       <header>
         <h1 className="text-2xl font-semibold text-[#191970]">
           Handboek FitLifeTool
         </h1>
+
         <p className="mt-2 text-gray-600 max-w-3xl">
           Dit handboek beschrijft de architectuur, logica en ontwerpkeuzes van
           FitLifeTool. Het fungeert als canonieke bron voor ontwikkeling,
@@ -24,19 +22,27 @@ export default function HandbookIndexPage() {
         </p>
       </header>
 
-      {Object.entries(grouped).map(([hoofdstuk, docs]) => {
-        const { hoofdstukTitel, hoofdstukIntro } = docs[0];
+      {/* ───────────────── Hoofdstukken ───────────────── */}
+      {hoofdstukken.map((hoofdstuk) => {
+        const docs = handbookDocuments.filter(
+          (doc) => doc.hoofdstuk === hoofdstuk.id
+        );
+
+        if (docs.length === 0) return null;
 
         return (
-          <section key={hoofdstuk} className="space-y-3">
+          <section key={hoofdstuk.id} className="space-y-3">
+            {/* Hoofdstuktitel */}
             <h2 className="text-lg font-semibold text-[#191970]">
-              {hoofdstuk}. {hoofdstukTitel}
+              {hoofdstuk.id}. {hoofdstuk.titel}
             </h2>
 
+            {/* Hoofdstuk intro */}
             <p className="text-sm text-gray-600 max-w-3xl">
-              {hoofdstukIntro}
+              {hoofdstuk.intro}
             </p>
 
+            {/* Documenten */}
             <ul className="space-y-1 pl-4 text-sm">
               {docs.map((doc) => (
                 <li key={doc.id}>
