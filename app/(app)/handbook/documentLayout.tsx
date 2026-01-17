@@ -9,8 +9,8 @@ type Props = {
 
 export default function DocumentLayout({ children }: Props) {
   return (
-    <div className="handbook space-y-12 max-w-4xl">
-      <article>
+    <div className="handbook max-w-4xl">
+      <article className="handbook-article">
         {children}
       </article>
 

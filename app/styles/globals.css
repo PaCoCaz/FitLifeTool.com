@@ -42,14 +42,13 @@ body {
   padding-right: 1rem;
 }
 
-/* Hide scrollbar but keep scroll functionality */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE / Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 @keyframes fade-in {
@@ -79,57 +78,58 @@ html {
 
 /* =========================================================
    HANDBOEK — CANONIEKE STIJL
-   Enkel hier aanpassen. Nooit per document.
    ========================================================= */
 
-   .handbook {
-    --handbook-heading: #191970;
-    --handbook-text: #374151;
-    --handbook-muted: #6b7280;
-  
-    max-width: 64rem; /* ~ max-w-4xl */
-  }
-  
-  /* Structuur */
-  .handbook section {
-    margin-bottom: 3rem;
-  }
-  
-  /* Koppen */
-  .handbook h1 {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--handbook-heading);
-  }
-  
-  .handbook h2 {
-    margin-top: 2.5rem;
-    margin-bottom: 0.75rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--handbook-heading);
-  }
-  
-  .handbook h3 {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--handbook-heading);
-  }
-  
-  /* Tekst */
-  .handbook p {
-    margin-bottom: 1rem;
-    line-height: 1.65;
-    color: var(--handbook-text);
-  }
-  
-  .handbook p:last-child {
-    margin-bottom: 0;
-  }
-  
+.handbook {
+  --handbook-heading: #191970;
+  --handbook-text: #374151;
+  --handbook-muted: #6b7280;
+
+  max-width: 64rem;
+}
+
+/* Artikel container (BELANGRIJK) */
+.handbook-article {
+  max-width: 100%;
+  overflow-x: hidden; /* voorkomt dat tabellen document breder maken */
+}
+
+/* Structuur */
+.handbook section {
+  margin-bottom: 3rem;
+}
+
+/* Koppen */
+.handbook h1 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--handbook-heading);
+}
+
+.handbook h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--handbook-heading);
+}
+
+.handbook h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--handbook-heading);
+}
+
+/* Tekst */
+.handbook p {
+  margin-bottom: 1rem;
+  line-height: 1.65;
+  color: var(--handbook-text);
+}
+
   /* Lijsten */
   .handbook ul {
     list-style-type: disc;
@@ -150,125 +150,133 @@ html {
   .handbook li {
     margin-top: 0.25rem;
   }
-  
-  /* Inline code */
-  .handbook code {
-    background: #f3f4f6;
-    padding: 0.1rem 0.35rem;
-    border-radius: 4px;
-    font-size: 0.875em;
-  }
-  
-  /* Infoblokken */
-  .handbook .info-box {
-    margin: 1.25rem 0;
-    padding: 1rem;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.875rem;
-  }
-  
-  /* Gedempte tekst */
-  .handbook .muted {
-    color: var(--handbook-muted);
-  }
-  
-  /* =========================================================
-     Tabellen binnen handboek (canoniek)
-     ========================================================= */
-  
-  .handbook table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    margin: 1.25rem 0;
-    overflow: hidden;
-  }
-  
-  /* Forceer echte tabel-semantiek (bescherming tegen flex/grid resets) */
-  .handbook table {
-    display: table;
-  }
-  
-  .handbook thead {
-    display: table-header-group;
-  }
-  
-  .handbook tbody {
-    display: table-row-group;
-  }
-  
-  .handbook tr {
-    display: table-row;
-  }
-  
+
+/* Inline code */
+.handbook code {
+  background: #f3f4f6;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+/* Infoblokken */
+.handbook .info-box {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+/* Gedempte tekst */
+.handbook .muted {
+  color: var(--handbook-muted);
+}
+
+/* =========================================================
+   TABELLEN — BASIS (ONGEWIJZIGD)
+   ========================================================= */
+
+.handbook table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin: 1.25rem 0;
+}
+
+.handbook th,
+.handbook td {
+  padding: 0.75rem;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: top;
+}
+
+.handbook th {
+  font-weight: 600;
+}
+
+.handbook tr th:last-child,
+.handbook tr td:last-child {
+  border-right: none;
+}
+
+.handbook tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================
+   TABELVARIANTEN
+   ========================================================= */
+
+.handbook table.label-column {
+  table-layout: auto;
+}
+
+.handbook table.key-column {
+  table-layout: fixed;
+}
+
+/* =========================================================
+   ✅ CANONIEKE RESPONSIVE TABEL-OPLOSSING
+   ========================================================= */
+
+/* Wrapper rond tabellen */
+.handbook .table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tabel blijft tabel */
+.handbook .table-scroll > table {
+  min-width: 520px; /* werkt perfect tot 360px */
+}
+
+/* Mobiel: voorkom afbreken van cellen */
+@media (max-width: 480px) {
   .handbook th,
   .handbook td {
-    display: table-cell;
-    padding: 0.75rem;
-    border-right: 1px solid #e5e7eb;
-    border-bottom: 1px solid #e5e7eb;
-    text-align: left;
-    vertical-align: top;
-  }
-  
-  .handbook th {
-    font-weight: 600;
-  }
-  
-  /* Geen dubbele randen */
-  .handbook tr th:last-child,
-  .handbook tr td:last-child {
-    border-right: none;
-  }
-  
-  .handbook tbody tr:last-child td {
-    border-bottom: none;
-  }
-  
-  /* =========================================================
-     Tabel-varianten
-     ========================================================= */
-  
-  /* Label-column
-     Eerste kolom = beschrijvend label
-  */
-  .handbook table.label-column {
-    table-layout: auto;
-  }
-  
-  .handbook table.label-column th:first-child,
-  .handbook table.label-column td:first-child {
-    text-align: left;
-    min-width: 8rem;
-  }
-  
-  .handbook table.label-column th:first-child {
-    font-weight: 600;
-  }
-  
-  /* Key-column
-     Eerste kolom = compacte waarde
-  */
-  .handbook table.key-column {
-    table-layout: fixed;
-  }
-  
-  .handbook table.key-column th:first-child,
-  .handbook table.key-column td:first-child {
-    text-align: left;
-    width: 4rem;
-    min-width: 4rem;
     white-space: nowrap;
   }
+}
+
+/* =========================================================
+   BREADCRUMB — MOBIELVRIENDELIJK GEDRAG
+   ========================================================= */
+
+   @media (max-width: 480px) {
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+    }
   
-  /* Header mag breder zijn dan body (voorkomt afkappen) */
-  .handbook table.key-column thead th:first-child {
-    width: 6.5rem;
-    min-width: 6.5rem;
+    /* Verberg alles behalve laatste item */
+    .breadcrumb > *:not(:last-child):not(:first-child) {
+      display: none;
+    }
+  
+    /* Maak eerste item een 'terug' */
+    .breadcrumb > :first-child {
+      font-weight: 500;
+    }
+  
+    .breadcrumb > :first-child::before {
+      content: "‹ ";
+    }
+  
+    /* Laat laatste item afkappen i.p.v. breken */
+    .breadcrumb > :last-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
   

@@ -55,28 +55,30 @@ export default function DocL30016() {
           Binnen FitLifeTool worden feature flags toegepast op duidelijke grenzen:
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Domein</th>
-              <th>Toepassing</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>UI</td>
-              <td>Cards, acties en visualisaties</td>
-            </tr>
-            <tr>
-              <td>Logica</td>
-              <td>Nieuwe score- en berekeningsvarianten</td>
-            </tr>
-            <tr>
-              <td>Workflow</td>
-              <td>Processtappen zoals nieuwe onboarding</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Domein</th>
+                <th>Toepassing</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>UI</td>
+                <td>Cards, acties en visualisaties</td>
+              </tr>
+              <tr>
+                <td>Logica</td>
+                <td>Nieuwe score- en berekeningsvarianten</td>
+              </tr>
+              <tr>
+                <td>Workflow</td>
+                <td>Processtappen zoals nieuwe onboarding</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Flags worden centraal beheerd en via

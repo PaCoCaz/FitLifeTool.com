@@ -2,7 +2,6 @@
 
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { handbookDocuments } from "./handbookRegistry";
 
@@ -18,7 +17,6 @@ export default function DocumentPager() {
 
   const current = handbookDocuments[index];
 
-  // Alleen documenten binnen hetzelfde hoofdstuk
   const hoofdstukDocs = handbookDocuments.filter(
     (doc) => doc.hoofdstuk === current.hoofdstuk
   );
@@ -37,31 +35,38 @@ export default function DocumentPager() {
 
   const navigate = (path: string) => {
     router.push(path);
-    // Force scroll naar boven
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <div className="flex items-center justify-between pt-10 mt-10 border-t border-gray-200 gap-4">
+    <div
+      className="
+        flex items-center justify-between
+        mt-10
+        border-t border-gray-200
+        pt-6
+        gap-4
+      "
+    >
       {/* Vorige */}
       {prev ? (
         <button
           onClick={() => navigate(prev.path)}
           className="
             flex items-center gap-2
-            px-4 py-2 rounded
+            px-4 py-2
+            rounded
             bg-[#191970] text-white text-sm font-medium
             hover:bg-[#0BA4E0]
             transition-colors
+            whitespace-nowrap
           "
         >
           <span>&lt;</span>
-
-          {/* Nummer altijd zichtbaar */}
           <span>{prev.nummer}</span>
 
-          {/* Titel alleen vanaf md */}
-          <span className="hidden md:inline">
+          {/* Titel zichtbaar tot 615px */}
+          <span className="inline max-[615px]:hidden">
             {prev.titel}
           </span>
         </button>
@@ -75,20 +80,19 @@ export default function DocumentPager() {
           onClick={() => navigate(next.path)}
           className="
             flex items-center gap-2
-            px-4 py-2 rounded
+            px-4 py-2
+            rounded
             bg-[#191970] text-white text-sm font-medium
             hover:bg-[#0BA4E0]
             transition-colors
+            whitespace-nowrap
           "
         >
-          {/* Titel alleen vanaf md */}
-          <span className="hidden md:inline">
+          <span className="inline max-[615px]:hidden">
             {next.titel}
           </span>
 
-          {/* Nummer altijd zichtbaar */}
           <span>{next.nummer}</span>
-
           <span>&gt;</span>
         </button>
       ) : (

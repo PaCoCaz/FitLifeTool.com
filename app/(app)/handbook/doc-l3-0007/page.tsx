@@ -25,24 +25,26 @@ export default function DocL30007() {
           FitLifeTool onderscheidt twee vormen van voortgang:
         </p>
 
-        <table className="label-column">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Omschrijving</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Expected progress</td>
-              <td>Waar een gebruiker theoretisch zou moeten staan op basis van tijd</td>
-            </tr>
-            <tr>
-              <td>Actual progress</td>
-              <td>Wat daadwerkelijk is gelogd door de gebruiker</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Omschrijving</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Expected progress</td>
+                <td>Waar een gebruiker theoretisch zou moeten staan op basis van tijd</td>
+              </tr>
+              <tr>
+                <td>Actual progress</td>
+                <td>Wat daadwerkelijk is gelogd door de gebruiker</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section>
@@ -84,28 +86,30 @@ export default function DocL30007() {
           De status van een card ontstaat uit de vergelijking tussen expected en actual progress.
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Vergelijking</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>behind</td>
-              <td>Actual &lt; Expected</td>
-            </tr>
-            <tr>
-              <td>onTrack</td>
-              <td>Actual ≈ Expected</td>
-            </tr>
-            <tr>
-              <td>completed</td>
-              <td>Actual ≥ dagdoel</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Vergelijking</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>behind</td>
+                <td>Actual &lt; Expected</td>
+              </tr>
+              <tr>
+                <td>onTrack</td>
+                <td>Actual ≈ Expected</td>
+              </tr>
+              <tr>
+                <td>completed</td>
+                <td>Actual ≥ dagdoel</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           “Behind” betekent hier niet fout, maar:

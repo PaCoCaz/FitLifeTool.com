@@ -1,10 +1,18 @@
 // app/components/layout/AppShell.tsx
+
 import Header from "@/components/layout/Header";
 import TopNavigation from "@/components/layout/TopNavigation";
 
 const HEADER_HEIGHT = 56;
 const TOPNAV_HEIGHT = 40;
 const BREADCRUMB_HEIGHT = 44;
+const MOBILE_FOOTER_HEIGHT = 44;
+
+/**
+ * Buitenmarge van cards (visueel gelijk aan zijkanten)
+ * → moet overeenkomen met onderruimte t.o.v. fixed footer
+ */
+const CARD_OUTER_SPACING = 20;
 
 const FIXED_OFFSET =
   HEADER_HEIGHT + TOPNAV_HEIGHT + BREADCRUMB_HEIGHT;
@@ -18,7 +26,7 @@ export default function AppShell({
 }) {
   return (
     <>
-      {/* FIXED HEADER */}
+      {/* ===== FIXED HEADER ===== */}
       <div
         className="fixed top-0 left-0 right-0 z-40"
         style={{ height: HEADER_HEIGHT }}
@@ -26,7 +34,7 @@ export default function AppShell({
         <Header />
       </div>
 
-      {/* FIXED TOP NAV */}
+      {/* ===== FIXED TOP NAV ===== */}
       <div
         className="fixed left-0 right-0 z-40"
         style={{ top: HEADER_HEIGHT, height: TOPNAV_HEIGHT }}
@@ -34,7 +42,7 @@ export default function AppShell({
         <TopNavigation />
       </div>
 
-      {/* FIXED BREADCRUMB AREA (altijd aanwezig) */}
+      {/* ===== FIXED BREADCRUMB ===== */}
       <div
         className="fixed left-0 right-0 z-30 bg-[#191970]"
         style={{
@@ -47,10 +55,14 @@ export default function AppShell({
         </div>
       </div>
 
-      {/* SCROLLENDE CONTENT */}
+      {/* ===== SCROLLABLE CONTENT ===== */}
       <main
         className="container-app py-6"
-        style={{ marginTop: FIXED_OFFSET }}
+        style={{
+          marginTop: FIXED_OFFSET,
+          paddingBottom:
+            MOBILE_FOOTER_HEIGHT + CARD_OUTER_SPACING,
+        }}
       >
         {children}
       </main>

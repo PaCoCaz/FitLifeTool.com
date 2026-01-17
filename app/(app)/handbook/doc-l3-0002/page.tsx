@@ -37,24 +37,26 @@ export default function DocL30002() {
           gescheiden entiteiten:
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Entiteit</th>
-              <th>Omschrijving</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Auth user</td>
-              <td>Beheerd door Supabase Auth</td>
-            </tr>
-            <tr>
-              <td>Profile</td>
-              <td>Domeinspecifieke gebruikersdata</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Entiteit</th>
+                <th>Omschrijving</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Auth user</td>
+                <td>Beheerd door Supabase Auth</td>
+              </tr>
+              <tr>
+                <td>Profile</td>
+                <td>Domeinspecifieke gebruikersdata</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Het profiel fungeert als centrale bron voor:
@@ -108,32 +110,34 @@ export default function DocL30002() {
           FitLifeTool hanteert een beperkt maar expliciet rollenmodel:
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Rol</th>
-              <th>Omschrijving</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>owner</td>
-              <td>Volledige toegang</td>
-            </tr>
-            <tr>
-              <td>admin</td>
-              <td>Beheer en moderatie</td>
-            </tr>
-            <tr>
-              <td>developer</td>
-              <td>Technische inzage</td>
-            </tr>
-            <tr>
-              <td>user</td>
-              <td>Reguliere eindgebruiker</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Rol</th>
+                <th>Omschrijving</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>owner</td>
+                <td>Volledige toegang</td>
+              </tr>
+              <tr>
+                <td>admin</td>
+                <td>Beheer en moderatie</td>
+              </tr>
+              <tr>
+                <td>developer</td>
+                <td>Technische inzage</td>
+              </tr>
+              <tr>
+                <td>user</td>
+                <td>Reguliere eindgebruiker</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Rollen zijn bedoeld voor <em>autorisatie</em>, niet voor

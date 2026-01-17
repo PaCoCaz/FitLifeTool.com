@@ -31,28 +31,30 @@ export default function DocL30006() {
           De status is altijd één van de volgende waarden:
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Betekenis</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>behind</td>
-              <td>Gebruiker loopt achter op schema</td>
-            </tr>
-            <tr>
-              <td>onTrack</td>
-              <td>Gebruiker ligt op schema</td>
-            </tr>
-            <tr>
-              <td>completed</td>
-              <td>Dagdoel is behaald</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Betekenis</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>behind</td>
+                <td>Gebruiker loopt achter op schema</td>
+              </tr>
+              <tr>
+                <td>onTrack</td>
+                <td>Gebruiker ligt op schema</td>
+              </tr>
+              <tr>
+                <td>completed</td>
+                <td>Dagdoel is behaald</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section>
@@ -62,28 +64,30 @@ export default function DocL30006() {
           Elke status correspondeert met een vaste kleur:
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Kleur</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>behind</td>
-              <td>Rood / oranje tint</td>
-            </tr>
-            <tr>
-              <td>onTrack</td>
-              <td>Blauw (neutraal positief)</td>
-            </tr>
-            <tr>
-              <td>completed</td>
-              <td>Groen</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Kleur</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>behind</td>
+                <td>Rood / oranje tint</td>
+              </tr>
+              <tr>
+                <td>onTrack</td>
+                <td>Blauw (neutraal positief)</td>
+              </tr>
+              <tr>
+                <td>completed</td>
+                <td>Groen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Deze mapping is overal identiek: cards, progress bars,

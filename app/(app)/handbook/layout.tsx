@@ -1,9 +1,11 @@
 // app/handbook/layout.tsx
+
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabaseServer";
 import AppShell from "@/components/layout/AppShell";
 import HandbookBreadcrumb from "./breadcrumb";
 import HandbookNavigation from "./navigation";
+import MobileHandbookNav from "./mobileHandbookNav";
 
 export default async function HandbookLayout({
   children,
@@ -16,9 +18,7 @@ export default async function HandbookLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) redirect("/login");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -31,22 +31,27 @@ export default async function HandbookLayout({
   }
 
   return (
-    <AppShell
-      breadcrumb={<HandbookBreadcrumb />}
-    >
-      <div className="grid grid-cols-[260px_1fr] gap-6">
+    <>
+      <AppShell breadcrumb={<HandbookBreadcrumb />}>
+        {/* ===== DESKTOP ===== */}
+        <div className="hidden md:grid grid-cols-[260px_1fr] gap-6">
+          <aside className="bg-white rounded-[var(--radius)] shadow-sm p-4 h-fit">
+            <HandbookNavigation />
+          </aside>
 
-        {/* Sidebar */}
-        <aside className="bg-white rounded-[var(--radius)] shadow-sm p-4 h-fit">
-          <HandbookNavigation />
-        </aside>
+          <main className="bg-white rounded-[var(--radius)] p-6 shadow-sm">
+            {children}
+          </main>
+        </div>
 
-        {/* Content */}
-        <main className="bg-white rounded-[var(--radius)] p-6 shadow-sm">
+        {/* ===== MOBILE CONTENT ===== */}
+        <div className="md:hidden bg-white rounded-[var(--radius)] p-4 shadow-sm pb-24">
           {children}
-        </main>
+        </div>
+      </AppShell>
 
-      </div>
-    </AppShell>
+      {/* ===== FIXED MOBILE FOOTER (BUITEN AppShell) ===== */}
+      <MobileHandbookNav />
+    </>
   );
 }

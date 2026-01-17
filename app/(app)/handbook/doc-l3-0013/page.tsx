@@ -33,28 +33,30 @@ export default function DocL30013() {
           waarbij elke laag een duidelijk doel heeft.
         </p>
 
-        <table className="label-column">
-          <thead>
-            <tr>
-              <th>Laag</th>
-              <th>Doel</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Globaal</td>
-              <td>Waar ben ik in de applicatie</td>
-            </tr>
-            <tr>
-              <td>Contextueel</td>
-              <td>Wat kan ik hier doen</td>
-            </tr>
-            <tr>
-              <td>Breadcrumbs</td>
-              <td>Hoe ben ik hier gekomen</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Laag</th>
+                <th>Doel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Globaal</td>
+                <td>Waar ben ik in de applicatie</td>
+              </tr>
+              <tr>
+                <td>Contextueel</td>
+                <td>Wat kan ik hier doen</td>
+              </tr>
+              <tr>
+                <td>Breadcrumbs</td>
+                <td>Hoe ben ik hier gekomen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Contextbewustzijn betekent dat navigatie-elementen
@@ -77,32 +79,34 @@ export default function DocL30013() {
           verantwoordelijkheid.
         </p>
 
-        <table className="label-column">
-          <thead>
-            <tr>
-              <th>Component</th>
-              <th>Verantwoordelijkheid</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Header</td>
-              <td>Applicatie-identiteit en primaire acties</td>
-            </tr>
-            <tr>
-              <td>TopNavigation</td>
-              <td>Hoofdsecties binnen de applicatie</td>
-            </tr>
-            <tr>
-              <td>Sidebar</td>
-              <td>Verdieping binnen een domein</td>
-            </tr>
-            <tr>
-              <td>Breadcrumb</td>
-              <td>Positionering binnen de hiërarchie</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Verantwoordelijkheid</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Header</td>
+                <td>Applicatie-identiteit en primaire acties</td>
+              </tr>
+              <tr>
+                <td>TopNavigation</td>
+                <td>Hoofdsecties binnen de applicatie</td>
+              </tr>
+              <tr>
+                <td>Sidebar</td>
+                <td>Verdieping binnen een domein</td>
+              </tr>
+              <tr>
+                <td>Breadcrumb</td>
+                <td>Positionering binnen de hiërarchie</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Context wordt afgeleid uit routing (URL-segmenten)

@@ -5,7 +5,7 @@ import { createServerClient } from "@supabase/ssr";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ⛔️ NOOIT auth endpoints intercepten (logout, callbacks, etc.)
+  // ⛔️ NOOIT auth endpoints intercepten
   if (pathname.startsWith("/auth")) {
     return NextResponse.next();
   }
@@ -30,7 +30,6 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // ⚠️ BELANGRIJK: geen getSession(), alleen getUser()
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -39,7 +38,8 @@ export async function middleware(request: NextRequest) {
 
   const isProtected =
     pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/settings");
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/handbook"); // ✅ TOEGEVOEGD
 
   const isLogin = pathname === "/login";
   const isHome = pathname === "/";
@@ -53,8 +53,22 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  // 🔒 EXTRA: role-check alleen voor handbook
+  if (isLoggedIn && pathname.startsWith("/handbook")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || !["owner", "admin", "developer"].includes(profile.role)) {
+      return NextResponse.redirect(
+        new URL("/", request.url)
+      );
+    }
+  }
+
   // ✅ Ingelogd → login/home overslaan
-  // ⚠️ MAAR reset/forgot password altijd toestaan
   if (
     isLoggedIn &&
     (isLogin || isHome) &&
@@ -77,6 +91,7 @@ export const config = {
     "/reset-password",
     "/dashboard/:path*",
     "/settings/:path*",
+    "/handbook/:path*", // ✅ TOEGEVOEGD
     "/auth/:path*",
   ],
 };

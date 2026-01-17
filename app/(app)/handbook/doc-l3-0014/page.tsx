@@ -60,55 +60,59 @@ export default function DocL30014() {
           vaste conventies:
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Rol</th>
-              <th>Kenmerken</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Primair</td>
-              <td>Donkerblauw, hoger typografisch gewicht, prominente plaatsing</td>
-            </tr>
-            <tr>
-              <td>Secundair</td>
-              <td>Neutrale tinten, kleiner lettertype</td>
-            </tr>
-            <tr>
-              <td>Status</td>
-              <td>Kleuraccenten met lage verzadiging</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Rol</th>
+                <th>Kenmerken</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Primair</td>
+                <td>Donkerblauw, hoger typografisch gewicht, prominente plaatsing</td>
+              </tr>
+              <tr>
+                <td>Secundair</td>
+                <td>Neutrale tinten, kleiner lettertype</td>
+              </tr>
+              <tr>
+                <td>Status</td>
+                <td>Kleuraccenten met lage verzadiging</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Status-signaling volgt vaste regels:
         </p>
 
-        <table className="label-column">
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Kleurgebruik</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Positief</td>
-              <td>Koele of groene tinten</td>
-            </tr>
-            <tr>
-              <td>Neutraal</td>
-              <td>Grijs of gedempt blauw</td>
-            </tr>
-            <tr>
-              <td>Waarschuwing</td>
-              <td>Warm accent, beperkt in oppervlak</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">  
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Kleurgebruik</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Positief</td>
+                <td>Koele of groene tinten</td>
+              </tr>
+              <tr>
+                <td>Neutraal</td>
+                <td>Grijs of gedempt blauw</td>
+              </tr>
+              <tr>
+                <td>Waarschuwing</td>
+                <td>Warm accent, beperkt in oppervlak</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Decoratieve elementen worden vermeden;

@@ -58,28 +58,30 @@ export default function DocL30005() {
           De FitLifeScore gebruikt vaste gewichten per pijler:
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Gewicht</th>
-              <th>Pijler</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>30%</td>
-              <td>Hydration</td>
-            </tr>
-            <tr>
-              <td>30%</td>
-              <td>Activity</td>
-            </tr>
-            <tr>
-              <td>40%</td>
-              <td>Nutrition</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Gewicht</th>
+                <th>Pijler</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>30%</td>
+                <td>Hydration</td>
+              </tr>
+              <tr>
+                <td>30%</td>
+                <td>Activity</td>
+              </tr>
+              <tr>
+                <td>40%</td>
+                <td>Nutrition</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           De ruwe score wordt berekend als gewogen gemiddelde en vervolgens naar beneden afgerond.

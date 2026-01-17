@@ -37,28 +37,30 @@ export default function DocL30018() {
           technische schuld:
         </p>
 
-        <table className="label-column">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Betekenis</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Geaccepteerd</td>
-              <td>Tijdelijk en bewust gekozen schuld</td>
-            </tr>
-            <tr>
-              <td>Verborgen</td>
-              <td>Onbedoelde schuld met verhoogd risico</td>
-            </tr>
-            <tr>
-              <td>Verouderd</td>
-              <td>Schuld die niet langer gerechtvaardigd is</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Betekenis</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Geaccepteerd</td>
+                <td>Tijdelijk en bewust gekozen schuld</td>
+              </tr>
+              <tr>
+                <td>Verborgen</td>
+                <td>Onbedoelde schuld met verhoogd risico</td>
+              </tr>
+              <tr>
+                <td>Verouderd</td>
+                <td>Schuld die niet langer gerechtvaardigd is</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
           Alleen geaccepteerde schuld is toegestaan; de overige vormen

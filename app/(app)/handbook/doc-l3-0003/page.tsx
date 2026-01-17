@@ -77,32 +77,34 @@ export default function DocL30003() {
           Elk log-record bevat minimaal:
         </p>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Veld</th>
-              <th>Omschrijving</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>user_id</td>
-              <td>Verwijzing naar de gebruiker waartoe het log behoort</td>
-            </tr>
-            <tr>
-              <td>log_date</td>
-              <td>Datum waarop de log bij de dag wordt gerekend</td>
-            </tr>
-            <tr>
-              <td>created_at</td>
-              <td>Tijdstip waarop de log is vastgelegd</td>
-            </tr>
-            <tr>
-              <td>inhoud</td>
-              <td>De gemeten waarde, zoals ml, kcal of aantal stappen</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Veld</th>
+                <th>Omschrijving</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>user_id</td>
+                <td>Verwijzing naar de gebruiker waartoe het log behoort</td>
+              </tr>
+              <tr>
+                <td>log_date</td>
+                <td>Datum waarop de log bij de dag wordt gerekend</td>
+              </tr>
+              <tr>
+                <td>created_at</td>
+                <td>Tijdstip waarop de log is vastgelegd</td>
+              </tr>
+              <tr>
+                <td>inhoud</td>
+                <td>De gemeten waarde, zoals ml, kcal of aantal stappen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section>

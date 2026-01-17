@@ -7,7 +7,7 @@ export default function DocL30020() {
     <DocumentLayout>
 
       <header>
-        <h1>5.6 De opbouw van het handboek</h1>
+        <h1>5.6 De opbouw van het interne FitLifeTool-handboek</h1>
       </header>
 
       <section>
@@ -52,32 +52,34 @@ export default function DocL30020() {
 
         <h3>Niveaus (levels)</h3>
 
-        <table className="key-column">
-          <thead>
-            <tr>
-              <th>Level</th>
-              <th>Doelgroep</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>L1</td>
-              <td>Eindgebruikersdocumentatie</td>
-              <td>Toekomstig</td>
-            </tr>
-            <tr>
-              <td>L2</td>
-              <td>Coach- en begeleidersdocumentatie</td>
-              <td>Toekomstig</td>
-            </tr>
-            <tr>
-              <td>L3</td>
-              <td>Interne ontwikkelaarsdocumentatie</td>
-              <td>Huidig</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Doelgroep</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>L1</td>
+                <td>Eindgebruikersdocumentatie</td>
+                <td>Toekomstig</td>
+              </tr>
+              <tr>
+                <td>L2</td>
+                <td>Coach- en begeleidersdocumentatie</td>
+                <td>Toekomstig</td>
+              </tr>
+              <tr>
+                <td>L3</td>
+                <td>Interne ontwikkelaarsdocumentatie</td>
+                <td>Huidig</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <h3>Hoofdstukken</h3>
 
@@ -208,6 +210,7 @@ export default function DocL30020() {
 
         <h3>Verschil met documentpagina's</h3>
 
+        <div className="table-scroll">
         <table className="label-column">
           <thead>
             <tr>
@@ -249,6 +252,7 @@ export default function DocL30020() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h3>Layout en technische afbakening</h3>
 
