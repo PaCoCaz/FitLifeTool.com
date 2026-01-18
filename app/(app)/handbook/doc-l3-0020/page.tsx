@@ -171,9 +171,19 @@ export default function DocL30020() {
           Alle visuele eigenschappen (uitlijning, breedte, typografie) zijn centraal vastgelegd in <code>globals.css</code>.
         </p>
 
+        <p>
+          <strong>Tabellen - implementatieregel</strong><br />
+          Elke tabel in een handboekdocument wordt <strong>verplicht</strong> geplaatst binnen een omhullende container met de class <code>.table-scroll</code>.
+        </p>
+
         <p className="muted">
-          Het introduceren van nieuwe classes in documenten is niet toegestaan.
-          Indien een nieuwe presentatievorm nodig is, wordt deze eerst canoniek toegevoegd aan het globale styling-contract.
+          De <code>.table-scroll</code>-container is verantwoordelijk voor horizontale scroll op kleine schermen en voorkomt dat tabellen het document of de layout verbreden.
+          Tabellen zelf blijven semantisch zuiver (<code>&lt;table&gt;</code>, <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>) en bevatten geen layout- of responsiviteitslogica.
+        </p>
+
+        <p className="muted">
+          Het is niet toegestaan om tabellen mobiel anders te implementeren, te herschalen, te splitsen of per document afwijkend gedrag toe te passen.
+          Responsiviteit van tabellen is een <strong>globale verantwoordelijkheid</strong> en wordt uitsluitend beheerd via <code>globals.css</code>.
         </p>
 
         <p>
@@ -211,54 +221,53 @@ export default function DocL30020() {
         <h3>Verschil met documentpagina's</h3>
 
         <div className="table-scroll">
-        <table className="label-column">
-          <thead>
-            <tr>
-              <th>Aspect</th>
-              <th>Hoofdstukpagina</th>
-              <th>Documentpagina</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Doel</td>
-              <td>Navigatie & context</td>
-              <td>Inhoud & besluitvorming</td>
-            </tr>
-            <tr>
-              <td>Normatief</td>
-              <td>Nee</td>
-              <td>Ja</td>
-            </tr>
-            <tr>
-              <td>Layout</td>
-              <td>ChapterLayout</td>
-              <td>DocumentLayout</td>
-            </tr>
-            <tr>
-              <td>DocumentPager</td>
-              <td>Niet toegestaan</td>
-              <td>Verplicht (indien van toepassing)</td>
-            </tr>
-            <tr>
-              <td>Tabellen</td>
-              <td>Niet toegestaan</td>
-              <td>Toegestaan</td>
-            </tr>
-            <tr>
-              <td>Info-box</td>
-              <td>Niet toegestaan</td>
-              <td>Toegestaan</td>
-            </tr>
-          </tbody>
-        </table>
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Aspect</th>
+                <th>Hoofdstukpagina</th>
+                <th>Documentpagina</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Doel</td>
+                <td>Navigatie & context</td>
+                <td>Inhoud & besluitvorming</td>
+              </tr>
+              <tr>
+                <td>Normatief</td>
+                <td>Nee</td>
+                <td>Ja</td>
+              </tr>
+              <tr>
+                <td>Layout</td>
+                <td>ChapterLayout</td>
+                <td>DocumentLayout</td>
+              </tr>
+              <tr>
+                <td>DocumentPager</td>
+                <td>Niet toegestaan</td>
+                <td>Verplicht (indien van toepassing)</td>
+              </tr>
+              <tr>
+                <td>Tabellen</td>
+                <td>Niet toegestaan</td>
+                <td>Toegestaan</td>
+              </tr>
+              <tr>
+                <td>Info-box</td>
+                <td>Niet toegestaan</td>
+                <td>Toegestaan</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <h3>Layout en technische afbakening</h3>
 
         <p>
-          Hoofdstukpagina's maken gebruik van een aparte layout:
-          <code>ChapterLayout</code>.
+          Hoofdstukpagina's maken gebruik van een aparte layout: <code>ChapterLayout</code>.
         </p>
 
         <ul>
@@ -269,6 +278,31 @@ export default function DocL30020() {
 
         <p className="muted">
           Het is niet toegestaan om hoofdstukpagina's te behandelen als “lichte documenten” of om documentgedrag gedeeltelijk te kopiëren.
+        </p>
+
+        <h3>Layout-afbakening</h3>
+
+        <p>
+          De layout van handboekdocumenten is <strong>gelaagd en strikt afgebakend</strong>.
+          Elke laag heeft een eigen verantwoordelijkheid en mag deze niet overschrijden.
+        </p>
+
+        <ul>
+          <li>
+            <strong>DocumentLayout</strong> bepaalt de <em>globale spacing</em>, positionering en verticale ritmiek van documentpagina's.
+          </li>
+          <li>
+            <strong>DocumentPager</strong> mag <em>lokaal compenseren</em> voor bekende en expliciete layout-effecten die voortkomen uit DocumentLayout.
+          </li>
+          <li>
+            Dergelijke compensatie is altijd <strong>responsief begrensd</strong> en nooit globaal of document-overschrijdend.
+          </li>
+        </ul>
+
+        <p className="muted">
+          Het is niet toegestaan om spacing-problemen op te lossen door globale layoutregels te verzwakken
+          of door per document afwijkende marges, padding of positionering toe te passen.
+          Indien een layout-effect structureel ongewenst is, wordt dit opgelost op het niveau waar het ontstaat.
         </p>
 
         <h3>Architectonische regel</h3>

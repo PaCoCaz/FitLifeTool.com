@@ -42,10 +42,10 @@ export default function DocumentPager() {
     <div
       className="
         flex items-center justify-between
-        mt-0
         border-t border-gray-200
         pt-5
         gap-4
+        max-[767px]:-mb-18
       "
     >
       {/* Vorige */}
@@ -64,8 +64,6 @@ export default function DocumentPager() {
         >
           <span>&lt;</span>
           <span>{prev.nummer}</span>
-
-          {/* Titel zichtbaar tot 615px */}
           <span className="inline max-[615px]:hidden">
             {prev.titel}
           </span>
@@ -91,7 +89,6 @@ export default function DocumentPager() {
           <span className="inline max-[615px]:hidden">
             {next.titel}
           </span>
-
           <span>{next.nummer}</span>
           <span>&gt;</span>
         </button>

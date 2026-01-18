@@ -102,7 +102,7 @@ html {
 /* Koppen */
 .handbook h1 {
   margin-bottom: 1rem;
-  font-size: 1.5rem;
+  font-size: 1.40rem;
   font-weight: 600;
   color: var(--handbook-heading);
 }
@@ -110,7 +110,7 @@ html {
 .handbook h2 {
   margin-top: 2.5rem;
   margin-bottom: 0.75rem;
-  font-size: 1.25rem;
+  font-size: 1.20rem;
   font-weight: 600;
   color: var(--handbook-heading);
 }
@@ -122,6 +122,24 @@ html {
   font-weight: 600;
   color: var(--handbook-heading);
 }
+
+/* =========================================================
+   HANDBOEK — TYPOGRAFISCHE SCHAALCORRECTIE (ZEER KLEIN)
+   ========================================================= */
+
+   @media (max-width: 400px) {
+    .handbook h1 {
+      font-size: 1.1rem;
+    }
+
+    .handbook h2 {
+      font-size: 1.05rem;
+    }
+
+    .handbook h3 {
+      font-size: 1.0rem;
+    }
+  } 
 
 /* Tekst */
 .handbook p {
@@ -163,7 +181,7 @@ html {
 .handbook .info-box {
   margin: 1.25rem 0;
   padding: 1rem;
-  background: #f9fafb;
+  background: #f3f4f6;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -182,8 +200,8 @@ html {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: #DBE4F0;
+  border: 0px solid #FFFFFF;
   border-radius: 6px;
   margin: 1.25rem 0;
 }
@@ -191,8 +209,8 @@ html {
 .handbook th,
 .handbook td {
   padding: 0.75rem;
-  border-right: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #FFFFFF;
+  border-bottom: 1px solid #FFFFFF;
   text-align: left;
   vertical-align: top;
 }
