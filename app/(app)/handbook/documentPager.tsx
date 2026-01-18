@@ -42,9 +42,9 @@ export default function DocumentPager() {
     <div
       className="
         flex items-center justify-between
-        mt-10
+        mt-0
         border-t border-gray-200
-        pt-6
+        pt-5
         gap-4
       "
     >

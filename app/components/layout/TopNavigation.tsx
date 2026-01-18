@@ -6,10 +6,12 @@ import Image from "next/image";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
+  { label: "Hydratatie", href: "/dashboard#hydration" },
   { label: "Voeding", href: "/dashboard#nutrition" },
-  { label: "Activiteit", href: "/dashboard#activity" },
+  { label: "Activiteiten", href: "/dashboard#activity" },
   { label: "Gewicht", href: "/dashboard/weight" },
-  { label: "Instellingen", href: "/settings" },
+  { label: "Handboek", href: "/handbook" },
+  { label: "Instellingen", href: "/dashboard#settings" },
 ];
 
 export default function TopNavigation() {
