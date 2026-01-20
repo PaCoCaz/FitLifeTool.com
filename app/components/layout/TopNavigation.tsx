@@ -1,23 +1,43 @@
+// app/components/layout/TopNavigation.tsx
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
+import { useUser } from "@/lib/AuthProvider";
 
-const NAV_ITEMS = [
+/* ───────────────── Navigatiesets ───────────────── */
+
+const PUBLIC_NAV_ITEMS = [
+  { label: "Gezondheid", href: "/gezondheid" },
+  { label: "Voeding", href: "/voeding" },
+  { label: "Beweging", href: "/beweging" },
+  { label: "Hydratatie", href: "/hydratatie" },
+  { label: "Gewicht", href: "/gewicht" },
+  { label: "Herstel", href: "/herstel" },
+  { label: "Leefstijl", href: "/leefstijl" },
+];
+
+const AUTH_NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
-  { label: "Hydratatie", href: "/dashboard#hydration" },
-  { label: "Voeding", href: "/dashboard#nutrition" },
-  { label: "Activiteiten", href: "/dashboard#activity" },
   { label: "Gewicht", href: "/dashboard/weight" },
   { label: "Handboek", href: "/handbook" },
-  { label: "Instellingen", href: "/dashboard#settings" },
+  { label: "Instellingen", href: "/settings" },
 ];
 
 export default function TopNavigation() {
   const pathname = usePathname();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const { user } = useUser();
+  const isLoggedIn = !!user;
+  const role = undefined;
+
+  const navItems = isLoggedIn
+    ? AUTH_NAV_ITEMS
+    : PUBLIC_NAV_ITEMS;
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -44,10 +64,9 @@ export default function TopNavigation() {
   }, []);
 
   return (
-    <nav className="sticky top-16 z-40 bg-[#B8CAE0]">
+    <nav className="sticky top-16 z-30 bg-[#B8CAE0]">
       <div className="mx-auto max-w-[1200px] px-4">
         <div className="flex items-start">
-
           {/* Left chevron */}
           {canScrollLeft && (
             <div className="mr-2 pt-[4px] flex items-start">
@@ -66,11 +85,11 @@ export default function TopNavigation() {
             ref={scrollRef}
             className="flex flex-1 gap-6 overflow-x-auto no-scrollbar"
           >
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const isActive =
-              item.href === "/dashboard"
-                ? pathname === "/dashboard"
-                : pathname.startsWith(item.href);            
+                item.href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname === item.href || pathname.startsWith(item.href + "/");            
 
               return (
                 <button
@@ -108,7 +127,6 @@ export default function TopNavigation() {
               />
             </div>
           )}
-
         </div>
       </div>
     </nav>

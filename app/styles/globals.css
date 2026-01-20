@@ -265,6 +265,31 @@ html {
 }
 
 /* =========================================================
+   CATEGORIE-AANDUIDING (publiek)
+   ========================================================= */
+
+    .handbook-public .category-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b7280;          /* muted */
+      letter-spacing: 0.02em; /* subtiel */
+      text-transform: uppercase;
+    }
+  
+/* =========================================================
+   CATEGORIE-AANDUIDING — MOBIEL SUBTIELER
+   ========================================================= */
+
+   @media (max-width: 480px) {
+    .handbook-public .category-label {
+      font-size: 0.6875rem;   /* ~11px */
+      font-weight: 400;       /* lichter */
+      letter-spacing: 0.01em; /* minder nadruk */
+      margin-bottom: 0.25rem;
+    }
+  }
+
+/* =========================================================
    BREADCRUMB — MOBIELVRIENDELIJK GEDRAG
    ========================================================= */
 

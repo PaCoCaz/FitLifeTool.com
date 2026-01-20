@@ -10,7 +10,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  let response = NextResponse.next();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
+
+  let response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -85,13 +92,20 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/",
+    "/",                         // homepage
     "/login",
     "/forgot-password",
     "/reset-password",
+
+    // publieke categorieën (SEO)
+    "/:category",
+    "/:category/:path*",
+
+    // app routes
     "/dashboard/:path*",
     "/settings/:path*",
-    "/handbook/:path*", // ✅ TOEGEVOEGD
+    "/handbook/:path*",
     "/auth/:path*",
   ],
 };
+

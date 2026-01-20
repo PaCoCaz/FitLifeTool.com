@@ -28,7 +28,7 @@ export default function AppShell({
     <>
       {/* ===== FIXED HEADER ===== */}
       <div
-        className="fixed top-0 left-0 right-0 z-40"
+        className="fixed top-0 left-0 right-0 z-50"
         style={{ height: HEADER_HEIGHT }}
       >
         <Header />

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
@@ -62,7 +63,40 @@ export default function Header() {
         {/* Spacer */}
         <div className="flex-1 min-w-0" />
 
-        {/* User menu */}
+        {/* Auth actions / User menu */}
+        {!loading && !user && (
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="
+                text-sm
+                font-medium
+                text-[#191970]
+                hover:underline
+              "
+            >
+              Inloggen
+            </Link>
+
+            <Link
+              href="/register"
+              className="
+                rounded-[var(--radius)]
+                bg-[#191970]
+                px-4
+                py-2
+                text-sm
+                font-medium
+                text-white
+                hover:bg-[#0BA4E0]
+                transition-colors
+              "
+            >
+              Registreren
+            </Link>
+          </div>
+        )}
+
         {!loading && user && firstName && (
           <div className="max-w-[55%]">
             <AvatarMenu firstName={firstName} />

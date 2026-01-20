@@ -35,7 +35,7 @@ export default function AvatarMenu({ firstName }: Props) {
       credentials: "include", // 🔴 DIT IS DE MISSENDE SCHAKEL
     });
   
-    window.location.assign("/login");
+    window.location.assign("/");
   };    
 
   return (
@@ -79,7 +79,7 @@ export default function AvatarMenu({ firstName }: Props) {
             shadow-lg
             border
             py-1
-            z-50
+            z-[100]
           "
         >
           {/* Instellingen */}
