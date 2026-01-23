@@ -1,6 +1,8 @@
+// app/components/auth/OnboardingFinalStep.tsx
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
@@ -37,9 +39,13 @@ type ProfileForCalculation = {
 
 /* ───────────────── Component ───────────────── */
 
-export default function OnboardingStep3() {
+type Props = {
+  onBack: () => void;
+};
+
+export default function OnboardingFinalStep({ onBack }: Props) {
   const router = useRouter();
-  const { user, loading } = useUser();
+  const { user } = useUser();
 
   const [activityLevel, setActivityLevel] =
     useState<ActivityLevel | "">("");
@@ -48,11 +54,7 @@ export default function OnboardingStep3() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/register");
-    }
-  }, [user, loading, router]);
+  /* ───────────────── Handler ───────────────── */
 
   const handleFinish = async () => {
     if (!activityLevel || !goal) {
@@ -60,7 +62,10 @@ export default function OnboardingStep3() {
       return;
     }
 
-    if (!user) return;
+    if (!user) {
+      setError("Geen gebruiker gevonden");
+      return;
+    }
 
     setSaving(true);
     setError(null);
@@ -136,10 +141,11 @@ export default function OnboardingStep3() {
       profile.height_cm
     );
 
-    /* 4️⃣ Doelen opslaan */
+    /* 4️⃣ Alles opslaan (incl. TDEE) */
     const { error: goalsError } = await supabase
       .from("profiles")
       .update({
+        tdee: Math.round(tdee),
         calorie_goal: calorieGoal,
         activity_goal_kcal: activityGoal,
         water_goal_ml: waterGoal,
@@ -154,105 +160,120 @@ export default function OnboardingStep3() {
       return;
     }
 
+    /* 5️⃣ Klaar */
     router.replace("/dashboard");
   };
 
-  if (loading || !user) return null;
+  if (!user) return null;
+
+  /* ───────────────── Render ───────────────── */
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 bg-[#DBE4F0]">
-      <div className="w-full max-w-sm rounded-[var(--radius)] bg-white p-6 shadow">
-        <h1 className="mb-2 text-lg font-semibold text-[#191970]">
-          Je doelen
-        </h1>
+    <div className="space-y-6">
+      {/* Activiteitsniveau */}
+      <div>
+        <label className="mb-1 block text-sm font-medium">
+          Activiteitsniveau
+        </label>
+        <select
+          value={activityLevel}
+          onChange={(e) =>
+            setActivityLevel(
+              e.target.value as ActivityLevel
+            )
+          }
+          className="w-full rounded border px-3 py-2"
+        >
+          <option value="">Selecteer</option>
+          <option value="sedentary">
+            Weinig tot geen beweging
+          </option>
+          <option value="light">
+            Licht actief (1–3× per week)
+          </option>
+          <option value="moderate">
+            Gemiddeld actief (3–5× per week)
+          </option>
+          <option value="active">
+            Zeer actief (6–7× per week)
+          </option>
+          <option value="very_active">
+            Extreem actief
+          </option>
+        </select>
+      </div>
 
-        <p className="mb-6 text-sm text-gray-500">
-          Op basis hiervan stellen we je persoonlijke dagdoelen in.
-        </p>
+      {/* Doel */}
+      <div>
+        <label className="mb-1 block text-sm font-medium">
+          Wat is je doel?
+        </label>
 
-        <div className="space-y-4">
-          {/* Activiteitsniveau */}
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Activiteitsniveau
-            </label>
-            <select
-              value={activityLevel}
-              onChange={(e) =>
-                setActivityLevel(
-                  e.target.value as ActivityLevel
-                )
+        <div className="space-y-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              checked={goal === "lose_weight"}
+              onChange={() =>
+                setGoal("lose_weight")
               }
-              className="w-full rounded border px-3 py-2 text-base"
-            >
-              <option value="">Selecteer</option>
-              <option value="sedentary">
-                Weinig tot geen beweging
-              </option>
-              <option value="light">
-                Licht actief (1–3× per week)
-              </option>
-              <option value="moderate">
-                Gemiddeld actief (3–5× per week)
-              </option>
-              <option value="active">
-                Zeer actief (6–7× per week)
-              </option>
-              <option value="very_active">
-                Extreem actief (fysiek werk / sport)
-              </option>
-            </select>
-          </div>
+            />
+            Afvallen
+          </label>
 
-          {/* Doel */}
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Wat is je doel?
-            </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              checked={goal === "maintain"}
+              onChange={() =>
+                setGoal("maintain")
+              }
+            />
+            Gewicht behouden
+          </label>
 
-            <div className="space-y-2 text-base">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  checked={goal === "lose_weight"}
-                  onChange={() => setGoal("lose_weight")}
-                />
-                Afvallen
-              </label>
-
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  checked={goal === "maintain"}
-                  onChange={() => setGoal("maintain")}
-                />
-                Gewicht behouden
-              </label>
-
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  checked={goal === "gain_weight"}
-                  onChange={() => setGoal("gain_weight")}
-                />
-                Aankomen
-              </label>
-            </div>
-          </div>
-
-          {error && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
-
-          <button
-            onClick={handleFinish}
-            disabled={saving}
-            className="w-full rounded-[var(--radius)] bg-[#191970] py-2 text-white hover:bg-[#0BA4E0] transition"
-          >
-            {saving ? "Instellen…" : "Naar dashboard"}
-          </button>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              checked={goal === "gain_weight"}
+              onChange={() =>
+                setGoal("gain_weight")
+              }
+            />
+            Aankomen
+          </label>
         </div>
       </div>
-    </main>
+
+      {error && (
+        <p className="text-sm text-red-600">{error}</p>
+      )}
+
+      {/* Actions */}
+      <div className="flex justify-between">
+        <button
+          onClick={onBack}
+          className="text-sm text-gray-500"
+        >
+          Terug
+        </button>
+
+        <button
+          onClick={handleFinish}
+          disabled={saving}
+          className="
+            rounded-[var(--radius)]
+            bg-[#191970]
+            px-4 py-2
+            text-sm
+            font-medium
+            text-white
+            hover:bg-[#0BA4E0]
+          "
+        >
+          {saving ? "Instellen…" : "Naar dashboard"}
+        </button>
+      </div>
+    </div>
   );
 }

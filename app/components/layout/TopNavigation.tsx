@@ -23,7 +23,6 @@ const AUTH_NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Gewicht", href: "/dashboard/weight" },
   { label: "Handboek", href: "/handbook" },
-  { label: "Instellingen", href: "/settings" },
 ];
 
 export default function TopNavigation() {
