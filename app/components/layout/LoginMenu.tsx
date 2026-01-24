@@ -50,6 +50,7 @@ export default function LoginMenu({ onRegister }: Props) {
           className="
             absolute right-0 mt-2
             w-[360px]
+            max-w-[calc(100vw-2rem)]
             rounded-[var(--radius)]
             bg-white
             shadow-xl

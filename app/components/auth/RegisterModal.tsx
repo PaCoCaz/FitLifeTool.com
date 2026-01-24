@@ -59,6 +59,8 @@ export default function RegisterModal({ open, onClose }: Props) {
       <div
         className="
           w-full max-w-md
+          mx-4
+          sm:mx-0
           rounded-[var(--radius)]
           bg-white
           shadow-xl

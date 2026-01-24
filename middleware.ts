@@ -1,3 +1,5 @@
+// middleware.ts
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
@@ -46,21 +48,17 @@ export async function middleware(request: NextRequest) {
   const isProtected =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/settings") ||
-    pathname.startsWith("/handbook"); // ✅ TOEGEVOEGD
-
-  const isLogin = pathname === "/login";
-  const isHome = pathname === "/";
-  const isResetPassword = pathname === "/reset-password";
-  const isForgotPassword = pathname === "/forgot-password";
+    pathname.startsWith("/handbook");
 
   // ❌ Niet ingelogd → protected routes blokkeren
+  // 🔁 Redirect nu altijd naar / (niet meer naar /login)
   if (!isLoggedIn && isProtected) {
     return NextResponse.redirect(
-      new URL("/login", request.url)
+      new URL("/", request.url)
     );
   }
 
-  // 🔒 EXTRA: role-check alleen voor handbook
+  // 🔒 Role-check alleen voor handbook
   if (isLoggedIn && pathname.startsWith("/handbook")) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -75,17 +73,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // ✅ Ingelogd → login/home overslaan
-  if (
-    isLoggedIn &&
-    (isLogin || isHome) &&
-    !isResetPassword &&
-    !isForgotPassword
-  ) {
-    return NextResponse.redirect(
-      new URL("/dashboard", request.url)
-    );
-  }
+  // ✅ GEEN redirects meer voor:
+  // - /
+  // - /login
+  // - /register
+  // Dit wordt nu volledig door pagina’s en header afgehandeld
 
   return response;
 }
@@ -108,4 +100,3 @@ export const config = {
     "/auth/:path*",
   ],
 };
-

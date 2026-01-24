@@ -60,7 +60,7 @@ export default function Header() {
           "
         >
           {/* Logo */}
-          <div className="relative h-10 sm:h-11 md:h-12 shrink-0">
+          <div className="relative h-10 sm:h-11 md:h-12 max-w-[55%]">
             <Image
               src="/logo_fitlifetool.png"
               alt="FitLifeTool"

@@ -73,13 +73,15 @@ export default function AvatarMenu({ firstName }: Props) {
       {open && (
         <div
           className="
-            absolute right-0 mt-2 w-48
-            rounded-[var(--radius)]
-            bg-white
-            shadow-lg
-            border
-            py-1
-            z-[100]
+          absolute right-0 mt-2
+          w-[240px]
+          max-w-[calc(100vw-2rem)]
+          rounded-[var(--radius)]
+          bg-white
+          shadow-lg
+          border
+          py-1
+          z-50
           "
         >
           {/* Instellingen */}
