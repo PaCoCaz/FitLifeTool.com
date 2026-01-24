@@ -3,6 +3,8 @@
 export default function HydratatiePage() {
   return (
     <>
+      <div className="category-label">HYDRATATIE</div>
+
       <header>
         <h1>Hydratatie</h1>
       </header>

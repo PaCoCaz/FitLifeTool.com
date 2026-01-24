@@ -19,10 +19,7 @@ export default function BMIPage() {
 
       <section>
         <p>
-          BMI staat voor <strong>Body Mass Index</strong> en is een veelgebruikte
-          maat om lichaamsgewicht te relateren aan lengte. De uitkomst wordt
-          vaak gebruikt om een globale inschatting te maken van
-          gezondheidsrisico’s.
+          BMI staat voor <strong>Body Mass Index</strong> en is een veelgebruikte maat om lichaamsgewicht te relateren aan lengte. De uitkomst wordt vaak gebruikt om een globale inschatting te maken van gezondheidsrisico's.
         </p>
 
         <p>

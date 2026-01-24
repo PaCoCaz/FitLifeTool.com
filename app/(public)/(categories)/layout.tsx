@@ -11,6 +11,7 @@ export default function CategoryLayout({ children }: Props) {
     <article
       className="
         handbook
+        handbook-public
         bg-white
         rounded-[var(--radius)]
         shadow-sm

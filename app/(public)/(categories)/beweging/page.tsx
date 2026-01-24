@@ -3,6 +3,8 @@
 export default function BewegingPage() {
   return (
     <>
+      <div className="category-label">BEWEGING</div>
+
       <header>
         <h1>Beweging</h1>
       </header>

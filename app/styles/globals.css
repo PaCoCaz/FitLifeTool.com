@@ -323,3 +323,128 @@ html {
     }
   }
   
+/* =========================================================
+   PUBLIC DOCUMENT — INSTAPPAGINA'S
+   ========================================================= */
+  
+   .handbook-public {
+    max-width: 100%;
+  }
+
+   .handbook-public h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .handbook-public h2 {
+    margin-top: 3rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .handbook-public h3 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .handbook-public p {
+    max-width: 100%;
+  }
+  
+  /* Voorbeeldkaarten */
+  .handbook-public .feature-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .handbook-public .feature-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  .handbook-public .feature-card {
+    background: #ffffff;
+    border: 1px solid #191970;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .handbook-public .feature-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .handbook-public .feature-card p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }  
+  
+  .handbook-public .feature-meta {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  /* Simpele progress bars */
+  .handbook-public .progress {
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  
+  .handbook-public .progress > span {
+    display: block;
+    height: 100%;
+  }
+  
+  .handbook-public .progress.red > span {
+    background: #ef4444;
+    width: 65%;
+  }
+  
+  .handbook-public .progress.green > span {
+    background: #22c55e;
+    width: 75%;
+  }
+  
+  /* Mini grafiek */
+  .handbook-public .mini-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.25rem;
+    height: 2rem;
+  }
+  
+  .handbook-public .mini-bars span {
+    width: 0.4rem;
+    background: #3b82f6;
+  }
+
+  .handbook-public .feature-card {
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  
+  @media (hover: hover) {
+    .handbook-public .feature-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+  }
+  
+/* =========================================================
+   PUBLIC DOCUMENT — HOMEPAGE NUANCE
+   ========================================================= */
+
+   .handbook-public > header {
+    margin-bottom: 1.25rem;
+  }
+  
+  .handbook-public > p:first-of-type {
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+

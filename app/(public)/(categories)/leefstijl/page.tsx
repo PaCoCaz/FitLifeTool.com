@@ -3,6 +3,8 @@
 export default function LeefstijlPage() {
   return (
     <>
+      <div className="category-label">LEEFSTIJL</div>
+
       <header>
         <h1>Leefstijl</h1>
       </header>

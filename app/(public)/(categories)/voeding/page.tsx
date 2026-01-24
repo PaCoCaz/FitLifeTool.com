@@ -3,6 +3,8 @@
 export default function VoedingPage() {
   return (
     <>
+      <div className="category-label">VOEDING</div>
+
       <header>
         <h1>Voeding</h1>
       </header>
