@@ -65,15 +65,6 @@ export const hoofdstukken: HoofdstukMeta[] = [
 /* ───────────────── Documenten ───────────────── */
 
 export const handbookDocuments: HandbookDocument[] = [
-  /* ─────────────── L1 – Introductie ─────────────── */
-  {
-    id: "doc-l1-0001",
-    level: "l1",
-    hoofdstuk: "H1",
-    nummer: "1.1",
-    titel: "Wat is FitLifeTool?",
-    path: "/handbook/doc-l1-0001",
-  },
 
   /* ─────────────── H1 ─────────────── */
   {
@@ -111,6 +102,14 @@ export const handbookDocuments: HandbookDocument[] = [
     nummer: "2.3",
     titel: "Dagdoelen & Herberekening",
     path: "/handbook/doc-l3-0004",
+  },
+  {
+    id: "doc-l3-0021",
+    level: "l3",
+    hoofdstuk: "H2",
+    nummer: "2.4",
+    titel: "Auth, Onboarding & Toegang",
+    path: "/handbook/doc-l3-0021",
   },
 
   /* ─────────────── H3 ─────────────── */
