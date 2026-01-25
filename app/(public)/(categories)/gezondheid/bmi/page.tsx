@@ -1,99 +1,55 @@
 // app/(public)/(categories)/gezondheid/bmi/page.tsx
 
-import { Metadata } from "next";
+import CategoryGrid from "@/components/layout/CategoryGrid";
+import CategoryIntroCard from "@/components/category/CategoryIntroCard";
+import CategoryTopicCard from "@/components/category/CategoryTopicCard";
 
-export const metadata: Metadata = {
-  title: "Wat is BMI en wat zegt het écht over je gezondheid?",
-  description:
-    "Uitleg over wat BMI is, hoe het wordt berekend, wat de beperkingen zijn en waarom BMI niet altijd een volledig beeld geeft van gezondheid.",
-};
-
-export default function BMIPage() {
+export default function BmiPage() {
   return (
-    <>
-      <div className="category-label">GEZONDHEID</div>
+    <CategoryGrid>
 
-      <header>
-        <h1>Wat is BMI en wat zegt het écht over je gezondheid?</h1>
-      </header>
+      {/* Intro card */}
+      <div className="category-span-full">
+        <CategoryIntroCard
+          categoryLabel="Gezondheid"
+          title="BMI (Body Mass Index)"
+          description="BMI (Body Mass Index) is een veelgebruikte methode om lichaamsgewicht te relateren aan lengte. Het wordt vaak ingezet als eerste indicatie van gewichtsstatus, maar krijgt pas betekenis wanneer het wordt bekeken in samenhang met lichaamsbouw, leefstijl en ontwikkeling over tijd."
+        />
+      </div>
 
-      <section>
-        <p>
-          BMI staat voor <strong>Body Mass Index</strong> en is een veelgebruikte maat om lichaamsgewicht te relateren aan lengte. De uitkomst wordt vaak gebruikt om een globale inschatting te maken van gezondheidsrisico's.
-        </p>
+      {/* Wat is BMI */}
+      <div className="category-span-full">
+        <CategoryTopicCard
+          title="Wat is BMI?"
+          description="De Body Mass Index berekent een verhouding tussen gewicht en lengte. Het resultaat wordt ingedeeld in categorieën zoals ondergewicht, gezond gewicht en overgewicht."
+          imageSrc="/images/gezondheid/bmi-wat-is-het.png"
+          imageAlt="Illustratie van BMI categorieën"
+          href="/gezondheid/bmi/wat-is-bmi"
+        />
+      </div>
 
-        <p>
-          Hoewel BMI eenvoudig te berekenen is, zegt het niet alles over hoe
-          gezond iemand daadwerkelijk is. Het is daarom belangrijk om BMI
-          altijd in context te bekijken.
-        </p>
-      </section>
+      {/* BMI berekenen */}
+      <div className="category-span-full">
+        <CategoryTopicCard
+          title="BMI berekenen"
+          description="BMI wordt berekend door het gewicht in kilogrammen te delen door het kwadraat van de lengte in meters. FitLifeTool gebruikt deze berekening als onderdeel van bredere gezondheidsinzichten."
+          imageSrc="/images/gezondheid/bmi-berekenen.png"
+          imageAlt="Voorbeeld van BMI berekening"
+          href="/gezondheid/bmi/berekenen"
+        />
+      </div>
 
-      <section>
-        <h2>Hoe wordt BMI berekend?</h2>
+      {/* Beperkingen */}
+      <div className="category-span-full">
+        <CategoryTopicCard
+          title="Beperkingen van BMI"
+          description="BMI houdt geen rekening met spiermassa, vetverdeling of conditie. Daarom wordt BMI binnen FitLifeTool nooit los geïnterpreteerd, maar altijd in context."
+          imageSrc="/images/gezondheid/bmi-beperkingen.png"
+          imageAlt="Uitleg over beperkingen van BMI"
+          href="/gezondheid/bmi/beperkingen"
+        />
+      </div>
 
-        <p>
-          BMI wordt berekend door het lichaamsgewicht (in kilogrammen) te delen
-          door het kwadraat van de lengte (in meters).
-        </p>
-
-        <p className="muted">
-          BMI = gewicht (kg) / lengte² (m²)
-        </p>
-      </section>
-
-      <section>
-        <h2>Wat zegt BMI wél?</h2>
-
-        <ul>
-          <li>Geeft een snelle, globale indicatie</li>
-          <li>Wordt gebruikt in populatieonderzoek</li>
-          <li>Kan trends over tijd zichtbaar maken</li>
-        </ul>
-
-        <p>
-          Op groepsniveau kan BMI nuttig zijn om patronen te herkennen, maar
-          individuele verschillen blijven buiten beeld.
-        </p>
-      </section>
-
-      <section>
-        <h2>Beperkingen van BMI</h2>
-
-        <ul>
-          <li>Maakt geen onderscheid tussen vet- en spiermassa</li>
-          <li>Houdt geen rekening met lichaamsbouw</li>
-          <li>Zegt niets over conditie of herstelvermogen</li>
-        </ul>
-
-        <p>
-          Hierdoor kan iemand met veel spiermassa een hoge BMI hebben zonder
-          ongezond te zijn, terwijl iemand met weinig spiermassa en meer vet
-          juist een ‘normale’ BMI kan hebben.
-        </p>
-      </section>
-
-      <section>
-        <h2>BMI in relatie tot gezondheid</h2>
-
-        <p>
-          Gezondheid is meer dan één getal. BMI krijgt pas betekenis wanneer het
-          wordt gecombineerd met andere factoren zoals voeding, beweging,
-          herstel en energieverbruik.
-        </p>
-
-        <p>
-          Daarom wordt BMI binnen FitLifeTool nooit los gebruikt, maar altijd
-          bekeken in samenhang met andere inzichten.
-        </p>
-      </section>
-
-      <section>
-        <p className="muted">
-          BMI is een hulpmiddel, geen oordeel. Het helpt bij het begrijpen van
-          trends, niet bij het trekken van conclusies op zichzelf.
-        </p>
-      </section>
-    </>
+    </CategoryGrid>
   );
 }

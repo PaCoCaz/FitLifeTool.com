@@ -11,7 +11,9 @@ type Props = {
 export default function PublicLayout({ children }: Props) {
   return (
     <AppShell breadcrumb={<PublicBreadcrumb />}>
-      {children}
+      <div className="handbook-public">
+        {children}
+      </div>
     </AppShell>
   );
 }

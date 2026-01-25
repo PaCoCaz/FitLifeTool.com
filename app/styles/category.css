@@ -1,0 +1,279 @@
+/* styles/category.css */
+
+/* =========================================================
+   CATEGORY — GRID & CARDS (DASHBOARD-MODEL)
+   ========================================================= */
+
+/* Grid: identiek aan DashboardGrid */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+  
+  /* Volledige breedte (12 kolommen) */
+  .category-span-full {
+    grid-column: 1 / -1;
+  }
+  
+  /* Basis card */
+  .category-card {
+    background: #ffffff;
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+  }
+  
+/* =========================================================
+   CATEGORY — INTRO CARD (H1 + SEO)
+   ========================================================= */
+
+   .category-intro-card .category-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+  
+  .category-intro-card h1 {
+    color: #191970;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .category-intro-card p {
+    line-height: 1.7;
+    font-size: 1rem;
+    max-width: 100%;
+  }  
+  
+  /* =========================================================
+     CATEGORY CARD — CONTENT LAYOUT (TEKST + VISUEEL)
+     ========================================================= */
+  
+  .category-card-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+  
+  @media (min-width: 768px) {
+    .category-card-content {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+  
+  /* Alleen voor categorie-index & subcategorie cards */
+  .category-card-content .category-card-image {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+
+  .category-card-content .category-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius);
+    display: block;
+  }
+  
+/* =========================================================
+   CATEGORY CARD — CTA BUTTON (STABIEL)
+   ========================================================= */
+
+   .category-card-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  
+    width: 140px;          /* VASTE BREEDTE */
+    height: 40px;          /* VASTE HOOGTE */
+  
+    font-size: 0.875rem;
+    font-weight: 500;
+  
+    color: #ffffff;
+    background-color: #191970;
+  
+    border-radius: 6px;
+    text-decoration: none;
+  
+    box-sizing: border-box;
+    transition: background-color 0.15s ease;
+  
+    /* BELANGRIJK */
+    align-self: flex-start;
+  }
+
+  .category-card-link:hover {
+    background-color: #0BA4E0;
+  }
+
+/* =========================================================
+   CATEGORY CARD — CTA ICON
+   ========================================================= */
+
+   .category-card-link img {
+    width: 20px;              /* vaste icon-grootte */
+    height: 20px;
+    flex-shrink: 0;
+    display: block;
+  }
+  
+/* =========================================================
+   CATEGORY CARD — TEKSTKOLOM MET ONDERLIJNDE CTA
+   ========================================================= */
+
+   .category-card-text {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* CTA altijd onderaan */
+  .category-card-text .category-card-link {
+    margin-top: auto;
+  }
+
+  @media (max-width: 1030px) {
+    .category-card-text .category-card-link {
+      margin-top: 1rem; /* subtiele ademruimte op mobiel */
+    }
+  }  
+
+/* =========================================================
+   CATEGORY — TYPOGRAFIE BINNEN CARDS
+   ========================================================= */
+
+/* H2 — subonderwerpen (zoals BMI) */
+.category-card h2 {
+    color: #191970;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Paragrafen binnen category cards */
+  .category-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Laatste p in card geen extra marge */
+  .category-card p:last-of-type {
+    margin-bottom: 0;
+  }
+
+/* =========================================================
+   CATEGORY — DETAIL ARTIKEL (DOCUMENTSTRUCTUUR)
+   ========================================================= */
+
+   .category-article {
+    padding-top: 1.5rem;
+  }
+  
+  /* H1 */
+  .category-article h1 {
+    padding-top: 0.5rem;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #191970;
+    margin-bottom: 1rem;
+  }
+  
+  /* H2 */
+  .category-article h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #191970;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Paragrafen */
+  .category-article p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Formule accent */
+  .category-article .formula {
+    background: #f3f4f6;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  /* Lijsten */
+  .category-article ul {
+    margin: 0.5rem 0 1rem 1.25rem;
+    list-style: disc;
+  }
+  
+  .category-article li {
+    margin-bottom: 0.25rem;
+  }
+  
+/* =========================================================
+   CATEGORY — DETAIL ARTIKEL (MOBIEL TYPOGRAFIE)
+   ========================================================= */
+
+   @media (max-width: 480px) {
+    .category-article h1 {
+      font-size: 1.25rem;
+      line-height: 1.3;
+    }
+  }
+  
+/* =========================================================
+   CATEGORY — PREVIEW CARDS (HOMEPAGE)
+   ========================================================= */
+
+   .category-preview-card {
+    height: 100%;
+  }
+  
+  .category-preview-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    height: 100%;
+    align-items: stretch;
+  }
+  
+  /* Tekstkolom */
+  .category-preview-text {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Button altijd onderin */
+  .category-preview-text .category-card-link {
+    margin-top: auto;
+  }
+  
+  /* Homepage preview image — rustig & niet dominant */
+  .category-preview-image {
+    width: 160px;              /* vaste visuele breedte */
+    max-width: 160px;
+    align-self: center; 
+  }
+
+  .category-preview-image img {
+    width: 100%;
+    height: auto;              /* hoogte schaalt */
+    object-fit: contain;       /* NOOIT croppen */
+    opacity: 0.85;
+    display: block;
+  }

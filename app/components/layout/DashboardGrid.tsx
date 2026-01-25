@@ -1,3 +1,5 @@
+// app/(app)/components/layout/DashboardGrid.tsx
+
 import FitLifeScoreCard from "@/components/dashboard/FitLifeScoreCard";
 import WaterCard from "@/components/dashboard/HydrationCard";
 import ActivityCard from "@/components/dashboard/ActivityCard";
