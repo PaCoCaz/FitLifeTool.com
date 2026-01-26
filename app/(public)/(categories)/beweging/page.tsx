@@ -1,18 +1,20 @@
-// app/(public)/beweging/page.tsx
+// app/(public)/(categories)/beweging/page.tsx
+
+import CategoryGrid from "@/components/layout/CategoryGrid";
+import CategoryIntroCard from "@/components/category/CategoryIntroCard";
+import CategoryTopicCard from "@/components/category/CategoryTopicCard";
 
 export default function BewegingPage() {
   return (
-    <>
-      <div className="category-label">BEWEGING</div>
-
-      <header>
-        <h1>Beweging</h1>
-      </header>
-
-      <p>
-        Beweging ondersteunt kracht, conditie en het aanpassingsvermogen van
-        het lichaam.
-      </p>
-    </>  
+    <CategoryGrid>
+      {/* Intro card */}
+      <div className="category-span-full">
+        <CategoryIntroCard
+          categoryLabel="Beweging"
+          title="Beweging"
+          description="Beweging ondersteunt kracht, conditie en het aanpassingsvermogen van het lichaam."
+        />
+      </div>
+    </CategoryGrid>
   );
 }

@@ -277,3 +277,119 @@
     opacity: 0.85;
     display: block;
   }
+
+/* =========================================================
+   HOMEPAGE — PREVIEW CARDS LAYOUT
+   ========================================================= */
+
+/* 2 kolommen op desktop, 1 op mobiel */
+.home-grid-2col {
+  grid-column: span 6;
+}
+
+@media (max-width: 900px) {
+  .home-grid-2col {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Kaart volledige hoogte zodat rijen gelijk blijven */
+.home-preview-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Afbeelding vaste beeldverhouding */
+.home-preview-image {
+  margin-top: 1rem;
+  width: 100%;
+  aspect-ratio: 16 / 9;   /* BELANGRIJK */
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: #f3f4f6;
+}
+
+.home-preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* vult netjes zonder vervormen */
+  display: block;
+}
+
+/* =========================================================
+   HERO CTA BUTTONS (HOMEPAGE) — IN BALANS MET HEADER
+   ========================================================= */
+
+   .hero-cta {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+  }
+  
+  /* ALLE HERO KNOPPEN */
+  .hero-cta a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    height: 40px;
+    padding: 0 1.25rem;
+    border-radius: 6px;
+  
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+  
+    white-space: nowrap;
+    line-height: 1;
+  }
+  
+  /* Primaire knop */
+  .hero-primary-btn {
+    background: #191970;
+    color: #ffffff;
+    font-weight: 600;
+  
+    padding: 0 1.25rem;   /* zelfde als andere knop */
+    height: 40px;         /* zelfde hoogte als header */
+    border-radius: 6px;    /* gelijk aan design system */
+  
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    transition: background-color 0.15s ease;
+  }
+  
+  .hero-primary-btn:hover {
+    background: #0BA4E0;
+  }
+  
+  
+  /* Secundaire knop */
+  .hero-secondary-btn {
+    background: #e5e7eb;
+    color: #191970;
+  }
+  
+  .hero-secondary-btn:hover {
+    background: #d1d5db;
+  }
+  
+  /* =========================================================
+     MOBIEL: knoppen onder elkaar en full width
+     ========================================================= */
+  @media (max-width: 640px) {
+    .hero-cta {
+      flex-direction: column;
+      align-items: stretch; /* dit zorgt voor full width */
+    }
+  
+    .hero-cta a {
+      width: 100%;
+    }
+  }
+  

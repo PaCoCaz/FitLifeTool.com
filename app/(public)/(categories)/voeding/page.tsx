@@ -1,17 +1,20 @@
-// app/(public)/voeding/page.tsx
+// app/(public)/(categories)/voeding/page.tsx
+
+import CategoryGrid from "@/components/layout/CategoryGrid";
+import CategoryIntroCard from "@/components/category/CategoryIntroCard";
+import CategoryTopicCard from "@/components/category/CategoryTopicCard";
 
 export default function VoedingPage() {
   return (
-    <>
-      <div className="category-label">VOEDING</div>
-
-      <header>
-        <h1>Voeding</h1>
-      </header>
-
-      <p>
-        Voeding vormt de basis voor energie, herstel en lichamelijk functioneren.
-      </p>
-    </>
+    <CategoryGrid>
+      {/* Intro card */}
+      <div className="category-span-full">
+        <CategoryIntroCard
+          categoryLabel="Voeding"
+          title="Voeding"
+          description="Voeding vormt de basis voor energie, herstel en lichamelijk functioneren."
+        />
+      </div>
+    </CategoryGrid>
   );
 }

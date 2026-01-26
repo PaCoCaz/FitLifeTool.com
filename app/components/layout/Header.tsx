@@ -45,6 +45,17 @@ export default function Header() {
     loadProfile();
   }, [user]);
 
+  /* ✅ TOEGEVOEGD: luister naar globale register-trigger */
+  useEffect(() => {
+    function openRegisterModal() {
+      setShowRegister(true);
+    }
+
+    window.addEventListener("open-register", openRegisterModal);
+    return () =>
+      window.removeEventListener("open-register", openRegisterModal);
+  }, []);
+
   return (
     <>
       <header className="fixed top-0 left-0 z-50 w-full bg-[#B8CAE0]">

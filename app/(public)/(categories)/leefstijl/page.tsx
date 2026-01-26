@@ -1,17 +1,20 @@
-// app/(public)/leefstijl/page.tsx
+// app/(public)/(categories)/leefstijl/page.tsx
+
+import CategoryGrid from "@/components/layout/CategoryGrid";
+import CategoryIntroCard from "@/components/category/CategoryIntroCard";
+import CategoryTopicCard from "@/components/category/CategoryTopicCard";
 
 export default function LeefstijlPage() {
   return (
-    <>
-      <div className="category-label">LEEFSTIJL</div>
-
-      <header>
-        <h1>Leefstijl</h1>
-      </header>
-
-      <p>
-        Leefstijl omvat gedrag, routines en keuzes die gezondheid beïnvloeden.
-      </p>
-    </>
+    <CategoryGrid>
+      {/* Intro card */}
+      <div className="category-span-full">
+        <CategoryIntroCard
+          categoryLabel="Leefstijl"
+          title="Leefstijl"
+          description="Leefstijl omvat gedrag, routines en keuzes die gezondheid beïnvloeden."
+        />
+      </div>
+    </CategoryGrid>
   );
 }
