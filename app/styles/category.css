@@ -6,283 +6,229 @@
 
 /* Grid: identiek aan DashboardGrid */
 .category-grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 1rem;
-    align-items: start;
-  }
-  
-  /* Volledige breedte (12 kolommen) */
-  .category-span-full {
-    grid-column: 1 / -1;
-  }
-  
-  /* Basis card */
-  .category-card {
-    background: #ffffff;
-    border-radius: var(--radius);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-    padding: 1.5rem;
-  }
-  
-/* =========================================================
-   CATEGORY — INTRO CARD (H1 + SEO)
-   ========================================================= */
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
 
-   .category-intro-card .category-label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #6b7280;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    margin-bottom: 0.25rem;
-  }
-  
-  .category-intro-card h1 {
-    color: #191970;
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-  
-  .category-intro-card p {
-    line-height: 1.7;
-    font-size: 1rem;
-    max-width: 100%;
-  }  
-  
-  /* =========================================================
-     CATEGORY CARD — CONTENT LAYOUT (TEKST + VISUEEL)
-     ========================================================= */
-  
+/* Volledige breedte (12 kolommen) */
+.category-span-full {
+  grid-column: 1 / -1;
+}
+
+/* Basis card */
+.category-card {
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+}
+
+/* =========================================================
+ CATEGORY — INTRO CARD (H1 + SEO)
+ ========================================================= */
+
+ .category-intro-card .category-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.category-intro-card h1 {
+  color: #191970;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.category-intro-card p {
+  line-height: 1.7;
+  font-size: 1rem;
+  max-width: 100%;
+}  
+
+/* =========================================================
+ CATEGORY CARD — CONTENT LAYOUT (TEKST + VISUEEL)
+ ========================================================= */
+
+.category-card-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
   .category-card-content {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    align-items: stretch;
+    grid-template-columns: 2fr 1fr;
   }
-  
-  @media (min-width: 768px) {
-    .category-card-content {
-      grid-template-columns: 2fr 1fr;
-    }
-  }
-  
-  /* Alleen voor categorie-index & subcategorie cards */
-  .category-card-content .category-card-image {
-    width: 100%;
-    height: 100%;
-    aspect-ratio: 16 / 10;
-    overflow: hidden;
-  }
+}
 
-  .category-card-content .category-card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius);
-    display: block;
-  }
-  
-/* =========================================================
-   CATEGORY CARD — CTA BUTTON (STABIEL)
-   ========================================================= */
+.category-card-content .category-card-image {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
 
-   .category-card-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  
-    width: 140px;          /* VASTE BREEDTE */
-    height: 40px;          /* VASTE HOOGTE */
-  
-    font-size: 0.875rem;
-    font-weight: 500;
-  
-    color: #ffffff;
-    background-color: #191970;
-  
-    border-radius: 6px;
-    text-decoration: none;
-  
-    box-sizing: border-box;
-    transition: background-color 0.15s ease;
-  
-    /* BELANGRIJK */
-    align-self: flex-start;
-  }
-
-  .category-card-link:hover {
-    background-color: #0BA4E0;
-  }
+.category-card-content .category-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius);
+  display: block;
+}
 
 /* =========================================================
-   CATEGORY CARD — CTA ICON
-   ========================================================= */
+ CATEGORY CARD — CTA BUTTON (STABIEL)
+ ========================================================= */
 
-   .category-card-link img {
-    width: 20px;              /* vaste icon-grootte */
-    height: 20px;
-    flex-shrink: 0;
-    display: block;
-  }
-  
+ .category-card-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  width: 140px;
+  height: 40px;
+
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  color: #ffffff;
+  background-color: #191970;
+
+  border-radius: 6px;
+  text-decoration: none;
+
+  box-sizing: border-box;
+  transition: background-color 0.15s ease;
+
+  align-self: flex-start;
+}
+
+.category-card-link:hover {
+  background-color: #0BA4E0;
+}
+
 /* =========================================================
-   CATEGORY CARD — TEKSTKOLOM MET ONDERLIJNDE CTA
-   ========================================================= */
+ CATEGORY CARD — CTA ICON
+ ========================================================= */
 
-   .category-card-text {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-  
-  /* CTA altijd onderaan */
+ .category-card-link img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* =========================================================
+ CATEGORY CARD — TEKSTKOLOM MET ONDERLIJNDE CTA
+ ========================================================= */
+
+ .category-card-text {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.category-card-text .category-card-link {
+  margin-top: auto;
+}
+
+@media (max-width: 1030px) {
   .category-card-text .category-card-link {
-    margin-top: auto;
+    margin-top: 1rem;
   }
-
-  @media (max-width: 1030px) {
-    .category-card-text .category-card-link {
-      margin-top: 1rem; /* subtiele ademruimte op mobiel */
-    }
-  }  
+}  
 
 /* =========================================================
-   CATEGORY — TYPOGRAFIE BINNEN CARDS
-   ========================================================= */
+ CATEGORY — TYPOGRAFIE BINNEN CARDS
+ ========================================================= */
 
-/* H2 — subonderwerpen (zoals BMI) */
 .category-card h2 {
-    color: #191970;
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-  }
-  
-  /* Paragrafen binnen category cards */
-  .category-card p {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: 0.75rem;
-  }
-  
-  /* Laatste p in card geen extra marge */
-  .category-card p:last-of-type {
-    margin-bottom: 0;
-  }
+  color: #191970;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.category-card p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.category-card p:last-of-type {
+  margin-bottom: 0;
+}
 
 /* =========================================================
-   CATEGORY — DETAIL ARTIKEL (DOCUMENTSTRUCTUUR)
-   ========================================================= */
+ CATEGORY — DETAIL ARTIKEL (DOCUMENTSTRUCTUUR)
+ ========================================================= */
 
-   .category-article {
-    padding-top: 1.5rem;
-  }
-  
-  /* H1 */
+ .category-article {
+  padding-top: 1.5rem;
+}
+
+.category-article h1 {
+  padding-top: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #191970;
+  margin-bottom: 1rem;
+}
+
+.category-article h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #191970;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.category-article p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 0.75rem;
+}
+
+.category-article .formula {
+  background: #f3f4f6;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.category-article ul {
+  margin: 0.5rem 0 1rem 1.25rem;
+  list-style: disc;
+}
+
+.category-article li {
+  margin-bottom: 0.25rem;
+}
+
+/* =========================================================
+ CATEGORY — DETAIL ARTIKEL (MOBIEL TYPOGRAFIE)
+ ========================================================= */
+
+ @media (max-width: 480px) {
   .category-article h1 {
-    padding-top: 0.5rem;
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: #191970;
-    margin-bottom: 1rem;
-  }
-  
-  /* H2 */
-  .category-article h2 {
     font-size: 1.25rem;
-    font-weight: 600;
-    color: #191970;
-    margin-top: 2rem;
-    margin-bottom: 0.5rem;
+    line-height: 1.3;
   }
-  
-  /* Paragrafen */
-  .category-article p {
-    font-size: 0.95rem;
-    line-height: 1.7;
-    margin-bottom: 0.75rem;
-  }
-  
-  /* Formule accent */
-  .category-article .formula {
-    background: #f3f4f6;
-    padding: 0.5rem 0.75rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-  }
-  
-  /* Lijsten */
-  .category-article ul {
-    margin: 0.5rem 0 1rem 1.25rem;
-    list-style: disc;
-  }
-  
-  .category-article li {
-    margin-bottom: 0.25rem;
-  }
-  
-/* =========================================================
-   CATEGORY — DETAIL ARTIKEL (MOBIEL TYPOGRAFIE)
-   ========================================================= */
-
-   @media (max-width: 480px) {
-    .category-article h1 {
-      font-size: 1.25rem;
-      line-height: 1.3;
-    }
-  }
-  
-/* =========================================================
-   CATEGORY — PREVIEW CARDS (HOMEPAGE)
-   ========================================================= */
-
-   .category-preview-card {
-    height: 100%;
-  }
-  
-  .category-preview-content {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 1rem;
-    height: 100%;
-    align-items: stretch;
-  }
-  
-  /* Tekstkolom */
-  .category-preview-text {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-  
-  /* Button altijd onderin */
-  .category-preview-text .category-card-link {
-    margin-top: auto;
-  }
-  
-  /* Homepage preview image — rustig & niet dominant */
-  .category-preview-image {
-    width: 160px;              /* vaste visuele breedte */
-    max-width: 160px;
-    align-self: center; 
-  }
-
-  .category-preview-image img {
-    width: 100%;
-    height: auto;              /* hoogte schaalt */
-    object-fit: contain;       /* NOOIT croppen */
-    opacity: 0.85;
-    display: block;
-  }
+}
 
 /* =========================================================
-   HOMEPAGE — PREVIEW CARDS LAYOUT
-   ========================================================= */
+ HOMEPAGE — PREVIEW CARDS LAYOUT
+ ========================================================= */
 
-/* 2 kolommen op desktop, 1 op mobiel */
 .home-grid-2col {
   grid-column: 1 / -1;
 }
@@ -293,18 +239,20 @@
   }
 }
 
-/* Kaart volledige hoogte zodat rijen gelijk blijven */
+.home-preview-card p {
+  padding-bottom: 1rem;
+}
+
 .home-preview-card {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-/* Afbeelding vaste beeldverhouding */
 .home-preview-image {
-  margin-top: 1rem;
+  margin-top: auto;
   width: 100%;
-  aspect-ratio: 16 / 9;   /* BELANGRIJK */
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: var(--radius);
   background: #f3f4f6;
@@ -313,99 +261,123 @@
 .home-preview-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;      /* vult netjes zonder vervormen */
+  object-fit: cover;
   display: block;
 }
 
 /* =========================================================
-   HERO CTA BUTTONS (HOMEPAGE) — IN BALANS MET HEADER
-   ========================================================= */
+ HERO CTA BUTTONS (HOMEPAGE)
+ ========================================================= */
 
-   .hero-cta {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    margin-top: 1.25rem;
+.hero-cta {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.hero-cta a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.hero-primary-btn {
+  background: #191970;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0 1.25rem;
+  height: 40px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.hero-primary-btn:hover {
+  background: #0BA4E0;
+}
+
+.hero-secondary-btn {
+  background: #e5e7eb;
+  color: #191970;
+}
+
+.hero-secondary-btn:hover {
+  background: #d1d5db;
+}
+
+@media (max-width: 640px) {
+  .hero-cta {
+    flex-direction: column;
+    align-items: stretch;
   }
-  
-  /* ALLE HERO KNOPPEN */
+
   .hero-cta a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  
-    height: 40px;
-    padding: 0 1.25rem;
-    border-radius: 6px;
-  
-    font-size: 0.9rem;
-    font-weight: 500;
-    text-decoration: none;
-  
-    white-space: nowrap;
-    line-height: 1;
+    width: 100%;
   }
-  
-  /* Primaire knop */
-  .hero-primary-btn {
-    background: #191970;
-    color: #ffffff;
-    font-weight: 600;
-  
-    padding: 0 1.25rem;   /* zelfde als andere knop */
-    height: 40px;         /* zelfde hoogte als header */
-    border-radius: 6px;    /* gelijk aan design system */
-  
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  
-    transition: background-color 0.15s ease;
-  }
-  
-  .hero-primary-btn:hover {
-    background: #0BA4E0;
-  }
-  
-  
-  /* Secundaire knop */
-  .hero-secondary-btn {
-    background: #e5e7eb;
-    color: #191970;
-  }
-  
-  .hero-secondary-btn:hover {
-    background: #d1d5db;
-  }
-  
-  /* =========================================================
-     MOBIEL: knoppen onder elkaar en full width
-     ========================================================= */
-  @media (max-width: 640px) {
-    .hero-cta {
-      flex-direction: column;
-      align-items: stretch; /* dit zorgt voor full width */
-    }
-  
-    .hero-cta a {
-      width: 100%;
-    }
-  }
-  
-  /* =========================================================
-   HERO H1 — MOBIEL SCHAALBAAR
-   ========================================================= */
+}
+
+/* =========================================================
+ HERO H1 — MOBIEL SCHAALBAAR
+ ========================================================= */
 
 @media (max-width: 850px) {
   .category-intro-card h1 {
-    font-size: 1.5rem;     /* was ±1.75rem desktop */
-    line-height: 1.3;
+    font-size: 1.5rem;
+    line-height: 1.3; 
   }
 }
 
 @media (max-width: 640px) {
   .category-intro-card h1 {
-    font-size: 1.4rem;
+    font-size: 1.4rem;  
   }
 }
+
+/* =========================================================
+ HOMEPAGE PREVIEW GRID
+ ========================================================= */
+
+.home-preview-card {
+  grid-column: span 12;
+}
+
+@media (min-width: 640px) {
+  .home-preview-card {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 1200px) {
+  .home-preview-card {
+    grid-column: span 4;
+  }
+}
+
+/* =========================================================
+   HOMEPAGE — PREVIEW CARD TITELS
+   ========================================================= */
+
+   .home-preview-card h2 {
+    font-size: 1.15rem;   /* groter dan standaard category h2 (1.25rem) */
+    line-height: 1.3;
+    margin-bottom: 0.75rem;
+  }
+  
+  @media (max-width: 640px) {
+    .home-preview-card h2 {
+      font-size: 1.05rem;  /* iets compacter op mobiel */
+    }
+  }
+  

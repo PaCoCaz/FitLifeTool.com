@@ -14,7 +14,7 @@ export default function HomePage() {
 
         <p>
           FitLifeTool bundelt je voeding, beweging, hydratatie en gewicht in één overzicht.
-          Zodat jij weet waar je staat en wat je vandaag kunt verbeteren voor duurzame vooruitgang.
+          Zo zie je dagelijks waar je staat en wat je vandaag kunt verbeteren voor duurzame vooruitgang.
         </p>
 
         <div className="hero-cta">
@@ -31,38 +31,62 @@ export default function HomePage() {
       {/* ================= RIJ 1 ================= */}
       <div className="home-grid-2col category-card home-preview-card">
         <h2>💧 Drink je genoeg water op een dag?</h2>
-        <p>Zie direct of je achterloopt op je persoonlijke hydratatiedoel en krijg inzicht in je dagelijkse balans.</p>
-
+        <p>
+          Zie direct of je achterloopt op je persoonlijke hydratatiedoel en houd je vochtbalans eenvoudig op peil.
+        </p>
         <div className="home-preview-image">
-          <img src="/images/home/hydration.png" alt="Glas water" />
+          <img src="/images/home/hydration.png" alt="Hydratatie overzicht" />
         </div>
       </div>
 
       <div className="home-grid-2col category-card home-preview-card">
         <h2>🏃 Beweeg je genoeg voor jouw doel?</h2>
-        <p>Volg je dagelijkse activiteiten en ontdek of je energieverbruik aansluit bij je gezondheidsdoelen.</p>
-
+        <p>
+          Volg je dagelijkse activiteiten en ontdek of je energieverbruik aansluit bij je gezondheidsdoelen.
+        </p>
         <div className="home-preview-image">
-          <img src="/images/home/activity.png" alt="Hardlopen" />
+          <img src="/images/home/activity.png" alt="Beweging en activiteit" />
+        </div>
+      </div>
+
+      <div className="home-grid-2col category-card home-preview-card">
+        <h2>🍽 Grip op calorieën zonder obsessief tellen</h2>
+        <p>
+          Krijg inzicht in je voedingspatroon en begrijp hoe je keuzes bijdragen aan je totale gezondheid.
+        </p>
+        <div className="home-preview-image">
+          <img src="/images/home/nutrition.png" alt="Voeding en calorie-inzicht" />
         </div>
       </div>
 
       {/* ================= RIJ 2 ================= */}
       <div className="home-grid-2col category-card home-preview-card">
-        <h2>🍽 Grip op calorieën zonder obsessief tellen</h2>
-        <p>Krijg inzicht in je voedingspatroon en begrijp hoe je keuzes bijdragen aan je totale gezondheid.</p>
-
+        <h2>⚖ Zie of je écht vooruitgaat</h2>
+        <p>
+          Volg gewicht, BMI en trends over tijd zodat je niet wordt misleid door losse momentopnames.
+        </p>
         <div className="home-preview-image">
-          <img src="/images/home/nutrition.png" alt="Gezonde maaltijd" />
+          <img src="/images/home/weight.png" alt="Gewicht en voortgang grafiek" />
         </div>
       </div>
 
       <div className="home-grid-2col category-card home-preview-card">
-        <h2>⚖ Zie of je écht vooruitgaat</h2>
-        <p>Volg gewicht, BMI en trends over tijd zodat je niet wordt misleid door losse momentopnames.</p>
-
+        <h2>🔥 Hoe gezond was jouw dag écht?</h2>
+        <p>
+          Combineer voeding, beweging en hydratatie in één duidelijke dagbalans en zie direct hoe je dag scoort.
+        </p>
         <div className="home-preview-image">
-          <img src="/images/home/weight.png" alt="Voortgang grafiek" />
+          <img src="/images/home/score.png" alt="Dagelijkse gezondheidsbalans" />
+        </div>
+      </div>
+
+      <div className="home-grid-2col category-card home-preview-card">
+        <h2>🎯 Werk gericht aan je doelen</h2>
+        <p>
+          Stel persoonlijke doelen en volg je vooruitgang met duidelijke trends in plaats van losse cijfers.
+        </p>
+        <div className="home-preview-image">
+          <img src="/images/home/goals.png" alt="Gezondheidsdoelen en voortgang" />
         </div>
       </div>
 
