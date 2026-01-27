@@ -370,14 +370,44 @@
    ========================================================= */
 
    .home-preview-card h2 {
-    font-size: 1.15rem;   /* groter dan standaard category h2 (1.25rem) */
+    font-size: 1.1rem;
     line-height: 1.3;
     margin-bottom: 0.75rem;
   }
   
   @media (max-width: 640px) {
     .home-preview-card h2 {
-      font-size: 1.05rem;  /* iets compacter op mobiel */
+      font-size: 1.05rem;
     }
+  }
+  
+/* =========================================================
+   PREVIEW TITEL MET ICON (HOMEPAGE)
+   ========================================================= */
+
+   .title-icon {
+    height: 1em;              /* schaalt exact mee met tekstgrootte */
+    width: auto;
+    vertical-align: -0.15em;  /* duwt icoon optisch naar de baseline */
+    margin-right: 0.5rem;
+    display: inline-block;    /* voorkomt rare line breaks */
+  }
+
+/* =========================================================
+   HOMEPAGE — SLOGAN BAR (LIJKT OP BREADCRUMB)
+   ========================================================= */
+
+   .home-slogan-bar {
+    background: #191970;        /* zelfde blauw als breadcrumb */
+    color: white;
+    border-radius: var(--radius);
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .home-slogan-text {
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
   }
   
