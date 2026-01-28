@@ -23,6 +23,7 @@ export default function HydrationCategoryPage() {
             Start met je hydratatie bijhouden
           </RegisterButton>
         </div>
+
       </div>
 
       {/* ================= RIJ 1 ================= */}
