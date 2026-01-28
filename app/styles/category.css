@@ -94,7 +94,7 @@
   justify-content: center;
   gap: 0.5rem;
 
-  width: 140px;
+  width: 100%;
   height: 40px;
 
   font-size: 0.875rem;
@@ -345,6 +345,16 @@
   }
 }
 
+@media (max-width: 400px) {
+  .category-intro-card h1 {
+    font-size: 1.1rem;  
+  }
+
+  .hero-primary-btn {
+    font-size: 0.95rem;
+  }
+}
+
 /* =========================================================
  HOMEPAGE PREVIEW GRID
  ========================================================= */
@@ -370,14 +380,20 @@
    ========================================================= */
 
    .home-preview-card h2 {
-    font-size: 1.1rem;
-    line-height: 1.3;
-    margin-bottom: 0.75rem;
-  }
+      font-size: 1.1rem;
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+    }
   
-  @media (max-width: 640px) {
+  @media (max-width: 800px) {
     .home-preview-card h2 {
       font-size: 1.05rem;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .home-preview-card h2 {
+      font-size: 0.95rem;
     }
   }
   
@@ -394,20 +410,32 @@
   }
 
 /* =========================================================
-   HOMEPAGE — SLOGAN BAR (LIJKT OP BREADCRUMB)
+   CATEGORY CARDS — BUTTON ONDER AFBEELDING
    ========================================================= */
 
-   .home-slogan-bar {
-    background: #191970;        /* zelfde blauw als breadcrumb */
-    color: white;
-    border-radius: var(--radius);
-    padding: 0.75rem 1.25rem;
+   .category-card-button {
+    margin-top: 1rem;
+    align-self: flex-start;
+  
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    height: 38px;
+    padding: 0.75rem 1rem;
+  
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+  
+    color: #ffffff;
+    background-color: #191970;
+    border-radius: 6px;
+  
+    transition: background-color 0.15s ease;
   }
   
-  .home-slogan-text {
-    text-align: center;
-    font-size: 0.95rem;
-    font-weight: 500;
-    letter-spacing: 0.03em;
+  .category-card-button:hover {
+    background-color: #0BA4E0;
   }
   
