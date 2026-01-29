@@ -22,11 +22,18 @@ export default function PublicBreadcrumb() {
 
   const segments = pathname.split("/").filter(Boolean);
 
-  // Helper: slug → leesbare titel
-  const toLabel = (slug: string) =>
-    slug
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+  // Helper: slug → leesbare titel (NL zinsopmaak + uitzonderingen)
+  const toLabel = (slug: string) => {
+    const sentence = slug.replace(/-/g, " ");
+
+    const lower = sentence.toLowerCase();
+
+    const withCaps = lower
+      .replace("bmi", "BMI")
+      .replace("vo2 max", "VO₂max");
+
+    return withCaps.charAt(0).toUpperCase() + withCaps.slice(1);
+  };
 
   const crumbs = segments.map((segment, index) => {
     const href = "/" + segments.slice(0, index + 1).join("/");
@@ -50,7 +57,7 @@ export default function PublicBreadcrumb() {
           </Link>
         </li>
 
-        {crumbs.map((crumb, i) => (
+        {crumbs.map((crumb) => (
           <li key={crumb.href} className="flex items-center gap-2">
             <span className="text-white/40">{">"}</span>
 

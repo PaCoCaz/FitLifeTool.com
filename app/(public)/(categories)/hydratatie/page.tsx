@@ -43,7 +43,7 @@ export default function HydrationCategoryPage() {
           <img src="/images/categories/hydration.png" alt="Water drinken" />
         </div>
 
-        <a href="/hydratatie/waterbehoefte" className="category-card-button category-card-link">
+        <a href="/hydratatie/hoeveel-water-moet-je-per-dag-drinken" className="category-card-button category-card-link">
           Lees hoeveel water jij nodig hebt <img src="/arrow_right_circle.svg" alt="" className="category-card-icon" aria-hidden="true" />
         </a>
       </div>

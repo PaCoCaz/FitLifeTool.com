@@ -439,3 +439,123 @@
     background-color: #0BA4E0;
   }
   
+/* ==============================================
+   SEO PAGE — EERSTE RIJ GELIJKE HOOGTE CARDS
+   ============================================== */
+
+   .category-equal-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Zorg dat de grid-rij rekt */
+  .category-grid {
+    align-items: stretch;
+  }
+
+  /* Afbeelding vult volledige cardhoogte */
+.category-image-fill {
+  flex: 1;
+  display: flex;
+}
+
+.category-image-fill img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+/* ===============================
+   SEO PAGE — INTRO LAYOUT FIX
+================================ */
+
+/* Standaard (desktop) */
+.seo-intro-text {
+  grid-column: span 8;
+}
+
+.seo-intro-image {
+  grid-column: span 4;
+}
+
+/* 🔥 Mobiel: onder elkaar */
+@media (max-width: 800px) {
+  .seo-intro-text,
+  .seo-intro-image {
+    grid-column: 1 / -1; /* full width */
+  }
+}
+
+/* =========================================================
+   TABELLEN — BASIS (ONGEWIJZIGD)
+   ========================================================= */
+
+   table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #DBE4F0;
+    border: 0px solid #FFFFFF;
+    border-radius: 6px;
+    margin: 1.25rem 0;
+  }
+  
+  th,
+  td {
+    padding: 0.75rem;
+    border-right: 1px solid #FFFFFF;
+    border-bottom: 1px solid #FFFFFF;
+    text-align: left;
+    vertical-align: top;
+  }
+  
+  th {
+    font-weight: 600;
+  }
+  
+  tr th:last-child,
+  tr td:last-child {
+    border-right: none;
+  }
+  
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* =========================================================
+     TABELVARIANTEN
+     ========================================================= */
+  
+  label-column {
+    table-layout: auto;
+  }
+  
+  key-column {
+    table-layout: fixed;
+  }
+  
+  /* =========================================================
+     ✅ CANONIEKE RESPONSIVE TABEL-OPLOSSING
+     ========================================================= */
+  
+  /* Wrapper rond tabellen */
+  table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Tabel blijft tabel */
+  table-scroll > table {
+    min-width: 520px; /* werkt perfect tot 360px */
+  }
+  
+  /* Mobiel: voorkom afbreken van cellen */
+  @media (max-width: 480px) {
+    th,
+    td {
+      white-space: nowrap;
+    }
+  }
