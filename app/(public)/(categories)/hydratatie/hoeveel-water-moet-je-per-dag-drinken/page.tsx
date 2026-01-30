@@ -48,8 +48,9 @@ export default function WaterbehoeftePage() {
         </p>
 
         <h2>Algemene richtlijnen voor dagelijkse vochtinname</h2>
-        <div className="table-scroll">
-          <table className="label-column">
+
+        <div className="table-scroll handbook">
+          <table className="table label-column">
             <thead>
               <tr>
                 <th>Situatie</th>
@@ -59,15 +60,15 @@ export default function WaterbehoeftePage() {
             <tbody>
               <tr>
                 <td>Gemiddelde vrouw</td>
-                <td>Ongeveer 1,5 – 2,5 liter per dag</td>
+                <td>Ongeveer 1,5 - 2,5 liter per dag</td>
               </tr>
               <tr>
                 <td>Gemiddelde man</td>
-                <td>Ongeveer 2 – 3 liter per dag</td>
+                <td>Ongeveer 2 - 3 liter per dag</td>
               </tr>
               <tr>
                 <td>Intensief sporten of warm weer</td>
-                <td>Vaak 0,5 – 1 liter extra per uur activiteit</td>
+                <td>Vaak 0,5 - 1 liter extra per uur activiteit</td>
               </tr>
             </tbody>
           </table>

@@ -492,7 +492,7 @@
    TABELLEN — BASIS (ONGEWIJZIGD)
    ========================================================= */
 
-   table {
+   .table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -502,8 +502,8 @@
     margin: 1.25rem 0;
   }
   
-  th,
-  td {
+  .th,
+  .td {
     padding: 0.75rem;
     border-right: 1px solid #FFFFFF;
     border-bottom: 1px solid #FFFFFF;
@@ -511,16 +511,16 @@
     vertical-align: top;
   }
   
-  th {
+  .th {
     font-weight: 600;
   }
   
-  tr th:last-child,
-  tr td:last-child {
+  .tr th:last-child,
+  .tr td:last-child {
     border-right: none;
   }
   
-  tbody tr:last-child td {
+  .tbody tr:last-child td {
     border-bottom: none;
   }
   
@@ -528,11 +528,11 @@
      TABELVARIANTEN
      ========================================================= */
   
-  label-column {
+  .table.label-column {
     table-layout: auto;
   }
   
-  key-column {
+  .table.key-column {
     table-layout: fixed;
   }
   
@@ -541,21 +541,21 @@
      ========================================================= */
   
   /* Wrapper rond tabellen */
-  table-scroll {
+  .table-scroll {
     max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
   
   /* Tabel blijft tabel */
-  table-scroll > table {
+  .table-scroll > table {
     min-width: 520px; /* werkt perfect tot 360px */
   }
   
   /* Mobiel: voorkom afbreken van cellen */
   @media (max-width: 480px) {
-    th,
-    td {
+    .th,
+    .td {
       white-space: nowrap;
     }
   }
