@@ -63,7 +63,7 @@ export default function HydrationCategoryPage() {
           <img src="/images/categories/hydration-timing.png" alt="Water drinken moment" />
         </div>
 
-        <a href="/hydratatie/drinkmomenten" className="category-card-button category-card-link">
+        <a href="/hydratatie/wanneer-moet-je-water-drinken" className="category-card-button category-card-link">
           Bekijk de beste drinkmomenten <img src="/arrow_right_circle.svg" alt="" className="category-card-icon" aria-hidden="true" />
         </a>
       </div>
@@ -83,7 +83,7 @@ export default function HydrationCategoryPage() {
           <img src="/images/categories/hydration-dehydration.png" alt="Uitdroging" />
         </div>
 
-        <a href="/hydratatie/uitdroging" className="category-card-button category-card-link">
+        <a href="/hydratatie/wat-gebeurt-er-als-je-te-weinig-drinkt" className="category-card-button category-card-link">
           Lees alles over uitdroging <img src="/arrow_right_circle.svg" alt="" className="category-card-icon" aria-hidden="true" />
         </a>
       </div>
@@ -105,7 +105,7 @@ export default function HydrationCategoryPage() {
           <img src="/images/categories/hydration-sport.png" alt="Sport en water" />
         </div>
 
-        <a href="/hydratatie/sport" className="category-card-button category-card-link">
+        <a href="/hydratatie/hoeveel-water-moet-je-drinken-bij-sporten" className="category-card-button category-card-link">
           Lees over hydratatie bij sport <img src="/arrow_right_circle.svg" alt="" className="category-card-icon" aria-hidden="true" />
         </a>
       </div>
@@ -125,7 +125,7 @@ export default function HydrationCategoryPage() {
           <img src="/images/categories/hydration-drinks.png" alt="Dranken" />
         </div>
 
-        <a href="/hydratatie/dranken" className="category-card-button category-card-link">
+        <a href="/hydratatie/tellen-koffie-thee-en-andere-dranken-mee-voor-hydratatie" className="category-card-button category-card-link">
           Ontdek welke dranken meetellen <img src="/arrow_right_circle.svg" alt="" className="category-card-icon" aria-hidden="true" />
         </a>
       </div>
@@ -133,7 +133,7 @@ export default function HydrationCategoryPage() {
       <div className="home-preview-card category-card">
         <h2>
           <img src="/water_drop.svg" alt="" aria-hidden="true" className="title-icon" />
-          FitLifeTool helpt bij je hydratatie?
+          Hydratatie tracking met FitLifeTool?
         </h2>
 
         <p>
@@ -145,7 +145,7 @@ export default function HydrationCategoryPage() {
           <img src="/images/categories/hydration-tracking.png" alt="Hydratatie tracking" />
         </div>
 
-        <a href="/hydratatie/hydratatie-tracking" className="category-card-button category-card-link">
+        <a href="/hydratatie/hydratatie-tracking-met-fitlifetool" className="category-card-button category-card-link">
           Bekijk hoe hydratatie tracking werkt <img src="/arrow_right_circle.svg" alt="" className="category-card-icon" aria-hidden="true" />
         </a>
       </div>

@@ -1,8 +1,8 @@
 /* styles/category.css */
 
 /* =========================================================
-   CATEGORY — GRID & CARDS (DASHBOARD-MODEL)
-   ========================================================= */
+  CATEGORY — GRID & CARDS (DASHBOARD-MODEL)
+========================================================= */
 
 /* Grid: identiek aan DashboardGrid */
 .category-grid {
@@ -28,9 +28,9 @@
 
 /* =========================================================
  CATEGORY — INTRO CARD (H1 + SEO)
- ========================================================= */
+========================================================= */
 
- .category-intro-card .category-label {
+.category-intro-card .category-label {
   font-size: 0.75rem;
   font-weight: 500;
   color: #6b7280;
@@ -50,11 +50,53 @@
   line-height: 1.7;
   font-size: 1rem;
   max-width: 100%;
-}  
+}
+
+/* Koppen */
+h1 {
+  margin-bottom: 1rem;
+  font-size: 1.40rem;
+  font-weight: 600;
+  color: #191970;
+}
+
+h2 {
+  margin-top: 1.0rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.20rem;
+  font-weight: 600;
+  color: #191970;
+}
+
+h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #191970;
+}
+
+/* =========================================================
+  HANDBOEK — TYPOGRAFISCHE SCHAALCORRECTIE (ZEER KLEIN)
+======================================================== */
+
+@media (max-width: 400px) {
+  h1 {
+    font-size: 1.1rem;
+  }
+
+  h2 {
+    font-size: 1.05rem;
+  }
+
+  h3 {
+    font-size: 1.0rem;
+  }
+}
 
 /* =========================================================
  CATEGORY CARD — CONTENT LAYOUT (TEKST + VISUEEL)
- ========================================================= */
+========================================================= */
 
 .category-card-content {
   display: grid;
@@ -438,6 +480,40 @@
   .category-card-button:hover {
     background-color: #0BA4E0;
   }
+
+/* =========================================================
+  INTRO CARD — INLINE LINKS (SEO HERO)
+========================================================= */
+
+   .category-article-intro-card a {
+    color: #0BA4E0;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+  
+  .category-article-intro-card a:hover {
+    color: #C80000;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }  
+
+/* =========================================================
+  SEO ARTIKEL — LINK STYLING (ALLEEN CONTENT)
+========================================================= */
+
+  .category-article a {
+    color: #0BA4E0;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+  
+  .category-article a:hover {
+    color: #C80000;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }  
   
 /* ==============================================
    SEO PAGE — EERSTE RIJ GELIJKE HOOGTE CARDS
@@ -489,73 +565,103 @@
 }
 
 /* =========================================================
-   TABELLEN — BASIS (ONGEWIJZIGD)
-   ========================================================= */
-
-   .table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: #DBE4F0;
-    border: 0px solid #FFFFFF;
-    border-radius: 6px;
-    margin: 1.25rem 0;
-  }
-  
-  .th,
-  .td {
-    padding: 0.75rem;
-    border-right: 1px solid #FFFFFF;
-    border-bottom: 1px solid #FFFFFF;
-    text-align: left;
-    vertical-align: top;
-  }
-  
-  .th {
-    font-weight: 600;
-  }
-  
-  .tr th:last-child,
-  .tr td:last-child {
-    border-right: none;
-  }
-  
-  .tbody tr:last-child td {
-    border-bottom: none;
-  }
-  
-  /* =========================================================
-     TABELVARIANTEN
-     ========================================================= */
+  TABELVARIANTEN
+========================================================= */
   
   .table.label-column {
     table-layout: auto;
   }
-  
+    
   .table.key-column {
     table-layout: fixed;
   }
-  
-  /* =========================================================
-     ✅ CANONIEKE RESPONSIVE TABEL-OPLOSSING
-     ========================================================= */
-  
+    
+/* =========================================================
+   ✅ CANONIEKE RESPONSIVE TABEL-OPLOSSING
+========================================================= */
+    
   /* Wrapper rond tabellen */
   .table-scroll {
     max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+    
   /* Tabel blijft tabel */
   .table-scroll > table {
     min-width: 520px; /* werkt perfect tot 360px */
   }
-  
+    
   /* Mobiel: voorkom afbreken van cellen */
   @media (max-width: 480px) {
-    .th,
-    .td {
+    th,
+    td {
       white-space: nowrap;
     }
   }
+
+  /* Lijsten */
+  ul {
+    list-style-type: disc;
+    list-style-position: outside;
+    margin: 0.75rem 0 1rem 0;
+    padding-left: 1.25rem;
+  }
+  
+/* =========================================
+   FAQ ACCORDION (SEO PAGINA'S)
+========================================= */
+
+.faq-accordion {
+  margin-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.faq-item {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 1rem 0;
+  padding-left: 0.5rem;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #191970;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.faq-icon {
+  font-size: 1.25rem;
+  transition: transform 0.2s ease;
+}
+
+.faq-icon.open {
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+  opacity: 0;
+  padding-left: 0.5rem;
+}
+
+.faq-answer.open {
+  max-height: 300px;
+  opacity: 1;
+  padding-bottom: 1rem;
+}
+
+.faq-answer p {
+  margin: 0.5rem 0 0 0;
+  font-weight: 400;
+  color: #374151;
+}

@@ -30,6 +30,7 @@ export default function PublicBreadcrumb() {
 
     const withCaps = lower
       .replace("bmi", "BMI")
+      .replace("fitlifetool", "FitLifeTool")
       .replace("vo2 max", "VO₂max");
 
     return withCaps.charAt(0).toUpperCase() + withCaps.slice(1);
