@@ -29,8 +29,12 @@ export default function PublicBreadcrumb() {
     const lower = sentence.toLowerCase();
 
     const withCaps = lower
+      .replace("10000 stappen", "10.000 stappen")
       .replace("bmi", "BMI")
+      .replace("bmr", "BMR")
       .replace("fitlifetool", "FitLifeTool")
+      .replace("met waarden", "MET-waarden")
+      .replace("tdee", "TDEE")
       .replace("vo2 max", "VO₂max");
 
     return withCaps.charAt(0).toUpperCase() + withCaps.slice(1);

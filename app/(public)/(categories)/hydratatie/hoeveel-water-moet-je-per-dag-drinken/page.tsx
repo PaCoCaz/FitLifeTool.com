@@ -40,7 +40,7 @@ export default function WaterbehoeftePage() {
 
       {/* ================= RIJ 2 ================= */}
 
-      <div className="category-span-full category-card">
+      <div className="category-span-full category-card category-article">
         <h2>Waarom verschilt de waterbehoefte per persoon?</h2>
         <p>
           Je lichaam verliest voortdurend vocht via ademhaling, zweten en urine.

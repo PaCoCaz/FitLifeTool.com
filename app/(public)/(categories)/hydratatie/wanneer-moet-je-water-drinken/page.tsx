@@ -34,7 +34,7 @@ export default function DrinkmomentenPage() {
 
       {/* ================= RIJ 2 ================= */}
 
-      <div className="category-span-full category-card">
+      <div className="category-span-full category-card category-article">
         <h2>Waarom spreiden van water drinken beter werkt</h2>
         <p>
           Je lichaam kan maar een beperkte hoeveelheid vocht per keer verwerken.

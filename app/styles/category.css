@@ -61,7 +61,7 @@ h1 {
 }
 
 h2 {
-  margin-top: 1.0rem;
+  margin-top: 1.25rem;
   margin-bottom: 0.75rem;
   font-size: 1.20rem;
   font-weight: 600;
@@ -194,6 +194,7 @@ h3 {
  ========================================================= */
 
 .category-card h2 {
+  margin-top: 0.0rem;
   color: #191970;
   font-size: 1.25rem;
   font-weight: 600;
@@ -215,7 +216,7 @@ h3 {
  ========================================================= */
 
  .category-article {
-  padding-top: 1.5rem;
+  padding-top: 0rem;
 }
 
 .category-article h1 {
