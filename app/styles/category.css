@@ -558,7 +558,7 @@ h3 {
 }
 
 /* 🔥 Mobiel: onder elkaar */
-@media (max-width: 800px) {
+@media (max-width: 850px) {
   .seo-intro-text,
   .seo-intro-image {
     grid-column: 1 / -1; /* full width */
