@@ -201,7 +201,7 @@ export default function WeightCard() {
         weight_kg: parsedWeight,
         bmi: newBMI,
         target_weight_kg: parsedTarget,
-        water_goal_ml: newWaterGoal, // ✅ TOEGEVOEGD
+        water_goal_ml: newWaterGoal,
       })
       .eq("id", user.id);
 
@@ -228,7 +228,7 @@ export default function WeightCard() {
     setTargetWeight(parsedTarget);
     setIsEditing(false);
 
-    showToast("✓ Gewicht en streefgewicht bijgewerkt");
+    showToast("✓ Je gewicht en streefgewicht zijn bijgewerkt.");
 
     dispatchDashboardEvent("weight-updated", {
       weightKg: parsedWeight,

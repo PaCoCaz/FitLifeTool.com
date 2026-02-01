@@ -1,4 +1,5 @@
 // app/lib/ToastProvider.tsx
+
 "use client";
 
 import {
@@ -82,7 +83,7 @@ export function ToastProvider({
               fixed inset-0 z-[9999]
               pointer-events-none
               flex items-start justify-center
-              pt-32
+              pt-50
             "
           >
             <div className="space-y-2">
