@@ -1,3 +1,5 @@
+// app/components/dashboard/WeightCard.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,6 +10,7 @@ import { useUser } from "@/lib/AuthProvider";
 import { useToast } from "@/lib/ToastProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
+import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent"; // ✅ TOEGEVOEGD
 
 /* ───────────────── Types ───────────────── */
 
@@ -189,12 +192,16 @@ export default function WeightCard() {
 
     const newBMI = calculateBMI(parsedWeight, heightCm);
 
+    // ✅ NIEUW — Hydratatiedoel berekenen
+    const newWaterGoal = Math.round(parsedWeight * 35);
+
     const { error } = await supabase
       .from("profiles")
       .update({
         weight_kg: parsedWeight,
         bmi: newBMI,
         target_weight_kg: parsedTarget,
+        water_goal_ml: newWaterGoal, // ✅ TOEGEVOEGD
       })
       .eq("id", user.id);
 
@@ -222,6 +229,10 @@ export default function WeightCard() {
     setIsEditing(false);
 
     showToast("✓ Gewicht en streefgewicht bijgewerkt");
+
+    dispatchDashboardEvent("weight-updated", {
+      weightKg: parsedWeight,
+    });
   }
 
   function cancelEdit() {

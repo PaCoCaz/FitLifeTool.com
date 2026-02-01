@@ -1,3 +1,5 @@
+// app/lib/hydrationScore.ts
+
 /**
  * ─────────────────────────────────────────────
  * Hydration score & schema logic (FINAL)

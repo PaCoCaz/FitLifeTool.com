@@ -1,6 +1,9 @@
+// app/components/dashboard/HydrationCard.tsx
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useCallback } from "react"; // ✅ TOEGEVOEGD
 import Image from "next/image";
 import Card from "@/components/ui/Card";
 import { supabase } from "@/lib/supabaseClient";
@@ -147,6 +150,21 @@ export default function HydrationCard() {
       color: hydrationStatus.color,
     });
   }, [loading, hydrationGoal, hydrationScore, hydrationStatus.color]);
+
+  /* ✅ NIEUW — Luistert naar gewichtswijzigingen */
+  useEffect(() => {
+    function handleWeightUpdate(e: any) {
+      const newWeight = e.detail?.weightKg;
+      if (!newWeight) return;
+
+      const recalculatedGoal = Math.round(newWeight * 35);
+      setHydrationGoal(recalculatedGoal);
+    }
+
+    window.addEventListener("weight-updated", handleWeightUpdate);
+    return () =>
+      window.removeEventListener("weight-updated", handleWeightUpdate);
+  }, []);
 
   async function addDrink(amount: number) {
     if (!user || !hydrationGoal) return;

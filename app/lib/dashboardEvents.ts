@@ -1,3 +1,10 @@
+// app/lib/dashboardEvents.ts
+
+/**
+ * Centrale mapping van alle dashboard events
+ * Zorgt voor volledige type-safety tussen zenders en ontvangers
+ */
+
 export type DashboardEventMap = {
   "hydration-updated": {
     score: number;
@@ -12,5 +19,9 @@ export type DashboardEventMap = {
   "nutrition-updated": {
     score: number;
     color: string;
+  };
+
+  "weight-updated": {
+    weightKg: number;
   };
 };
