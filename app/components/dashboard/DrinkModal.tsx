@@ -104,14 +104,17 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
         grouped[row.drink_type].hydrated += hydrated;
       }
 
-      setTodayDrinks(
-        Object.entries(grouped).map(([type, values]) => ({
+      const sortedDrinks = Object.entries(grouped)
+        .map(([type, values]) => ({
           drink_type: type,
           total_input_ml: Math.round(values.input),
           total_ml: Math.round(values.hydrated),
           factor: values.factor,
         }))
-      );
+        .sort((a, b) => b.total_ml - a.total_ml); // 🔽 Hoog → laag hydratatie
+
+      setTodayDrinks(sortedDrinks);
+
     }
 
     loadToday();
@@ -120,7 +123,7 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
   return (
     <div className="fixed inset-0 z-50 bg-black/40 overflow-y-auto">
       <div className="min-h-full flex items-center justify-center px-3">
-        <div className="w-full max-w-3xl rounded-[var(--radius)] bg-white p-6 shadow-xl my-3">
+        <div className="w-full max-w-3xl rounded-[var(--radius)] bg-white p-6 shadow-xl my-4">
 
           <div className="flex justify-between items-center mb-6">
             <h2 className="flex items-center gap-2 text-base font-semibold text-[#191970]">
