@@ -129,7 +129,7 @@ export default function HydrationCard() {
 
     if (expectedMl <= 0) return;
 
-    const ratio = currentMl / expectedMl;
+    const ratio = Math.round(currentMl) / expectedMl;
     const score = Math.min(
       100,
       Math.round(ratio * 100)
@@ -202,7 +202,7 @@ export default function HydrationCard() {
   }
 
   const actualProgress = Math.min(
-    currentMl / hydrationGoal,
+    Math.round(currentMl) / hydrationGoal,
     1
   );
 
@@ -236,7 +236,7 @@ export default function HydrationCard() {
         <div className="h-full flex flex-col justify-between">
           <div className="space-y-1">
             <div className="text-2xl font-semibold text-[#191970]">
-              {currentMl.toLocaleString()} ml
+              {Math.round(currentMl).toLocaleString()} ml
             </div>
             <div className="text-xs text-gray-500">
               Dagdoel: {hydrationGoal.toLocaleString()} ml

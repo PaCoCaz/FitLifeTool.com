@@ -14,7 +14,13 @@ type Props = {
   onAdd: (amountMl: number, factor: number, label: string) => void;
 };
 
-const DRINK_OPTIONS = [
+type DrinkOption = {
+  label: string;
+  factor: number;
+  icon: string;
+};
+
+const DRINK_OPTIONS: DrinkOption[] = [
   { label: "Water", factor: 1.0, icon: "water" },
   { label: "Thee", factor: 0.95, icon: "tea" },
   { label: "Koffie", factor: 0.8, icon: "coffee" },
@@ -29,7 +35,7 @@ const DRINK_OPTIONS = [
   { label: "Sterke drank", factor: 0.3, icon: "liquor" },
 ];
 
-const QUICK_VOLUMES = [150, 200, 250, 300, 500];
+const QUICK_VOLUMES = [50, 100, 150, 200, 250, 300, 500, 1000];
 
 type TodayDrink = {
   drink_type: string;
@@ -44,7 +50,6 @@ type HydrationRow = {
   hydration_factor: number;
 };
 
-/* 🎨 Kleurcodering */
 function getHydrationColor(factor: number) {
   if (factor >= 0.9) return "text-green-600";
   if (factor >= 0.7) return "text-[#0095D3]";
@@ -56,11 +61,14 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
 
-  const [selectedDrink, setSelectedDrink] = useState<typeof DRINK_OPTIONS[number] | null>(null);
+  const [selectedDrink, setSelectedDrink] = useState<DrinkOption | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>("");
   const [todayDrinks, setTodayDrinks] = useState<TodayDrink[]>([]);
 
-  /* ESC sluiten */
+  const finalAmount =
+    customAmount.trim() !== "" ? Number(customAmount) : amount;
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -69,7 +77,6 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  /* Vandaag gedronken ophalen */
   useEffect(() => {
     if (!user) return;
     const userId = user.id;
@@ -112,10 +119,9 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 overflow-y-auto">
-      <div className="min-h-full flex items-center justify-center p-4">
-        <div className="w-full max-w-3xl rounded-[var(--radius)] bg-white p-6 shadow-xl my-8">
+      <div className="min-h-full flex items-center justify-center px-3">
+        <div className="w-full max-w-3xl rounded-[var(--radius)] bg-white p-6 shadow-xl my-3">
 
-          {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="flex items-center gap-2 text-base font-semibold text-[#191970]">
               <Image src="/water_drop.svg" alt="" width={18} height={18} aria-hidden />
@@ -129,13 +135,11 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
             </button>
           </div>
 
-          {/* Drink type */}
           <div className="mb-6">
-            <div className="text-xs font-medium text-gray-500 mb-2">Wat dronk je?</div>
+            <div className="text-xs font-medium text-gray-500 mb-2">Wat heb je gedronken?</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {DRINK_OPTIONS.map((drink) => {
-                const isActive = selectedDrink !== null && selectedDrink.label === drink.label;
-
+                const isActive = selectedDrink?.label === drink.label;
                 return (
                   <button
                     key={drink.label}
@@ -157,38 +161,56 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
             </div>
           </div>
 
-          {/* Volume */}
           <div className="mb-6">
-            <div className="text-xs font-medium text-gray-500 mb-2">Hoeveel?</div>
-            <div className="flex flex-wrap gap-2">
+            <div className="text-xs font-medium text-gray-500 mb-2">Hoeveel heb je gedronken?</div>
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
               {QUICK_VOLUMES.map((v) => (
                 <button
                   key={v}
-                  onClick={() => setAmount(v)}
-                  className={`rounded-[var(--radius)] border px-3 py-2 text-xs font-medium transition ${
-                    amount !== null && amount === v
+                  onClick={() => {
+                    setAmount(v);
+                    setCustomAmount("");
+                  }}
+                  className={`w-full rounded-[var(--radius)] border py-2 text-xs font-medium transition ${
+                    amount === v
                       ? "bg-[#0095D3] text-white border-[#0095D3]"
                       : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
                   }`}
                 >
-                  {v} ml
+                  {v.toLocaleString("nl-NL")} ml
                 </button>
               ))}
             </div>
+
+            <div className="mt-3">
+              <label className="text-xs font-medium text-gray-500 block mb-1">
+                Of voer zelf een hoeveelheid in (ml)
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                placeholder="Bijv. 275"
+                value={customAmount}
+                onChange={(e) => {
+                  setCustomAmount(e.target.value);
+                  setAmount(null);
+                }}
+                className="w-full rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-sm text-[#191970] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0095D3]/30"
+              />
+            </div>
           </div>
 
-          {/* Add button */}
           <button
             onClick={() => {
-              if (!selectedDrink || amount === null) return;
-              onAdd(amount, selectedDrink.factor, selectedDrink.label);
+              if (!selectedDrink || !finalAmount || finalAmount <= 0) return;
+              onAdd(finalAmount, selectedDrink.factor, selectedDrink.label);
             }}
             className="w-full rounded-[var(--radius)] border border-[#0095D3] px-4 py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
           >
             Toevoegen
           </button>
 
-          {/* Tabel overzicht */}
           {todayDrinks.length > 0 && (
             <div className="mt-8 border-t pt-6">
               <div className="text-sm font-semibold text-[#191970] mb-3">Vandaag gedronken</div>
@@ -204,9 +226,9 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                 {todayDrinks.map((d) => (
                   <div key={d.drink_type} className="grid grid-cols-4 gap-2">
                     <div className="capitalize">{d.drink_type}</div>
-                    <div className="text-right">{d.total_input_ml} ml</div>
+                    <div className="text-right">{d.total_input_ml.toLocaleString("nl-NL")} ml</div>
                     <div className={`text-right ${getHydrationColor(d.factor)}`}>{d.factor.toFixed(2)}</div>
-                    <div className={`text-right font-medium ${getHydrationColor(d.factor)}`}>{d.total_ml} ml</div>
+                    <div className={`text-right font-medium ${getHydrationColor(d.factor)}`}>{d.total_ml.toLocaleString("nl-NL")} ml</div>
                   </div>
                 ))}
               </div>
