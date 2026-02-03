@@ -53,7 +53,7 @@ type HydrationRow = {
 function getHydrationColor(factor: number) {
   if (factor >= 0.9) return "text-green-600";
   if (factor >= 0.7) return "text-[#0095D3]";
-  return "text-red-600";
+  return "text-[#80000]";
 }
 
 export default function DrinkModal({ onClose, onAdd }: Props) {
@@ -65,6 +65,15 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
   const [amount, setAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState<string>("");
   const [todayDrinks, setTodayDrinks] = useState<TodayDrink[]>([]);
+
+  const totals = todayDrinks.reduce(
+    (acc, d) => {
+      acc.input += d.total_input_ml;
+      acc.hydration += d.total_ml;
+      return acc;
+    },
+    { input: 0, hydration: 0 }
+  );  
 
   const finalAmount =
     customAmount.trim() !== "" ? Number(customAmount) : amount;
@@ -229,11 +238,35 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                 {todayDrinks.map((d) => (
                   <div key={d.drink_type} className="grid grid-cols-4 gap-2">
                     <div className="capitalize">{d.drink_type}</div>
-                    <div className="text-right">{d.total_input_ml.toLocaleString("nl-NL")} ml</div>
-                    <div className={`text-right ${getHydrationColor(d.factor)}`}>{d.factor.toFixed(2)}</div>
-                    <div className={`text-right font-medium ${getHydrationColor(d.factor)}`}>{d.total_ml.toLocaleString("nl-NL")} ml</div>
+
+                    <div className="text-right">
+                      {d.total_input_ml.toLocaleString("nl-NL")} ml
+                    </div>
+
+                    <div className={`text-right ${getHydrationColor(d.factor)}`}>
+                      {d.factor.toFixed(2)}
+                    </div>
+
+                    <div className={`text-right font-medium ${getHydrationColor(d.factor)}`}>
+                      {d.total_ml.toLocaleString("nl-NL")} ml
+                    </div>
                   </div>
                 ))}
+
+                {/* ───── Subtiele scheidingslijn + totalen ───── */}
+                <div className="mt-4 pt-3 border-t border-gray-200 grid grid-cols-4 gap-2 text-sm font-semibold text-[#191970]">
+                  <div>Totaal</div>
+
+                  <div className="text-right">
+                    {totals.input.toLocaleString("nl-NL")} ml
+                  </div>
+
+                  <div />
+
+                  <div className="text-right">
+                    {totals.hydration.toLocaleString("nl-NL")} ml
+                  </div>
+                </div>
               </div>
 
               <div className="mt-4 text-xs text-gray-500 leading-relaxed">

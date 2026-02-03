@@ -1,3 +1,5 @@
+// app/lib/activityScore.ts
+
 /**
  * ─────────────────────────────────────────────
  * Activity score & schema logic (FINAL)
