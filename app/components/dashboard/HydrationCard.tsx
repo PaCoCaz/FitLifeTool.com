@@ -21,6 +21,11 @@ import {
   getExpectedHydrationProgress,
 } from "@/lib/hydrationScore";
 
+/* 🌍 Meertaligheid */
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+import { formatNumber } from "@/lib/formatNumber"; // ✅ toegevoegd
+
 /* ───────────────── Constants ───────────────── */
 
 const DRINK_TYPES = {
@@ -45,15 +50,16 @@ type HydrationLogRow = {
 export default function HydrationCard() {
   const { user } = useUser();
 
+  const lang = useLang();
+  const t = uiText[lang];
+
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
   const now = useNow();
 
-  const [hydrationGoal, setHydrationGoal] =
-    useState<number | null>(null);
+  const [hydrationGoal, setHydrationGoal] = useState<number | null>(null);
   const [currentMl, setCurrentMl] = useState<number>(0);
-  const [hydrationScore, setHydrationScore] =
-    useState<number>(0);
+  const [hydrationScore, setHydrationScore] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
   const [showDrinkModal, setShowDrinkModal] = useState(false);
@@ -89,9 +95,7 @@ export default function HydrationCard() {
 
       const total =
         (logs as HydrationLogRow[] | null)?.reduce(
-          (sum, row) =>
-            sum +
-            row.amount_ml * row.hydration_factor,
+          (sum, row) => sum + row.amount_ml * row.hydration_factor,
           0
         ) ?? 0;
 
@@ -111,29 +115,19 @@ export default function HydrationCard() {
       };
     }
 
-    return getHydrationStatus(
-      currentMl,
-      hydrationGoal,
-      now
-    );
+    return getHydrationStatus(currentMl, hydrationGoal, now, t);
   }, [currentMl, hydrationGoal, now]);
 
   useEffect(() => {
     if (!hydrationGoal) return;
 
-    const expectedProgress =
-      getExpectedHydrationProgress(now);
-
-    const expectedMl =
-      hydrationGoal * expectedProgress;
+    const expectedProgress = getExpectedHydrationProgress(now);
+    const expectedMl = hydrationGoal * expectedProgress;
 
     if (expectedMl <= 0) return;
 
     const ratio = Math.round(currentMl) / expectedMl;
-    const score = Math.min(
-      100,
-      Math.round(ratio * 100)
-    );
+    const score = Math.min(100, Math.round(ratio * 100));
 
     setHydrationScore(score);
   }, [currentMl, hydrationGoal, now]);
@@ -167,24 +161,20 @@ export default function HydrationCard() {
       window.removeEventListener("weight-updated", handleWeightUpdate);
   }, []);
 
-  // ✅ STAP A — drink_type correct opslaan
   async function addDrink(amount: number, factor: number, drinkLabel: string) {
     if (!user || !hydrationGoal) return;
 
     const nowTs = new Date();
 
-    const { error } = await supabase
-      .from("hydration_logs")
-      .insert({
-        user_id: user.id,
-        drink_type: drinkLabel.toLowerCase(),
-        amount_ml: amount,
-        hydration_factor: factor,
-        log_date: dayKey,
-        log_time_local: nowTs.toTimeString().slice(0, 8),
-        timezone:
-          Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
+    const { error } = await supabase.from("hydration_logs").insert({
+      user_id: user.id,
+      drink_type: drinkLabel.toLowerCase(),
+      amount_ml: amount,
+      hydration_factor: factor,
+      log_date: dayKey,
+      log_time_local: nowTs.toTimeString().slice(0, 8),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
 
     if (error) return;
 
@@ -193,23 +183,20 @@ export default function HydrationCard() {
 
   if (loading || hydrationGoal === null) {
     return (
-      <Card title="Hydratatie">
+      <Card title={t.hydration.title}>
         <div className="text-sm text-gray-500">
-          Hydratatie laden…
+          {t.hydration.loading}
         </div>
       </Card>
     );
   }
 
-  const actualProgress = Math.min(
-    Math.round(currentMl) / hydrationGoal,
-    1
-  );
+  const actualProgress = Math.min(Math.round(currentMl) / hydrationGoal, 1);
 
   return (
     <>
       <Card
-        title="Hydratatie"
+        title={t.hydration.title}
         icon={
           <Image
             src={DRINK_TYPES.water.icon}
@@ -236,10 +223,10 @@ export default function HydrationCard() {
         <div className="h-full flex flex-col justify-between">
           <div className="space-y-1">
             <div className="text-2xl font-semibold text-[#191970]">
-              {Math.round(currentMl).toLocaleString()} ml
+              {formatNumber(Math.round(currentMl), lang)} ml
             </div>
             <div className="text-xs text-gray-500">
-              Dagdoel: {hydrationGoal.toLocaleString()} ml
+              {t.hydration.goal}: {formatNumber(hydrationGoal, lang)} ml
             </div>
           </div>
 
@@ -281,7 +268,7 @@ export default function HydrationCard() {
               transition
             "
           >
-            + Drinken toevoegen
+            + {t.hydration.addDrink}
           </button>
         </div>
       </Card>

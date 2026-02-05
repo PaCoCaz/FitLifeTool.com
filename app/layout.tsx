@@ -1,10 +1,12 @@
+// app/layout.tsx
+
 import type { Metadata } from "next";
 import "./styles/globals.css";
 import { AuthProvider } from "./lib/AuthProvider";
 import { TimeProvider } from "./lib/TimeProvider";
 import { ToastProvider } from "./lib/ToastProvider";
+import { LangProvider } from "@/lib/LangProvider";
 
-/* 🔴 DIT TOEVOEGEN */
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -22,14 +24,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="nl">
+    <html lang="en">
       <body>
         <AuthProvider>
-          <TimeProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </TimeProvider>
+          <LangProvider>
+            <TimeProvider>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </TimeProvider>
+          </LangProvider>
         </AuthProvider>
       </body>
     </html>

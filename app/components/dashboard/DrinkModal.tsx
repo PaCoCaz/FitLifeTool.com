@@ -9,6 +9,9 @@ import { useUser } from "@/lib/AuthProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 type Props = {
   onClose: () => void;
   onAdd: (amountMl: number, factor: number, label: string) => void;
@@ -61,6 +64,9 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
 
+  const lang = useLang();
+  const t = uiText[lang];
+
   const [selectedDrink, setSelectedDrink] = useState<DrinkOption | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState<string>("");
@@ -73,7 +79,7 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
       return acc;
     },
     { input: 0, hydration: 0 }
-  );  
+  );
 
   const finalAmount =
     customAmount.trim() !== "" ? Number(customAmount) : amount;
@@ -120,10 +126,9 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
           total_ml: Math.round(values.hydrated),
           factor: values.factor,
         }))
-        .sort((a, b) => b.total_ml - a.total_ml); // 🔽 Hoog → laag hydratatie
+        .sort((a, b) => b.total_ml - a.total_ml);
 
       setTodayDrinks(sortedDrinks);
-
     }
 
     loadToday();
@@ -137,24 +142,26 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
           <div className="flex justify-between items-center mb-6">
             <h2 className="flex items-center gap-2 text-base font-semibold text-[#191970]">
               <Image src="/water_drop.svg" alt="" width={18} height={18} aria-hidden />
-              Drinken toevoegen
+              {t.hydration.addDrink}
             </h2>
             <button
               onClick={onClose}
               className="rounded-[var(--radius)] border border-[#191970] bg-[#191970] px-3 py-1 text-xs font-medium text-white hover:bg-[#0095D3] hover:border-[#0095D3] transition"
             >
-              Sluiten
+              {t.common.close}
             </button>
           </div>
 
           <div className="mb-6">
-            <div className="text-xs font-medium text-gray-500 mb-2">Wat heb je gedronken?</div>
+            <div className="text-xs font-medium text-gray-500 mb-2">
+              {lang === "en" ? "What did you drink?" : "Wat heb je gedronken?"}
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {DRINK_OPTIONS.map((drink) => {
                 const isActive = selectedDrink?.label === drink.label;
                 return (
                   <button
-                    key={drink.label}
+                    key={t.hydration.drinkLabels[drink.icon as keyof typeof t.hydration.drinkLabels]}
                     onClick={() => setSelectedDrink(drink)}
                     className={`group flex items-center gap-2 rounded-[var(--radius)] border px-3 py-2 text-xs font-medium transition ${
                       isActive
@@ -166,7 +173,7 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                       <Image src={`/images/drinks/${drink.icon}.svg`} alt="" fill className={`${isActive ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`} />
                       <Image src={`/images/drinks/${drink.icon}_hover.svg`} alt="" fill className={`${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
                     </span>
-                    {drink.label}
+                    {t.hydration.drinkLabels[drink.icon as keyof typeof t.hydration.drinkLabels]}
                   </button>
                 );
               })}
@@ -174,7 +181,9 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
           </div>
 
           <div className="mb-6">
-            <div className="text-xs font-medium text-gray-500 mb-2">Hoeveel heb je gedronken?</div>
+            <div className="text-xs font-medium text-gray-500 mb-2">
+              {lang === "en" ? "How much did you drink?" : "Hoeveel heb je gedronken?"}
+            </div>
             <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
               {QUICK_VOLUMES.map((v) => (
                 <button
@@ -189,20 +198,22 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                       : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
                   }`}
                 >
-                  {v.toLocaleString("nl-NL")} ml
+                  {v.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
                 </button>
               ))}
             </div>
 
             <div className="mt-3">
               <label className="text-xs font-medium text-gray-500 block mb-1">
-                Of voer zelf een hoeveelheid in (ml)
+                {lang === "en"
+                  ? "Or enter a custom amount (ml)"
+                  : "Of voer zelf een hoeveelheid in (ml)"}
               </label>
               <input
                 type="number"
                 inputMode="numeric"
                 min={1}
-                placeholder="Bijv. 275"
+                placeholder="275"
                 value={customAmount}
                 onChange={(e) => {
                   setCustomAmount(e.target.value);
@@ -220,59 +231,63 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
             }}
             className="w-full rounded-[var(--radius)] border border-[#0095D3] px-4 py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
           >
-            Toevoegen
+            {lang === "en" ? "Add drink" : "Toevoegen"}
           </button>
 
           {todayDrinks.length > 0 && (
             <div className="mt-8 border-t pt-6">
-              <div className="text-sm font-semibold text-[#191970] mb-3">Vandaag gedronken</div>
+              <div className="text-sm font-semibold text-[#191970] mb-3">
+                {lang === "en" ? "Today’s drinks" : "Vandaag gedronken"}
+              </div>
 
               <div className="grid grid-cols-4 gap-2 text-xs font-semibold text-gray-500 mb-2">
-                <div>Drank</div>
-                <div className="text-right">Hoeveelheid</div>
+                <div>{lang === "en" ? "Drink" : "Drank"}</div>
+                <div className="text-right">{lang === "en" ? "Amount" : "Hoeveelheid"}</div>
                 <div className="text-right">Factor</div>
-                <div className="text-right">Hydratatie</div>
+                <div className="text-right">{lang === "en" ? "Hydration" : "Hydratatie"}</div>
               </div>
 
               <div className="space-y-2 text-sm text-[#191970]">
                 {todayDrinks.map((d) => (
                   <div key={d.drink_type} className="grid grid-cols-4 gap-2">
-                    <div className="capitalize">{d.drink_type}</div>
-
-                    <div className="text-right">
-                      {d.total_input_ml.toLocaleString("nl-NL")} ml
+                    <div className="capitalize">
+                      {t.hydration.drinkLabels[d.drink_type as keyof typeof t.hydration.drinkLabels] ?? d.drink_type}
                     </div>
-
+                    <div className="text-right">
+                      {d.total_input_ml.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
+                    </div>
                     <div className={`text-right ${getHydrationColor(d.factor)}`}>
                       {d.factor.toFixed(2)}
                     </div>
-
                     <div className={`text-right font-medium ${getHydrationColor(d.factor)}`}>
-                      {d.total_ml.toLocaleString("nl-NL")} ml
+                      {d.total_ml.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
                     </div>
                   </div>
                 ))}
 
-                {/* ───── Subtiele scheidingslijn + totalen ───── */}
                 <div className="mt-4 pt-3 border-t border-gray-200 grid grid-cols-4 gap-2 text-sm font-semibold text-[#191970]">
-                  <div>Totaal</div>
-
+                  <div>{lang === "en" ? "Total" : "Totaal"}</div>
                   <div className="text-right">
-                    {totals.input.toLocaleString("nl-NL")} ml
+                    {totals.input.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
                   </div>
-
                   <div />
-
                   <div className="text-right">
-                    {totals.hydration.toLocaleString("nl-NL")} ml
+                    {totals.hydration.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
                   </div>
                 </div>
               </div>
 
               <div className="mt-4 text-xs text-gray-500 leading-relaxed">
-                <span className="font-semibold">Hydratatiefactor:</span><br />
-                Niet alle dranken hydrateren even sterk als water, de hydratatiefactor van water is 1.<br />
-                Dranken met cafeïne, suiker of alcohol dragen minder bij aan je hydratatie.
+                <span className="font-semibold">
+                  {lang === "en" ? "Hydration factor:" : "Hydratatiefactor:"}
+                </span><br />
+                {lang === "en"
+                  ? "Not all drinks hydrate as effectively as water. Water has a hydration factor of 1."
+                  : "Niet alle dranken hydrateren even sterk als water, de hydratatiefactor van water is 1."}
+                <br />
+                {lang === "en"
+                  ? "Drinks containing caffeine, sugar or alcohol contribute less to hydration."
+                  : "Dranken met cafeïne, suiker of alcohol dragen minder bij aan je hydratatie."}
               </div>
             </div>
           )}

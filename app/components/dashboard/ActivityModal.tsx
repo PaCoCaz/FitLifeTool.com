@@ -1,8 +1,8 @@
-// /app/components/dashboard/ActivityModal.tsx
+// app/components/dashboard/ActivityModal.tsx
 
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
@@ -13,6 +13,10 @@ import {
   ActivityType,
   calculateActivityCalories,
 } from "@/lib/activityScore";
+
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+import { formatNumber } from "@/lib/formatNumber";
 
 type Props = {
   onClose: () => void;
@@ -29,6 +33,9 @@ const QUICK_DURATIONS = [5, 10, 15, 20, 25, 30, 45, 60];
 
 export default function ActivityModal({ onClose, onAdd }: Props) {
   const { user } = useUser();
+  const lang = useLang();
+  const t = uiText[lang];
+
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
 
@@ -38,6 +45,18 @@ export default function ActivityModal({ onClose, onAdd }: Props) {
   const [minutes, setMinutes] = useState<number | null>(null);
   const [customMinutes, setCustomMinutes] = useState("");
   const [todayActivities, setTodayActivities] = useState<ActivityRow[]>([]);
+
+  const totals = todayActivities.reduce(
+    (acc, a) => {
+      acc.minutes += a.duration_minutes;
+      acc.calories += a.calories;
+      return acc;
+    },
+    { minutes: 0, calories: 0 }
+  );
+
+  const finalMinutes =
+    customMinutes.trim() !== "" ? Number(customMinutes) : minutes;
 
   /* ESC sluiten */
   useEffect(() => {
@@ -55,64 +74,48 @@ export default function ActivityModal({ onClose, onAdd }: Props) {
       .select("activity_type, duration_minutes, calories")
       .eq("user_id", user.id)
       .eq("log_date", dayKey)
-      .then(
-        ({
-          data,
-        }: {
-          data: ActivityRow[] | null;
-        }) => {
-          setTodayActivities(data ?? []);
-        }
-      );
+      .then(({ data }: { data: ActivityRow[] | null }) => {
+        const sorted = (data ?? []).sort((a, b) => b.calories - a.calories);
+        setTodayActivities(sorted);
+      });
   }, [user, dayKey]);
 
-  const totalCalories = useMemo(
-    () => todayActivities.reduce((sum, a) => sum + a.calories, 0),
-    [todayActivities]
-  );
-
-  const totalMinutes = useMemo(
-    () => todayActivities.reduce((sum, a) => sum + a.duration_minutes, 0),
-    [todayActivities]
-  );
-
-  const effectiveMinutes =
-    minutes ?? (customMinutes ? Number(customMinutes) : 0);
-
   const previewCalories =
-    selectedType && effectiveMinutes > 0
+    selectedType && finalMinutes && finalMinutes > 0
       ? calculateActivityCalories(
           ACTIVITY_TYPES[selectedType].met,
           weightKg,
-          effectiveMinutes
+          finalMinutes
         )
       : 0;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 overflow-y-auto">
-      <div className="min-h-full flex items-center justify-center p-4">
-        <div className="w-full max-w-3xl rounded-[var(--radius)] bg-white p-6 shadow-xl my-8">
+      <div className="min-h-full flex items-center justify-center px-3">
+        <div className="w-full max-w-3xl rounded-[var(--radius)] bg-white p-6 shadow-xl my-4">
+
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="flex items-center gap-2 text-base font-semibold text-[#191970]">
               <Image src="/activity.svg" alt="" width={18} height={18} />
-              Activiteit toevoegen
+              {t.activity.addActivity}
             </h2>
 
             <button
               onClick={onClose}
               className="rounded-[var(--radius)] border border-[#191970] bg-[#191970] px-3 py-1 text-xs font-medium text-white hover:bg-[#0095D3] hover:border-[#0095D3] transition"
             >
-              Sluiten
+              {t.common.close}
             </button>
           </div>
 
-          {/* Activiteitstype */}
+          {/* Activity Type */}
           <div className="mb-6">
             <div className="text-xs font-medium text-gray-500 mb-2">
-              Welke activiteit?
+              {t.activity.whichActivity}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {(Object.keys(ACTIVITY_TYPES) as ActivityType[]).map((type) => {
                 const isActive = selectedType === type;
                 return (
@@ -125,20 +128,20 @@ export default function ActivityModal({ onClose, onAdd }: Props) {
                         : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
                     }`}
                   >
-                    {ACTIVITY_TYPES[type].label}
+                    {t.activity.labels[type]}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Duur */}
+          {/* Duration */}
           <div className="mb-6">
             <div className="text-xs font-medium text-gray-500 mb-2">
-              Hoe lang?
+              {t.activity.howLong}
             </div>
 
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-3">
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
               {QUICK_DURATIONS.map((d) => (
                 <button
                   key={d}
@@ -146,80 +149,88 @@ export default function ActivityModal({ onClose, onAdd }: Props) {
                     setMinutes(d);
                     setCustomMinutes("");
                   }}
-                  className={`rounded-[var(--radius)] border px-3 py-2 text-xs font-medium transition ${
+                  className={`w-full rounded-[var(--radius)] border py-2 text-xs font-medium transition ${
                     minutes === d
                       ? "bg-[#0095D3] text-white border-[#0095D3]"
                       : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
                   }`}
                 >
-                  {d} min
+                  {d} {t.activity.minutes}
                 </button>
               ))}
             </div>
 
-            <input
-              type="number"
-              placeholder="Of vul zelf minuten in"
-              value={customMinutes}
-              onChange={(e) => {
-                setCustomMinutes(e.target.value);
-                setMinutes(null);
-              }}
-              className="w-full rounded-[var(--radius)] border border-gray-300 px-3 py-2 text-sm"
-            />
+            <div className="mt-3">
+              <label className="text-xs font-medium text-gray-500 block mb-1">
+                {t.activity.customMinutesPlaceholder}
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={customMinutes}
+                onChange={(e) => {
+                  setCustomMinutes(e.target.value);
+                  setMinutes(null);
+                }}
+                className="w-full rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-sm text-[#191970]"
+              />
+            </div>
           </div>
 
           {/* Preview */}
           {previewCalories > 0 && (
             <div className="text-sm text-gray-600 mb-4">
-              Verbranding:{" "}
+              {t.activity.burnPreview}{" "}
               <span className="font-semibold text-[#191970]">
-                {previewCalories.toLocaleString("nl-NL")} kcal
+                {formatNumber(previewCalories, lang)} kcal
               </span>
             </div>
           )}
 
-          {/* Toevoegen knop */}
           <button
-            disabled={!selectedType || effectiveMinutes <= 0}
-            onClick={() =>
-              selectedType && onAdd(selectedType, effectiveMinutes)
-            }
-            className="w-full rounded-[var(--radius)] border border-[#0095D3] px-4 py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition disabled:opacity-40"
+            onClick={() => {
+              if (!selectedType || !finalMinutes || finalMinutes <= 0) return;
+              onAdd(selectedType, finalMinutes);
+            }}
+            className="w-full rounded-[var(--radius)] border border-[#0095D3] px-4 py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
           >
-            Activiteit toevoegen
+            {t.activity.addActivity}
           </button>
 
-          {/* Overzicht vandaag */}
+          {/* Vandaag overzicht */}
           {todayActivities.length > 0 && (
-            <div className="mt-8 border-t border-gray-200 pt-6">
+            <div className="mt-8 border-t pt-6">
               <div className="text-sm font-semibold text-[#191970] mb-3">
-                Vandaag bewogen
+                {t.activity.todayOverview}
               </div>
 
               <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-gray-500 mb-2">
-                <div>Activiteit</div>
-                <div className="text-right">Duur</div>
+                <div>{t.activity.activityLabel}</div>
+                <div className="text-right">{t.activity.duration}</div>
                 <div className="text-right">kcal</div>
               </div>
 
               <div className="space-y-2 text-sm text-[#191970]">
                 {todayActivities.map((a, i) => (
                   <div key={i} className="grid grid-cols-3 gap-2">
-                    <div>{ACTIVITY_TYPES[a.activity_type].label}</div>
-                    <div className="text-right">{a.duration_minutes} min</div>
+                    <div>{t.activity.labels[a.activity_type]}</div>
+                    <div className="text-right">
+                      {a.duration_minutes} {t.activity.minutes}
+                    </div>
                     <div className="text-right font-medium">
-                      {a.calories.toLocaleString("nl-NL")} kcal
+                      {formatNumber(a.calories, lang)} kcal
                     </div>
                   </div>
                 ))}
-              </div>
 
-              <div className="mt-4 border-t border-gray-200 pt-3 text-sm font-semibold text-[#191970] grid grid-cols-3 gap-2">
-                <div>Totaal</div>
-                <div className="text-right">{totalMinutes} min</div>
-                <div className="text-right">
-                  {totalCalories.toLocaleString("nl-NL")} kcal
+                <div className="mt-4 pt-3 border-t border-gray-200 grid grid-cols-3 gap-2 text-sm font-semibold text-[#191970]">
+                  <div>{t.activity.total}</div>
+                  <div className="text-right">
+                    {totals.minutes} {t.activity.minutes}
+                  </div>
+                  <div className="text-right">
+                    {formatNumber(totals.calories, lang)} kcal
+                  </div>
                 </div>
               </div>
             </div>
