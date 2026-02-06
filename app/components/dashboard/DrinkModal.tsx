@@ -24,18 +24,18 @@ type DrinkOption = {
 };
 
 const DRINK_OPTIONS: DrinkOption[] = [
-  { label: "Water", factor: 1.0, icon: "water" },
-  { label: "Thee", factor: 0.95, icon: "tea" },
-  { label: "Koffie", factor: 0.8, icon: "coffee" },
-  { label: "Melk", factor: 0.9, icon: "milk" },
-  { label: "Frisdrank", factor: 0.9, icon: "soda" },
-  { label: "Sap / Smoothie", factor: 0.85, icon: "juice" },
-  { label: "Sportdrank", factor: 0.9, icon: "sports" },
-  { label: "Energy drink", factor: 0.7, icon: "energy" },
-  { label: "Bier", factor: 0.6, icon: "beer" },
-  { label: "Wijn", factor: 0.5, icon: "wine" },
-  { label: "Cocktail", factor: 0.4, icon: "cocktail" },
-  { label: "Sterke drank", factor: 0.3, icon: "liquor" },
+  { label: "water", factor: 1.0, icon: "water" },
+  { label: "tea", factor: 0.95, icon: "tea" },
+  { label: "coffee", factor: 0.8, icon: "coffee" },
+  { label: "milk", factor: 0.9, icon: "milk" },
+  { label: "soda", factor: 0.9, icon: "soda" },
+  { label: "juice", factor: 0.85, icon: "juice" },
+  { label: "sports", factor: 0.9, icon: "sports" },
+  { label: "energy", factor: 0.7, icon: "energy" },
+  { label: "beer", factor: 0.6, icon: "beer" },
+  { label: "wine", factor: 0.5, icon: "wine" },
+  { label: "cocktail", factor: 0.4, icon: "cocktail" },
+  { label: "liquor", factor: 0.3, icon: "liquor" },
 ];
 
 const QUICK_VOLUMES = [50, 100, 150, 200, 250, 300, 500, 1000];
@@ -154,14 +154,14 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
 
           <div className="mb-6">
             <div className="text-xs font-medium text-gray-500 mb-2">
-              {lang === "en" ? "What did you drink?" : "Wat heb je gedronken?"}
+              {t.hydration.modalWhatDidYouDrink}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {DRINK_OPTIONS.map((drink) => {
                 const isActive = selectedDrink?.label === drink.label;
                 return (
                   <button
-                    key={t.hydration.drinkLabels[drink.icon as keyof typeof t.hydration.drinkLabels]}
+                    key={drink.label}
                     onClick={() => setSelectedDrink(drink)}
                     className={`group flex items-center gap-2 rounded-[var(--radius)] border px-3 py-2 text-xs font-medium transition ${
                       isActive
@@ -173,7 +173,7 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                       <Image src={`/images/drinks/${drink.icon}.svg`} alt="" fill className={`${isActive ? "opacity-0" : "opacity-100 group-hover:opacity-0"}`} />
                       <Image src={`/images/drinks/${drink.icon}_hover.svg`} alt="" fill className={`${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
                     </span>
-                    {t.hydration.drinkLabels[drink.icon as keyof typeof t.hydration.drinkLabels]}
+                    {t.hydration.drinkLabels[drink.label as keyof typeof t.hydration.drinkLabels]}
                   </button>
                 );
               })}
@@ -182,7 +182,7 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
 
           <div className="mb-6">
             <div className="text-xs font-medium text-gray-500 mb-2">
-              {lang === "en" ? "How much did you drink?" : "Hoeveel heb je gedronken?"}
+              {t.hydration.modalHowMuch}
             </div>
             <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
               {QUICK_VOLUMES.map((v) => (
@@ -198,16 +198,14 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                       : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
                   }`}
                 >
-                  {v.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
+                  {v.toLocaleString(t.__lang === "nl" ? "nl-NL" : "en-US")} ml
                 </button>
               ))}
             </div>
 
             <div className="mt-3">
               <label className="text-xs font-medium text-gray-500 block mb-1">
-                {lang === "en"
-                  ? "Or enter a custom amount (ml)"
-                  : "Of voer zelf een hoeveelheid in (ml)"}
+                {t.hydration.modalCustomAmount}
               </label>
               <input
                 type="number"
@@ -231,20 +229,20 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
             }}
             className="w-full rounded-[var(--radius)] border border-[#0095D3] px-4 py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
           >
-            {lang === "en" ? "Add drink" : "Toevoegen"}
+            {t.hydration.addDrink}
           </button>
 
           {todayDrinks.length > 0 && (
             <div className="mt-8 border-t pt-6">
               <div className="text-sm font-semibold text-[#191970] mb-3">
-                {lang === "en" ? "Today’s drinks" : "Vandaag gedronken"}
+                {t.hydration.modalToday}
               </div>
 
               <div className="grid grid-cols-4 gap-2 text-xs font-semibold text-gray-500 mb-2">
-                <div>{lang === "en" ? "Drink" : "Drank"}</div>
-                <div className="text-right">{lang === "en" ? "Amount" : "Hoeveelheid"}</div>
+                <div>{t.hydration.modalDrink}</div>
+                <div className="text-right">{t.hydration.modalAmount}</div>
                 <div className="text-right">Factor</div>
-                <div className="text-right">{lang === "en" ? "Hydration" : "Hydratatie"}</div>
+                <div className="text-right">{t.hydration.modalHydration}</div>
               </div>
 
               <div className="space-y-2 text-sm text-[#191970]">
@@ -254,40 +252,33 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                       {t.hydration.drinkLabels[d.drink_type as keyof typeof t.hydration.drinkLabels] ?? d.drink_type}
                     </div>
                     <div className="text-right">
-                      {d.total_input_ml.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
+                      {d.total_input_ml.toLocaleString()} ml
                     </div>
                     <div className={`text-right ${getHydrationColor(d.factor)}`}>
                       {d.factor.toFixed(2)}
                     </div>
                     <div className={`text-right font-medium ${getHydrationColor(d.factor)}`}>
-                      {d.total_ml.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
+                      {d.total_ml.toLocaleString()} ml
                     </div>
                   </div>
                 ))}
 
                 <div className="mt-4 pt-3 border-t border-gray-200 grid grid-cols-4 gap-2 text-sm font-semibold text-[#191970]">
-                  <div>{lang === "en" ? "Total" : "Totaal"}</div>
+                  <div>{t.hydration.modalTotal}</div>
                   <div className="text-right">
-                    {totals.input.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
+                    {totals.input.toLocaleString()} ml
                   </div>
                   <div />
                   <div className="text-right">
-                    {totals.hydration.toLocaleString(lang === "nl" ? "nl-NL" : "en-US")} ml
+                    {totals.hydration.toLocaleString()} ml
                   </div>
                 </div>
               </div>
 
               <div className="mt-4 text-xs text-gray-500 leading-relaxed">
-                <span className="font-semibold">
-                  {lang === "en" ? "Hydration factor:" : "Hydratatiefactor:"}
-                </span><br />
-                {lang === "en"
-                  ? "Not all drinks hydrate as effectively as water. Water has a hydration factor of 1."
-                  : "Niet alle dranken hydrateren even sterk als water, de hydratatiefactor van water is 1."}
-                <br />
-                {lang === "en"
-                  ? "Drinks containing caffeine, sugar or alcohol contribute less to hydration."
-                  : "Dranken met cafeïne, suiker of alcohol dragen minder bij aan je hydratatie."}
+                <span className="font-semibold">{t.hydration.modalFactorTitle}</span><br />
+                {t.hydration.modalFactorLine1}<br />
+                {t.hydration.modalFactorLine2}
               </div>
             </div>
           )}

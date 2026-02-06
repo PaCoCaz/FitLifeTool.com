@@ -116,7 +116,7 @@ export default function HydrationCard() {
     }
 
     return getHydrationStatus(currentMl, hydrationGoal, now, t);
-  }, [currentMl, hydrationGoal, now]);
+  }, [currentMl, hydrationGoal, now, t]);
 
   useEffect(() => {
     if (!hydrationGoal) return;

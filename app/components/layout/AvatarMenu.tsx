@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useLang, setUserLanguage } from "@/lib/useLang";
+import { useLang, useSetUserLanguage } from "@/lib/useLang";
 
 type Props = {
   firstName: string;
@@ -16,6 +16,7 @@ export default function AvatarMenu({ firstName }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const lang = useLang();
+  const setUserLanguage = useSetUserLanguage(); // ✅ FIX
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -39,8 +40,8 @@ export default function AvatarMenu({ firstName }: Props) {
 
   async function changeLanguage(newLang: any) {
     setOpen(false);
-    await setUserLanguage(newLang);
-  }
+    await setUserLanguage(newLang); // werkt nu live via context
+  }    
 
   const languages = [
     { code: "en", label: "English", flag: "/images/flags/en.svg" },
@@ -83,53 +84,53 @@ export default function AvatarMenu({ firstName }: Props) {
           <div className="my-2 h-px bg-gray-100" />
 
           {/* LANGUAGE */}
-<div className="px-4 pb-2 text-xs font-semibold text-gray-400">
-  Language
-</div>
+          <div className="px-4 pb-2 text-xs font-semibold text-gray-400">
+            Language
+          </div>
 
-<div className="px-4">
-  <details className="group">
-    <summary className="flex items-center justify-between cursor-pointer list-none py-2">
-      <div className="flex items-center gap-3">
-        <Image
-          src={languages.find(l => l.code === lang)?.flag || "/images/flags/en.svg"}
-          alt=""
-          width={18}
-          height={18}
-          className="object-cover"
-        />
-        <span className="font-semibold text-[#191970]">
-          {languages.find(l => l.code === lang)?.label}
-        </span>
-      </div>
+          <div className="px-4">
+            <details className="group">
+              <summary className="flex items-center justify-between cursor-pointer list-none py-2">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src={languages.find(l => l.code === lang)?.flag || "/images/flags/en.svg"}
+                    alt=""
+                    width={18}
+                    height={18}
+                    className="object-cover"
+                  />
+                  <span className="font-semibold text-[#191970]">
+                    {languages.find(l => l.code === lang)?.label}
+                  </span>
+                </div>
 
-      <span className="text-gray-400 group-open:rotate-180 transition-transform">
-        ▾
-      </span>
-    </summary>
+                <span className="text-gray-400 group-open:rotate-180 transition-transform">
+                  ▾
+                </span>
+              </summary>
 
-    <div className="mt-1 rounded-md border bg-white shadow-sm overflow-hidden">
-      {languages
-        .filter(l => l.code !== lang)
-        .map(l => (
-          <button
-            key={l.code}
-            onClick={() => changeLanguage(l.code)}
-            className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-50"
-          >
-            <Image
-              src={l.flag}
-              alt=""
-              width={18}
-              height={18}
-              className="object-cover"
-            />
-            {l.label}
-          </button>
-        ))}
-    </div>
-  </details>
-</div>
+              <div className="mt-1 rounded-md border bg-white shadow-sm overflow-hidden">
+                {languages
+                  .filter(l => l.code !== lang)
+                  .map(l => (
+                    <button
+                      key={l.code}
+                      onClick={() => changeLanguage(l.code)}
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-50"
+                    >
+                      <Image
+                        src={l.flag}
+                        alt=""
+                        width={18}
+                        height={18}
+                        className="object-cover"
+                      />
+                      {l.label}
+                    </button>
+                  ))}
+              </div>
+            </details>
+          </div>
 
           <div className="my-2 h-px bg-gray-100" />
 

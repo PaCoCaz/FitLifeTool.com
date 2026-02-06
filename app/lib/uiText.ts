@@ -2,7 +2,7 @@
 
 import { Lang } from "./useLang";
 
-/* ───────────────── EN (basis) ───────────────── */
+/* ───────────────── ENGLISH ───────────────── */
 
 const en = {
   hydration: {
@@ -10,6 +10,20 @@ const en = {
     addDrink: "Add drink",
     goal: "Daily goal",
     loading: "Loading hydration…",
+
+    modalWhatDidYouDrink: "What did you drink?",
+    modalHowMuch: "How much did you drink?",
+    modalCustomAmount: "Or enter a custom amount (ml)",
+    modalToday: "Today's drinks",
+    modalDrink: "Drink",
+    modalAmount: "Amount",
+    modalHydration: "Hydration",
+    modalTotal: "Total",
+    modalFactorTitle: "Hydration factor:",
+    modalFactorLine1:
+      "Not all drinks hydrate as effectively as water. Water has a hydration factor of 1.",
+    modalFactorLine2:
+      "Drinks containing caffeine, sugar or alcohol contribute less to hydration.",
 
     drinkLabels: {
       water: "Water",
@@ -74,7 +88,7 @@ const en = {
   },
 };
 
-/* ───────────────── NL ───────────────── */
+/* ───────────────── DUTCH ───────────────── */
 
 const nl = {
   hydration: {
@@ -82,6 +96,20 @@ const nl = {
     addDrink: "Drinken toevoegen",
     goal: "Dagdoel",
     loading: "Hydratatie laden…",
+
+    modalWhatDidYouDrink: "Wat heb je gedronken?",
+    modalHowMuch: "Hoeveel heb je gedronken?",
+    modalCustomAmount: "Of voer zelf een hoeveelheid in (ml)",
+    modalToday: "Vandaag gedronken",
+    modalDrink: "Drank",
+    modalAmount: "Hoeveelheid",
+    modalHydration: "Hydratatie",
+    modalTotal: "Totaal",
+    modalFactorTitle: "Hydratatiefactor:",
+    modalFactorLine1:
+      "Niet alle dranken hydrateren even sterk als water, de hydratatiefactor van water is 1.",
+    modalFactorLine2:
+      "Dranken met cafeïne, suiker of alcohol dragen minder bij aan je hydratatie.",
 
     drinkLabels: {
       water: "Water",
@@ -146,7 +174,7 @@ const nl = {
   },
 };
 
-/* ───────────────── FR ───────────────── */
+/* ───────────────── FRENCH ───────────────── */
 
 const fr = {
   hydration: {
@@ -154,6 +182,20 @@ const fr = {
     addDrink: "Ajouter une boisson",
     goal: "Objectif quotidien",
     loading: "Chargement de l'hydratation…",
+
+    modalWhatDidYouDrink: "Qu'avez-vous bu ?",
+    modalHowMuch: "Combien avez-vous bu ?",
+    modalCustomAmount: "Ou saisissez une quantité personnalisée (ml)",
+    modalToday: "Boissons d'aujourd'hui",
+    modalDrink: "Boisson",
+    modalAmount: "Quantité",
+    modalHydration: "Hydratation",
+    modalTotal: "Total",
+    modalFactorTitle: "Facteur d'hydratation :",
+    modalFactorLine1:
+      "Toutes les boissons n'hydratent pas aussi bien que l'eau. L'eau a un facteur d'hydratation de 1.",
+    modalFactorLine2:
+      "Les boissons contenant de la caféine, du sucre ou de l'alcool contribuent moins à l'hydratation.",
 
     drinkLabels: {
       water: "Eau",
@@ -218,7 +260,7 @@ const fr = {
   },
 };
 
-/* ───────────────── DE ───────────────── */
+/* ───────────────── GERMAN ───────────────── */
 
 const de = {
   hydration: {
@@ -226,6 +268,20 @@ const de = {
     addDrink: "Getränk hinzufügen",
     goal: "Tagesziel",
     loading: "Lade Flüssigkeitsdaten…",
+
+    modalWhatDidYouDrink: "Was hast du getrunken?",
+    modalHowMuch: "Wie viel hast du getrunken?",
+    modalCustomAmount: "Oder gib eine eigene Menge ein (ml)",
+    modalToday: "Heute getrunken",
+    modalDrink: "Getränk",
+    modalAmount: "Menge",
+    modalHydration: "Hydration",
+    modalTotal: "Gesamt",
+    modalFactorTitle: "Hydrationsfaktor:",
+    modalFactorLine1:
+      "Nicht alle Getränke hydratisieren so gut wie Wasser. Wasser hat einen Hydrationsfaktor von 1.",
+    modalFactorLine2:
+      "Getränke mit Koffein, Zucker oder Alkohol tragen weniger zur Hydration bei.",
 
     drinkLabels: {
       water: "Wasser",
@@ -290,7 +346,7 @@ const de = {
   },
 };
 
-/* ───────────────── PL ───────────────── */
+/* ───────────────── POLISH ───────────────── */
 
 const pl = {
   hydration: {
@@ -298,6 +354,20 @@ const pl = {
     addDrink: "Dodaj napój",
     goal: "Cel dzienny",
     loading: "Ładowanie nawodnienia…",
+
+    modalWhatDidYouDrink: "Co wypiłeś?",
+    modalHowMuch: "Ile wypiłeś?",
+    modalCustomAmount: "Lub wpisz własną ilość (ml)",
+    modalToday: "Dzisiejsze napoje",
+    modalDrink: "Napój",
+    modalAmount: "Ilość",
+    modalHydration: "Nawodnienie",
+    modalTotal: "Suma",
+    modalFactorTitle: "Współczynnik nawodnienia:",
+    modalFactorLine1:
+      "Nie wszystkie napoje nawadniają tak skutecznie jak woda. Woda ma współczynnik nawodnienia równy 1.",
+    modalFactorLine2:
+      "Napoje zawierające kofeinę, cukier lub alkohol mniej wspierają nawodnienie.",
 
     drinkLabels: {
       water: "Woda",
@@ -362,17 +432,8 @@ const pl = {
   },
 };
 
-/* ───────────────── Export ───────────────── */
+export const uiText: Record<Lang, any> = { en, nl, fr, de, pl };
 
-export const uiText: Record<Lang, any> = {
-  en,
-  nl,
-  fr,
-  de,
-  pl,
-};
-
-/* Helper zodat score-bestanden weten welke taal actief is */
 export function getUIText(lang: Lang) {
   const t = uiText[lang];
   t.__lang = lang;
