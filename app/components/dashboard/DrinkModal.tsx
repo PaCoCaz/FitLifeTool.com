@@ -11,6 +11,7 @@ import { getLocalDayKey } from "@/lib/dayKey";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
+import { formatNumber } from "@/lib/formatNumber"; // ✅ zelfde als ActivityModal
 
 type Props = {
   onClose: () => void;
@@ -198,7 +199,7 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                       : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
                   }`}
                 >
-                  {v.toLocaleString(t.__lang === "nl" ? "nl-NL" : "en-US")} ml
+                  {formatNumber(v, lang)} ml
                 </button>
               ))}
             </div>
@@ -252,13 +253,13 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                       {t.hydration.drinkLabels[d.drink_type as keyof typeof t.hydration.drinkLabels] ?? d.drink_type}
                     </div>
                     <div className="text-right">
-                      {d.total_input_ml.toLocaleString()} ml
+                      {formatNumber(d.total_input_ml, lang)} ml
                     </div>
                     <div className={`text-right ${getHydrationColor(d.factor)}`}>
                       {d.factor.toFixed(2)}
                     </div>
                     <div className={`text-right font-medium ${getHydrationColor(d.factor)}`}>
-                      {d.total_ml.toLocaleString()} ml
+                      {formatNumber(d.total_ml, lang)} ml
                     </div>
                   </div>
                 ))}
@@ -266,11 +267,11 @@ export default function DrinkModal({ onClose, onAdd }: Props) {
                 <div className="mt-4 pt-3 border-t border-gray-200 grid grid-cols-4 gap-2 text-sm font-semibold text-[#191970]">
                   <div>{t.hydration.modalTotal}</div>
                   <div className="text-right">
-                    {totals.input.toLocaleString()} ml
+                    {formatNumber(totals.input, lang)} ml
                   </div>
                   <div />
                   <div className="text-right">
-                    {totals.hydration.toLocaleString()} ml
+                    {formatNumber(totals.hydration, lang)} ml
                   </div>
                 </div>
               </div>

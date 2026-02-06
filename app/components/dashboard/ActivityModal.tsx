@@ -65,7 +65,7 @@ export default function ActivityModal({ onClose, onAdd }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  /* Vandaag logs laden */
+  /* Vandaag logs laden + GROEPEREN */
   useEffect(() => {
     if (!user) return;
 
@@ -75,8 +75,27 @@ export default function ActivityModal({ onClose, onAdd }: Props) {
       .eq("user_id", user.id)
       .eq("log_date", dayKey)
       .then(({ data }: { data: ActivityRow[] | null }) => {
-        const sorted = (data ?? []).sort((a, b) => b.calories - a.calories);
-        setTodayActivities(sorted);
+        const rows = data ?? [];
+
+        const grouped: Record<ActivityType, { minutes: number; calories: number }> = {} as any;
+
+        for (const row of rows) {
+          if (!grouped[row.activity_type]) {
+            grouped[row.activity_type] = { minutes: 0, calories: 0 };
+          }
+          grouped[row.activity_type].minutes += row.duration_minutes;
+          grouped[row.activity_type].calories += row.calories;
+        }
+
+        const merged = Object.entries(grouped).map(([type, values]) => ({
+          activity_type: type as ActivityType,
+          duration_minutes: Math.round(values.minutes),
+          calories: Math.round(values.calories),
+        }));
+
+        merged.sort((a, b) => b.calories - a.calories);
+
+        setTodayActivities(merged);
       });
   }, [user, dayKey]);
 

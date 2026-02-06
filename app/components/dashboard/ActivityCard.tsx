@@ -119,7 +119,7 @@ export default function ActivityCard() {
       };
     }
 
-    return getActivityStatus(burnedCalories, activityGoal, now, t);
+    return getActivityStatus(burnedCalories, activityGoal, now, t, lang);
   }, [burnedCalories, activityGoal, now, t]);
 
   /* Dashboard sync */
@@ -158,7 +158,7 @@ export default function ActivityCard() {
 
     const nextBurned = burnedCalories + calories;
     const nextScore = calculateActivityScore(nextBurned, activityGoal, now);
-    const nextStatus = getActivityStatus(nextBurned, activityGoal, now, t);
+    const nextStatus = getActivityStatus(nextBurned, activityGoal, now, t, lang);
 
     setBurnedCalories(nextBurned);
     setActivityScore(nextScore);

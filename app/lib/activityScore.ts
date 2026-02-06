@@ -1,5 +1,8 @@
 // app/lib/activityScore.ts
 
+import { formatNumber } from "@/lib/formatNumber";
+import type { Lang } from "@/lib/useLang";
+
 /**
  * Verwachte activiteit-voortgang (0–1)
  *
@@ -7,10 +10,7 @@
  * - 00:00–07:00 → 5%
  * - 07:00–23:59 → 95%
  */
-/**
- * Verwachte activiteit-voortgang (0–1)
- */
- export function getExpectedActivityProgress(
+export function getExpectedActivityProgress(
   now: Date = new Date()
 ): number {
   const hour = now.getHours() + now.getMinutes() / 60;
@@ -43,13 +43,14 @@ export function calculateActivityScore(
 }
 
 /**
- * Activiteit-status (meertalig)
+ * Activiteit-status (meertalig + locale getallen)
  */
 export function getActivityStatus(
   burnedCalories: number,
   dailyGoal: number,
   now: Date = new Date(),
-  t: any
+  t: any,
+  lang: Lang
 ) {
   if (dailyGoal <= 0) {
     return {
@@ -79,7 +80,7 @@ export function getActivityStatus(
       color: "bg-green-600 text-white",
       message: t.activity.status.ahead.replace(
         "{{value}}",
-        delta.toString()
+        formatNumber(delta, lang)
       ),
       expectedProgress,
     };
@@ -92,7 +93,7 @@ export function getActivityStatus(
         : "bg-[#C80000] text-white",
     message: t.activity.status.behind.replace(
       "{{value}}",
-      Math.abs(delta).toString()
+      formatNumber(Math.abs(delta), lang)
     ),
     expectedProgress,
   };
@@ -113,7 +114,7 @@ export function calculateActivityCalories(
 /**
  * Activity types — ALLES met label (GEEN labelKey meer)
  */
- export const ACTIVITY_TYPES = {
+export const ACTIVITY_TYPES = {
   walking: { label: "Wandelen", labelKey: "walking", met: 3.5 },
   cycling: { label: "Fietsen", labelKey: "cycling", met: 6.8 },
   running: { label: "Hardlopen", labelKey: "running", met: 9.8 },

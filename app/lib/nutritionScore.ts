@@ -1,3 +1,5 @@
+// app/lib/nutritionScore.ts
+
 /**
  * ─────────────────────────────────────────────
  * Nutrition score & schema logic
