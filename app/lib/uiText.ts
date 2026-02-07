@@ -83,6 +83,40 @@ const en = {
     },
   },
 
+  nutrition: {
+    title: "Nutrition",
+    addFood: "Add food",
+    goal: "Daily limit",
+    loading: "Loading nutrition…",
+    basePlusActivity: "Base {{base}} + daily activity {{activity}}",
+
+    modalWhatDidYouEat: "What did you eat?",
+    modalHowMuch: "How many calories?",
+    modalCustomAmount: "Or enter calories manually",
+    modalToday: "Today's food",
+    modalMeal: "Meal",
+    modalCalories: "Calories",
+    modalTotal: "Total",
+
+    mealLabels: {
+      breakfast: "Breakfast",
+      lunch: "Lunch",
+      dinner: "Dinner",
+      snack: "Snack",
+      drink_calories: "Calorie drink",
+      dessert: "Dessert",
+      fast_food: "Fast food",
+      other: "Other",
+    },
+
+    status: {
+      noGoal: "No nutrition goal set",
+      onTrack: "You're on schedule",
+      behind: "You're {{value}} kcal behind your schedule",
+      over: "You're {{value}} kcal above your schedule",
+    },
+  },
+
   common: {
     close: "Close",
   },
@@ -166,6 +200,40 @@ const nl = {
       goalReached: "Goed bezig, je hebt je dagdoel gehaald.",
       ahead: "Je loopt {{value}} kcal voor op je dagschema",
       behind: "Je loopt {{value}} kcal achter op je dagschema",
+    },
+  },
+
+  nutrition: {
+    title: "Voeding",
+    addFood: "Voeding toevoegen",
+    goal: "Daglimiet",
+    loading: "Voeding laden…",
+    basePlusActivity: "Basis {{base}} + dagelijkse activiteiten {{activity}}",
+
+    modalWhatDidYouEat: "Wat heb je gegeten?",
+    modalHowMuch: "Hoeveel calorieën?",
+    modalCustomAmount: "Of vul zelf calorieën in",
+    modalToday: "Vandaag gegeten",
+    modalMeal: "Maaltijd",
+    modalCalories: "Calorieën",
+    modalTotal: "Totaal",
+
+    mealLabels: {
+      breakfast: "Ontbijt",
+      lunch: "Lunch",
+      dinner: "Diner",
+      snack: "Snack",
+      drink_calories: "Calorische drank",
+      dessert: "Dessert",
+      fast_food: "Fastfood",
+      other: "Overig",
+    },
+
+    status: {
+      noGoal: "Geen voedingsdoel ingesteld",
+      onTrack: "Je ligt op dagschema",
+      behind: "Je loopt {{value}} kcal achter op je dagschema",
+      over: "Je zit {{value}} kcal boven je dagschema",
     },
   },
 
@@ -255,6 +323,40 @@ const fr = {
     },
   },
 
+  nutrition: {
+    title: "Nutrition",
+    addFood: "Ajouter un aliment",
+    goal: "Limite quotidienne",
+    loading: "Chargement de la nutrition…",
+    basePlusActivity: "Base {{base}} + activité quotidienne {{activity}}",
+
+    modalWhatDidYouEat: "Qu'avez-vous mangé ?",
+    modalHowMuch: "Combien de calories ?",
+    modalCustomAmount: "Ou saisissez les calories manuellement",
+    modalToday: "Repas d'aujourd'hui",
+    modalMeal: "Repas",
+    modalCalories: "Calories",
+    modalTotal: "Total",
+
+    mealLabels: {
+      breakfast: "Petit-déjeuner",
+      lunch: "Déjeuner",
+      dinner: "Dîner",
+      snack: "Collation",
+      drink_calories: "Boisson calorique",
+      dessert: "Dessert",
+      fast_food: "Fast-food",
+      other: "Autre",
+    },
+
+    status: {
+      noGoal: "Aucun objectif nutritionnel défini",
+      onTrack: "Vous êtes dans le planning",
+      behind: "Vous avez {{value}} kcal de retard sur votre planning",
+      over: "Vous avez {{value}} kcal au-dessus de votre planning",
+    },
+  },
+
   common: {
     close: "Fermer",
   },
@@ -341,6 +443,40 @@ const de = {
     },
   },
 
+  nutrition: {
+    title: "Ernährung",
+    addFood: "Mahlzeit hinzufügen",
+    goal: "Tageslimit",
+    loading: "Lade Ernährungsdaten…",
+    basePlusActivity: "Basis {{base}} + tägliche Aktivität {{activity}}",
+
+    modalWhatDidYouEat: "Was hast du gegessen?",
+    modalHowMuch: "Wie viele Kalorien?",
+    modalCustomAmount: "Oder Kalorien manuell eingeben",
+    modalToday: "Heute gegessen",
+    modalMeal: "Mahlzeit",
+    modalCalories: "Kalorien",
+    modalTotal: "Gesamt",
+
+    mealLabels: {
+      breakfast: "Frühstück",
+      lunch: "Mittagessen",
+      dinner: "Abendessen",
+      snack: "Snack",
+      drink_calories: "Kaloriengetränk",
+      dessert: "Dessert",
+      fast_food: "Fastfood",
+      other: "Sonstiges",
+    },
+
+    status: {
+      noGoal: "Kein Ernährungsziel festgelegt",
+      onTrack: "Du liegst im Plan",
+      behind: "Du liegst {{value}} kcal hinter deinem Plan",
+      over: "Du liegst {{value}} kcal über deinem Plan",
+    },
+  },
+
   common: {
     close: "Schließen",
   },
@@ -424,6 +560,40 @@ const pl = {
       goalReached: "Świetnie, osiągnąłeś dzienny cel.",
       ahead: "Masz {{value}} kcal przewagi względem planu",
       behind: "Masz {{value}} kcal opóźnienia względem planu",
+    },
+  },
+
+  nutrition: {
+    title: "Odżywianie",
+    addFood: "Dodaj posiłek",
+    goal: "Limit dzienny",
+    loading: "Ładowanie danych o odżywianiu…",
+    basePlusActivity: "Podstawa {{base}} + dzienna aktywność {{activity}}",
+
+    modalWhatDidYouEat: "Co zjadłeś?",
+    modalHowMuch: "Ile kalorii?",
+    modalCustomAmount: "Lub wpisz kalorie ręcznie",
+    modalToday: "Dzisiejsze posiłki",
+    modalMeal: "Posiłek",
+    modalCalories: "Kalorie",
+    modalTotal: "Suma",
+
+    mealLabels: {
+      breakfast: "Śniadanie",
+      lunch: "Obiad",
+      dinner: "Kolacja",
+      snack: "Przekąska",
+      drink_calories: "Napój kaloryczny",
+      dessert: "Deser",
+      fast_food: "Fast food",
+      other: "Inne",
+    },
+
+    status: {
+      noGoal: "Brak ustawionego celu żywieniowego",
+      onTrack: "Jesteś zgodnie z planem",
+      behind: "Masz {{value}} kcal opóźnienia względem planu",
+      over: "Masz {{value}} kcal powyżej planu",
     },
   },
 
