@@ -212,8 +212,8 @@ export default function NutritionCard() {
       {showModal && (
         <NutritionModal
           onClose={() => setShowModal(false)}
-          onAdd={(amount, type) => {
-            addCalories(amount);
+          onAdd={(calories) => {
+            addCalories(calories);
             setShowModal(false);
           }}
         />
