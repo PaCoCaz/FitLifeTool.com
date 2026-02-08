@@ -66,7 +66,11 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
     const load = async () => {
       const { data } = await supabase
         .from("food_products")
-        .select(`id, kcal_per_100g, food_product_translations!inner(name, lang)`)
+        .select(`
+          id,
+          kcal_per_100g,
+          food_product_translations!inner(name, lang)
+        `)
         .eq("food_product_translations.lang", lang)
         .ilike("food_product_translations.name", `%${search}%`)
         .limit(20);
@@ -92,7 +96,11 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
     const load = async () => {
       const { data } = await supabase
         .from("food_portions")
-        .select(`id, grams, food_portion_translations!inner(name, lang)`)
+        .select(`
+          id,
+          grams,
+          food_portion_translations!inner(name, lang)
+        `)
         .eq("food_id", selectedProduct.id)
         .eq("food_portion_translations.lang", lang);
 
@@ -126,21 +134,23 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
           )
         `)
         .eq("user_id", user.id)
-        .eq("log_date", dayKey);
+        .eq("log_date", dayKey)
+        .not("food_id", "is", null)
+        .gt("grams", 0);
 
       if (data) {
         setTodayFoods(
-          data
-            .filter((f: any) => f.food_id) // 🔥 voorkomt "Onbekend product"
-            .map((f: any) => {
-              const translations = f.food_products?.food_product_translations || [];
-              const match = translations.find((t: any) => t.lang === lang);
-              return {
-                product_name: match?.name || "Onbekend product",
-                grams: f.grams,
-                calories: f.calories,
-              };
-            })
+          data.map((f: any) => {
+            const translations = f.food_products?.food_product_translations || [];
+            const match = translations.find((t: any) => t.lang === lang);
+            const fallback = translations[0];
+
+            return {
+              product_name: match?.name || fallback?.name || t.nutrition.unknownProduct,
+              grams: f.grams,
+              calories: f.calories,
+            };
+          })
         );
       }
     };
@@ -150,31 +160,27 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
 
   const totalCalories = todayFoods.reduce((s, f) => s + f.calories, 0);
 
-  const activeGrams =
-    customGrams.trim() !== ""
-      ? Number(customGrams)
-      : selectedGrams ?? null;
-
-  const activeKcal =
-    selectedProduct && activeGrams
-      ? Math.round((activeGrams / 100) * selectedProduct.kcal_per_100g)
+  const gramsToUse = selectedGrams ?? Number(customGrams);
+  const kcalToUse =
+    selectedProduct && gramsToUse
+      ? Math.round((gramsToUse / 100) * selectedProduct.kcal_per_100g)
       : 0;
 
-  async function confirmAdd() {
-    if (!selectedProduct || !activeGrams || !user) return;
+  async function addFood() {
+    if (!selectedProduct || !user || !gramsToUse) return;
 
     const { error } = await supabase.from("nutrition_logs").insert({
       user_id: user.id,
       food_id: selectedProduct.id,
-      grams: activeGrams,
-      calories: activeKcal,
+      grams: gramsToUse,
+      calories: kcalToUse,
       log_date: dayKey,
       log_time_local: new Date().toTimeString().slice(0, 8),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
 
     if (!error) {
-      onAdd(activeKcal);
+      onAdd(kcalToUse);
       onClose();
     }
   }
@@ -184,6 +190,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
       <div className="min-h-full flex items-center justify-center px-3">
         <div className="w-full max-w-3xl rounded-[var(--radius)] bg-white p-6 shadow-xl my-4">
 
+          {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="flex items-center gap-2 text-base font-semibold text-[#191970]">
               <Image src="/nutrition.svg" alt="" width={18} height={18} />
@@ -194,19 +201,20 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
             </button>
           </div>
 
+          {/* Zoekveld */}
           <input
             type="text"
             value={selectedProduct ? selectedProduct.name : search}
             onChange={(e) => {
               setSelectedProduct(null);
               setSelectedGrams(null);
-              setCustomGrams("");
               setSearch(e.target.value);
             }}
             placeholder={t.nutrition.searchPlaceholder}
             className="w-full rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-sm text-[#191970]"
           />
 
+          {/* Resultaten */}
           {!selectedProduct && results.length > 0 && (
             <div className="mt-3 border rounded-[var(--radius)] overflow-hidden">
               {results.map((r) => (
@@ -221,6 +229,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
             </div>
           )}
 
+          {/* Porties */}
           {selectedProduct && (
             <>
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -242,7 +251,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
                       }`}
                     >
                       <div>{p.label}</div>
-                      <div className="text-xs opacity-70">
+                      <div className="text-xs opacity-80">
                         ({p.grams} g • {formatNumber(kcal, lang)} kcal)
                       </div>
                     </button>
@@ -250,6 +259,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
                 })}
               </div>
 
+              {/* Eigen hoeveelheid */}
               <div className="mt-4">
                 <label className="text-xs text-gray-500">Eigen hoeveelheid (gram)</label>
                 <input
@@ -263,38 +273,48 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
                 />
                 {customGrams && (
                   <div className="text-xs text-gray-500 mt-1">
-                    {customGrams} g ({formatNumber(activeKcal, lang)} kcal)
+                    {customGrams} g ({formatNumber(kcalToUse, lang)} kcal)
                   </div>
                 )}
               </div>
 
-              {activeGrams && (
-                <button
-                  onClick={confirmAdd}
-                  className="mt-6 w-full rounded-[var(--radius)] border border-[#0095D3] py-2 text-sm text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
-                >
-                  {t.nutrition.addFood}
-                </button>
-              )}
+              {/* Bevestigknop */}
+              <button
+                onClick={addFood}
+                disabled={!gramsToUse}
+                className="mt-4 w-full rounded-[var(--radius)] border border-[#0095D3] py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition disabled:opacity-40"
+              >
+                {t.nutrition.addFood}
+              </button>
             </>
           )}
 
+          {/* Vandaag gegeten */}
           {todayFoods.length > 0 && (
             <div className="mt-8 border-t pt-6">
               <div className="text-sm font-semibold text-[#191970] mb-3">
                 {t.nutrition.modalToday}
               </div>
 
+              <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-gray-500 mb-2">
+                <div>{t.nutrition.modalProduct}</div>
+                <div className="text-right">{t.nutrition.modalAmount}</div>
+                <div className="text-right">{t.nutrition.modalCalories}</div>
+              </div>
+
               <div className="space-y-2 text-sm text-[#191970]">
                 {todayFoods.map((f, i) => (
-                  <div key={i} className="flex justify-between">
-                    <span>{f.product_name} ({f.grams} g)</span>
-                    <span>{formatNumber(f.calories, lang)} kcal</span>
+                  <div key={i} className="grid grid-cols-3 gap-2">
+                    <div>{f.product_name}</div>
+                    <div className="text-right">{f.grams} g</div>
+                    <div className="text-right">{formatNumber(f.calories, lang)} kcal</div>
                   </div>
                 ))}
-                <div className="mt-3 pt-2 border-t font-semibold flex justify-between">
-                  <span>{t.nutrition.modalTotal}</span>
-                  <span>{formatNumber(totalCalories, lang)} kcal</span>
+
+                <div className="mt-4 pt-3 border-t border-gray-200 grid grid-cols-3 gap-2 text-sm font-semibold text-[#191970]">
+                  <div>{t.nutrition.modalTotal}</div>
+                  <div />
+                  <div className="text-right">{formatNumber(totalCalories, lang)} kcal</div>
                 </div>
               </div>
             </div>
