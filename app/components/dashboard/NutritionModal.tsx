@@ -48,6 +48,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
   const [selectedGrams, setSelectedGrams] = useState<number | null>(null);
   const [customGrams, setCustomGrams] = useState("");
   const [todayFoods, setTodayFoods] = useState<TodayFood[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   /* ESC sluiten */
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
 
   /* 🔎 Zoeken */
   useEffect(() => {
-    if (search.length < 2 || selectedProduct) {
+    if (search.length < 1 || selectedProduct) {
       setResults([]);
       return;
     }
@@ -73,16 +74,31 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
         `)
         .eq("food_product_translations.lang", lang)
         .ilike("food_product_translations.name", `%${search}%`)
-        .limit(20);
+        .limit(30);
 
       if (data) {
-        setResults(
-          data.map((p: any) => ({
-            id: p.id,
-            name: p.food_product_translations[0].name,
-            kcal_per_100g: p.kcal_per_100g,
-          }))
-        );
+        const mapped = data.map((p: any) => ({
+          id: p.id,
+          name: p.food_product_translations[0].name,
+          kcal_per_100g: p.kcal_per_100g,
+        }));
+
+        mapped.sort((a: Product, b: Product) => {
+          const searchLower = search.toLowerCase();
+          const aLower = a.name.toLowerCase();
+          const bLower = b.name.toLowerCase();
+        
+          const aStarts = aLower.startsWith(searchLower);
+          const bStarts = bLower.startsWith(searchLower);
+        
+          // 🔹 Eerst alles dat met de zoekterm begint
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+        
+          // 🔹 Daarna alfabetisch
+          return aLower.localeCompare(bLower);
+        });        
+        setResults(mapped);
       }
     };
 
@@ -128,14 +144,12 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
         .select(`
           grams,
           calories,
-          food_id,
           food_products (
             food_product_translations ( name, lang )
           )
         `)
         .eq("user_id", user.id)
         .eq("log_date", dayKey)
-        .not("food_id", "is", null)
         .gt("grams", 0);
 
       if (data) {
@@ -158,8 +172,6 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
     load();
   }, [user, dayKey, lang]);
 
-  const totalCalories = todayFoods.reduce((s, f) => s + f.calories, 0);
-
   const gramsToUse = selectedGrams ?? Number(customGrams);
   const kcalToUse =
     selectedProduct && gramsToUse
@@ -167,7 +179,17 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
       : 0;
 
   async function addFood() {
-    if (!selectedProduct || !user || !gramsToUse) return;
+    if (
+      isSaving ||
+      !user ||
+      !selectedProduct ||
+      !selectedProduct.id ||
+      !gramsToUse ||
+      gramsToUse <= 0 ||
+      kcalToUse <= 0
+    ) return;
+
+    setIsSaving(true);
 
     const { error } = await supabase.from("nutrition_logs").insert({
       user_id: user.id,
@@ -179,11 +201,15 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
 
+    setIsSaving(false);
+
     if (!error) {
       onAdd(kcalToUse);
       onClose();
     }
   }
+
+  const totalCalories = todayFoods.reduce((s, f) => s + f.calories, 0);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 overflow-y-auto">
@@ -216,7 +242,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
 
           {/* Resultaten */}
           {!selectedProduct && results.length > 0 && (
-            <div className="mt-3 border rounded-[var(--radius)] overflow-hidden">
+            <div className="mt-3 border rounded-[var(--radius)] overflow-hidden max-h-60 overflow-y-auto">
               {results.map((r) => (
                 <button
                   key={r.id}
@@ -278,10 +304,9 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
                 )}
               </div>
 
-              {/* Bevestigknop */}
               <button
                 onClick={addFood}
-                disabled={!gramsToUse}
+                disabled={!gramsToUse || isSaving}
                 className="mt-4 w-full rounded-[var(--radius)] border border-[#0095D3] py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition disabled:opacity-40"
               >
                 {t.nutrition.addFood}
