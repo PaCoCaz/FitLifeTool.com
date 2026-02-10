@@ -90,6 +90,7 @@ const en = {
     loading: "Loading nutrition…",
     basePlusActivity: "Base {{base}} + daily activity {{activity}}",
 
+    modalMealMoment: "When did you eat this?",
     modalWhatDidYouEat: "What did you eat?",
     modalHowMuch: "How many calories?",
     modalCustomAmount: "Or enter calories manually",
@@ -210,6 +211,7 @@ const nl = {
     loading: "Voeding laden…",
     basePlusActivity: "Basis {{base}} + dagelijkse activiteiten {{activity}}",
 
+    modalMealMoment: "Wanneer heb je dit gegeten?",
     modalWhatDidYouEat: "Wat heb je gegeten?",
     modalHowMuch: "Hoeveel calorieën?",
     modalCustomAmount: "Of vul zelf calorieën in",
@@ -330,6 +332,7 @@ const fr = {
     loading: "Chargement de la nutrition…",
     basePlusActivity: "Base {{base}} + activité quotidienne {{activity}}",
 
+    modalMealMoment: "Quand avez-vous mangé ceci ?",
     modalWhatDidYouEat: "Qu'avez-vous mangé ?",
     modalHowMuch: "Combien de calories ?",
     modalCustomAmount: "Ou saisissez les calories manuellement",
@@ -450,6 +453,7 @@ const de = {
     loading: "Lade Ernährungsdaten…",
     basePlusActivity: "Basis {{base}} + tägliche Aktivität {{activity}}",
 
+    modalMealMoment: "Wann hast du das gegessen?",
     modalWhatDidYouEat: "Was hast du gegessen?",
     modalHowMuch: "Wie viele Kalorien?",
     modalCustomAmount: "Oder Kalorien manuell eingeben",
@@ -570,6 +574,7 @@ const pl = {
     loading: "Ładowanie danych o odżywianiu…",
     basePlusActivity: "Podstawa {{base}} + dzienna aktywność {{activity}}",
 
+    modalMealMoment: "Kiedy to zjadłeś?",
     modalWhatDidYouEat: "Co zjadłeś?",
     modalHowMuch: "Ile kalorii?",
     modalCustomAmount: "Lub wpisz kalorie ręcznie",

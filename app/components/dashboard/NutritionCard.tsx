@@ -130,30 +130,18 @@ export default function NutritionCard() {
     dispatchDashboardEvent("nutrition-updated", { score: nutritionScore, color: nutritionStatus.color });
   }, [hasLoaded, dailyLimit, nutritionScore, nutritionStatus.color]);
 
-  async function addCalories(amount: number) {
-    if (!user || !dailyLimit) return;
-
-    const nowTs = new Date();
-
-    const { error } = await supabase.from("nutrition_logs").insert({
-      user_id: user.id,
-      calories: amount,
-      log_date: dayKey,
-      log_time_local: nowTs.toTimeString().slice(0, 8),
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    });
-
-    if (error) return;
-
+  function addCalories(amount: number) {
+    if (!dailyLimit) return;
+  
     const nextCalories = currentCalories + amount;
-    const nextScore = calculateNutritionScore(nextCalories, dailyLimit, goal);
-    const nextStatus = getNutritionStatus(nextCalories, dailyLimit, goal, now, t, lang);
-
+    const nextScore = calculateNutritionScore(nextCalories, dailyLimit, goal, new Date());
+    const nextStatus = getNutritionStatus(nextCalories, dailyLimit, goal, new Date(), t, lang);
+  
     setCurrentCalories(nextCalories);
     setNutritionScore(nextScore);
-
+  
     dispatchDashboardEvent("nutrition-updated", { score: nextScore, color: nextStatus.color });
-  }
+  }  
 
   if (!hasLoaded || baseGoal === null) {
     return <Card title={t.nutrition.title}><div className="text-sm text-gray-500">{t.nutrition.loading}</div></Card>;

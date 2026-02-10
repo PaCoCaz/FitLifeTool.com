@@ -17,6 +17,10 @@ type Props = {
   onAdd: (calories: number) => void;
 };
 
+type MealType = "breakfast" | "lunch" | "dinner" | "snack";
+
+const MEAL_TYPES: MealType[] = ["breakfast", "lunch", "dinner", "snack"];
+
 type Product = {
   id: string;
   name: string;
@@ -41,6 +45,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
   const lang = useLang();
   const t = uiText[lang];
 
+  const [mealType, setMealType] = useState<MealType | null>(null);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -50,7 +55,6 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
   const [todayFoods, setTodayFoods] = useState<TodayFood[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  /* ESC sluiten */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -84,20 +88,16 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
         }));
 
         mapped.sort((a: Product, b: Product) => {
-          const searchLower = search.toLowerCase();
+          const s = search.toLowerCase();
           const aLower = a.name.toLowerCase();
           const bLower = b.name.toLowerCase();
-        
-          const aStarts = aLower.startsWith(searchLower);
-          const bStarts = bLower.startsWith(searchLower);
-        
-          // 🔹 Eerst alles dat met de zoekterm begint
+          const aStarts = aLower.startsWith(s);
+          const bStarts = bLower.startsWith(s);
           if (aStarts && !bStarts) return -1;
           if (!aStarts && bStarts) return 1;
-        
-          // 🔹 Daarna alfabetisch
           return aLower.localeCompare(bLower);
-        });        
+        });
+
         setResults(mapped);
       }
     };
@@ -182,17 +182,17 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
     if (
       isSaving ||
       !user ||
+      !mealType ||
       !selectedProduct ||
-      !selectedProduct.id ||
       !gramsToUse ||
-      gramsToUse <= 0 ||
-      kcalToUse <= 0
+      kcalToUse < 0
     ) return;
 
     setIsSaving(true);
 
     const { error } = await supabase.from("nutrition_logs").insert({
       user_id: user.id,
+      meal_type: mealType,
       food_id: selectedProduct.id,
       grams: gramsToUse,
       calories: kcalToUse,
@@ -227,7 +227,32 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
             </button>
           </div>
 
-          {/* Zoekveld */}
+          {/* 🍳 Meal type */}
+          <div className="mb-6">
+            <div className="text-xs font-medium text-gray-500 mb-2">
+              {t.nutrition.modalMealMoment}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {MEAL_TYPES.map((m) => {
+                const active = mealType === m;
+                return (
+                  <button
+                    key={m}
+                    onClick={() => setMealType(m)}
+                    className={`rounded-[var(--radius)] border px-3 py-2 text-xs font-medium transition ${
+                      active
+                        ? "bg-[#0095D3] text-white border-[#0095D3]"
+                        : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
+                    }`}
+                  >
+                    {t.nutrition.mealLabels[m]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 🔍 Search */}
           <input
             type="text"
             value={selectedProduct ? selectedProduct.name : search}
@@ -240,7 +265,6 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
             className="w-full rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-sm text-[#191970]"
           />
 
-          {/* Resultaten */}
           {!selectedProduct && results.length > 0 && (
             <div className="mt-3 border rounded-[var(--radius)] overflow-hidden max-h-60 overflow-y-auto">
               {results.map((r) => (
@@ -285,7 +309,6 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
                 })}
               </div>
 
-              {/* Eigen hoeveelheid */}
               <div className="mt-4">
                 <label className="text-xs text-gray-500">Eigen hoeveelheid (gram)</label>
                 <input
@@ -306,7 +329,7 @@ export default function NutritionModal({ onClose, onAdd }: Props) {
 
               <button
                 onClick={addFood}
-                disabled={!gramsToUse || isSaving}
+                disabled={!gramsToUse || isSaving || !mealType}
                 className="mt-4 w-full rounded-[var(--radius)] border border-[#0095D3] py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition disabled:opacity-40"
               >
                 {t.nutrition.addFood}
