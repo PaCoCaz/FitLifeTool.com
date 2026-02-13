@@ -224,7 +224,7 @@ const nl = {
       breakfast: "Ontbijt",
       lunch: "Lunch",
       dinner: "Diner",
-      snack: "Snack",
+      snack: "Tussendoor",
       drink_calories: "Calorische drank",
       dessert: "Dessert",
       fast_food: "Fastfood",
