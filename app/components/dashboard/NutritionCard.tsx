@@ -18,13 +18,10 @@ import {
   getNutritionStatus,
 } from "@/lib/nutritionScore";
 
-/* ✅ NIEUWE MODAL */
-import ConsumptionModal from "@/components/dashboard/ConsumptionModal";
-
-/* 🌍 Meertaligheid */
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
 import { formatNumber } from "@/lib/formatNumber";
+import { useRouter } from "next/navigation";
 
 /* ───────────────── Types ───────────────── */
 
@@ -45,15 +42,19 @@ export default function NutritionCard() {
 
   const lang = useLang();
   const t = uiText[lang];
+  const router = useRouter();
 
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
-  const [goal, setGoal] = useState<NutritionProfile["goal"]>("maintain");
-  const [activityBonus, setActivityBonus] = useState<number>(0);
-  const [currentCalories, setCurrentCalories] = useState<number>(0);
-  const [nutritionScore, setNutritionScore] = useState<number>(0);
-  const [hasLoaded, setHasLoaded] = useState(false);
-
-  const [showConsumptionModal, setShowConsumptionModal] = useState(false);
+  const [goal, setGoal] =
+    useState<NutritionProfile["goal"]>("maintain");
+  const [activityBonus, setActivityBonus] =
+    useState<number>(0);
+  const [currentCalories, setCurrentCalories] =
+    useState<number>(0);
+  const [nutritionScore, setNutritionScore] =
+    useState<number>(0);
+  const [hasLoaded, setHasLoaded] =
+    useState(false);
 
   useEffect(() => {
     setBaseGoal(null);
@@ -74,9 +75,21 @@ export default function NutritionCard() {
         { data: activityLogs },
         { data: consumptionLogs },
       ] = await Promise.all([
-        supabase.from("profiles").select("calorie_goal, goal").eq("id", userId).single<NutritionProfile>(),
-        supabase.from("activity_logs").select("calories").eq("user_id", userId).eq("log_date", dayKey),
-        supabase.from("consumption_logs").select("calories").eq("user_id", userId).eq("log_date", dayKey),
+        supabase
+          .from("profiles")
+          .select("calorie_goal, goal")
+          .eq("id", userId)
+          .single<NutritionProfile>(),
+        supabase
+          .from("activity_logs")
+          .select("calories")
+          .eq("user_id", userId)
+          .eq("log_date", dayKey),
+        supabase
+          .from("consumption_logs")
+          .select("calories")
+          .eq("user_id", userId)
+          .eq("log_date", dayKey),
       ]);
 
       if (!profile?.calorie_goal) return;
@@ -99,40 +112,51 @@ export default function NutritionCard() {
       setCurrentCalories(eaten);
 
       const limit = profile.calorie_goal + burned;
-      setNutritionScore(calculateNutritionScore(eaten, limit, profile.goal));
+      setNutritionScore(
+        calculateNutritionScore(
+          eaten,
+          limit,
+          profile.goal
+        )
+      );
+
       setHasLoaded(true);
     };
 
     loadInitial();
   }, [user, dayKey]);
 
-  /* ✅ NIEUW: luisteren naar consumption-changed */
   useEffect(() => {
     if (!user) return;
-  
-    const userId = user.id; // ✅ fix TS null warning
-  
+    const userId = user.id;
+
     async function handleConsumptionChange() {
       const { data } = await supabase
         .from("consumption_logs")
         .select("calories")
         .eq("user_id", userId)
         .eq("log_date", dayKey);
-  
+
       const eaten =
         (data as NutritionLogRow[] | null)?.reduce(
           (s, r) => s + r.calories,
           0
         ) ?? 0;
-  
+
       setCurrentCalories(eaten);
     }
-  
-    window.addEventListener("consumption-changed", handleConsumptionChange);
-  
+
+    window.addEventListener(
+      "consumption-changed",
+      handleConsumptionChange
+    );
+
     return () =>
-      window.removeEventListener("consumption-changed", handleConsumptionChange);
-  }, [user, dayKey]);  
+      window.removeEventListener(
+        "consumption-changed",
+        handleConsumptionChange
+      );
+  }, [user, dayKey]);
 
   useEffect(() => {
     if (!user || !hasLoaded) return;
@@ -154,33 +178,60 @@ export default function NutritionCard() {
       setActivityBonus(burned);
     }
 
-    window.addEventListener("activity-updated", handleActivityUpdate);
+    window.addEventListener(
+      "activity-updated",
+      handleActivityUpdate
+    );
+
     return () =>
-      window.removeEventListener("activity-updated", handleActivityUpdate);
+      window.removeEventListener(
+        "activity-updated",
+        handleActivityUpdate
+      );
   }, [user, hasLoaded, dayKey]);
 
-  const dailyLimit = baseGoal !== null ? baseGoal + activityBonus : 0;
+  const dailyLimit =
+    baseGoal !== null ? baseGoal + activityBonus : 0;
 
   const statusKey = `${currentCalories}-${dailyLimit}-${goal}-${now.getHours()}-${lang}`;
 
   const nutritionStatus = useMemo(() => {
     if (!dailyLimit)
-      return { color: "bg-gray-400 text-white", message: "", expectedProgress: 0 };
-    return getNutritionStatus(currentCalories, dailyLimit, goal, now, t, lang);
+      return {
+        color: "bg-gray-400 text-white",
+        message: "",
+        expectedProgress: 0,
+      };
+
+    return getNutritionStatus(
+      currentCalories,
+      dailyLimit,
+      goal,
+      now,
+      t,
+      lang
+    );
   }, [statusKey]);
 
   const pillScore =
-    nutritionStatus.color === "bg-green-600 text-white"
+    nutritionStatus.color ===
+    "bg-green-600 text-white"
       ? nutritionScore
       : Math.min(nutritionScore, 99);
 
   useEffect(() => {
     if (!hasLoaded || !dailyLimit) return;
+
     dispatchDashboardEvent("nutrition-updated", {
       score: nutritionScore,
       color: nutritionStatus.color,
     });
-  }, [hasLoaded, dailyLimit, nutritionScore, nutritionStatus.color]);
+  }, [
+    hasLoaded,
+    dailyLimit,
+    nutritionScore,
+    nutritionStatus.color,
+  ]);
 
   if (!hasLoaded || baseGoal === null) {
     return (
@@ -192,15 +243,28 @@ export default function NutritionCard() {
     );
   }
 
-  const actualProgress = Math.min(currentCalories / dailyLimit, 1);
-  const progressBarColor = nutritionStatus.color.replace("text-white", "");
+  const actualProgress = Math.min(
+    currentCalories / dailyLimit,
+    1
+  );
+
+  const progressBarColor =
+    nutritionStatus.color.replace("text-white", "");
+
   const limitLabel = t.nutrition.goal;
 
   return (
     <>
       <Card
         title={t.nutrition.title}
-        icon={<Image src="/nutrition.svg" alt="" width={16} height={16} />}
+        icon={
+          <Image
+            src="/nutrition.svg"
+            alt=""
+            width={16}
+            height={16}
+          />
+        }
         action={
           <div
             className={`rounded-[var(--radius)] px-3 py-1 text-xs font-semibold whitespace-nowrap ${nutritionStatus.color}`}
@@ -216,13 +280,20 @@ export default function NutritionCard() {
             </div>
 
             <div className="text-xs text-gray-500">
-              {limitLabel}: {formatNumber(dailyLimit, lang)} kcal
+              {limitLabel}:{" "}
+              {formatNumber(dailyLimit, lang)} kcal
             </div>
 
             <div className="text-[11px] text-gray-400">
               {t.nutrition.basePlusActivity
-                .replace("{{base}}", formatNumber(baseGoal ?? 0, lang))
-                .replace("{{activity}}", formatNumber(activityBonus, lang))}
+                .replace(
+                  "{{base}}",
+                  formatNumber(baseGoal ?? 0, lang)
+                )
+                .replace(
+                  "{{activity}}",
+                  formatNumber(activityBonus, lang)
+                )}
             </div>
           </div>
 
@@ -230,11 +301,15 @@ export default function NutritionCard() {
             <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
               <div
                 className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
-                style={{ width: `${nutritionStatus.expectedProgress * 100}%` }}
+                style={{
+                  width: `${nutritionStatus.expectedProgress * 100}%`,
+                }}
               />
               <div
                 className={`absolute left-0 top-0 h-full transition-all ${progressBarColor}`}
-                style={{ width: `${actualProgress * 100}%` }}
+                style={{
+                  width: `${actualProgress * 100}%`,
+                }}
               />
             </div>
 
@@ -244,22 +319,13 @@ export default function NutritionCard() {
           </div>
 
           <button
-            onClick={() => setShowConsumptionModal(true)}
+            onClick={() => router.push("/dashboard/food/search")}
             className="mt-4 rounded-[var(--radius)] border border-[#0095D3] px-3 py-3 text-sm font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
           >
             + {t.nutrition.addFood}
           </button>
         </div>
       </Card>
-
-      {showConsumptionModal && (
-        <ConsumptionModal
-          onClose={() => setShowConsumptionModal(false)}
-          onSaved={(calories: number) => {
-            setCurrentCalories((prev) => prev + calories)
-          }}
-        />
-      )}
     </>
   );
 }
