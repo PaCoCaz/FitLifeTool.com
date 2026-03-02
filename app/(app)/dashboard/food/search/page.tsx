@@ -1,20 +1,56 @@
-//  app/(app)/dashboard/food/search/page.tsx
+// app/(app)/dashboard/food/search/page.tsx
 
 "use client";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/AuthProvider";
+
+/* ───────────────── Types ───────────────── */
 
 type Product = {
   product_key: string;
   name: string;
 };
 
+type ProfileRow = {
+  language: string;
+};
+
+/* ───────────────── Component ───────────────── */
+
 export default function FoodSearchPage() {
   const router = useRouter();
+  const { user } = useUser();
+
+  const [language, setLanguage] = useState<string>("nl");
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Product[]>([]);
+
+  /* ───────────────── LOAD LANGUAGE ───────────────── */
+
+  useEffect(() => {
+    if (!user) return;
+
+    const userId = user.id;
+
+    async function loadLanguage() {
+      const { data } = await supabase
+        .from("profiles")
+        .select("language")
+        .eq("id", userId)
+        .single<ProfileRow>();
+
+      if (data?.language) {
+        setLanguage(data.language);
+      }
+    }
+
+    loadLanguage();
+  }, [user]);
+
+  /* ───────────────── SEARCH ───────────────── */
 
   useEffect(() => {
     if (search.length < 2) {
@@ -27,8 +63,8 @@ export default function FoodSearchPage() {
         "search_nutrition_products",
         {
           p_search: search,
-          p_lang: "nl",
-          p_goal: "maintain",
+          p_lang: language,
+          p_goal: "maintain", // later dynamisch uit profile
           p_limit: 20,
         }
       );
@@ -37,7 +73,9 @@ export default function FoodSearchPage() {
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [search]);
+  }, [search, language]);
+
+  /* ───────────────── UI ───────────────── */
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -53,7 +91,7 @@ export default function FoodSearchPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Zoek product..."
-          className="w-full border rounded px-4 py-3"
+          className="w-full border rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0095D3]"
         />
       </div>
 
@@ -66,7 +104,7 @@ export default function FoodSearchPage() {
                 `/dashboard/food/add/${product.product_key}`
               )
             }
-            className="w-full text-left px-4 py-3 border rounded hover:bg-gray-100"
+            className="w-full text-left px-4 py-3 border rounded hover:bg-gray-100 transition"
           >
             {product.name}
           </button>

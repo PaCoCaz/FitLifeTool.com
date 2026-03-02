@@ -2,7 +2,13 @@
 
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 
@@ -18,31 +24,73 @@ const LangContext = createContext<LangContextType | null>(null);
 export function LangProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
   const [lang, setLang] = useState<Lang>("en");
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  // Taal laden bij login
+  /* ───────────────── LOAD LANGUAGE FROM DB ───────────────── */
+
   useEffect(() => {
     if (!user) return;
 
-    supabase
-      .from("profiles")
-      .select("language")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }: { data: { language: Lang } | null }) => {
-        if (data?.language) setLang(data.language);
-      });
+    const userId = user.id;
+
+    async function loadLanguage() {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("language")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Language load error:", error);
+        return;
+      }
+
+      if (data?.language) {
+        setLang(data.language as Lang);
+      }
+
+      setHasLoaded(true);
+    }
+
+    loadLanguage();
   }, [user]);
 
-  async function setUserLanguage(newLang: Lang) {
-    setLang(newLang); // 🔥 DIRECT LIVE UPDATE
+  /* ───────────────── CHANGE LANGUAGE ───────────────── */
 
-    if (!user) return;
+  const setUserLanguage = useCallback(
+    async (newLang: Lang) => {
+      if (!user) return;
 
-    await supabase
-      .from("profiles")
-      .update({ language: newLang })
-      .eq("id", user.id);
-  }
+      const userId = user.id;
+
+      // 1️⃣ Direct live UI update
+      setLang(newLang);
+
+      // 2️⃣ Persist to database
+      const { error } = await supabase
+        .from("profiles")
+        .update({ language: newLang })
+        .eq("id", userId);
+
+      if (error) {
+        console.error("Language update failed:", error);
+
+        // 🔁 Revert if DB update failed
+        const { data } = await supabase
+          .from("profiles")
+          .select("language")
+          .eq("id", userId)
+          .single();
+
+        if (data?.language) {
+          setLang(data.language as Lang);
+        }
+      }
+    },
+    [user]
+  );
+
+  /* ───────────────── PROVIDER ───────────────── */
 
   return (
     <LangContext.Provider value={{ lang, setUserLanguage }}>
@@ -53,6 +101,8 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
 
 export function useLangContext() {
   const ctx = useContext(LangContext);
-  if (!ctx) throw new Error("useLangContext must be used inside LangProvider");
+  if (!ctx) {
+    throw new Error("useLangContext must be used inside LangProvider");
+  }
   return ctx;
 }

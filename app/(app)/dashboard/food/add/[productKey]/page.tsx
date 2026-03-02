@@ -1,4 +1,4 @@
-//  app/(app)/dashboard/food/add/[productKey]/page.tsx
+// app/(app)/dashboard/food/add/[productKey]/page.tsx
 
 "use client";
 
@@ -15,8 +15,17 @@ type Params = {
   productKey: string;
 };
 
+type ProfileRow = {
+  language: string;
+  goal: string;
+};
+
 type ProductTranslationRow = {
   name: string;
+};
+
+type ProductScoreRow = {
+  score: number;
 };
 
 type PreparationKeyRow = {
@@ -32,6 +41,7 @@ type PortionRow = {
   unit_key: string;
   grams: number | null;
   ml: number | null;
+  label: string | null;
 };
 
 type Preparation = {
@@ -46,6 +56,24 @@ type Portion = {
   label: string;
 };
 
+type UnitTranslationRow = {
+  unit_key: string;
+  label: string;
+};
+
+type NutritionRow = {
+  kcal_per_100g: number | null;
+  kcal_per_100ml: number | null;
+  protein_per_100g: number | null;
+  carbs_per_100g: number | null;
+  fat_per_100g: number | null;
+  fiber_per_100g: number | null;
+  sugar_per_100g: number | null;
+  alcohol_per_100g: number | null;
+  water_percent: number | null;
+  sodium_per_100g: number | null;
+};
+
 /* ───────────────── Component ───────────────── */
 
 export default function AddFoodPage() {
@@ -56,7 +84,10 @@ export default function AddFoodPage() {
   const { user } = useUser();
   const dayKey = getLocalDayKey(useDayNow());
 
+  const [language, setLanguage] = useState<string>("nl");
+  const [goal, setGoal] = useState<string>("maintain");
   const [productName, setProductName] = useState<string>("");
+  const [productScore, setProductScore] = useState<number | null>(null);
 
   const [preparations, setPreparations] = useState<Preparation[]>([]);
   const [selectedPreparation, setSelectedPreparation] =
@@ -68,6 +99,27 @@ export default function AddFoodPage() {
 
   const [quantity, setQuantity] = useState<number>(1);
 
+  /* ───────────────── LOAD LANGUAGE + GOAL ───────────────── */
+
+  useEffect(() => {
+    if (!user) return;
+
+    const userId = user.id;
+
+    async function loadProfile() {
+      const { data } = await supabase
+        .from("profiles")
+        .select("language, goal")
+        .eq("id", userId)
+        .single<ProfileRow>();
+
+      if (data?.language) setLanguage(data.language);
+      if (data?.goal) setGoal(data.goal);
+    }
+
+    loadProfile();
+  }, [user]);
+
   /* ───────────────── PRODUCT NAME ───────────────── */
 
   useEffect(() => {
@@ -76,7 +128,7 @@ export default function AddFoodPage() {
         .from("nutrition_product_translations")
         .select("name")
         .eq("product_key", productKey)
-        .eq("lang", "nl")
+        .eq("lang", language)
         .single<ProductTranslationRow>();
 
       if (data) {
@@ -84,15 +136,41 @@ export default function AddFoodPage() {
       }
     }
 
-    loadProduct();
-  }, [productKey]);
+    if (productKey && language) {
+      loadProduct();
+    }
+  }, [productKey, language]);
+
+  /* ───────────────── PRODUCT SCORE ───────────────── */
+
+  useEffect(() => {
+    if (!productKey || !goal || !selectedPreparation) return;
+  
+    async function loadProductScore() {
+      const { data } = await supabase
+        .from("nutrition_product_scores")
+        .select("score_numeric")
+        .eq("product_key", productKey)
+        .eq("preparation_key", selectedPreparation)
+        .eq("goal_key", goal)
+        .single();
+  
+      if (data?.score_numeric !== undefined) {
+        setProductScore(data.score_numeric);
+      } else {
+        setProductScore(null);
+      }
+    }
+  
+    loadProductScore();
+  }, [productKey, goal, selectedPreparation]);
 
   /* ───────────────── PREPARATIONS ───────────────── */
 
   useEffect(() => {
     async function loadPreparations() {
       const { data } = await supabase
-        .from("nutrition_portions")
+        .from("nutrition_product_preparations")
         .select("preparation_key")
         .eq("product_key", productKey);
 
@@ -100,23 +178,24 @@ export default function AddFoodPage() {
 
       const typedKeys = data as PreparationKeyRow[];
 
-      const uniqueKeys: string[] = Array.from(
-        new Set(typedKeys.map((d: PreparationKeyRow) => d.preparation_key))
+      const uniqueKeys = Array.from(
+        new Set(typedKeys.map((d) => d.preparation_key))
       );
 
+      if (uniqueKeys.length === 0) return;
+
       const { data: translations } = await supabase
-        .from("preparation_translations")
+        .from("nutrition_preparation_translations")
         .select("preparation_key, name")
         .in("preparation_key", uniqueKeys)
-        .eq("lang", "nl");
+        .eq("lang", language);
 
       const typedTranslations =
         (translations as PreparationTranslationRow[]) ?? [];
 
-      const mapped: Preparation[] = uniqueKeys.map((key: string) => {
+      const mapped: Preparation[] = uniqueKeys.map((key) => {
         const found = typedTranslations.find(
-          (t: PreparationTranslationRow) =>
-            t.preparation_key === key
+          (t) => t.preparation_key === key
         );
 
         return {
@@ -126,179 +205,260 @@ export default function AddFoodPage() {
       });
 
       setPreparations(mapped);
-      setSelectedPreparation(mapped[0]?.preparation_key ?? null);
+
+      setSelectedPreparation((prev) => {
+        if (prev && mapped.some(p => p.preparation_key === prev)) {
+          return prev;
+        }
+        return mapped[0]?.preparation_key ?? null;
+      });
     }
 
-    loadPreparations();
-  }, [productKey]);
+    if (productKey && language) {
+      loadPreparations();
+    }
+  }, [productKey, language]);
 
   /* ───────────────── PORTIONS ───────────────── */
 
   useEffect(() => {
     if (!selectedPreparation) return;
-
+  
     async function loadPortions() {
-      const { data } = await supabase
+      setPortions([]);
+      setSelectedPortion(null);
+  
+      const { data: portionsRaw } = await supabase
         .from("nutrition_portions")
-        .select("unit_key, grams, ml")
+        .select("unit_key, grams, ml, sort_order")
         .eq("product_key", productKey)
-        .eq("preparation_key", selectedPreparation);
-
-      if (!data) return;
-
-      const typedData = data as PortionRow[];
-
-      const mapped: Portion[] = typedData.map(
-        (row: PortionRow) => ({
+        .eq("preparation_key", selectedPreparation)
+        .order("sort_order", { ascending: true });
+  
+      if (!portionsRaw) return;
+  
+      const portionsData = portionsRaw as PortionRow[];
+      if (portionsData.length === 0) return;
+  
+      const unitKeys = Array.from(
+        new Set(portionsData.map((p) => p.unit_key))
+      );
+  
+      const { data: unitTranslationsRaw } = await supabase
+        .from("nutrition_unit_translations")
+        .select("unit_key, label")
+        .in("unit_key", unitKeys)
+        .eq("lang", language);
+  
+      const unitTranslations =
+        (unitTranslationsRaw as UnitTranslationRow[]) ?? [];
+  
+      const unitMap = new Map<string, string>(
+        unitTranslations.map((u) => [u.unit_key, u.label])
+      );
+  
+      const mapped: Portion[] = portionsData.map((row) => {
+        const unitLabel = unitMap.get(row.unit_key);
+  
+        const amount =
+          row.grams !== null
+            ? `${row.grams} g`
+            : `${row.ml} ml`;
+  
+        return {
           unit_key: row.unit_key,
           grams: row.grams,
           ml: row.ml,
-          label:
-            row.grams !== null
-              ? `${row.grams} g`
-              : `${row.ml} ml`,
-        })
-      );
-
+          label: unitLabel
+            ? `${unitLabel} (${amount})`
+            : amount,
+        };
+      });
+  
       setPortions(mapped);
       setSelectedPortion(mapped[0] ?? null);
     }
-
+  
     loadPortions();
-  }, [selectedPreparation, productKey]);
+  }, [selectedPreparation, productKey, language]);
 
   /* ───────────────── SAVE ───────────────── */
 
   async function handleSave() {
-    if (!user || !selectedPortion) return;
-
-    const base =
-      selectedPortion.grams ??
-      selectedPortion.ml ??
-      0;
-
-    const total = base * quantity;
-
-    await supabase.from("consumption_logs").insert({
-        user_id: user.id,
-        product_key: productKey,
-        preparation_key: selectedPreparation,
-        unit_key: selectedPortion.unit_key,
-        grams: selectedPortion.grams ? total : null,
-        ml: selectedPortion.ml ? total : null,
-        quantity,
-        log_date: dayKey,
-      });
+    if (!user || !selectedPortion || !selectedPreparation) return;
   
-      window.dispatchEvent(
-        new Event("consumption-changed")
-      );
+    const { data: nutrition } = await supabase
+      .from("nutrition_product_preparations")
+      .select("*")
+      .eq("product_key", productKey)
+      .eq("preparation_key", selectedPreparation)
+      .single<NutritionRow>();
   
-      router.push("/dashboard");
-    }
+    if (!nutrition) return;
   
-    /* ───────────────── UI ───────────────── */
+    const totalGrams = selectedPortion.grams
+      ? selectedPortion.grams * quantity
+      : null;
   
-    return (
-        <div className="grid grid-cols-12 gap-6">
-      
-          <div className="col-span-12">
-      
-            <div className="bg-white rounded-[var(--radius)] shadow-sm border">
-      
-              {/* Header */}
-              <div className="px-6 py-4 border-b">
-                <h1 className="text-lg font-semibold">
-                  {productName}
-                </h1>
-              </div>
-      
-              {/* Content */}
-              <div className="px-6 py-6 space-y-10">
-      
-                {/* Bereiding */}
-                <div>
-                  <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                    Bereiding
-                  </h2>
-      
-                  <div className="space-y-3">
-                    {preparations.map((p) => (
-                      <button
-                        key={p.preparation_key}
-                        onClick={() =>
-                          setSelectedPreparation(p.preparation_key)
-                        }
-                        className={`w-full text-left px-4 py-3 rounded-[var(--radius)] border transition ${
-                          selectedPreparation === p.preparation_key
-                            ? "border-[#0095D3] bg-[#E6F4FA] text-[#0095D3]"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-      
-                {/* Eenheid */}
-                <div>
-                  <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                    Eenheid
-                  </h2>
-      
-                  <div className="space-y-3">
-                    {portions.map((p) => (
-                      <button
-                        key={p.unit_key}
-                        onClick={() => setSelectedPortion(p)}
-                        className={`w-full text-left px-4 py-3 rounded-[var(--radius)] border transition ${
-                          selectedPortion?.unit_key === p.unit_key
-                            ? "border-[#0095D3] bg-[#E6F4FA] text-[#0095D3]"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-      
-                {/* Aantal */}
-                <div>
-                  <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                    Aantal
-                  </h2>
-      
-                  <input
-                    type="number"
-                    min={1}
-                    value={quantity}
-                    onChange={(e) =>
-                      setQuantity(
-                        Math.max(1, parseInt(e.target.value) || 1)
-                      )
-                    }
-                    className="w-32 border rounded-[var(--radius)] px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0095D3] focus:border-[#0095D3]"
-                  />
-                </div>
-      
-              </div>
-      
-              {/* Action bar */}
-              <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
-                <button
-                  onClick={handleSave}
-                  className="bg-[#0095D3] text-white px-6 py-3 rounded-[var(--radius)] font-medium hover:opacity-90 transition"
-                >
-                  Gereed
-                </button>
-              </div>
-      
-            </div>
-      
-          </div>
-      
-        </div>
-      );
+    const totalMl = selectedPortion.ml
+      ? selectedPortion.ml * quantity
+      : null;
+  
+    const factor =
+      totalGrams !== null
+        ? totalGrams / 100
+        : totalMl !== null
+        ? totalMl / 100
+        : 0;
+  
+    const kcal =
+      (nutrition.kcal_per_100g ??
+        nutrition.kcal_per_100ml ??
+        0) * factor;
+  
+    const protein = (nutrition.protein_per_100g ?? 0) * factor;
+    const carbs = (nutrition.carbs_per_100g ?? 0) * factor;
+    const fat = (nutrition.fat_per_100g ?? 0) * factor;
+    const fiber = (nutrition.fiber_per_100g ?? 0) * factor;
+    const sugar = (nutrition.sugar_per_100g ?? 0) * factor;
+    const alcohol = (nutrition.alcohol_per_100g ?? 0) * factor;
+    const sodium = (nutrition.sodium_per_100g ?? 0) * factor;
+  
+    const water =
+      nutrition.water_percent !== null && totalGrams !== null
+        ? (nutrition.water_percent / 100) * totalGrams
+        : null;
+  
+    await supabase.from("nutrition_logs").insert({
+      user_id: user.id,
+      log_date: dayKey,
+      product_key: productKey,
+      preparation_key: selectedPreparation,
+      unit_key: selectedPortion.unit_key,
+      quantity,
+      grams: totalGrams,
+      ml: totalMl,
+      kcal,
+      protein,
+      carbs,
+      fat,
+      fiber,
+      sugar,
+      alcohol,
+      water,
+      sodium,
+    });
+  
+    window.dispatchEvent(new Event("consumption-changed"));
+    router.push("/dashboard");
   }
+
+  /* ───────────────── UI ───────────────── */
+
+  return (
+    <div className="grid grid-cols-12 gap-6">
+      <div className="col-span-12">
+        <div className="bg-white rounded-[var(--radius)] shadow-sm border">
+
+          <div className="px-6 py-4 border-b flex items-center justify-between">
+            <h1 className="text-lg font-semibold">
+              {productName}
+            </h1>
+
+            {productScore !== null && (
+              <div
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  productScore >= 80
+                    ? "bg-green-100 text-green-700"
+                    : productScore >= 50
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                Score {productScore} / 100
+              </div>
+            )}
+          </div>
+
+          <div className="px-6 py-6 space-y-10">
+
+            <div>
+              <h2 className="text-sm font-semibold text-gray-500 mb-4">
+                Bereiding
+              </h2>
+
+              <div className="space-y-3">
+                {preparations.map((p) => (
+                  <button
+                    key={p.preparation_key}
+                    onClick={() =>
+                      setSelectedPreparation(p.preparation_key)
+                    }
+                    className={`w-full text-left px-4 py-3 rounded-[var(--radius)] border transition ${
+                      selectedPreparation === p.preparation_key
+                        ? "border-[#0095D3] bg-[#E6F4FA] text-[#0095D3]"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold text-gray-500 mb-4">
+                Eenheid
+              </h2>
+
+              <div className="space-y-3">
+                {portions.map((p) => (
+                  <button
+                    key={p.unit_key}
+                    onClick={() => setSelectedPortion(p)}
+                    className={`w-full text-left px-4 py-3 rounded-[var(--radius)] border transition ${
+                      selectedPortion?.unit_key === p.unit_key
+                        ? "border-[#0095D3] bg-[#E6F4FA] text-[#0095D3]"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold text-gray-500 mb-4">
+                Aantal
+              </h2>
+
+              <input
+                type="number"
+                min={1}
+                value={quantity}
+                onChange={(e) =>
+                  setQuantity(
+                    Math.max(1, parseInt(e.target.value) || 1)
+                  )
+                }
+                className="w-32 border rounded-[var(--radius)] px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0095D3] focus:border-[#0095D3]"
+              />
+            </div>
+
+          </div>
+
+          <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
+            <button
+              onClick={handleSave}
+              className="bg-[#0095D3] text-white px-6 py-3 rounded-[var(--radius)] font-medium hover:opacity-90 transition"
+            >
+              Gereed
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}

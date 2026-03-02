@@ -40,7 +40,7 @@ export default function TodayConsumptionCard() {
     if (!user) return;
 
     const { data, error } = await supabase
-      .from("consumption_logs")
+      .from("nutrition_logs")
       .select(`
         id,
         calories,
@@ -90,7 +90,7 @@ export default function TodayConsumptionCard() {
 
   async function deleteLog(id: string) {
     const { error } = await supabase
-      .from("consumption_logs")
+      .from("nutrition_logs")
       .delete()
       .eq("id", id);
 
