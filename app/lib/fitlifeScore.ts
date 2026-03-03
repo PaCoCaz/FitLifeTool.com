@@ -1,3 +1,5 @@
+// app/lib/fitlifeScore.ts
+
 /**
  * ─────────────────────────────────────────────
  * FitLifeScore – aggregatie & algemene UI helpers

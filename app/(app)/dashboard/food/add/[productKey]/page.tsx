@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@/lib/AuthProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
+import { useLangContext } from "@/lib/LangProvider";
 
 /* ───────────────── Types ───────────────── */
 
@@ -16,16 +17,11 @@ type Params = {
 };
 
 type ProfileRow = {
-  language: string;
   goal: string;
 };
 
 type ProductTranslationRow = {
   name: string;
-};
-
-type ProductScoreRow = {
-  score: number;
 };
 
 type PreparationKeyRow = {
@@ -74,6 +70,10 @@ type NutritionRow = {
   sodium_per_100g: number | null;
 };
 
+type FavoriteRow = {
+  id: string;
+};
+
 /* ───────────────── Component ───────────────── */
 
 export default function AddFoodPage() {
@@ -82,9 +82,9 @@ export default function AddFoodPage() {
 
   const router = useRouter();
   const { user } = useUser();
+  const { lang } = useLangContext();
   const dayKey = getLocalDayKey(useDayNow());
 
-  const [language, setLanguage] = useState<string>("nl");
   const [goal, setGoal] = useState<string>("maintain");
   const [productName, setProductName] = useState<string>("");
   const [productScore, setProductScore] = useState<number | null>(null);
@@ -99,36 +99,63 @@ export default function AddFoodPage() {
 
   const [quantity, setQuantity] = useState<number>(1);
 
-  /* ───────────────── LOAD LANGUAGE + GOAL ───────────────── */
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [favoriteId, setFavoriteId] = useState<string | null>(null);
+
+  /* ───────────────── LOAD GOAL ───────────────── */
 
   useEffect(() => {
     if (!user) return;
 
-    const userId = user.id;
-
     async function loadProfile() {
       const { data } = await supabase
         .from("profiles")
-        .select("language, goal")
-        .eq("id", userId)
+        .select("goal")
+        .eq("id", user!.id)
         .single<ProfileRow>();
 
-      if (data?.language) setLanguage(data.language);
       if (data?.goal) setGoal(data.goal);
     }
 
     loadProfile();
   }, [user]);
 
+  /* ⭐ CHECK FAVORITE */
+
+  useEffect(() => {
+    if (!user || !productKey) return;
+
+    async function checkFavorite() {
+      const { data } = await supabase
+        .from("nutrition_favorites")
+        .select("id")
+        .eq("user_id", user!.id)
+        .eq("product_key", productKey)
+        .maybeSingle<FavoriteRow>();
+
+      if (data) {
+        setIsFavorite(true);
+        setFavoriteId(data.id);
+      } else {
+        setIsFavorite(false);
+        setFavoriteId(null);
+      }
+    }
+
+    checkFavorite();
+  }, [user, productKey]);
+
   /* ───────────────── PRODUCT NAME ───────────────── */
 
   useEffect(() => {
+    if (!productKey || !lang) return;
+
     async function loadProduct() {
       const { data } = await supabase
         .from("nutrition_product_translations")
         .select("name")
         .eq("product_key", productKey)
-        .eq("lang", language)
+        .eq("lang", lang)
         .single<ProductTranslationRow>();
 
       if (data) {
@@ -136,16 +163,14 @@ export default function AddFoodPage() {
       }
     }
 
-    if (productKey && language) {
-      loadProduct();
-    }
-  }, [productKey, language]);
+    loadProduct();
+  }, [productKey, lang]);
 
   /* ───────────────── PRODUCT SCORE ───────────────── */
 
   useEffect(() => {
     if (!productKey || !goal || !selectedPreparation) return;
-  
+
     async function loadProductScore() {
       const { data } = await supabase
         .from("nutrition_product_scores")
@@ -154,20 +179,22 @@ export default function AddFoodPage() {
         .eq("preparation_key", selectedPreparation)
         .eq("goal_key", goal)
         .single();
-  
+
       if (data?.score_numeric !== undefined) {
         setProductScore(data.score_numeric);
       } else {
         setProductScore(null);
       }
     }
-  
+
     loadProductScore();
   }, [productKey, goal, selectedPreparation]);
 
   /* ───────────────── PREPARATIONS ───────────────── */
 
   useEffect(() => {
+    if (!productKey || !lang) return;
+
     async function loadPreparations() {
       const { data } = await supabase
         .from("nutrition_product_preparations")
@@ -188,7 +215,7 @@ export default function AddFoodPage() {
         .from("nutrition_preparation_translations")
         .select("preparation_key, name")
         .in("preparation_key", uniqueKeys)
-        .eq("lang", language);
+        .eq("lang", lang);
 
       const typedTranslations =
         (translations as PreparationTranslationRow[]) ?? [];
@@ -214,57 +241,55 @@ export default function AddFoodPage() {
       });
     }
 
-    if (productKey && language) {
-      loadPreparations();
-    }
-  }, [productKey, language]);
+    loadPreparations();
+  }, [productKey, lang]);
 
   /* ───────────────── PORTIONS ───────────────── */
 
   useEffect(() => {
-    if (!selectedPreparation) return;
-  
+    if (!selectedPreparation || !lang) return;
+
     async function loadPortions() {
       setPortions([]);
       setSelectedPortion(null);
-  
+
       const { data: portionsRaw } = await supabase
         .from("nutrition_portions")
         .select("unit_key, grams, ml, sort_order")
         .eq("product_key", productKey)
         .eq("preparation_key", selectedPreparation)
         .order("sort_order", { ascending: true });
-  
+
       if (!portionsRaw) return;
-  
+
       const portionsData = portionsRaw as PortionRow[];
       if (portionsData.length === 0) return;
-  
+
       const unitKeys = Array.from(
         new Set(portionsData.map((p) => p.unit_key))
       );
-  
+
       const { data: unitTranslationsRaw } = await supabase
         .from("nutrition_unit_translations")
         .select("unit_key, label")
         .in("unit_key", unitKeys)
-        .eq("lang", language);
-  
+        .eq("lang", lang);
+
       const unitTranslations =
         (unitTranslationsRaw as UnitTranslationRow[]) ?? [];
-  
+
       const unitMap = new Map<string, string>(
         unitTranslations.map((u) => [u.unit_key, u.label])
       );
-  
+
       const mapped: Portion[] = portionsData.map((row) => {
         const unitLabel = unitMap.get(row.unit_key);
-  
+
         const amount =
           row.grams !== null
             ? `${row.grams} g`
             : `${row.ml} ml`;
-  
+
         return {
           unit_key: row.unit_key,
           grams: row.grams,
@@ -274,48 +299,79 @@ export default function AddFoodPage() {
             : amount,
         };
       });
-  
+
       setPortions(mapped);
       setSelectedPortion(mapped[0] ?? null);
     }
-  
+
     loadPortions();
-  }, [selectedPreparation, productKey, language]);
+  }, [selectedPreparation, productKey, lang]);
+
+  /* ⭐ TOGGLE FAVORITE */
+
+  async function toggleFavorite() {
+    if (!user) return;
+
+    if (isFavorite && favoriteId) {
+      await supabase
+        .from("nutrition_favorites")
+        .delete()
+        .eq("id", favoriteId);
+
+      setIsFavorite(false);
+      setFavoriteId(null);
+      return;
+    }
+
+    const { data } = await supabase
+      .from("nutrition_favorites")
+      .insert({
+        user_id: user.id,
+        product_key: productKey,
+      })
+      .select("id")
+      .single();
+
+    if (data) {
+      setIsFavorite(true);
+      setFavoriteId(data.id);
+    }
+  }
 
   /* ───────────────── SAVE ───────────────── */
 
   async function handleSave() {
     if (!user || !selectedPortion || !selectedPreparation) return;
-  
+
     const { data: nutrition } = await supabase
       .from("nutrition_product_preparations")
       .select("*")
       .eq("product_key", productKey)
       .eq("preparation_key", selectedPreparation)
       .single<NutritionRow>();
-  
+
     if (!nutrition) return;
-  
+
     const totalGrams = selectedPortion.grams
       ? selectedPortion.grams * quantity
       : null;
-  
+
     const totalMl = selectedPortion.ml
       ? selectedPortion.ml * quantity
       : null;
-  
+
     const factor =
       totalGrams !== null
         ? totalGrams / 100
         : totalMl !== null
         ? totalMl / 100
         : 0;
-  
+
     const kcal =
       (nutrition.kcal_per_100g ??
         nutrition.kcal_per_100ml ??
         0) * factor;
-  
+
     const protein = (nutrition.protein_per_100g ?? 0) * factor;
     const carbs = (nutrition.carbs_per_100g ?? 0) * factor;
     const fat = (nutrition.fat_per_100g ?? 0) * factor;
@@ -323,12 +379,12 @@ export default function AddFoodPage() {
     const sugar = (nutrition.sugar_per_100g ?? 0) * factor;
     const alcohol = (nutrition.alcohol_per_100g ?? 0) * factor;
     const sodium = (nutrition.sodium_per_100g ?? 0) * factor;
-  
+
     const water =
       nutrition.water_percent !== null && totalGrams !== null
         ? (nutrition.water_percent / 100) * totalGrams
         : null;
-  
+
     await supabase.from("nutrition_logs").insert({
       user_id: user.id,
       log_date: dayKey,
@@ -348,7 +404,7 @@ export default function AddFoodPage() {
       water,
       sodium,
     });
-  
+
     window.dispatchEvent(new Event("consumption-changed"));
     router.push("/dashboard");
   }
@@ -365,19 +421,34 @@ export default function AddFoodPage() {
               {productName}
             </h1>
 
-            {productScore !== null && (
-              <div
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  productScore >= 80
-                    ? "bg-green-100 text-green-700"
-                    : productScore >= 50
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
+            <div className="flex items-center gap-3">
+
+              {productScore !== null && (
+                <div
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    productScore >= 80
+                      ? "bg-green-100 text-green-700"
+                      : productScore >= 50
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  Score {productScore} / 100
+                </div>
+              )}
+
+              <button
+                onClick={toggleFavorite}
+                className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
+                  isFavorite
+                    ? "bg-[#0095D3] text-white border-[#0095D3]"
+                    : "border-gray-300 text-gray-600 hover:border-[#0095D3] hover:text-[#0095D3]"
                 }`}
               >
-                Score {productScore} / 100
-              </div>
-            )}
+                {isFavorite ? "★ Favoriet" : "☆ Favoriet"}
+              </button>
+
+            </div>
           </div>
 
           <div className="px-6 py-6 space-y-10">

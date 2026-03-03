@@ -86,6 +86,22 @@ export default function OnboardingFinalStep({ onBack }: Props) {
       return;
     }
 
+    /* ✅ NIEUW — Eerste goal periode aanmaken */
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    const goalMap = {
+      lose_weight: "LOSE",
+      maintain: "MAINTAIN",
+      gain_weight: "GAIN",
+    } as const;
+
+    await supabase.from("user_goal_periods").insert({
+      user_id: user.id,
+      goal_key: goalMap[goal],
+      start_at: todayStr,
+      end_at: null,
+    });
+
     /* 2️⃣ Profiel ophalen voor berekeningen */
     const {
       data: profile,

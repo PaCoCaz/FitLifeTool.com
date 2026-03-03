@@ -25,12 +25,23 @@ import { useRouter } from "next/navigation";
 
 /* ───────────────── Types ───────────────── */
 
-type NutritionLogRow = { calories: number };
+type NutritionLogRow = { kcal: number };
 type ActivityLogRow = { calories: number };
+
+type ProfileGoal = "LOSE" | "MAINTAIN" | "GAIN";
+
 type NutritionProfile = {
   calorie_goal: number;
-  goal: "lose_weight" | "maintain" | "gain_weight";
+  goal: ProfileGoal;
 };
+
+/* ───────────────── Goal Mapping ───────────────── */
+
+function mapGoalToScoreGoal(goal: ProfileGoal) {
+  if (goal === "LOSE") return "lose_weight";
+  if (goal === "GAIN") return "gain_weight";
+  return "maintain";
+}
 
 /* ───────────────── Component ───────────────── */
 
@@ -46,7 +57,9 @@ export default function NutritionCard() {
 
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
   const [goal, setGoal] =
-    useState<NutritionProfile["goal"]>("maintain");
+    useState<"lose_weight" | "maintain" | "gain_weight">(
+      "maintain"
+    );
   const [activityBonus, setActivityBonus] =
     useState<number>(0);
   const [currentCalories, setCurrentCalories] =
@@ -55,6 +68,8 @@ export default function NutritionCard() {
     useState<number>(0);
   const [hasLoaded, setHasLoaded] =
     useState(false);
+
+  /* ───────────────── Reset bij dagwissel ───────────────── */
 
   useEffect(() => {
     setBaseGoal(null);
@@ -65,6 +80,8 @@ export default function NutritionCard() {
     setHasLoaded(false);
   }, [dayKey]);
 
+  /* ───────────────── Initial Load ───────────────── */
+
   useEffect(() => {
     if (!user) return;
     const userId = user.id;
@@ -73,7 +90,7 @@ export default function NutritionCard() {
       const [
         { data: profile },
         { data: activityLogs },
-        { data: consumptionLogs },
+        { data: nutritionLogs },
       ] = await Promise.all([
         supabase
           .from("profiles")
@@ -86,8 +103,8 @@ export default function NutritionCard() {
           .eq("user_id", userId)
           .eq("log_date", dayKey),
         supabase
-          .from("consumption_logs")
-          .select("calories")
+          .from("nutrition_logs")
+          .select("kcal")
           .eq("user_id", userId)
           .eq("log_date", dayKey),
       ]);
@@ -95,30 +112,25 @@ export default function NutritionCard() {
       if (!profile?.calorie_goal) return;
 
       setBaseGoal(profile.calorie_goal);
-      setGoal(profile.goal);
+
+      const mappedGoal = mapGoalToScoreGoal(profile.goal);
+      setGoal(mappedGoal);
 
       const burned =
         (activityLogs as ActivityLogRow[] | null)?.reduce(
           (s, r) => s + r.calories,
           0
         ) ?? 0;
+
       setActivityBonus(burned);
 
       const eaten =
-        (consumptionLogs as NutritionLogRow[] | null)?.reduce(
-          (s, r) => s + r.calories,
+        (nutritionLogs as NutritionLogRow[] | null)?.reduce(
+          (s, r) => s + (r.kcal ?? 0),
           0
         ) ?? 0;
-      setCurrentCalories(eaten);
 
-      const limit = profile.calorie_goal + burned;
-      setNutritionScore(
-        calculateNutritionScore(
-          eaten,
-          limit,
-          profile.goal
-        )
-      );
+      setCurrentCalories(eaten);
 
       setHasLoaded(true);
     };
@@ -126,20 +138,22 @@ export default function NutritionCard() {
     loadInitial();
   }, [user, dayKey]);
 
+  /* ───────────────── Nutrition Update Event ───────────────── */
+
   useEffect(() => {
     if (!user) return;
     const userId = user.id;
 
-    async function handleConsumptionChange() {
+    async function handleNutritionChange() {
       const { data } = await supabase
-        .from("consumption_logs")
-        .select("calories")
+        .from("nutrition_logs")
+        .select("kcal")
         .eq("user_id", userId)
         .eq("log_date", dayKey);
 
       const eaten =
         (data as NutritionLogRow[] | null)?.reduce(
-          (s, r) => s + r.calories,
+          (s, r) => s + (r.kcal ?? 0),
           0
         ) ?? 0;
 
@@ -147,16 +161,18 @@ export default function NutritionCard() {
     }
 
     window.addEventListener(
-      "consumption-changed",
-      handleConsumptionChange
+      "nutrition-changed",
+      handleNutritionChange
     );
 
     return () =>
       window.removeEventListener(
-        "consumption-changed",
-        handleConsumptionChange
+        "nutrition-changed",
+        handleNutritionChange
       );
   }, [user, dayKey]);
+
+  /* ───────────────── Activity Update Event ───────────────── */
 
   useEffect(() => {
     if (!user || !hasLoaded) return;
@@ -189,6 +205,23 @@ export default function NutritionCard() {
         handleActivityUpdate
       );
   }, [user, hasLoaded, dayKey]);
+
+  /* ───────────────── Score Recalculation ───────────────── */
+
+  useEffect(() => {
+    if (!baseGoal) return;
+
+    const limit = baseGoal + activityBonus;
+
+    const score = calculateNutritionScore(
+      currentCalories,
+      limit,
+      goal,
+      now
+    );
+
+    setNutritionScore(score);
+  }, [currentCalories, activityBonus, baseGoal, goal, now]);
 
   const dailyLimit =
     baseGoal !== null ? baseGoal + activityBonus : 0;
@@ -276,23 +309,29 @@ export default function NutritionCard() {
         <div className="h-full flex flex-col justify-between">
           <div className="space-y-1">
             <div className="text-2xl font-semibold text-[#191970]">
-              {formatNumber(currentCalories, lang)} kcal
+              {formatNumber(Math.round(currentCalories), lang)} kcal
             </div>
 
             <div className="text-xs text-gray-500">
               {limitLabel}:{" "}
-              {formatNumber(dailyLimit, lang)} kcal
+              {formatNumber(Math.round(dailyLimit), lang)} kcal
             </div>
 
             <div className="text-[11px] text-gray-400">
               {t.nutrition.basePlusActivity
                 .replace(
                   "{{base}}",
-                  formatNumber(baseGoal ?? 0, lang)
+                  formatNumber(
+                    Math.round(baseGoal ?? 0),
+                    lang
+                  )
                 )
                 .replace(
                   "{{activity}}",
-                  formatNumber(activityBonus, lang)
+                  formatNumber(
+                    Math.round(activityBonus),
+                    lang
+                  )
                 )}
             </div>
           </div>
@@ -319,7 +358,9 @@ export default function NutritionCard() {
           </div>
 
           <button
-            onClick={() => router.push("/dashboard/food/search")}
+            onClick={() =>
+              router.push("/dashboard/food/search")
+            }
             className="mt-4 rounded-[var(--radius)] border border-[#0095D3] px-3 py-3 text-sm font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
           >
             + {t.nutrition.addFood}

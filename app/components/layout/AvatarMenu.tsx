@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLang, useSetUserLanguage } from "@/lib/useLang";
+import { useGoalContext } from "@/lib/GoalProvider";
 
 type Props = {
   firstName: string;
@@ -13,15 +14,19 @@ type Props = {
 
 export default function AvatarMenu({ firstName }: Props) {
   const [open, setOpen] = useState(false);
+  const [openSection, setOpenSection] = useState<"language" | "goal" | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+
   const lang = useLang();
-  const setUserLanguage = useSetUserLanguage(); // ✅ FIX
+  const setUserLanguage = useSetUserLanguage();
+  const { goal, setUserGoal } = useGoalContext();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
+        setOpenSection(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -40,8 +45,15 @@ export default function AvatarMenu({ firstName }: Props) {
 
   async function changeLanguage(newLang: any) {
     setOpen(false);
-    await setUserLanguage(newLang); // werkt nu live via context
-  }    
+    setOpenSection(null);
+    await setUserLanguage(newLang);
+  }
+
+  async function changeGoal(newGoal: any) {
+    setOpen(false);
+    setOpenSection(null);
+    await setUserGoal(newGoal);
+  }
 
   const languages = [
     { code: "en", label: "English", flag: "/images/flags/en.svg" },
@@ -51,9 +63,18 @@ export default function AvatarMenu({ firstName }: Props) {
     { code: "pl", label: "Polski", flag: "/images/flags/pl.svg" },
   ];
 
+  const goals = [
+    { code: "LOSE", label: "Lose weight" },
+    { code: "MAINTAIN", label: "Maintain weight" },
+    { code: "GAIN", label: "Gain weight" },
+    { code: "HOLIDAY", label: "Holiday mode" },
+  ];
+
+  const activeLanguage = languages.find(l => l.code === lang);
+  const activeGoal = goals.find(g => g.code === goal);
+
   return (
     <div ref={ref} className="relative">
-      {/* Trigger */}
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-[var(--radius)] bg-[#191970] px-3 py-2 text-white hover:bg-[#0BA4E0] transition-colors"
@@ -71,6 +92,7 @@ export default function AvatarMenu({ firstName }: Props) {
           <div className="px-4 pb-2 text-xs font-semibold text-gray-400">
             Account
           </div>
+
           <button
             onClick={() => {
               setOpen(false);
@@ -89,47 +111,98 @@ export default function AvatarMenu({ firstName }: Props) {
           </div>
 
           <div className="px-4">
-            <details className="group">
-              <summary className="flex items-center justify-between cursor-pointer list-none py-2">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src={languages.find(l => l.code === lang)?.flag || "/images/flags/en.svg"}
-                    alt=""
-                    width={18}
-                    height={18}
-                    className="object-cover"
-                  />
-                  <span className="font-semibold text-[#191970]">
-                    {languages.find(l => l.code === lang)?.label}
-                  </span>
-                </div>
-
-                <span className="text-gray-400 group-open:rotate-180 transition-transform">
-                  ▾
+            <div
+              onClick={() =>
+                setOpenSection(openSection === "language" ? null : "language")
+              }
+              className="flex items-center justify-between cursor-pointer py-2"
+            >
+              <div className="flex items-center gap-3">
+                <Image
+                  src={activeLanguage?.flag || "/images/flags/en.svg"}
+                  alt=""
+                  width={18}
+                  height={18}
+                />
+                <span className="text-sm text-[#191970]">
+                  {activeLanguage?.label}
                 </span>
-              </summary>
+              </div>
 
-              <div className="mt-1 rounded-md border bg-white shadow-sm overflow-hidden">
+              <span
+                className={`text-gray-400 transition-transform ${
+                  openSection === "language" ? "rotate-180" : ""
+                }`}
+              >
+                ▾
+              </span>
+            </div>
+
+            {openSection === "language" && (
+              <div>
                 {languages
                   .filter(l => l.code !== lang)
                   .map(l => (
                     <button
                       key={l.code}
                       onClick={() => changeLanguage(l.code)}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-50"
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-50 border-t border-gray-100"
                     >
                       <Image
                         src={l.flag}
                         alt=""
                         width={18}
                         height={18}
-                        className="object-cover"
                       />
                       {l.label}
                     </button>
                   ))}
               </div>
-            </details>
+            )}
+          </div>
+
+          <div className="my-2 h-px bg-gray-100" />
+
+          {/* GOAL */}
+          <div className="px-4 pb-2 text-xs font-semibold text-gray-400">
+            Goal
+          </div>
+
+          <div className="px-4">
+            <div
+              onClick={() =>
+                setOpenSection(openSection === "goal" ? null : "goal")
+              }
+              className="flex items-center justify-between cursor-pointer py-2"
+            >
+              <span className="text-sm text-[#191970]">
+                {activeGoal?.label}
+              </span>
+
+              <span
+                className={`text-gray-400 transition-transform ${
+                  openSection === "goal" ? "rotate-180" : ""
+                }`}
+              >
+                ▾
+              </span>
+            </div>
+
+            {openSection === "goal" && (
+              <div>
+                {goals
+                  .filter(g => g.code !== goal)
+                  .map(g => (
+                    <button
+                      key={g.code}
+                      onClick={() => changeGoal(g.code)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 border-t border-gray-100"
+                    >
+                      {g.label}
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
 
           <div className="my-2 h-px bg-gray-100" />
@@ -141,6 +214,7 @@ export default function AvatarMenu({ firstName }: Props) {
           >
             Logout
           </button>
+
         </div>
       )}
     </div>
