@@ -41,7 +41,7 @@ type PortionRow = {
   unit_key: string;
   grams: number | null;
   ml: number | null;
-  label: string | null;
+  sort_order: number | null;
 };
 
 type Preparation = {
