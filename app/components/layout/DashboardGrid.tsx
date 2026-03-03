@@ -4,7 +4,6 @@ import FitLifeScoreCard from "@/components/dashboard/FitLifeScoreCard";
 import WaterCard from "@/components/dashboard/HydrationCard";
 import ActivityCard from "@/components/dashboard/ActivityCard";
 import NutritionCard from "@/components/dashboard/NutritionCard";
-import TodayConsumptionCard from "@/components/dashboard/TodayConsumptionCard";
 import WeightCard from "@/components/dashboard/WeightCard";
 import WeekOverviewCard from "@/components/dashboard/WeekOverviewCard";
 import DailyGoalsCard from "@/components/dashboard/DailyGoalsCard";
@@ -37,21 +36,16 @@ export default function DashboardGrid() {
       </div>
 
       {/* Rij 3 */}
-      <div className="col-span-12 md:col-span-6">
-        <TodayConsumptionCard />
-      </div>
-
-      {/* Rij 4 */}
       <div className="col-span-12">
         <WeekOverviewCard />
       </div>
 
-      {/* Rij 5 */}
+      {/* Rij 4 */}
       <div className="col-span-12">
         <DailyGoalsCard />
       </div>
 
-      {/* Rij 6 */}
+      {/* Rij 5 */}
       <div className="col-span-12">
         <TipOfTheDayCard />
       </div>
