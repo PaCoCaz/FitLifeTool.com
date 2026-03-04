@@ -206,6 +206,34 @@ export default function NutritionCard() {
       );
   }, [user, hasLoaded, dayKey]);
 
+  /* ───────────────── Weight Update Event (NIEUW) ───────────────── */
+
+  useEffect(() => {
+    if (!user) return;
+    const userId = user.id;
+
+    async function handleWeightUpdate() {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("calorie_goal, goal")
+        .eq("id", userId)
+        .single<NutritionProfile>();
+
+      if (!profile?.calorie_goal) return;
+
+      setBaseGoal(profile.calorie_goal);
+      setGoal(mapGoalToScoreGoal(profile.goal));
+    }
+
+    window.addEventListener("weight-updated", handleWeightUpdate);
+
+    return () =>
+      window.removeEventListener(
+        "weight-updated",
+        handleWeightUpdate
+      );
+  }, [user]);
+
   /* ───────────────── Score Recalculation ───────────────── */
 
   useEffect(() => {

@@ -10,7 +10,7 @@ import { useUser } from "@/lib/AuthProvider";
 import { useToast } from "@/lib/ToastProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
-import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent"; // ✅ TOEGEVOEGD
+import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
 
 /* ───────────────── Types ───────────────── */
 
@@ -155,27 +155,19 @@ export default function WeightCard() {
       .select("weight_kg, bmi, target_weight_kg, height_cm")
       .eq("id", user.id)
       .single()
-      .then(
-        ({
-          data,
-          error,
-        }: {
-          data: WeightProfileResult | null;
-          error: { message: string } | null;
-        }) => {
-          if (error) return console.error(error.message);
-          if (data) {
-            setWeight(data.weight_kg);
-            setBmi(data.bmi);
-            setTargetWeight(data.target_weight_kg);
-            setHeightCm(data.height_cm);
-            setDraftWeight(String(data.weight_kg));
-            setDraftTargetWeight(
-              data.target_weight_kg ? String(data.target_weight_kg) : ""
-            );
-          }
+      .then(({ data, error }: { data: WeightProfileResult | null; error: { message: string } | null }) => {
+        if (error) return console.error(error.message);
+        if (data) {
+          setWeight(data.weight_kg);
+          setBmi(data.bmi);
+          setTargetWeight(data.target_weight_kg);
+          setHeightCm(data.height_cm);
+          setDraftWeight(String(data.weight_kg));
+          setDraftTargetWeight(
+            data.target_weight_kg ? String(data.target_weight_kg) : ""
+          );
         }
-      );
+      });
   }, [user]);
 
   async function saveWeight() {
@@ -192,7 +184,6 @@ export default function WeightCard() {
 
     const newBMI = calculateBMI(parsedWeight, heightCm);
 
-    // ✅ NIEUW — Hydratatiedoel berekenen
     const newWaterGoal = Math.round(parsedWeight * 35);
 
     const { error } = await supabase
@@ -206,6 +197,11 @@ export default function WeightCard() {
       .eq("id", user.id);
 
     if (error) return console.error(error.message);
+
+    /* ✅ NIEUW — Targets opnieuw berekenen */
+    await supabase.rpc("recalculate_user_targets", {
+      p_user_id: user.id,
+    });
 
     const nowTs = new Date();
 

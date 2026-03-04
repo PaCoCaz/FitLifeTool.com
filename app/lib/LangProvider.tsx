@@ -38,7 +38,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
         .from("profiles")
         .select("language")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Language load error:", error);

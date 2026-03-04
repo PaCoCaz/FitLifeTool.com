@@ -109,6 +109,41 @@ export default function ActivityCard() {
     loadActivity();
   }, [user, dayKey, now]);
 
+  /* ───────────────── Weight Update Event (NIEUW) ───────────────── */
+
+  useEffect(() => {
+    if (!user) return;
+
+    const userId = user.id;
+
+    async function handleWeightUpdate() {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("activity_goal_kcal")
+        .eq("id", userId)
+        .single();
+
+      const goal =
+        (profile as ActivityGoalProfileRow | null)?.activity_goal_kcal ?? null;
+
+      if (!goal) return;
+
+      setActivityGoal(goal);
+
+      setActivityScore(
+        calculateActivityScore(burnedCalories, goal, now)
+      );
+    }
+
+    window.addEventListener("weight-updated", handleWeightUpdate);
+
+    return () =>
+      window.removeEventListener(
+        "weight-updated",
+        handleWeightUpdate
+      );
+  }, [user, burnedCalories, now]);
+
   /* Status */
   const activityStatus = useMemo(() => {
     if (!activityGoal) {

@@ -1,3 +1,5 @@
+// app/lib/calculations.ts
+
 type CalculationSex = "male" | "female";
 
 type ActivityLevel =
@@ -8,10 +10,10 @@ type ActivityLevel =
   | "very_active";
 
 type Goal =
-  | "lose_weight"
-  | "maintain"
-  | "gain_weight"
-  | "build_muscle";
+  | "LOSE"
+  | "MAINTAIN"
+  | "GAIN"
+  | "HOLIDAY";
 
 /* ───────────────── Leeftijd ───────────────── */
 
@@ -66,17 +68,17 @@ export function adjustForGoal(
   goal: Goal
 ): number {
   switch (goal) {
-    case "lose_weight": {
-      // Maximaal 20% tekort of 500 kcal (wat lager is)
+    case "LOSE": {
       const deficit = Math.min(500, tdee * 0.2);
       const result = tdee - deficit;
-
-      // Minimum bescherming (mannen)
       return Math.max(result, 1600);
     }
 
-    case "gain_weight":
+    case "GAIN":
       return tdee + 300;
+
+    case "HOLIDAY":
+      return tdee;
 
     default:
       return tdee;
@@ -88,7 +90,7 @@ export function adjustForGoal(
 export function calculateWaterGoal(
   weightKg: number
 ): number {
-  return Math.round(weightKg * 35); // ml per dag
+  return Math.round(weightKg * 35);
 }
 
 /* ───────────────── BMI ───────────────── */
@@ -99,24 +101,11 @@ export function calculateBMI(
 ): number {
   const heightM = heightCm / 100;
   const bmi = weightKg / (heightM * heightM);
-  return Math.round(bmi * 10) / 10; // 1 decimaal
+  return Math.round(bmi * 10) / 10;
 }
 
-/* ───────────────── Activity goal (NIEUW) ───────────────── */
+/* ───────────────── Activity goal ───────────────── */
 
-/**
- * Dagelijks activiteitsdoel (kcal)
- * Afgeleid van TDEE en gebruikersdoel
- *
- * - lose_weight  → 20% van TDEE
- * - maintain     → 15% van TDEE
- * - gain_weight  → 10% van TDEE
- * - build_muscle → 15% van TDEE
- *
- * Met veiligheidsgrenzen:
- * - min 200 kcal
- * - max 800 kcal
- */
 export function calculateActivityGoal(
   tdee: number,
   goal: Goal
@@ -124,19 +113,19 @@ export function calculateActivityGoal(
   let ratio: number;
 
   switch (goal) {
-    case "lose_weight":
+    case "LOSE":
       ratio = 0.20;
       break;
 
-    case "gain_weight":
+    case "GAIN":
       ratio = 0.10;
       break;
 
-    case "build_muscle":
-      ratio = 0.15;
+    case "HOLIDAY":
+      ratio = 0.10;
       break;
 
-    default: // maintain
+    default: // MAINTAIN
       ratio = 0.15;
   }
 

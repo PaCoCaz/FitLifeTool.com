@@ -110,6 +110,11 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // 3️⃣ Targets opnieuw berekenen
+      await supabase.rpc("recalculate_user_targets", {
+        p_user_id: userId,
+      });
+
       setGoal(newGoal);
     },
     [user, goal]

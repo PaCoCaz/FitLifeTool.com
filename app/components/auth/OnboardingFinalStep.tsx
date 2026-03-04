@@ -7,16 +7,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 
-import {
-  calculateAge,
-  calculateBMR,
-  activityMultiplier,
-  adjustForGoal,
-  calculateWaterGoal,
-  calculateBMI,
-  calculateActivityGoal,
-} from "@/lib/calculations";
-
 /* ───────────────── Types ───────────────── */
 
 type ActivityLevel =
@@ -26,7 +16,7 @@ type ActivityLevel =
   | "active"
   | "very_active";
 
-type Goal = "lose_weight" | "maintain" | "gain_weight";
+type Goal = "LOSE" | "MAINTAIN" | "GAIN";
 
 type ProfileForCalculation = {
   birthdate: string;
@@ -86,97 +76,39 @@ export default function OnboardingFinalStep({ onBack }: Props) {
       return;
     }
 
-    /* ✅ NIEUW — Eerste goal periode aanmaken */
+    /* 2️⃣ Eerste goal periode aanmaken */
     const todayStr = new Date().toISOString().split("T")[0];
 
-    const goalMap = {
-      lose_weight: "LOSE",
-      maintain: "MAINTAIN",
-      gain_weight: "GAIN",
-    } as const;
+    const { error: goalError } = await supabase
+      .from("user_goal_periods")
+      .insert({
+        user_id: user.id,
+        goal_key: goal,
+        start_date: todayStr,
+        end_date: null,
+      });
 
-    await supabase.from("user_goal_periods").insert({
-      user_id: user.id,
-      goal_key: goalMap[goal],
-      start_at: todayStr,
-      end_at: null,
-    });
-
-    /* 2️⃣ Profiel ophalen voor berekeningen */
-    const {
-      data: profile,
-      error: profileError,
-    }: {
-      data: ProfileForCalculation | null;
-      error: { message: string } | null;
-    } = await supabase
-      .from("profiles")
-      .select(`
-        birthdate,
-        height_cm,
-        weight_kg,
-        calculation_sex,
-        activity_level,
-        goal
-      `)
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile) {
-      setError("Kon profiel niet laden voor berekening");
+    if (goalError) {
+      setError(goalError.message);
       setSaving(false);
       return;
     }
 
-    /* 3️⃣ Berekeningen */
-    const age = calculateAge(profile.birthdate);
-
-    const bmr = calculateBMR(
-      profile.calculation_sex,
-      profile.weight_kg,
-      profile.height_cm,
-      age
+    /* 3️⃣ Alle doelen opnieuw laten berekenen */
+    const { error: recalcError } = await supabase.rpc(
+      "recalculate_user_targets",
+      {
+        p_user_id: user.id,
+      }
     );
 
-    const tdee =
-      bmr * activityMultiplier(profile.activity_level);
-
-    const calorieGoal = Math.round(
-      adjustForGoal(tdee, profile.goal)
-    );
-
-    const activityGoal = calculateActivityGoal(
-      tdee,
-      profile.goal
-    );
-
-    const waterGoal = calculateWaterGoal(profile.weight_kg);
-
-    const bmi = calculateBMI(
-      profile.weight_kg,
-      profile.height_cm
-    );
-
-    /* 4️⃣ Alles opslaan (incl. TDEE) */
-    const { error: goalsError } = await supabase
-      .from("profiles")
-      .update({
-        tdee: Math.round(tdee),
-        calorie_goal: calorieGoal,
-        activity_goal_kcal: activityGoal,
-        water_goal_ml: waterGoal,
-        bmi,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
-
-    if (goalsError) {
-      setError(goalsError.message);
+    if (recalcError) {
+      setError(recalcError.message);
       setSaving(false);
       return;
     }
 
-    /* 5️⃣ Klaar */
+    /* 4️⃣ Klaar */
     router.replace("/dashboard");
   };
 
@@ -229,10 +161,8 @@ export default function OnboardingFinalStep({ onBack }: Props) {
           <label className="flex items-center gap-2">
             <input
               type="radio"
-              checked={goal === "lose_weight"}
-              onChange={() =>
-                setGoal("lose_weight")
-              }
+              checked={goal === "LOSE"}
+              onChange={() => setGoal("LOSE")}
             />
             Afvallen
           </label>
@@ -240,10 +170,8 @@ export default function OnboardingFinalStep({ onBack }: Props) {
           <label className="flex items-center gap-2">
             <input
               type="radio"
-              checked={goal === "maintain"}
-              onChange={() =>
-                setGoal("maintain")
-              }
+              checked={goal === "MAINTAIN"}
+              onChange={() => setGoal("MAINTAIN")}
             />
             Gewicht behouden
           </label>
@@ -251,10 +179,8 @@ export default function OnboardingFinalStep({ onBack }: Props) {
           <label className="flex items-center gap-2">
             <input
               type="radio"
-              checked={goal === "gain_weight"}
-              onChange={() =>
-                setGoal("gain_weight")
-              }
+              checked={goal === "GAIN"}
+              onChange={() => setGoal("GAIN")}
             />
             Aankomen
           </label>
