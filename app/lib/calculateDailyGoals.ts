@@ -1,14 +1,12 @@
+// app/lib/calculateDailyGoals.ts
+
 import {
   calculateWaterGoal,
   adjustForGoal,
   calculateActivityGoal,
 } from "./calculations";
 
-type Goal =
-  | "lose_weight"
-  | "maintain"
-  | "gain_weight"
-  | "build_muscle";
+type Goal = "LOSE" | "MAINTAIN" | "GAIN";
 
 export function calculateDailyGoals(
   weightKg: number,
@@ -19,10 +17,10 @@ export function calculateDailyGoals(
     // Hydratatie — gewicht-afhankelijk, doel-onafhankelijk
     waterGoalMl: calculateWaterGoal(weightKg),
 
-    // Activiteit — beweegdoel uit onboarding (GEEN TDEE!)
+    // Activiteit — beweegdoel uit onboarding
     activityGoalKcal: calculateActivityGoal(tdee, goal),
 
-    // Voeding — calorie-doel uit onboarding (afvallen blijft afvallen)
+    // Voeding — calorie-doel
     calorieGoal: adjustForGoal(tdee, goal),
   };
 }
