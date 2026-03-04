@@ -1,12 +1,10 @@
+// app/lib/useTomorrowGoals.ts
+
 "use client";
 
 import { calculateDailyGoals } from "./calculateDailyGoals";
 
-type Goal =
-  | "lose_weight"
-  | "maintain"
-  | "gain_weight"
-  | "build_muscle";
+type Goal = "LOSE" | "MAINTAIN" | "GAIN";
 
 export function useTomorrowGoals(
   weightKg: number | null,

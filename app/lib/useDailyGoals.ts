@@ -1,3 +1,5 @@
+// app/lib/useDailyGoals.ts
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,11 +7,7 @@ import { supabase } from "./supabaseClient";
 import { useUser } from "./AuthProvider";
 import { useDayNow } from "./useDayNow";
 
-type Goal =
-  | "lose_weight"
-  | "maintain"
-  | "gain_weight"
-  | "build_muscle";
+type Goal = "LOSE" | "MAINTAIN" | "GAIN";
 
 type DailyGoals = {
   waterGoalMl: number;
@@ -25,9 +23,9 @@ export function useDailyGoals() {
   const [loading, setLoading] = useState(true);
   const [isActiveDay, setIsActiveDay] = useState(false);
 
-  const [weightKg, setWeightKg] = useState<number | null>(null); // STAP 4E
-  const [tdee, setTdee] = useState<number | null>(null);         // STAP 4J
-  const [goal, setGoal] = useState<Goal | null>(null);           // STAP 4J
+  const [weightKg, setWeightKg] = useState<number | null>(null);
+  const [tdee, setTdee] = useState<number | null>(null);
+  const [goal, setGoal] = useState<Goal | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -58,14 +56,10 @@ export function useDailyGoals() {
         return;
       }
 
-      // STAP 4E — expose huidig gewicht (read-only)
       setWeightKg(profile.weight_kg);
-
-      // STAP 4J — expose onboarding context (read-only)
       setTdee(profile.tdee);
       setGoal(profile.goal);
 
-      // STAP 3D — herberekenen en schrijven ALLEEN bij nieuwe dag
       const needsRecalc =
         profile.goals_last_calculated_on !== todayKey;
 
@@ -100,7 +94,6 @@ export function useDailyGoals() {
     run();
   }, [user, dayNow]);
 
-  // STAP 3C — live refresh bij dagwissel (read-only)
   useEffect(() => {
     if (!user) return;
 
@@ -109,10 +102,9 @@ export function useDailyGoals() {
       const dayKeyFromHook = dayNow.toISOString().slice(0, 10);
 
       if (currentKey !== dayKeyFromHook) {
-        // force re-run via dayNow update (read-only)
-        // useDayNow zal hierdoor opnieuw renderen
+        // useDayNow zal opnieuw renderen
       }
-    }, 60_000); // 1x per minuut
+    }, 60_000);
 
     return () => clearInterval(interval);
   }, [user, dayNow]);
@@ -122,7 +114,7 @@ export function useDailyGoals() {
     loading,
     isActiveDay,
     weightKg,
-    tdee,   // STAP 4J
-    goal,   // STAP 4J
+    tdee,
+    goal,
   };
 }
