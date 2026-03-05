@@ -2,10 +2,12 @@
 
 import type { Metadata } from "next";
 import "./styles/globals.css";
+
 import { AuthProvider } from "./lib/AuthProvider";
 import { TimeProvider } from "./lib/TimeProvider";
 import { ToastProvider } from "./lib/ToastProvider";
 import { LangProvider } from "@/lib/LangProvider";
+import { GoalProvider } from "@/lib/GoalProvider";
 
 export const viewport = {
   width: "device-width",
@@ -28,11 +30,13 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <LangProvider>
-            <TimeProvider>
-              <ToastProvider>
-                {children}
-              </ToastProvider>
-            </TimeProvider>
+            <GoalProvider>
+              <TimeProvider>
+                <ToastProvider>
+                  {children}
+                </ToastProvider>
+              </TimeProvider>
+            </GoalProvider>
           </LangProvider>
         </AuthProvider>
       </body>

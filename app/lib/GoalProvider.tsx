@@ -129,8 +129,14 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
 
 export function useGoalContext() {
   const ctx = useContext(GoalContext);
+
   if (!ctx) {
-    throw new Error("useGoalContext must be used inside GoalProvider");
+    return {
+      goal: null,
+      isLoading: true,
+      setUserGoal: async () => {},
+    };
   }
+
   return ctx;
 }
