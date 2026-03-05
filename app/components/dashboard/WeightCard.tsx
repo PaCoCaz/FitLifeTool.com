@@ -11,6 +11,7 @@ import { useToast } from "@/lib/ToastProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
 import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
+import { dispatchDashboardRefresh } from "@/lib/dashboardEvents"; // ✅ NIEUW
 
 /* ───────────────── Types ───────────────── */
 
@@ -198,7 +199,6 @@ export default function WeightCard() {
 
     if (error) return console.error(error.message);
 
-    /* ✅ NIEUW — Targets opnieuw berekenen */
     await supabase.rpc("recalculate_user_targets", {
       p_user_id: user.id,
     });
@@ -229,6 +229,8 @@ export default function WeightCard() {
     dispatchDashboardEvent("weight-updated", {
       weightKg: parsedWeight,
     });
+
+    dispatchDashboardRefresh(); // ✅ NIEUW
   }
 
   function cancelEdit() {

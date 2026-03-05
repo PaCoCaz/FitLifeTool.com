@@ -65,7 +65,7 @@ export function calculateNutritionScore(
   const upperBound = expectedCalories * 1.15;
 
   if (consumedCalories < lowerBound) {
-    if (expectedCalories === 0) return 0;
+    if (expectedCalories <= 1) return 0;
     return Math.round((consumedCalories / expectedCalories) * 100);
   }
 
@@ -93,7 +93,7 @@ export function getNutritionStatus(
     };
   }
 
-  const now = new Date(); // 🔥 realtime
+  const now = _now; // 🔥 realtime
   const expectedProgress = getExpectedNutritionProgress(now);
   const expectedCalories = dailyLimit * expectedProgress;
   const delta = Math.round(consumedCalories - expectedCalories);

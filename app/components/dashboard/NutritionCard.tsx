@@ -12,6 +12,7 @@ import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
 import { useNow } from "@/lib/TimeProvider";
 import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
+import { dispatchDashboardRefresh } from "@/lib/dashboardEvents"; // ✅ NIEUW
 
 import {
   calculateNutritionScore,
@@ -136,6 +137,71 @@ export default function NutritionCard() {
     };
 
     loadInitial();
+  }, [user, dayKey]);
+
+  /* ───────────────── Dashboard Refresh Event (NIEUW) ───────────────── */
+
+  useEffect(() => {
+    const userId = user?.id;
+    if (!userId) return;
+
+    async function handleDashboardRefresh() {
+      const [
+        { data: profile },
+        { data: activityLogs },
+        { data: nutritionLogs },
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("calorie_goal, goal")
+          .eq("id", userId)
+          .single<NutritionProfile>(),
+        supabase
+          .from("activity_logs")
+          .select("calories")
+          .eq("user_id", userId)
+          .eq("log_date", dayKey),
+        supabase
+          .from("nutrition_logs")
+          .select("kcal")
+          .eq("user_id", userId)
+          .eq("log_date", dayKey),
+      ]);
+
+      if (!profile?.calorie_goal) return;
+
+      setBaseGoal(profile.calorie_goal);
+      setGoal(mapGoalToScoreGoal(profile.goal));
+
+      const burned =
+        (activityLogs as ActivityLogRow[] | null)?.reduce(
+          (s, r) => s + r.calories,
+          0
+        ) ?? 0;
+
+      setActivityBonus(burned);
+
+      const eaten =
+        (nutritionLogs as NutritionLogRow[] | null)?.reduce(
+          (s, r) => s + (r.kcal ?? 0),
+          0
+        ) ?? 0;
+
+      setCurrentCalories(eaten);
+
+      setHasLoaded(true);
+    }
+
+    window.addEventListener(
+      "dashboard-refresh",
+      handleDashboardRefresh
+    );
+
+    return () =>
+      window.removeEventListener(
+        "dashboard-refresh",
+        handleDashboardRefresh
+      );
   }, [user, dayKey]);
 
   /* ───────────────── Nutrition Update Event ───────────────── */

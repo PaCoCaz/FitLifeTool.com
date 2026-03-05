@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLang, useSetUserLanguage } from "@/lib/useLang";
 import { useGoalContext } from "@/lib/GoalProvider";
+import { dispatchDashboardRefresh } from "@/lib/dashboardEvents";
 
 type Props = {
   firstName: string;
@@ -52,9 +53,12 @@ export default function AvatarMenu({ firstName }: Props) {
   async function changeGoal(newGoal: any) {
     setOpen(false);
     setOpenSection(null);
+  
     await setUserGoal(newGoal);
+  
+    dispatchDashboardRefresh();
   }
-
+  
   const languages = [
     { code: "en", label: "English", flag: "/images/flags/en.svg" },
     { code: "nl", label: "Nederlands", flag: "/images/flags/nl.svg" },

@@ -1,3 +1,5 @@
+// app/components/dashboard/FitLifeScoreCard.tsx
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -41,13 +43,13 @@ export default function FitLifeScoreCard() {
 
   /* ───── Dagreset ───── */
   useEffect(() => {
-    setHydrationScore(null);
-    setActivityScore(null);
-    setNutritionScore(null);
+    setHydrationScore(0);
+    setActivityScore(0);
+    setNutritionScore(0);
 
-    setHydrationColor(null);
-    setActivityColor(null);
-    setNutritionColor(null);
+    setHydrationColor("bg-gray-400 text-white");
+    setActivityColor("bg-gray-400 text-white");
+    setNutritionColor("bg-gray-400 text-white");
   }, [dayNow]);
 
   /* ───── Events ───── */

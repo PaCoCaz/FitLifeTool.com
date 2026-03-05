@@ -14,6 +14,7 @@ import { getLocalDayKey } from "@/lib/dayKey";
 import { useNow } from "@/lib/TimeProvider";
 
 import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
+import { dispatchDashboardRefresh } from "@/lib/dashboardEvents"; // ✅ NIEUW
 import ActivityModal from "@/components/dashboard/ActivityModal";
 
 import {
@@ -107,6 +108,56 @@ export default function ActivityCard() {
     };
 
     loadActivity();
+  }, [user, dayKey, now]);
+
+  /* ───────────────── Dashboard Refresh Event (NIEUW) ───────────────── */
+
+  useEffect(() => {
+    const userId = user?.id;
+    if (!userId) return;
+
+    async function handleDashboardRefresh() {
+      const [{ data: profile }, { data: logs }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("activity_goal_kcal")
+          .eq("id", userId)
+          .single(),
+
+        supabase
+          .from("activity_logs")
+          .select("calories")
+          .eq("user_id", userId)
+          .eq("log_date", dayKey),
+      ]);
+
+      const goal =
+        (profile as ActivityGoalProfileRow | null)?.activity_goal_kcal ?? null;
+
+      setActivityGoal(goal);
+
+      const total =
+        (logs as ActivityLogRow[] | null)?.reduce(
+          (sum, row) => sum + row.calories,
+          0
+        ) ?? 0;
+
+      setBurnedCalories(total);
+
+      if (goal) {
+        setActivityScore(calculateActivityScore(total, goal, now));
+      }
+
+      setLoading(false);
+    }
+
+    window.addEventListener("dashboard-refresh", handleDashboardRefresh);
+
+    return () =>
+      window.removeEventListener(
+        "dashboard-refresh",
+        handleDashboardRefresh
+      );
   }, [user, dayKey, now]);
 
   /* ───────────────── Weight Update Event (NIEUW) ───────────────── */

@@ -14,6 +14,7 @@ import { getLocalDayKey } from "@/lib/dayKey";
 import { useNow } from "@/lib/TimeProvider";
 
 import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
+import { dispatchDashboardRefresh } from "@/lib/dashboardEvents"; // ✅ NIEUW
 import DrinkModal from "@/components/dashboard/DrinkModal";
 
 import {
@@ -24,7 +25,7 @@ import {
 /* 🌍 Meertaligheid */
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
-import { formatNumber } from "@/lib/formatNumber"; // ✅ toegevoegd
+import { formatNumber } from "@/lib/formatNumber";
 
 /* ───────────────── Constants ───────────────── */
 
@@ -104,6 +105,50 @@ export default function HydrationCard() {
     };
 
     loadHydration();
+  }, [user, dayKey]);
+
+  /* ───────────────── Dashboard Refresh Event (NIEUW) ───────────────── */
+
+  useEffect(() => {
+    const userId = user?.id;
+    if (!userId) return;
+
+    async function handleDashboardRefresh() {
+      const [{ data: profile }, { data: logs }] =
+        await Promise.all([
+          supabase
+            .from("profiles")
+            .select("water_goal_ml")
+            .eq("id", userId)
+            .single(),
+
+          supabase
+            .from("hydration_logs")
+            .select("amount_ml, hydration_factor")
+            .eq("user_id", userId)
+            .eq("log_date", dayKey),
+        ]);
+
+      const goal = profile?.water_goal_ml ?? null;
+      setHydrationGoal(goal);
+
+      const total =
+        (logs as HydrationLogRow[] | null)?.reduce(
+          (sum, row) => sum + row.amount_ml * row.hydration_factor,
+          0
+        ) ?? 0;
+
+      setCurrentMl(Math.round(total));
+      setLoading(false);
+    }
+
+    window.addEventListener("dashboard-refresh", handleDashboardRefresh);
+
+    return () =>
+      window.removeEventListener(
+        "dashboard-refresh",
+        handleDashboardRefresh
+      );
   }, [user, dayKey]);
 
   const hydrationStatus = useMemo(() => {
