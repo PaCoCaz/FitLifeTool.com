@@ -224,4 +224,4 @@ export default function AvatarMenu({ firstName }: Props) {
       )}
     </div>
   );
-}
+} 
