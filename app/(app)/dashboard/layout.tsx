@@ -22,12 +22,12 @@ export default async function DashboardLayout({
   }
 
   return (
-    <AppShell>
-      <TimeProvider>
-        <DashboardProvider>
+    <DashboardProvider>
+      <AppShell>
+        <TimeProvider>
           {children}
-        </DashboardProvider>
-      </TimeProvider>
-    </AppShell>
+        </TimeProvider>
+      </AppShell>
+    </DashboardProvider>
   );
 }
