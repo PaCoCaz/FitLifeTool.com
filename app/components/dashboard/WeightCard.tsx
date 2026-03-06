@@ -10,8 +10,7 @@ import { useUser } from "@/lib/AuthProvider";
 import { useToast } from "@/lib/ToastProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
-import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
-import { dispatchDashboardRefresh } from "@/lib/dashboardEvents";
+import { useDashboard } from "@/lib/DashboardStore";
 
 /* ───────────────── Types ───────────────── */
 
@@ -84,15 +83,7 @@ function BMIBar({ bmi }: { bmi: number }) {
           className="absolute -top-3 -translate-x-1/2"
           style={{ left: `${percentage}%` }}
         >
-          <div
-            className="
-              w-0 h-0
-              border-l-4 border-r-4
-              border-t-6
-              border-transparent
-              border-t-[#191970]
-            "
-          />
+          <div className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-[#191970]" />
         </div>
       </div>
 
@@ -133,8 +124,10 @@ function BMIBar({ bmi }: { bmi: number }) {
 /* ───────────────── WeightCard ───────────────── */
 
 export default function WeightCard() {
+
   const { user } = useUser();
   const { showToast } = useToast();
+  const { refreshDashboard } = useDashboard();
 
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
@@ -151,76 +144,42 @@ export default function WeightCard() {
   /* ───────────────── Initial Load ───────────────── */
 
   useEffect(() => {
-    if (!user) return;
+
+    const userId = user?.id;
+    if (!userId) return;
 
     supabase
       .from("profiles")
       .select("weight_kg, bmi, target_weight_kg, height_cm")
-      .eq("id", user.id)
+      .eq("id", userId)
       .single()
-      .then(
-        ({
-          data,
-          error,
-        }: {
-          data: WeightProfileResult | null;
-          error: { message: string } | null;
-        }) => {
-          if (error) return console.error(error.message);
-          if (data) {
-            setWeight(data.weight_kg);
-            setBmi(data.bmi);
-            setTargetWeight(data.target_weight_kg);
-            setHeightCm(data.height_cm);
-            setDraftWeight(String(data.weight_kg));
-            setDraftTargetWeight(
-              data.target_weight_kg ? String(data.target_weight_kg) : ""
-            );
-          }
-        }
-      );
-  }, [user]);
+      .then(({ data }: { data: WeightProfileResult | null }) => {
 
-  /* ───────────────── Dashboard Refresh Event ───────────────── */
+        if (!data) return;
 
-  useEffect(() => {
-    const userId = user?.id;
-    if (!userId) return;
+        setWeight(data.weight_kg);
+        setBmi(data.bmi);
+        setTargetWeight(data.target_weight_kg);
+        setHeightCm(data.height_cm);
 
-    async function handleDashboardRefresh() {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("weight_kg, bmi, target_weight_kg, height_cm")
-        .eq("id", userId)
-        .single<WeightProfileResult>();
+        setDraftWeight(String(data.weight_kg));
+        setDraftTargetWeight(
+          data.target_weight_kg ? String(data.target_weight_kg) : ""
+        );
 
-      if (error || !data) return;
-
-      setWeight(data.weight_kg);
-      setBmi(data.bmi);
-      setTargetWeight(data.target_weight_kg);
-      setHeightCm(data.height_cm);
-
-      dispatchDashboardEvent("weight-updated", {
-        weightKg: data.weight_kg,
       });
-    }
 
-    window.addEventListener("dashboard-refresh", handleDashboardRefresh);
-
-    return () =>
-      window.removeEventListener(
-        "dashboard-refresh",
-        handleDashboardRefresh
-      );
   }, [user]);
 
   /* ───────────────── Save Weight ───────────────── */
 
   async function saveWeight() {
-    if (!user || weight === null || heightCm === null) return;
+
+    const userId = user?.id;
+    if (!userId || weight === null || heightCm === null) return;
 
     const parsedWeight = parseFloat(draftWeight);
+
     const parsedTarget =
       draftTargetWeight.trim() === ""
         ? null
@@ -240,19 +199,19 @@ export default function WeightCard() {
         target_weight_kg: parsedTarget,
         water_goal_ml: newWaterGoal,
       })
-      .eq("id", user.id);
+      .eq("id", userId);
 
     if (error) return console.error(error.message);
 
     await supabase.rpc("recalculate_user_targets", {
-      p_user_id: user.id,
+      p_user_id: userId,
     });
 
     const nowTs = new Date();
 
     await supabase.from("weight_logs").upsert(
       {
-        user_id: user.id,
+        user_id: userId,
         weight_kg: parsedWeight,
         bmi: newBMI,
         log_date: dayKey,
@@ -269,11 +228,7 @@ export default function WeightCard() {
 
     showToast("✓ Je gewicht en streefgewicht zijn bijgewerkt.");
 
-    dispatchDashboardEvent("weight-updated", {
-      weightKg: parsedWeight,
-    });
-
-    dispatchDashboardRefresh();
+    await refreshDashboard();
   }
 
   function cancelEdit() {
@@ -320,8 +275,10 @@ export default function WeightCard() {
     >
       <div className="h-full flex flex-col justify-between">
         <div className="space-y-1">
+
           {isEditing ? (
             <div className="space-y-2">
+
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -339,15 +296,14 @@ export default function WeightCard() {
                   step="0.1"
                   placeholder="Streefgewicht"
                   value={draftTargetWeight}
-                  onChange={(e) =>
-                    setDraftTargetWeight(e.target.value)
-                  }
+                  onChange={(e) => setDraftTargetWeight(e.target.value)}
                   className="w-24 rounded-[var(--radius)] border px-2 py-1 text-sm"
                 />
                 <span className="text-sm text-gray-500">kg</span>
               </div>
 
               <div className="flex gap-2">
+
                 <button
                   onClick={saveWeight}
                   className="rounded-[var(--radius)] bg-[#0095D3] px-3 py-1 text-xs font-medium text-white"
@@ -361,8 +317,10 @@ export default function WeightCard() {
                 >
                   Annuleren
                 </button>
+
               </div>
             </div>
+
           ) : (
             <>
               <div className="text-2xl font-semibold text-[#191970]">
@@ -381,34 +339,10 @@ export default function WeightCard() {
             <span>
               BMI: {bmi.toFixed(1)} ({getBMICategory(bmi)})
             </span>
-
-            <button
-              onClick={() =>
-                showToast(
-                  "BMI is een algemene indicatie en houdt geen rekening met spiermassa of vetpercentage.",
-                  7000,
-                  "info"
-                )
-              }
-              className="group relative h-4 w-4"
-              aria-label="BMI informatie"
-            >
-              <Image
-                src="/info.svg"
-                alt=""
-                fill
-                className="object-contain group-hover:opacity-0"
-              />
-              <Image
-                src="/info_hover.svg"
-                alt=""
-                fill
-                className="object-contain opacity-0 group-hover:opacity-100"
-              />
-            </button>
           </div>
 
           <BMIBar bmi={bmi} />
+
         </div>
       </div>
     </Card>

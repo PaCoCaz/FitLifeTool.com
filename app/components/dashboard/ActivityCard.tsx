@@ -13,8 +13,6 @@ import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
 import { useNow } from "@/lib/TimeProvider";
 
-import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
-import { dispatchDashboardRefresh } from "@/lib/dashboardEvents"; // ✅ NIEUW
 import ActivityModal from "@/components/dashboard/ActivityModal";
 
 import {
@@ -28,6 +26,8 @@ import {
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
 import { formatNumber } from "@/lib/formatNumber";
+
+import { useDashboard } from "@/lib/DashboardStore";
 
 /* ───────────────── Types ───────────────── */
 
@@ -45,6 +45,8 @@ export default function ActivityCard() {
   const { user } = useUser();
   const { showToast } = useToast();
 
+  const { ready, refreshDashboard } = useDashboard();
+
   const lang = useLang();
   const t = uiText[lang];
 
@@ -61,6 +63,7 @@ export default function ActivityCard() {
   const [showActivityModal, setShowActivityModal] = useState(false);
 
   /* Reset bij dagwissel */
+
   useEffect(() => {
     setBurnedCalories(0);
     setActivityScore(0);
@@ -69,6 +72,7 @@ export default function ActivityCard() {
   }, [dayKey]);
 
   /* Data laden */
+
   useEffect(() => {
     if (!user) return;
 
@@ -110,96 +114,8 @@ export default function ActivityCard() {
     loadActivity();
   }, [user, dayKey, now]);
 
-  /* ───────────────── Dashboard Refresh Event (FIX) ───────────────── */
-
-  useEffect(() => {
-    const userId = user?.id;
-    if (!userId) return;
-
-    async function handleDashboardRefresh() {
-
-      // 🔑 Nieuwe dagKey berekenen (voorkomt middernacht race condition)
-      const freshDayKey = getLocalDayKey(new Date());
-
-      const [{ data: profile }, { data: logs }] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("activity_goal_kcal")
-          .eq("id", userId)
-          .single(),
-
-        supabase
-          .from("activity_logs")
-          .select("calories")
-          .eq("user_id", userId)
-          .eq("log_date", freshDayKey),
-      ]);
-
-      const goal =
-        (profile as ActivityGoalProfileRow | null)?.activity_goal_kcal ?? null;
-
-      setActivityGoal(goal);
-
-      const total =
-        (logs as ActivityLogRow[] | null)?.reduce(
-          (sum, row) => sum + row.calories,
-          0
-        ) ?? 0;
-
-      setBurnedCalories(total);
-
-      if (goal) {
-        setActivityScore(calculateActivityScore(total, goal, new Date()));
-      }
-
-      setLoading(false);
-    }
-
-    window.addEventListener("dashboard-refresh", handleDashboardRefresh);
-
-    return () =>
-      window.removeEventListener(
-        "dashboard-refresh",
-        handleDashboardRefresh
-      );
-  }, [user]);
-
-  /* ───────────────── Weight Update Event (NIEUW) ───────────────── */
-
-  useEffect(() => {
-    if (!user) return;
-
-    const userId = user.id;
-
-    async function handleWeightUpdate() {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("activity_goal_kcal")
-        .eq("id", userId)
-        .single();
-
-      const goal =
-        (profile as ActivityGoalProfileRow | null)?.activity_goal_kcal ?? null;
-
-      if (!goal) return;
-
-      setActivityGoal(goal);
-
-      setActivityScore(
-        calculateActivityScore(burnedCalories, goal, now)
-      );
-    }
-
-    window.addEventListener("weight-updated", handleWeightUpdate);
-
-    return () =>
-      window.removeEventListener(
-        "weight-updated",
-        handleWeightUpdate
-      );
-  }, [user, burnedCalories, now]);
-
   /* Status */
+
   const activityStatus = useMemo(() => {
     if (!activityGoal) {
       return {
@@ -212,18 +128,8 @@ export default function ActivityCard() {
     return getActivityStatus(burnedCalories, activityGoal, now, t, lang);
   }, [burnedCalories, activityGoal, now, t]);
 
-  /* Dashboard sync */
-  useEffect(() => {
-    if (loading || !activityGoal) return;
-
-    dispatchDashboardEvent("activity-updated", {
-      score: activityScore,
-      color: activityStatus.color,
-      calories: burnedCalories,
-    });
-  }, [loading, activityGoal, activityScore, activityStatus.color, burnedCalories]);
-
   /* Activiteit toevoegen */
+
   async function addActivity(type: ActivityType, minutes: number) {
     if (!user || !activityGoal) return;
 
@@ -247,18 +153,13 @@ export default function ActivityCard() {
 
     if (error) return console.error(error.message);
 
+    await refreshDashboard();
+
     const nextBurned = burnedCalories + calories;
     const nextScore = calculateActivityScore(nextBurned, activityGoal, now);
-    const nextStatus = getActivityStatus(nextBurned, activityGoal, now, t, lang);
 
     setBurnedCalories(nextBurned);
     setActivityScore(nextScore);
-
-    dispatchDashboardEvent("activity-updated", {
-      score: nextScore,
-      color: nextStatus.color,
-      calories: nextBurned,
-    });
 
     showToast(
       `✓ ${t.activity.labels[type]} · ${minutes} ${t.activity.minutes} · ${formatNumber(
@@ -268,7 +169,7 @@ export default function ActivityCard() {
     );
   }
 
-  if (loading || activityGoal === null) {
+  if (!ready || loading || activityGoal === null) {
     return (
       <Card title={t.activity.title}>
         <div className="text-sm text-gray-500">{t.activity.loading}</div>
@@ -297,6 +198,7 @@ export default function ActivityCard() {
             <div className="text-2xl font-semibold text-[#191970]">
               {formatNumber(burnedCalories, lang)} kcal
             </div>
+
             <div className="text-xs text-gray-500">
               {t.activity.goal}: {formatNumber(activityGoal, lang)} kcal
             </div>
@@ -304,14 +206,17 @@ export default function ActivityCard() {
 
           <div className="mt-4 space-y-2">
             <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+
               <div
                 className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
                 style={{ width: `${activityStatus.expectedProgress * 100}%` }}
               />
+
               <div
                 className={`absolute left-0 top-0 h-full transition-all ${barColor}`}
                 style={{ width: `${actualProgress * 100}%` }}
               />
+
             </div>
 
             <div className="text-xs text-gray-600">
@@ -325,6 +230,7 @@ export default function ActivityCard() {
           >
             + {t.activity.addActivity}
           </button>
+
         </div>
       </Card>
 

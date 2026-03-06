@@ -9,6 +9,7 @@ import { useUser } from "@/lib/AuthProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
 import { useLangContext } from "@/lib/LangProvider";
+import { useDashboard } from "@/lib/DashboardStore";
 
 /* ───────────────── Types ───────────────── */
 
@@ -84,6 +85,8 @@ export default function AddFoodPage() {
   const { user } = useUser();
   const { lang } = useLangContext();
   const dayKey = getLocalDayKey(useDayNow());
+
+  const { refreshDashboard } = useDashboard();
 
   const [goal, setGoal] = useState<string>("maintain");
   const [productName, setProductName] = useState<string>("");
@@ -307,6 +310,8 @@ export default function AddFoodPage() {
     loadPortions();
   }, [selectedPreparation, productKey, lang]);
 
+  /* ───────────────── SAVE ───────────────── */
+
   /* ⭐ TOGGLE FAVORITE */
 
   async function toggleFavorite() {
@@ -337,8 +342,6 @@ export default function AddFoodPage() {
       setFavoriteId(data.id);
     }
   }
-
-  /* ───────────────── SAVE ───────────────── */
 
   async function handleSave() {
     if (!user || !selectedPortion || !selectedPreparation) return;
@@ -404,6 +407,8 @@ export default function AddFoodPage() {
       water,
       sodium,
     });
+
+    await refreshDashboard();
 
     window.dispatchEvent(new Event("consumption-changed"));
     router.push("/dashboard");

@@ -8,11 +8,7 @@ import Card from "@/components/ui/Card";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 
-import { useDayNow } from "@/lib/useDayNow";
-import { getLocalDayKey } from "@/lib/dayKey";
 import { useNow } from "@/lib/TimeProvider";
-import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
-import { dispatchDashboardRefresh, DashboardEventMap } from "@/lib/dashboardEvents";
 
 import {
   calculateNutritionScore,
@@ -24,10 +20,9 @@ import { uiText } from "@/lib/uiText";
 import { formatNumber } from "@/lib/formatNumber";
 import { useRouter } from "next/navigation";
 
-/* ───────────────── Types ───────────────── */
+import { useDashboard } from "@/lib/DashboardStore";
 
-type NutritionLogRow = { kcal: number };
-type ActivityLogRow = { calories: number };
+/* ───────────────── Types ───────────────── */
 
 type ProfileGoal = "LOSE" | "MAINTAIN" | "GAIN";
 
@@ -47,9 +42,15 @@ function mapGoalToScoreGoal(goal: ProfileGoal) {
 /* ───────────────── Component ───────────────── */
 
 export default function NutritionCard() {
+
   const { user } = useUser();
-  const dayNow = useDayNow();
-  const dayKey = getLocalDayKey(dayNow);
+
+  const {
+    ready,
+    nutritionKcal,
+    activityCalories
+  } = useDashboard();
+
   const now = useNow();
 
   const lang = useLang();
@@ -59,228 +60,49 @@ export default function NutritionCard() {
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
   const [goal, setGoal] =
     useState<"lose_weight" | "maintain" | "gain_weight">("maintain");
-  const [activityBonus, setActivityBonus] = useState<number>(0);
-  const [currentCalories, setCurrentCalories] = useState<number>(0);
+
   const [nutritionScore, setNutritionScore] = useState<number>(0);
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  /* ───────────────── Reset bij dagwissel ───────────────── */
-
-  useEffect(() => {
-    setBaseGoal(null);
-    setGoal("maintain");
-    setActivityBonus(0);
-    setCurrentCalories(0);
-    setNutritionScore(0);
-    setHasLoaded(false);
-  }, [dayKey]);
-
-  /* ───────────────── Initial Load ───────────────── */
-
-  useEffect(() => {
-    if (!user) return;
-    const userId = user.id;
-
-    const loadInitial = async () => {
-      const [
-        { data: profile },
-        { data: activityLogs },
-        { data: nutritionLogs },
-      ] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("calorie_goal, goal")
-          .eq("id", userId)
-          .single<NutritionProfile>(),
-        supabase
-          .from("activity_logs")
-          .select("calories")
-          .eq("user_id", userId)
-          .eq("log_date", dayKey),
-        supabase
-          .from("nutrition_logs")
-          .select("kcal")
-          .eq("user_id", userId)
-          .eq("log_date", dayKey),
-      ]);
-
-      if (!profile?.calorie_goal) return;
-
-      setBaseGoal(profile.calorie_goal);
-      setGoal(mapGoalToScoreGoal(profile.goal));
-
-      const burned =
-        (activityLogs as ActivityLogRow[] | null)?.reduce(
-          (s, r) => s + r.calories,
-          0
-        ) ?? 0;
-
-      setActivityBonus(burned);
-
-      const eaten =
-        (nutritionLogs as NutritionLogRow[] | null)?.reduce(
-          (s, r) => s + (r.kcal ?? 0),
-          0
-        ) ?? 0;
-
-      setCurrentCalories(eaten);
-
-      setHasLoaded(true);
-    };
-
-    loadInitial();
-  }, [user, dayKey]);
-
-  /* ───────────────── Dashboard Refresh Event ───────────────── */
+  /* ───────────────── Load profile ───────────────── */
 
   useEffect(() => {
     const userId = user?.id;
-    if (!userId) return;
-
-    async function handleDashboardRefresh() {
-
-      const freshDayKey = getLocalDayKey(new Date());
-
-      const [
-        { data: profile },
-        { data: activityLogs },
-        { data: nutritionLogs },
-      ] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("calorie_goal, goal")
-          .eq("id", userId)
-          .single<NutritionProfile>(),
-        supabase
-          .from("activity_logs")
-          .select("calories")
-          .eq("user_id", userId)
-          .eq("log_date", freshDayKey),
-        supabase
-          .from("nutrition_logs")
-          .select("kcal")
-          .eq("user_id", userId)
-          .eq("log_date", freshDayKey),
-      ]);
-
-      if (!profile?.calorie_goal) return;
-
-      setBaseGoal(profile.calorie_goal);
-      setGoal(mapGoalToScoreGoal(profile.goal));
-
-      const burned =
-        (activityLogs as ActivityLogRow[] | null)?.reduce(
-          (s, r) => s + r.calories,
-          0
-        ) ?? 0;
-
-      setActivityBonus(burned);
-
-      const eaten =
-        (nutritionLogs as NutritionLogRow[] | null)?.reduce(
-          (s, r) => s + (r.kcal ?? 0),
-          0
-        ) ?? 0;
-
-      setCurrentCalories(eaten);
-
-      setHasLoaded(true);
-    }
-
-    window.addEventListener("dashboard-refresh", handleDashboardRefresh);
-
-    return () =>
-      window.removeEventListener(
-        "dashboard-refresh",
-        handleDashboardRefresh
-      );
-  }, [user]);
-
-  /* ───────────────── Nutrition Update Event ───────────────── */
-
-  useEffect(() => {
     if (!user) return;
-    const userId = user.id;
 
-    async function handleNutritionChange() {
+    async function loadProfile() {
+
       const { data } = await supabase
-        .from("nutrition_logs")
-        .select("kcal")
-        .eq("user_id", userId)
-        .eq("log_date", dayKey);
-
-      const eaten =
-        (data as NutritionLogRow[] | null)?.reduce(
-          (s, r) => s + (r.kcal ?? 0),
-          0
-        ) ?? 0;
-
-      setCurrentCalories(eaten);
-    }
-
-    window.addEventListener("nutrition-changed", handleNutritionChange);
-
-    return () =>
-      window.removeEventListener(
-        "nutrition-changed",
-        handleNutritionChange
-      );
-  }, [user, dayKey]);
-
-  /* ───────────────── Activity Update Event (OPTIMALIZED) ───────────────── */
-
-  useEffect(() => {
-    if (!user || !hasLoaded) return;
-
-    function handleActivityUpdate(
-      e: CustomEvent<DashboardEventMap["activity-updated"]>
-    ) {
-      setActivityBonus(e.detail.calories);
-    }
-
-    window.addEventListener(
-      "activity-updated",
-      handleActivityUpdate as EventListener
-    );
-
-    return () =>
-      window.removeEventListener(
-        "activity-updated",
-        handleActivityUpdate as EventListener
-      );
-  }, [user, hasLoaded]);
-
-  /* ───────────────── Weight Update Event ───────────────── */
-
-  useEffect(() => {
-    if (!user) return;
-    const userId = user.id;
-
-    async function handleWeightUpdate() {
-      const { data: profile } = await supabase
         .from("profiles")
         .select("calorie_goal, goal")
         .eq("id", userId)
         .single<NutritionProfile>();
 
-      if (!profile?.calorie_goal) return;
+      if (!data?.calorie_goal) return;
 
-      setBaseGoal(profile.calorie_goal);
-      setGoal(mapGoalToScoreGoal(profile.goal));
+      setBaseGoal(data.calorie_goal);
+      setGoal(mapGoalToScoreGoal(data.goal));
+
+      setHasLoaded(true);
+
     }
 
-    window.addEventListener("weight-updated", handleWeightUpdate);
+    loadProfile();
 
-    return () =>
-      window.removeEventListener(
-        "weight-updated",
-        handleWeightUpdate
-      );
   }, [user]);
 
-  /* ───────────────── Score Recalculation ───────────────── */
+  /* ───────────────── Derived values ───────────────── */
+
+  const currentCalories = nutritionKcal ?? 0;
+  const activityBonus = activityCalories ?? 0;
+
+  const dailyLimit =
+    baseGoal !== null ? baseGoal + activityBonus : 0;
+
+  /* ───────────────── Score ───────────────── */
 
   useEffect(() => {
+
     if (!baseGoal) return;
 
     const limit = baseGoal + activityBonus;
@@ -293,14 +115,14 @@ export default function NutritionCard() {
     );
 
     setNutritionScore(score);
+
   }, [currentCalories, activityBonus, baseGoal, goal, now]);
 
-  const dailyLimit =
-    baseGoal !== null ? baseGoal + activityBonus : 0;
-
-  const statusKey = `${currentCalories}-${dailyLimit}-${goal}-${now.getHours()}-${lang}`;
+  const statusKey =
+    `${currentCalories}-${dailyLimit}-${goal}-${now.getHours()}-${lang}`;
 
   const nutritionStatus = useMemo(() => {
+
     if (!dailyLimit)
       return {
         color: "bg-gray-400 text-white",
@@ -316,6 +138,7 @@ export default function NutritionCard() {
       t,
       lang
     );
+
   }, [statusKey]);
 
   const pillScore =
@@ -323,22 +146,7 @@ export default function NutritionCard() {
       ? nutritionScore
       : Math.min(nutritionScore, 99);
 
-  useEffect(() => {
-    if (!hasLoaded || !dailyLimit) return;
-
-    dispatchDashboardEvent("nutrition-updated", {
-      score: nutritionScore,
-      color: nutritionStatus.color,
-      kcal: currentCalories,
-    });
-  }, [
-    hasLoaded,
-    dailyLimit,
-    nutritionScore,
-    nutritionStatus.color,
-  ]);
-
-  if (!hasLoaded || baseGoal === null) {
+  if (!ready || !hasLoaded || baseGoal === null) {
     return (
       <Card title={t.nutrition.title}>
         <div className="text-sm text-gray-500">
@@ -348,10 +156,8 @@ export default function NutritionCard() {
     );
   }
 
-  const actualProgress = Math.min(
-    currentCalories / dailyLimit,
-    1
-  );
+  const actualProgress =
+    Math.min(currentCalories / dailyLimit, 1);
 
   const progressBarColor =
     nutritionStatus.color.replace("text-white", "");
@@ -372,7 +178,9 @@ export default function NutritionCard() {
         }
       >
         <div className="h-full flex flex-col justify-between">
+
           <div className="space-y-1">
+
             <div className="text-2xl font-semibold text-[#191970]">
               {formatNumber(Math.round(currentCalories), lang)} kcal
             </div>
@@ -392,27 +200,33 @@ export default function NutritionCard() {
                   formatNumber(Math.round(activityBonus), lang)
                 )}
             </div>
+
           </div>
 
           <div className="mt-4 space-y-2">
+
             <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+
               <div
                 className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
                 style={{
                   width: `${nutritionStatus.expectedProgress * 100}%`,
                 }}
               />
+
               <div
                 className={`absolute left-0 top-0 h-full transition-all ${progressBarColor}`}
                 style={{
                   width: `${actualProgress * 100}%`,
                 }}
               />
+
             </div>
 
             <div className="text-xs text-gray-600">
               {nutritionStatus.message}
             </div>
+
           </div>
 
           <button
@@ -421,6 +235,7 @@ export default function NutritionCard() {
           >
             + {t.nutrition.addFood}
           </button>
+
         </div>
       </Card>
     </>
