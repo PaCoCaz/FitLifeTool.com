@@ -12,7 +12,7 @@ import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
 import { useNow } from "@/lib/TimeProvider";
 import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
-import { dispatchDashboardRefresh } from "@/lib/dashboardEvents";
+import { dispatchDashboardRefresh, DashboardEventMap } from "@/lib/dashboardEvents";
 
 import {
   calculateNutritionScore,
@@ -131,7 +131,7 @@ export default function NutritionCard() {
     loadInitial();
   }, [user, dayKey]);
 
-  /* ───────────────── Dashboard Refresh Event (FIX) ───────────────── */
+  /* ───────────────── Dashboard Refresh Event ───────────────── */
 
   useEffect(() => {
     const userId = user?.id;
@@ -139,7 +139,6 @@ export default function NutritionCard() {
 
     async function handleDashboardRefresh() {
 
-      // 🔑 Nieuwe dagKey berekenen (voorkomt middernacht race condition)
       const freshDayKey = getLocalDayKey(new Date());
 
       const [
@@ -228,36 +227,28 @@ export default function NutritionCard() {
       );
   }, [user, dayKey]);
 
-  /* ───────────────── Activity Update Event ───────────────── */
+  /* ───────────────── Activity Update Event (OPTIMALIZED) ───────────────── */
 
   useEffect(() => {
     if (!user || !hasLoaded) return;
-    const userId = user.id;
 
-    async function handleActivityUpdate() {
-      const { data } = await supabase
-        .from("activity_logs")
-        .select("calories")
-        .eq("user_id", userId)
-        .eq("log_date", dayKey);
-
-      const burned =
-        (data as ActivityLogRow[] | null)?.reduce(
-          (s, r) => s + r.calories,
-          0
-        ) ?? 0;
-
-      setActivityBonus(burned);
+    function handleActivityUpdate(
+      e: CustomEvent<DashboardEventMap["activity-updated"]>
+    ) {
+      setActivityBonus(e.detail.calories);
     }
 
-    window.addEventListener("activity-updated", handleActivityUpdate);
+    window.addEventListener(
+      "activity-updated",
+      handleActivityUpdate as EventListener
+    );
 
     return () =>
       window.removeEventListener(
         "activity-updated",
-        handleActivityUpdate
+        handleActivityUpdate as EventListener
       );
-  }, [user, hasLoaded, dayKey]);
+  }, [user, hasLoaded]);
 
   /* ───────────────── Weight Update Event ───────────────── */
 
@@ -338,6 +329,7 @@ export default function NutritionCard() {
     dispatchDashboardEvent("nutrition-updated", {
       score: nutritionScore,
       color: nutritionStatus.color,
+      kcal: currentCalories,
     });
   }, [
     hasLoaded,

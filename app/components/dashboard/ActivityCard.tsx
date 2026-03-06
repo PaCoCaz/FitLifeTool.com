@@ -219,8 +219,9 @@ export default function ActivityCard() {
     dispatchDashboardEvent("activity-updated", {
       score: activityScore,
       color: activityStatus.color,
+      calories: burnedCalories,
     });
-  }, [loading, activityGoal, activityScore, activityStatus.color]);
+  }, [loading, activityGoal, activityScore, activityStatus.color, burnedCalories]);
 
   /* Activiteit toevoegen */
   async function addActivity(type: ActivityType, minutes: number) {
@@ -256,6 +257,7 @@ export default function ActivityCard() {
     dispatchDashboardEvent("activity-updated", {
       score: nextScore,
       color: nextStatus.color,
+      calories: nextBurned,
     });
 
     showToast(

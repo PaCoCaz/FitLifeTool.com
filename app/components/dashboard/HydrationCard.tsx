@@ -14,7 +14,7 @@ import { getLocalDayKey } from "@/lib/dayKey";
 import { useNow } from "@/lib/TimeProvider";
 
 import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
-import { dispatchDashboardRefresh } from "@/lib/dashboardEvents"; // ✅ NIEUW
+import { dispatchDashboardRefresh } from "@/lib/dashboardEvents";
 import DrinkModal from "@/components/dashboard/DrinkModal";
 
 import {
@@ -22,7 +22,6 @@ import {
   getExpectedHydrationProgress,
 } from "@/lib/hydrationScore";
 
-/* 🌍 Meertaligheid */
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
 import { formatNumber } from "@/lib/formatNumber";
@@ -107,7 +106,7 @@ export default function HydrationCard() {
     loadHydration();
   }, [user, dayKey]);
 
-  /* ───────────────── Dashboard Refresh Event (NIEUW) ───────────────── */
+  /* ───────────────── Dashboard Refresh Event ───────────────── */
 
   useEffect(() => {
     const userId = user?.id;
@@ -115,7 +114,6 @@ export default function HydrationCard() {
 
     async function handleDashboardRefresh() {
 
-      // 🔑 Nieuwe dagKey berekenen zodat middernacht altijd klopt
       const freshDayKey = getLocalDayKey(new Date());
 
       const [{ data: profile }, { data: logs }] =
@@ -193,8 +191,9 @@ export default function HydrationCard() {
     dispatchDashboardEvent("hydration-updated", {
       score: hydrationScore,
       color: hydrationStatus.color,
+      ml: currentMl,
     });
-  }, [loading, hydrationGoal, hydrationScore, hydrationStatus.color]);
+  }, [loading, hydrationGoal, hydrationScore, hydrationStatus.color, currentMl]);
 
   useEffect(() => {
     function handleWeightUpdate(e: any) {

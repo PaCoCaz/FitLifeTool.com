@@ -11,16 +11,19 @@
   "hydration-updated": {
     score: number;
     color: string;
+    ml: number;
   };
 
   "activity-updated": {
     score: number;
     color: string;
+    calories: number;
   };
 
   "nutrition-updated": {
     score: number;
     color: string;
+    kcal: number;
   };
 
   "weight-updated": {

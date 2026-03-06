@@ -26,16 +26,25 @@ export default function FitLifeScoreCard() {
   const dayNow = useDayNow();
   const clockNow = useClockNow();
 
-  /* 🔒 Client-only render guard */
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  /* ───── Scores ───── */
+
   const [hydrationScore, setHydrationScore] = useState<number | null>(null);
   const [activityScore, setActivityScore] = useState<number | null>(null);
   const [nutritionScore, setNutritionScore] = useState<number | null>(null);
+
+  /* ───── Raw values (deterministic stabilisation) ───── */
+
+  const [hydrationMl, setHydrationMl] = useState<number>(0);
+  const [activityCalories, setActivityCalories] = useState<number>(0);
+  const [nutritionKcal, setNutritionKcal] = useState<number>(0);
+
+  /* ───── Status colors ───── */
 
   const [hydrationColor, setHydrationColor] = useState<string | null>(null);
   const [activityColor, setActivityColor] = useState<string | null>(null);
@@ -48,18 +57,26 @@ export default function FitLifeScoreCard() {
     setActivityScore(0);
     setNutritionScore(0);
 
+    setHydrationMl(0);
+    setActivityCalories(0);
+    setNutritionKcal(0);
+
     setHydrationColor("bg-gray-400 text-white");
     setActivityColor("bg-gray-400 text-white");
     setNutritionColor("bg-gray-400 text-white");
   }, [dayNow]);
 
-  /* ───── Dashboard Refresh (NIEUW) ───── */
+  /* ───── Dashboard Refresh ───── */
 
   useEffect(() => {
     function handleDashboardRefresh() {
       setHydrationScore(0);
       setActivityScore(0);
       setNutritionScore(0);
+
+      setHydrationMl(0);
+      setActivityCalories(0);
+      setNutritionKcal(0);
 
       setHydrationColor("bg-gray-400 text-white");
       setActivityColor("bg-gray-400 text-white");
@@ -83,6 +100,7 @@ export default function FitLifeScoreCard() {
     ) => {
       setHydrationScore(e.detail.score);
       setHydrationColor(e.detail.color);
+      setHydrationMl(e.detail.ml);
     };
 
     const activityHandler = (
@@ -90,6 +108,7 @@ export default function FitLifeScoreCard() {
     ) => {
       setActivityScore(e.detail.score);
       setActivityColor(e.detail.color);
+      setActivityCalories(e.detail.calories);
     };
 
     const nutritionHandler = (
@@ -97,6 +116,7 @@ export default function FitLifeScoreCard() {
     ) => {
       setNutritionScore(e.detail.score);
       setNutritionColor(e.detail.color);
+      setNutritionKcal(e.detail.kcal);
     };
 
     window.addEventListener(
