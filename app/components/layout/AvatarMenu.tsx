@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLang, useSetUserLanguage } from "@/lib/useLang";
 import { useGoalContext } from "@/lib/GoalProvider";
-import { dispatchDashboardRefresh } from "@/lib/dashboardEvents";
+import { useDashboard } from "@/lib/DashboardStore";
 
 type Props = {
   firstName: string;
@@ -22,6 +22,7 @@ export default function AvatarMenu({ firstName }: Props) {
   const lang = useLang();
   const setUserLanguage = useSetUserLanguage();
   const { goal, setUserGoal } = useGoalContext();
+  const { refreshDashboard } = useDashboard();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -56,7 +57,7 @@ export default function AvatarMenu({ firstName }: Props) {
   
     await setUserGoal(newGoal);
   
-    dispatchDashboardRefresh();
+    await refreshDashboard();
   }
   
   const languages = [
