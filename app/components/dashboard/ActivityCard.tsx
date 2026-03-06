@@ -110,13 +110,17 @@ export default function ActivityCard() {
     loadActivity();
   }, [user, dayKey, now]);
 
-  /* ───────────────── Dashboard Refresh Event (NIEUW) ───────────────── */
+  /* ───────────────── Dashboard Refresh Event (FIX) ───────────────── */
 
   useEffect(() => {
     const userId = user?.id;
     if (!userId) return;
 
     async function handleDashboardRefresh() {
+
+      // 🔑 Nieuwe dagKey berekenen (voorkomt middernacht race condition)
+      const freshDayKey = getLocalDayKey(new Date());
+
       const [{ data: profile }, { data: logs }] = await Promise.all([
         supabase
           .from("profiles")
@@ -128,7 +132,7 @@ export default function ActivityCard() {
           .from("activity_logs")
           .select("calories")
           .eq("user_id", userId)
-          .eq("log_date", dayKey),
+          .eq("log_date", freshDayKey),
       ]);
 
       const goal =
@@ -145,7 +149,7 @@ export default function ActivityCard() {
       setBurnedCalories(total);
 
       if (goal) {
-        setActivityScore(calculateActivityScore(total, goal, now));
+        setActivityScore(calculateActivityScore(total, goal, new Date()));
       }
 
       setLoading(false);
@@ -158,7 +162,7 @@ export default function ActivityCard() {
         "dashboard-refresh",
         handleDashboardRefresh
       );
-  }, [user, dayKey, now]);
+  }, [user]);
 
   /* ───────────────── Weight Update Event (NIEUW) ───────────────── */
 

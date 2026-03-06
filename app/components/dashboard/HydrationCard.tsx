@@ -114,6 +114,10 @@ export default function HydrationCard() {
     if (!userId) return;
 
     async function handleDashboardRefresh() {
+
+      // 🔑 Nieuwe dagKey berekenen zodat middernacht altijd klopt
+      const freshDayKey = getLocalDayKey(new Date());
+
       const [{ data: profile }, { data: logs }] =
         await Promise.all([
           supabase
@@ -126,7 +130,7 @@ export default function HydrationCard() {
             .from("hydration_logs")
             .select("amount_ml, hydration_factor")
             .eq("user_id", userId)
-            .eq("log_date", dayKey),
+            .eq("log_date", freshDayKey),
         ]);
 
       const goal = profile?.water_goal_ml ?? null;

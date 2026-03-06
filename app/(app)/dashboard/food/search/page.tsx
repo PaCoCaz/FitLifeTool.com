@@ -16,10 +16,6 @@ type Product = {
   is_drink: boolean;
 };
 
-type ProfileRow = {
-  subscription: string;
-};
-
 type FavoriteKeyRow = {
   product_key: string;
 };
@@ -39,9 +35,7 @@ type TranslationRow = {
 export default function FoodSearchPage() {
   const router = useRouter();
   const { user } = useUser();
-  const { lang } = useLangContext(); // ✅ GLOBAL LANGUAGE
-
-  const [subscription, setSubscription] = useState<string>("free");
+  const { lang } = useLangContext();
 
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Product[]>([]);
@@ -49,34 +43,18 @@ export default function FoodSearchPage() {
   const [drinkFavorites, setDrinkFavorites] = useState<Product[]>([]);
   const [foodFavorites, setFoodFavorites] = useState<Product[]>([]);
 
-  /* ───────────────── LOAD PROFILE (subscription only) ───────────────── */
-
-  useEffect(() => {
-    if (!user) return;
-
-    async function loadProfile() {
-      const { data } = await supabase
-        .from("profiles")
-        .select("subscription")
-        .eq("id", user!.id)
-        .single<ProfileRow>();
-
-      if (data?.subscription) setSubscription(data.subscription);
-    }
-
-    loadProfile();
-  }, [user]);
-
   /* ───────────────── LOAD FAVORITES ───────────────── */
 
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
+
+    const userId = user.id;
 
     async function loadFavorites() {
       const { data: favorites } = await supabase
         .from("nutrition_favorites")
         .select("product_key")
-        .eq("user_id", user!.id)
+        .eq("user_id", userId)
         .order("sort_order", { ascending: true });
 
       const typedFavorites = (favorites ?? []) as FavoriteKeyRow[];
@@ -102,7 +80,7 @@ export default function FoodSearchPage() {
         .from("nutrition_product_translations")
         .select("product_key, name")
         .in("product_key", productKeys)
-        .eq("lang", lang); // ✅ CONTEXT LANGUAGE
+        .eq("lang", lang);
 
       const typedTranslations =
         (translations ?? []) as TranslationRow[];
@@ -126,7 +104,7 @@ export default function FoodSearchPage() {
     }
 
     loadFavorites();
-  }, [user, lang]); // ✅ reacts instantly to language change
+  }, [user?.id, lang]);
 
   /* ───────────────── SEARCH ───────────────── */
 
@@ -140,39 +118,23 @@ export default function FoodSearchPage() {
 
     const timeout = setTimeout(async () => {
 
-      const { data: translations } = await supabase
-        .from("nutrition_product_translations")
-        .select("product_key, name")
-        .eq("lang", lang) // ✅ CONTEXT LANGUAGE
+      const { data } = await supabase
+        .from("nutrition_products_search")
+        .select("product_key, name, is_drink")
+        .eq("lang", lang)
         .ilike("name", `%${search}%`);
 
-      const typedTranslations =
-        (translations ?? []) as TranslationRow[];
-
-      if (typedTranslations.length === 0) {
+      if (!data || data.length === 0) {
         setResults([]);
         return;
       }
 
-      const productKeys = typedTranslations.map(t => t.product_key);
-
-      const { data: products } = await supabase
-        .from("nutrition_products")
-        .select("product_key, is_drink")
-        .in("product_key", productKeys);
-
-      const typedProducts =
-        (products ?? []) as ProductRow[];
-
-      const productMap = new Map(
-        typedProducts.map(p => [p.product_key, p.is_drink])
-      );
-
-      const sorted = typedTranslations.sort((a, b) => {
+      const sorted = data.sort((a: any, b: any) => {
 
         const aStarts = a.name
           .toLowerCase()
           .startsWith(search.toLowerCase());
+
         const bStarts = b.name
           .toLowerCase()
           .startsWith(search.toLowerCase());
@@ -183,12 +145,13 @@ export default function FoodSearchPage() {
         return a.name.localeCompare(b.name, lang, {
           sensitivity: "base",
         });
+
       });
 
-      const mapped: Product[] = sorted.map(t => ({
-        product_key: t.product_key,
-        name: t.name,
-        is_drink: Boolean(productMap.get(t.product_key)),
+      const mapped: Product[] = sorted.map((p: any) => ({
+        product_key: p.product_key,
+        name: p.name,
+        is_drink: Boolean(p.is_drink),
       }));
 
       setResults(mapped);
@@ -197,7 +160,7 @@ export default function FoodSearchPage() {
 
     return () => clearTimeout(timeout);
 
-  }, [search, lang]); // ✅ reacts instantly
+  }, [search, lang]);
 
   /* ───────────────── UI ───────────────── */
 

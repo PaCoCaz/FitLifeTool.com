@@ -11,7 +11,7 @@ import { useToast } from "@/lib/ToastProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
 import { dispatchDashboardEvent } from "@/lib/dispatchDashboardEvent";
-import { dispatchDashboardRefresh } from "@/lib/dashboardEvents"; // ✅ NIEUW
+import { dispatchDashboardRefresh } from "@/lib/dashboardEvents";
 
 /* ───────────────── Types ───────────────── */
 
@@ -148,6 +148,8 @@ export default function WeightCard() {
   const [draftWeight, setDraftWeight] = useState("");
   const [draftTargetWeight, setDraftTargetWeight] = useState("");
 
+  /* ───────────────── Initial Load ───────────────── */
+
   useEffect(() => {
     if (!user) return;
 
@@ -156,20 +158,64 @@ export default function WeightCard() {
       .select("weight_kg, bmi, target_weight_kg, height_cm")
       .eq("id", user.id)
       .single()
-      .then(({ data, error }: { data: WeightProfileResult | null; error: { message: string } | null }) => {
-        if (error) return console.error(error.message);
-        if (data) {
-          setWeight(data.weight_kg);
-          setBmi(data.bmi);
-          setTargetWeight(data.target_weight_kg);
-          setHeightCm(data.height_cm);
-          setDraftWeight(String(data.weight_kg));
-          setDraftTargetWeight(
-            data.target_weight_kg ? String(data.target_weight_kg) : ""
-          );
+      .then(
+        ({
+          data,
+          error,
+        }: {
+          data: WeightProfileResult | null;
+          error: { message: string } | null;
+        }) => {
+          if (error) return console.error(error.message);
+          if (data) {
+            setWeight(data.weight_kg);
+            setBmi(data.bmi);
+            setTargetWeight(data.target_weight_kg);
+            setHeightCm(data.height_cm);
+            setDraftWeight(String(data.weight_kg));
+            setDraftTargetWeight(
+              data.target_weight_kg ? String(data.target_weight_kg) : ""
+            );
+          }
         }
-      });
+      );
   }, [user]);
+
+  /* ───────────────── Dashboard Refresh Event ───────────────── */
+
+  useEffect(() => {
+    const userId = user?.id;
+    if (!userId) return;
+
+    async function handleDashboardRefresh() {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("weight_kg, bmi, target_weight_kg, height_cm")
+        .eq("id", userId)
+        .single<WeightProfileResult>();
+
+      if (error || !data) return;
+
+      setWeight(data.weight_kg);
+      setBmi(data.bmi);
+      setTargetWeight(data.target_weight_kg);
+      setHeightCm(data.height_cm);
+
+      dispatchDashboardEvent("weight-updated", {
+        weightKg: data.weight_kg,
+      });
+    }
+
+    window.addEventListener("dashboard-refresh", handleDashboardRefresh);
+
+    return () =>
+      window.removeEventListener(
+        "dashboard-refresh",
+        handleDashboardRefresh
+      );
+  }, [user]);
+
+  /* ───────────────── Save Weight ───────────────── */
 
   async function saveWeight() {
     if (!user || weight === null || heightCm === null) return;
@@ -184,7 +230,6 @@ export default function WeightCard() {
     if (parsedTarget !== null && parsedTarget <= 0) return;
 
     const newBMI = calculateBMI(parsedWeight, heightCm);
-
     const newWaterGoal = Math.round(parsedWeight * 35);
 
     const { error } = await supabase
@@ -205,19 +250,17 @@ export default function WeightCard() {
 
     const nowTs = new Date();
 
-    await supabase
-      .from("weight_logs")
-      .upsert(
-        {
-          user_id: user.id,
-          weight_kg: parsedWeight,
-          bmi: newBMI,
-          log_date: dayKey,
-          log_time_local: nowTs.toTimeString().slice(0, 8),
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        { onConflict: "user_id,log_date" }
-      );
+    await supabase.from("weight_logs").upsert(
+      {
+        user_id: user.id,
+        weight_kg: parsedWeight,
+        bmi: newBMI,
+        log_date: dayKey,
+        log_time_local: nowTs.toTimeString().slice(0, 8),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
+      { onConflict: "user_id,log_date" }
+    );
 
     setWeight(parsedWeight);
     setBmi(newBMI);
@@ -230,7 +273,7 @@ export default function WeightCard() {
       weightKg: parsedWeight,
     });
 
-    dispatchDashboardRefresh(); // ✅ NIEUW
+    dispatchDashboardRefresh();
   }
 
   function cancelEdit() {

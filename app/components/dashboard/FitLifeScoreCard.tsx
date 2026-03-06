@@ -26,7 +26,7 @@ export default function FitLifeScoreCard() {
   const dayNow = useDayNow();
   const clockNow = useClockNow();
 
-  /* 🔒 Client-only render guard (NOODZAKELIJK VOOR HYDRATION) */
+  /* 🔒 Client-only render guard */
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -42,6 +42,7 @@ export default function FitLifeScoreCard() {
   const [nutritionColor, setNutritionColor] = useState<string | null>(null);
 
   /* ───── Dagreset ───── */
+
   useEffect(() => {
     setHydrationScore(0);
     setActivityScore(0);
@@ -52,7 +53,30 @@ export default function FitLifeScoreCard() {
     setNutritionColor("bg-gray-400 text-white");
   }, [dayNow]);
 
+  /* ───── Dashboard Refresh (NIEUW) ───── */
+
+  useEffect(() => {
+    function handleDashboardRefresh() {
+      setHydrationScore(0);
+      setActivityScore(0);
+      setNutritionScore(0);
+
+      setHydrationColor("bg-gray-400 text-white");
+      setActivityColor("bg-gray-400 text-white");
+      setNutritionColor("bg-gray-400 text-white");
+    }
+
+    window.addEventListener("dashboard-refresh", handleDashboardRefresh);
+
+    return () =>
+      window.removeEventListener(
+        "dashboard-refresh",
+        handleDashboardRefresh
+      );
+  }, []);
+
   /* ───── Events ───── */
+
   useEffect(() => {
     const hydrationHandler = (
       e: CustomEvent<DashboardEventMap["hydration-updated"]>
@@ -75,18 +99,37 @@ export default function FitLifeScoreCard() {
       setNutritionColor(e.detail.color);
     };
 
-    window.addEventListener("hydration-updated", hydrationHandler as EventListener);
-    window.addEventListener("activity-updated", activityHandler as EventListener);
-    window.addEventListener("nutrition-updated", nutritionHandler as EventListener);
+    window.addEventListener(
+      "hydration-updated",
+      hydrationHandler as EventListener
+    );
+    window.addEventListener(
+      "activity-updated",
+      activityHandler as EventListener
+    );
+    window.addEventListener(
+      "nutrition-updated",
+      nutritionHandler as EventListener
+    );
 
     return () => {
-      window.removeEventListener("hydration-updated", hydrationHandler as EventListener);
-      window.removeEventListener("activity-updated", activityHandler as EventListener);
-      window.removeEventListener("nutrition-updated", nutritionHandler as EventListener);
+      window.removeEventListener(
+        "hydration-updated",
+        hydrationHandler as EventListener
+      );
+      window.removeEventListener(
+        "activity-updated",
+        activityHandler as EventListener
+      );
+      window.removeEventListener(
+        "nutrition-updated",
+        nutritionHandler as EventListener
+      );
     };
   }, []);
 
-  /* ───── Gewogen FitLifeScore (MET BLOKKADE) ───── */
+  /* ───── Gewogen FitLifeScore ───── */
+
   const fitLifeScore = useMemo(() => {
     const h = hydrationScore ?? 0;
     const a = activityScore ?? 0;
@@ -115,6 +158,7 @@ export default function FitLifeScoreCard() {
   ]);
 
   /* ───── Aggregatiekleur ───── */
+
   const statusColor = useMemo(() => {
     return getFitLifeStatusColor([
       hydrationColor,
@@ -124,7 +168,9 @@ export default function FitLifeScoreCard() {
   }, [hydrationColor, activityColor, nutritionColor]);
 
   /* ───── Dagschema ───── */
+
   const expectedProgress = getExpectedHydrationProgress(clockNow);
+
   const actualProgressWithinSchedule =
     expectedProgress * (fitLifeScore / 100);
 

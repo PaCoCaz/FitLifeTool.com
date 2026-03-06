@@ -34,11 +34,26 @@ export function useDayNow(): Date {
       nextMidnight.getTime() - now.getTime();
 
     timeoutRef.current = window.setTimeout(() => {
-      setDayNow(new Date()); // 🔥 DAG WISSELT HIER
+      const newDay = new Date();
+
+      setDayNow(newDay); // 🔥 DAG WISSELT HIER
+
+      // 🔔 Dashboard refresh event
+      window.dispatchEvent(
+        new CustomEvent("dashboard-refresh")
+      );
 
       // Daarna elke 24 uur exact
       intervalRef.current = window.setInterval(() => {
-        setDayNow(new Date());
+        const newDay = new Date();
+
+        setDayNow(newDay);
+
+        // 🔔 Dashboard refresh event
+        window.dispatchEvent(
+          new CustomEvent("dashboard-refresh")
+        );
+
       }, 24 * 60 * 60 * 1000);
     }, msUntilMidnight);
 
