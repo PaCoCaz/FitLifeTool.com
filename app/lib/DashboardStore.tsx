@@ -21,7 +21,7 @@ type DashboardState = {
 
   refreshDashboard: () => Promise<void>;
 
-  ready: boolean; // ← nieuw
+  ready: boolean;
 };
 
 const DashboardContext = createContext<DashboardState | null>(null);
@@ -46,55 +46,58 @@ export function DashboardProvider({
   const [nutritionKcal, setNutritionKcal] = useState(0);
   const [activityCalories, setActivityCalories] = useState(0);
 
-  const [ready, setReady] = useState(false); // ← nieuw
+  const [ready, setReady] = useState(false);
 
   /* ───────────────── Dashboard Refresh ───────────────── */
 
   async function refreshDashboard() {
     if (!user) return;
 
-    setReady(false); // ← nieuw
-  
+    setReady(false);
+
+    // 🔑 voorkomt middernacht race conditions
+    const freshDayKey = getLocalDayKey(new Date());
+
     const [rpcResult, profileResult] = await Promise.all([
       supabase.rpc("dashboard_day_summary", {
         p_user_id: user.id,
-        p_day: dayKey,
+        p_day: freshDayKey,
       }),
-  
+
       supabase
         .from("profiles")
         .select("water_goal_ml")
         .eq("id", user.id)
         .single(),
     ]);
-  
+
     const rows = rpcResult.data;
     const profile = profileResult.data;
-  
+
     const row = rows?.[0];
     if (!row) return;
-  
+
     setNutritionKcal(row.kcal ?? 0);
-  
+
     const drinkMl = row.drink_ml ?? 0;
     const foodMl = row.food_water_ml ?? 0;
-  
+
     setHydrationDrinkMl(drinkMl);
     setHydrationFoodMl(foodMl);
     setHydrationMl(drinkMl + foodMl);
-  
+
     setActivityCalories(row.activity_kcal ?? 0);
-  
+
     setHydrationGoalMl(profile?.water_goal_ml ?? null);
 
-    setReady(true); // ← nieuw
+    setReady(true);
   }
 
   /* ───────────────── Initial Load ───────────────── */
 
   useEffect(() => {
-    if (!user) return;
-  
+    if (!user?.id) return;
+
     refreshDashboard();
   }, [user?.id, dayKey]);
 
@@ -110,7 +113,7 @@ export function DashboardProvider({
         nutritionKcal,
         activityCalories,
         refreshDashboard,
-        ready, // ← nieuw
+        ready,
       }}
     >
       {children}
