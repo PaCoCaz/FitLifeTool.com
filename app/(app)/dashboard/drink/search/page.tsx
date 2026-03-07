@@ -1,4 +1,4 @@
-// app/(app)/dashboard/food/search/page.tsx
+// app/(app)/dashboard/drink/search/page.tsx
 
 "use client";
 
@@ -100,7 +100,7 @@ export default function FoodSearchPage() {
       );
 
       setDrinkFavorites(mapped.filter((p) => p.is_drink));
-      setFoodFavorites(mapped.filter((p) => !p.is_drink));
+      setFoodFavorites([]);
     }
 
     loadFavorites();
@@ -122,7 +122,7 @@ export default function FoodSearchPage() {
         .from("nutrition_products_search")
         .select("product_key, name, is_drink")
         .eq("lang", lang)
-        .eq("is_drink", false)
+        .eq("is_drink", true)
         .ilike("name", `%${search}%`);
 
       if (!data || data.length === 0) {
@@ -172,25 +172,25 @@ export default function FoodSearchPage() {
 
           <div className="px-6 py-4 border-b">
             <h1 className="text-lg font-semibold">
-              Voeding toevoegen
+              Drinken toevoegen
             </h1>
           </div>
 
           <div className="px-6 py-6 space-y-10">
 
-            {foodFavorites.length > 0 && (
+            {drinkFavorites.length > 0 && (
               <div>
                 <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                  Eten
+                  Drinken
                 </h2>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {foodFavorites.map((product) => (
+                  {drinkFavorites.map((product) => (
                     <button
                       key={product.product_key}
                       onClick={() =>
                         router.push(
-                          `/dashboard/food/add/${product.product_key}`
+                          `/dashboard/drink/add/${product.product_key}`
                         )
                       }
                       className="group flex items-center justify-center rounded-[var(--radius)] border px-3 py-2 text-xs font-medium transition border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
@@ -220,7 +220,7 @@ export default function FoodSearchPage() {
                       <span
                         onClick={() =>
                           router.push(
-                            `/dashboard/food/add/${product.product_key}`
+                            `/dashboard/drink/add/${product.product_key}`
                           )
                         }
                       >
