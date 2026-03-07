@@ -1,5 +1,3 @@
-// app/components/dashboard/WeightCard.tsx
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,10 +5,7 @@ import Image from "next/image";
 import Card from "@/components/ui/Card";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
-import { useToast } from "@/lib/ToastProvider";
-import { useDayNow } from "@/lib/useDayNow";
-import { getLocalDayKey } from "@/lib/dayKey";
-import { useDashboard } from "@/lib/DashboardStore";
+import { useRouter } from "next/navigation";
 
 /* ───────────────── Types ───────────────── */
 
@@ -28,11 +23,6 @@ function getBMICategory(bmi: number): string {
   if (bmi < 25) return "Gezond";
   if (bmi < 30) return "Overgewicht";
   return "Obesitas";
-}
-
-function calculateBMI(weightKg: number, heightCm: number): number {
-  const heightM = heightCm / 100;
-  return weightKg / (heightM * heightM);
 }
 
 /* ───────────────── BMI segmentdefinitie ───────────────── */
@@ -124,124 +114,39 @@ function BMIBar({ bmi }: { bmi: number }) {
 /* ───────────────── WeightCard ───────────────── */
 
 export default function WeightCard() {
-
   const { user } = useUser();
-  const { showToast } = useToast();
-  const { refreshDashboard } = useDashboard();
-
-  const dayNow = useDayNow();
-  const dayKey = getLocalDayKey(dayNow);
+  const router = useRouter();
 
   const [weight, setWeight] = useState<number | null>(null);
   const [bmi, setBmi] = useState<number | null>(null);
   const [targetWeight, setTargetWeight] = useState<number | null>(null);
-  const [heightCm, setHeightCm] = useState<number | null>(null);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [draftWeight, setDraftWeight] = useState("");
-  const [draftTargetWeight, setDraftTargetWeight] = useState("");
-
-  /* ───────────────── Initial Load ───────────────── */
+  /* ───────────────── Load profile ───────────────── */
 
   useEffect(() => {
-
     const userId = user?.id;
     if (!userId) return;
 
     supabase
       .from("profiles")
-      .select("weight_kg, bmi, target_weight_kg, height_cm")
+      .select("weight_kg, bmi, target_weight_kg")
       .eq("id", userId)
       .single()
       .then(({ data }: { data: WeightProfileResult | null }) => {
-
         if (!data) return;
 
         setWeight(data.weight_kg);
         setBmi(data.bmi);
         setTargetWeight(data.target_weight_kg);
-        setHeightCm(data.height_cm);
-
-        setDraftWeight(String(data.weight_kg));
-        setDraftTargetWeight(
-          data.target_weight_kg ? String(data.target_weight_kg) : ""
-        );
-
       });
-
   }, [user]);
-
-  /* ───────────────── Save Weight ───────────────── */
-
-  async function saveWeight() {
-
-    const userId = user?.id;
-    if (!userId || weight === null || heightCm === null) return;
-
-    const parsedWeight = parseFloat(draftWeight);
-
-    const parsedTarget =
-      draftTargetWeight.trim() === ""
-        ? null
-        : parseFloat(draftTargetWeight);
-
-    if (isNaN(parsedWeight) || parsedWeight <= 0) return;
-    if (parsedTarget !== null && parsedTarget <= 0) return;
-
-    const newBMI = calculateBMI(parsedWeight, heightCm);
-    const newWaterGoal = Math.round(parsedWeight * 35);
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        weight_kg: parsedWeight,
-        bmi: newBMI,
-        target_weight_kg: parsedTarget,
-        water_goal_ml: newWaterGoal,
-      })
-      .eq("id", userId);
-
-    if (error) return console.error(error.message);
-
-    await supabase.rpc("recalculate_user_targets", {
-      p_user_id: userId,
-    });
-
-    const nowTs = new Date();
-
-    await supabase.from("weight_logs").upsert(
-      {
-        user_id: userId,
-        weight_kg: parsedWeight,
-        bmi: newBMI,
-        log_date: dayKey,
-        log_time_local: nowTs.toTimeString().slice(0, 8),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      },
-      { onConflict: "user_id,log_date" }
-    );
-
-    setWeight(parsedWeight);
-    setBmi(newBMI);
-    setTargetWeight(parsedTarget);
-    setIsEditing(false);
-
-    showToast("✓ Je gewicht en streefgewicht zijn bijgewerkt.");
-
-    await refreshDashboard();
-  }
-
-  function cancelEdit() {
-    if (weight === null) return;
-    setDraftWeight(String(weight));
-    setDraftTargetWeight(targetWeight ? String(targetWeight) : "");
-    setIsEditing(false);
-  }
 
   if (weight === null || bmi === null) {
     return (
       <Card title="Gewicht">
-        <div className="text-sm text-gray-500">Gegevens laden…</div>
+        <div className="text-sm text-gray-500">
+          Gegevens laden…
+        </div>
       </Card>
     );
   }
@@ -250,100 +155,25 @@ export default function WeightCard() {
     <Card
       title="Gewicht"
       icon={<Image src="/weight.svg" alt="" width={16} height={16} />}
-      action={
-        !isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="group relative h-6 w-6"
-            aria-label="Gewicht wijzigen"
-          >
-            <Image
-              src="/plus_sign.svg"
-              alt=""
-              fill
-              className="object-contain group-hover:opacity-0"
-            />
-            <Image
-              src="/plus_sign_hover.svg"
-              alt=""
-              fill
-              className="object-contain opacity-0 group-hover:opacity-100"
-            />
-          </button>
-        )
-      }
     >
-      <div className="h-full flex flex-col justify-between">
-        <div className="space-y-1">
+      <div className="space-y-1">
 
-          {isEditing ? (
-            <div className="space-y-2">
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  step="0.1"
-                  value={draftWeight}
-                  onChange={(e) => setDraftWeight(e.target.value)}
-                  className="w-24 rounded-[var(--radius)] border px-2 py-1 text-sm"
-                />
-                <span className="text-sm text-gray-500">kg</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  step="0.1"
-                  placeholder="Streefgewicht"
-                  value={draftTargetWeight}
-                  onChange={(e) => setDraftTargetWeight(e.target.value)}
-                  className="w-24 rounded-[var(--radius)] border px-2 py-1 text-sm"
-                />
-                <span className="text-sm text-gray-500">kg</span>
-              </div>
-
-              <div className="flex gap-2">
-
-                <button
-                  onClick={saveWeight}
-                  className="rounded-[var(--radius)] bg-[#0095D3] px-3 py-1 text-xs font-medium text-white"
-                >
-                  Opslaan
-                </button>
-
-                <button
-                  onClick={cancelEdit}
-                  className="rounded-[var(--radius)] border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:border-gray-400"
-                >
-                  Annuleren
-                </button>
-
-              </div>
-            </div>
-
-          ) : (
-            <>
-              <div className="text-2xl font-semibold text-[#191970]">
-                {weight} kg
-              </div>
-
-              {targetWeight && (
-                <div className="text-xs text-gray-500">
-                  Streefgewicht: {targetWeight} kg
-                </div>
-              )}
-            </>
-          )}
-
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span>
-              BMI: {bmi.toFixed(1)} ({getBMICategory(bmi)})
-            </span>
-          </div>
-
-          <BMIBar bmi={bmi} />
-
+        <div className="text-2xl font-semibold text-[#191970]">
+          {weight} kg
         </div>
+
+        {targetWeight && (
+          <div className="text-xs text-gray-500">
+            Streefgewicht: {targetWeight} kg
+          </div>
+        )}
+
+        <div className="text-xs text-gray-500">
+          BMI: {bmi.toFixed(1)} ({getBMICategory(bmi)})
+        </div>
+
+        <BMIBar bmi={bmi} />
+
       </div>
     </Card>
   );

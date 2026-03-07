@@ -1,3 +1,5 @@
+// app/(app)/dashboard/weight/page.tsx
+
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -5,6 +7,8 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import Card from "@/components/ui/Card";
+import { useDashboard } from "@/lib/DashboardStore";
+import { useRouter } from "next/navigation";
 
 import {
   LineChart,
@@ -14,7 +18,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-  ReferenceArea, // ← ENIGE TOEVOEGING (import)
+  ReferenceArea,
 } from "recharts";
 
 /* ───────────────── Types ───────────────── */
@@ -56,8 +60,6 @@ function calculateBMI(weightKg: number, heightCm: number) {
   return Number((weightKg / (h * h)).toFixed(2));
 }
 
-/* ───────────────── Trend helper ───────────────── */
-
 function getWeightTrend(data: WeightLog[]) {
   if (data.length < 2) return null;
 
@@ -74,8 +76,6 @@ function getWeightTrend(data: WeightLog[]) {
     : { type: "up", diff };
 }
 
-/* ───────────────── Moving average helper ───────────────── */
-
 function calculateMovingAverage(
   data: WeightLog[],
   windowSize = 7
@@ -83,6 +83,7 @@ function calculateMovingAverage(
   return data.map((point, index) => {
     const start = Math.max(0, index - windowSize + 1);
     const slice = data.slice(start, index + 1);
+
     const avg =
       slice.reduce((sum, d) => sum + d.weight_kg, 0) /
       slice.length;
@@ -93,8 +94,6 @@ function calculateMovingAverage(
     };
   });
 }
-
-/* ───────────────── Extrapolatie helper ───────────────── */
 
 function getTargetDate(
   data: WeightLog[],
@@ -130,10 +129,83 @@ function getTargetDate(
   return targetDate;
 }
 
+/* ───────────────── Save weight ───────────────── */
+
+async function saveWeight(
+  user: any,
+  draftWeight: string,
+  draftTarget: string,
+  heightCm: number | null,
+  setSaving: (v: boolean) => void,
+  refreshDashboard: () => Promise<void>,
+  router: any
+) {
+  if (!user) return;
+
+  const w = parseFloat(draftWeight);
+
+  const t =
+    draftTarget.trim() === ""
+      ? null
+      : parseFloat(draftTarget);
+
+  if (!w || w <= 0) return;
+
+  const bmi =
+    heightCm != null
+      ? calculateBMI(w, heightCm)
+      : null;
+
+  const waterGoal = Math.round(w * 35);
+
+  setSaving(true);
+
+  await supabase
+    .from("profiles")
+    .update({
+      weight_kg: w,
+      target_weight_kg: t,
+      bmi,
+      water_goal_ml: waterGoal,
+    })
+    .eq("id", user.id);
+
+  await supabase.rpc("recalculate_user_targets", {
+    p_user_id: user.id,
+  });
+
+  const now = new Date();
+
+  await supabase.from("weight_logs").upsert(
+    {
+      user_id: user.id,
+      weight_kg: w,
+      bmi,
+      log_date: now.toISOString().slice(0, 10),
+      log_time_local: now.toTimeString().slice(0, 8),
+      timezone:
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+    },
+    { onConflict: "user_id,log_date" }
+  );
+
+  setSaving(false);
+
+  await refreshDashboard();
+
+  router.push("/dashboard");
+}
+
 /* ───────────────── Page ───────────────── */
 
 export default function WeightPage() {
   const { user } = useUser();
+  const router = useRouter();
+
+  const { refreshDashboard } = useDashboard();
+  const [draftWeight, setDraftWeight] = useState("");
+  const [draftTarget, setDraftTarget] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,7 +259,7 @@ export default function WeightPage() {
 
           supabase
             .from("profiles")
-            .select("target_weight_kg, height_cm")
+            .select("weight_kg, target_weight_kg, height_cm")
             .eq("id", user.id)
             .single(),
         ]);
@@ -205,6 +277,17 @@ export default function WeightPage() {
       setHeightCm(profile?.height_cm ?? null);
       setData(withMA);
       setTargetWeight(profile?.target_weight_kg ?? null);
+      setDraftWeight(
+        profile?.weight_kg != null
+          ? String(profile.weight_kg)
+          : ""
+      );
+      
+      setDraftTarget(
+        profile?.target_weight_kg != null
+          ? String(profile.target_weight_kg)
+          : ""
+      );
       setLoading(false);
     };
 
@@ -232,6 +315,78 @@ export default function WeightPage() {
 
   return (
     <div className="space-y-6 -mt-41 -mx-4">
+
+<Card title="Gewicht aanpassen">
+
+<div className="space-y-4">
+
+  <div className="flex gap-4">
+
+    <div>
+      <div className="text-xs text-gray-500">
+        Gewicht
+      </div>
+
+      <input
+        type="number"
+        step="0.1"
+        value={draftWeight}
+        onChange={(e) =>
+          setDraftWeight(e.target.value)
+        }
+        className="border rounded px-3 py-2 w-24"
+      />
+
+    </div>
+
+    <div>
+      <div className="text-xs text-gray-500">
+        Streefgewicht
+      </div>
+
+      <input
+        type="number"
+        step="0.1"
+        value={draftTarget}
+        onChange={(e) =>
+          setDraftTarget(e.target.value)
+        }
+        className="border rounded px-3 py-2 w-24"
+      />
+
+    </div>
+
+  </div>
+
+  <button
+    onClick={() =>
+      saveWeight(
+        user,
+        draftWeight,
+        draftTarget,
+        heightCm,
+        setSaving,
+        refreshDashboard,
+        router
+      )
+    }
+    disabled={saving}
+    className="
+      rounded-[var(--radius)]
+      border border-[#0095D3]
+      px-4 py-2
+      text-sm
+      text-[#0095D3]
+      hover:bg-[#0095D3]
+      hover:text-white
+    "
+  >
+    Opslaan
+  </button>
+
+</div>
+
+</Card>
 
       {/* ================= GEWICHT CARD — ONGWIJZIGD ================= */}
 

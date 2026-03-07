@@ -4,11 +4,21 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
+
 import { useClockNow } from "@/lib/useClockNow";
-import { getFitLifeStatusColor } from "@/lib/fitlifeScore";
 import { getExpectedHydrationProgress } from "@/lib/hydrationScore";
-import { useDashboard } from "@/lib/DashboardStore";
 import { calculateNutritionScore } from "@/lib/nutritionScore";
+
+import {
+  calculateDailyFitLifeScore,
+  getFitLifeStatusColor,
+  getFitLifeProgressColor,
+  getFitLifeScoreColor,
+} from "@/lib/fitlifeScore";
+
+import { useDashboard } from "@/lib/DashboardStore";
+
+/* ───────────────── Helpers ───────────────── */
 
 function formatTime(now: Date): string {
   return now.toLocaleTimeString("nl-NL", {
@@ -18,6 +28,8 @@ function formatTime(now: Date): string {
   });
 }
 
+/* ───────────────── Component ───────────────── */
+
 export default function FitLifeScoreCard() {
 
   const clockNow = useClockNow();
@@ -26,7 +38,7 @@ export default function FitLifeScoreCard() {
     hydrationMl,
     hydrationGoalMl,
     nutritionKcal,
-    activityCalories
+    activityCalories,
   } = useDashboard();
 
   const [mounted, setMounted] = useState(false);
@@ -41,22 +53,33 @@ export default function FitLifeScoreCard() {
 
     if (!hydrationGoalMl) return 0;
 
-    const expectedProgress = getExpectedHydrationProgress(clockNow);
-    const expectedMl = hydrationGoalMl * expectedProgress;
+    const expectedProgress =
+      getExpectedHydrationProgress(clockNow);
+
+    const expectedMl =
+      hydrationGoalMl * expectedProgress;
 
     if (expectedMl <= 0) return 0;
 
-    const ratio = hydrationMl / expectedMl;
+    const ratio =
+      hydrationMl / expectedMl;
 
-    return Math.min(100, Math.round(ratio * 100));
+    return Math.min(
+      100,
+      Math.round(ratio * 100)
+    );
 
-  }, [hydrationMl, hydrationGoalMl, clockNow]);
+  }, [
+    hydrationMl,
+    hydrationGoalMl,
+    clockNow,
+  ]);
 
   const hydrationColor =
     hydrationScore >= 100
       ? "bg-green-600 text-white"
       : hydrationScore >= 70
-      ? "bg-yellow-500 text-white"
+      ? "bg-orange-500 text-white"
       : "bg-[#C80000] text-white";
 
   /* ───────── Activity Score ───────── */
@@ -65,9 +88,13 @@ export default function FitLifeScoreCard() {
 
   const activityScore = useMemo(() => {
 
-    const ratio = activityCalories / activityGoal;
+    const ratio =
+      activityCalories / activityGoal;
 
-    return Math.min(100, Math.round(ratio * 100));
+    return Math.min(
+      100,
+      Math.round(ratio * 100)
+    );
 
   }, [activityCalories]);
 
@@ -75,14 +102,14 @@ export default function FitLifeScoreCard() {
     activityScore >= 100
       ? "bg-green-600 text-white"
       : activityScore >= 70
-      ? "bg-yellow-500 text-white"
+      ? "bg-orange-500 text-white"
       : "bg-[#C80000] text-white";
 
   /* ───────── Nutrition Score ───────── */
 
-  const nutritionScore = useMemo(() => {
+  const calorieGoal = 2000;
 
-    const calorieGoal = 2000;
+  const nutritionScore = useMemo(() => {
 
     return calculateNutritionScore(
       nutritionKcal,
@@ -91,44 +118,32 @@ export default function FitLifeScoreCard() {
       clockNow
     );
 
-  }, [nutritionKcal, clockNow]);
+  }, [
+    nutritionKcal,
+    clockNow,
+  ]);
 
   const nutritionColor =
     nutritionScore >= 100
       ? "bg-green-600 text-white"
       : nutritionScore >= 70
-      ? "bg-yellow-500 text-white"
+      ? "bg-orange-500 text-white"
       : "bg-[#C80000] text-white";
 
-  /* ───────── FitLifeScore ───────── */
+  /* ───────── FitLifeScore (lib) ───────── */
 
   const fitLifeScore = useMemo(() => {
 
-    const weighted =
-      hydrationScore * 0.3 +
-      activityScore * 0.3 +
-      nutritionScore * 0.4;
-
-    const floored = Math.floor(weighted);
-
-    const allGreen =
-      hydrationColor === "bg-green-600 text-white" &&
-      activityColor === "bg-green-600 text-white" &&
-      nutritionColor === "bg-green-600 text-white";
-
-    if (!allGreen) {
-      return Math.min(99, floored);
-    }
-
-    return floored;
+    return calculateDailyFitLifeScore({
+      hydrationScore,
+      nutritionScore,
+      activityScore,
+    });
 
   }, [
     hydrationScore,
-    activityScore,
     nutritionScore,
-    hydrationColor,
-    activityColor,
-    nutritionColor
+    activityScore,
   ]);
 
   /* ───────── Status kleur ───────── */
@@ -138,29 +153,30 @@ export default function FitLifeScoreCard() {
     return getFitLifeStatusColor([
       hydrationColor,
       activityColor,
-      nutritionColor
+      nutritionColor,
     ]);
 
   }, [
     hydrationColor,
     activityColor,
-    nutritionColor
+    nutritionColor,
   ]);
 
   /* ───────── Dagprogress ───────── */
 
-  const expectedProgress = getExpectedHydrationProgress(clockNow);
+  const expectedProgress =
+    getExpectedHydrationProgress(clockNow);
 
   const actualProgressWithinSchedule =
     expectedProgress * (fitLifeScore / 100);
 
-  const pillColor =
-    fitLifeScore < expectedProgress * 100
-      ? "bg-[#C80000] text-white"
-      : statusColor;
+    const pillColor =
+    getFitLifeScoreColor(fitLifeScore);
 
   const progressBarColor =
-    statusColor.replace("text-white", "");
+    getFitLifeProgressColor(fitLifeScore);
+
+  /* ───────── UI ───────── */
 
   return (
     <Card
@@ -172,7 +188,6 @@ export default function FitLifeScoreCard() {
             px-3 py-1
             text-xs
             font-semibold
-            tabular-time
             min-w-[130px]
             text-center
             ${pillColor}
@@ -194,11 +209,13 @@ export default function FitLifeScoreCard() {
 
             <div
               className="absolute left-0 top-0 h-2 bg-[#B8CAE0]"
-              style={{ width: `${expectedProgress * 100}%` }}
+              style={{
+                width: `${expectedProgress * 100}%`,
+              }}
             />
 
             <div
-              className={`absolute left-0 top-0 h-2 transition-all ${progressBarColor}`}
+              className={`absolute left-0 top-0 h-2 ${progressBarColor}`}
               style={{
                 width: `${actualProgressWithinSchedule * 100}%`,
               }}
