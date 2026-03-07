@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabaseServer";
 import AppShell from "@/components/layout/AppShell";
-import { TimeProvider } from "@/lib/TimeProvider";
 import { DashboardProvider } from "@/lib/DashboardStore";
 
 export default async function DashboardLayout({
@@ -24,9 +23,7 @@ export default async function DashboardLayout({
   return (
     <DashboardProvider>
       <AppShell>
-        <TimeProvider>
-          {children}
-        </TimeProvider>
+        {children}
       </AppShell>
     </DashboardProvider>
   );
