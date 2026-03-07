@@ -129,7 +129,7 @@ export default function WeightCard() {
 
     supabase
       .from("profiles")
-      .select("weight_kg, bmi, target_weight_kg")
+      .select("weight_kg, bmi, target_weight_kg, height_cm")
       .eq("id", userId)
       .single()
       .then(({ data }: { data: WeightProfileResult | null }) => {
