@@ -18,7 +18,6 @@ import {
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
 import { formatNumber } from "@/lib/formatNumber";
-import { useRouter } from "next/navigation";
 
 import { useDashboard } from "@/lib/DashboardStore";
 
@@ -55,7 +54,6 @@ export default function NutritionCard() {
 
   const lang = useLang();
   const t = uiText[lang];
-  const router = useRouter();
 
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
   const [goal, setGoal] =
@@ -228,13 +226,6 @@ export default function NutritionCard() {
             </div>
 
           </div>
-
-          <button
-            onClick={() => router.push("/dashboard/food/search")}
-            className="mt-4 rounded-[var(--radius)] border border-[#0095D3] px-3 py-3 text-sm font-medium text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
-          >
-            + {t.nutrition.addFood}
-          </button>
 
         </div>
       </Card>

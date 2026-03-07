@@ -1,6 +1,7 @@
 // app/(app)/components/layout/DashboardGrid.tsx
 
 import FitLifeScoreCard from "@/components/dashboard/FitLifeScoreCard";
+import DashboardActionsCard from "@/components/dashboard/DashboardActionsCard";
 import WaterCard from "@/components/dashboard/HydrationCard";
 import ActivityCard from "@/components/dashboard/ActivityCard";
 import NutritionCard from "@/components/dashboard/NutritionCard";
@@ -12,12 +13,18 @@ import TipOfTheDayCard from "@/components/dashboard/TipOfTheDayCard";
 export default function DashboardGrid() {
   return (
     <section className="grid grid-cols-12 auto-rows-auto gap-4 items-start">
+
       {/* Rij 0 — Dagscore */}
       <div className="col-span-12">
         <FitLifeScoreCard />
       </div>
 
-      {/* Rij 1 */}
+      {/* Rij 1 — Acties */}
+      <div className="col-span-12">
+        <DashboardActionsCard />
+      </div>
+
+      {/* Rij 2 */}
       <div className="col-span-12 md:col-span-6">
         <WaterCard />
       </div>
@@ -26,7 +33,7 @@ export default function DashboardGrid() {
         <ActivityCard />
       </div>
 
-      {/* Rij 2 */}
+      {/* Rij 3 */}
       <div className="col-span-12 md:col-span-6">
         <NutritionCard />
       </div>
@@ -35,20 +42,21 @@ export default function DashboardGrid() {
         <WeightCard />
       </div>
 
-      {/* Rij 3 */}
+      {/* Rij 4 */}
       <div className="col-span-12">
         <WeekOverviewCard />
       </div>
 
-      {/* Rij 4 */}
+      {/* Rij 5 */}
       <div className="col-span-12">
         <DailyGoalsCard />
       </div>
 
-      {/* Rij 5 */}
+      {/* Rij 6 */}
       <div className="col-span-12">
         <TipOfTheDayCard />
       </div>
+
     </section>
   );
 }

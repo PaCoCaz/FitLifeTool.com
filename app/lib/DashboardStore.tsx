@@ -1,8 +1,15 @@
-//  app/lib/DashboardStore.tsx
+// app/lib/DashboardStore.tsx
 
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
+
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useDayNow } from "@/lib/useDayNow";
@@ -48,10 +55,18 @@ export function DashboardProvider({
 
   const [ready, setReady] = useState(false);
 
+  // ✅ refresh lock
+  const refreshingRef = useRef(false);
+
   /* ───────────────── Dashboard Refresh ───────────────── */
 
   async function refreshDashboard() {
     if (!user) return;
+
+    // ✅ voorkomt dubbele refresh tegelijk
+    if (refreshingRef.current) return;
+
+    refreshingRef.current = true;
 
     setReady(false);
 
@@ -75,22 +90,26 @@ export function DashboardProvider({
     const profile = profileResult.data;
 
     const row = rows?.[0];
-    if (!row) return;
 
-    setNutritionKcal(row.kcal ?? 0);
+    if (row) {
+      setNutritionKcal(row.kcal ?? 0);
 
-    const drinkMl = row.drink_ml ?? 0;
-    const foodMl = row.food_water_ml ?? 0;
+      const drinkMl = row.drink_ml ?? 0;
+      const foodMl = row.food_water_ml ?? 0;
 
-    setHydrationDrinkMl(drinkMl);
-    setHydrationFoodMl(foodMl);
-    setHydrationMl(drinkMl + foodMl);
+      setHydrationDrinkMl(drinkMl);
+      setHydrationFoodMl(foodMl);
+      setHydrationMl(drinkMl + foodMl);
 
-    setActivityCalories(row.activity_kcal ?? 0);
+      setActivityCalories(row.activity_kcal ?? 0);
 
-    setHydrationGoalMl(profile?.water_goal_ml ?? null);
+      setHydrationGoalMl(profile?.water_goal_ml ?? null);
+    }
 
     setReady(true);
+
+    // ✅ lock vrijgeven
+    refreshingRef.current = false;
   }
 
   /* ───────────────── Initial Load ───────────────── */
