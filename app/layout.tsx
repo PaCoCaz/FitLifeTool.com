@@ -8,6 +8,7 @@ import { TimeProvider } from "./lib/TimeProvider";
 import { ToastProvider } from "./lib/ToastProvider";
 import { LangProvider } from "@/lib/LangProvider";
 import { GoalProvider } from "@/lib/GoalProvider";
+import { DashboardProvider } from "@/lib/DashboardStore";
 
 export const viewport = {
   width: "device-width",
@@ -33,7 +34,9 @@ export default function RootLayout({
             <GoalProvider>
               <TimeProvider>
                 <ToastProvider>
-                  {children}
+                  <DashboardProvider>
+                    {children}
+                  </DashboardProvider>
                 </ToastProvider>
               </TimeProvider>
             </GoalProvider>

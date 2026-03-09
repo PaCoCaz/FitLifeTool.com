@@ -55,22 +55,32 @@ export function DashboardProvider({
 
   const [ready, setReady] = useState(false);
 
-  // ✅ refresh lock
+  // voorkomt dubbele refresh
   const refreshingRef = useRef(false);
 
-  /* ───────────────── Dashboard Refresh ───────────────── */
+  // voorkomt state update na unmount
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  /* ───────────────── Refresh ───────────────── */
 
   async function refreshDashboard() {
-    if (!user) return;
+    if (!user?.id) return;
 
-    // ✅ voorkomt dubbele refresh tegelijk
     if (refreshingRef.current) return;
 
     refreshingRef.current = true;
 
-    setReady(false);
+    if (mountedRef.current) {
+      setReady(false);
+    }
 
-    // 🔑 voorkomt middernacht race conditions
     const freshDayKey = getLocalDayKey(new Date());
 
     const [rpcResult, profileResult] = await Promise.all([
@@ -85,6 +95,11 @@ export function DashboardProvider({
         .eq("id", user.id)
         .single(),
     ]);
+
+    if (!mountedRef.current) {
+      refreshingRef.current = false;
+      return;
+    }
 
     const rows = rpcResult.data;
     const profile = profileResult.data;
@@ -104,18 +119,27 @@ export function DashboardProvider({
       setActivityCalories(row.activity_kcal ?? 0);
 
       setHydrationGoalMl(profile?.water_goal_ml ?? null);
+    } else {
+      setNutritionKcal(0);
+      setHydrationMl(0);
+      setHydrationDrinkMl(0);
+      setHydrationFoodMl(0);
+      setActivityCalories(0);
+      setHydrationGoalMl(profile?.water_goal_ml ?? null);
     }
 
     setReady(true);
 
-    // ✅ lock vrijgeven
     refreshingRef.current = false;
   }
 
-  /* ───────────────── Initial Load ───────────────── */
+  /* ───────────────── Load ───────────────── */
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setReady(false);
+      return;
+    }
 
     refreshDashboard();
   }, [user?.id, dayKey]);
@@ -144,6 +168,10 @@ export function DashboardProvider({
 
 export function useDashboard() {
   const ctx = useContext(DashboardContext);
-  if (!ctx) throw new Error("DashboardProvider missing");
+
+  if (!ctx) {
+    throw new Error("DashboardProvider missing");
+  }
+
   return ctx;
 }

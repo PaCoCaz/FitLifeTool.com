@@ -314,7 +314,7 @@ export default function WeightPage() {
       : null;
 
   return (
-    <div className="space-y-6 -mt-41 -mx-4">
+    <div className="space-y-6">
 
 <Card title="Gewicht aanpassen">
 

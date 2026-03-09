@@ -3,90 +3,62 @@
 "use client";
 
 import Card from "@/components/ui/Card";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+function ActionButton({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="
+        flex items-center justify-center
+        rounded-[var(--radius)]
+        border
+        px-3 py-2
+        text-xs font-medium
+        transition
+        border-[#0095D3]
+        text-[#0095D3]
+        hover:bg-[#0095D3]
+        hover:text-white
+      "
+    >
+      {label}
+    </Link>
+  );
+}
 
 export default function DashboardActionsCard() {
-  const router = useRouter();
-
   return (
     <Card>
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
 
-        <button
-          onClick={() => router.push("/dashboard/drink/search")}
-          className="
-            flex items-center justify-center
-            rounded-[var(--radius)]
-            border
-            px-3 py-2
-            text-xs font-medium
-            transition
-            border-[#0095D3]
-            text-[#0095D3]
-            hover:bg-[#0095D3]
-            hover:text-white
-          "
-        >
-          + Drinken
-        </button>
+        <ActionButton
+          href="/dashboard/drink/search"
+          label="+ Drinken"
+        />
 
-        <button
-          onClick={() => router.push("/dashboard/food/search")}
-          className="
-            flex items-center justify-center
-            rounded-[var(--radius)]
-            border
-            px-3 py-2
-            text-xs font-medium
-            transition
-            border-[#0095D3]
-            text-[#0095D3]
-            hover:bg-[#0095D3]
-            hover:text-white
-          "
-        >
-          + Voeding
-        </button>
+        <ActionButton
+          href="/dashboard/food/search"
+          label="+ Voeding"
+        />
 
-        <button
-          onClick={() => router.push("/dashboard/activity")}
-          className="
-            flex items-center justify-center
-            rounded-[var(--radius)]
-            border
-            px-3 py-2
-            text-xs font-medium
-            transition
-            border-[#0095D3]
-            text-[#0095D3]
-            hover:bg-[#0095D3]
-            hover:text-white
-          "
-        >
-          + Activiteit
-        </button>
+        <ActionButton
+          href="/dashboard/activity"
+          label="+ Activiteit"
+        />
 
-        <button
-          onClick={() => router.push("/dashboard/weight")}
-          className="
-            flex items-center justify-center
-            rounded-[var(--radius)]
-            border
-            px-3 py-2
-            text-xs font-medium
-            transition
-            border-[#0095D3]
-            text-[#0095D3]
-            hover:bg-[#0095D3]
-            hover:text-white
-          "
-        >
-          + Gewicht
-        </button>
+        <ActionButton
+          href="/dashboard/weight"
+          label="+ Gewicht"
+        />
 
       </div>
-
     </Card>
   );
 }
