@@ -69,7 +69,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // role check
-  if (isLoggedIn && pathname.startsWith("/handbook")) {
+  if (isLoggedIn && user && pathname.startsWith("/handbook")) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
