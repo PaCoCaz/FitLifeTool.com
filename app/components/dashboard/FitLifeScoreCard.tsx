@@ -7,7 +7,6 @@ import Card from "@/components/ui/Card";
 
 import { useClockNow } from "@/lib/useClockNow";
 import { getExpectedHydrationProgress } from "@/lib/hydrationScore";
-import { calculateNutritionScore } from "@/lib/nutritionScore";
 
 import {
   calculateDailyFitLifeScore,
@@ -17,6 +16,7 @@ import {
 } from "@/lib/fitlifeScore";
 
 import { useDashboard } from "@/lib/DashboardStore";
+import { useScores } from "@/lib/ScoreContext";
 
 /* ───────────────── Helpers ───────────────── */
 
@@ -41,39 +41,20 @@ export default function FitLifeScoreCard() {
     activityCalories,
   } = useDashboard();
 
+  /* ✅ scores uit cards */
+  const {
+    hydrationScore,
+    nutritionScore,
+    activityScore,
+  } = useScores();
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  /* ───────── Hydration Score ───────── */
-
-  const hydrationScore = useMemo(() => {
-
-    if (!hydrationGoalMl) return 0;
-
-    const expectedProgress =
-      getExpectedHydrationProgress(clockNow);
-
-    const expectedMl =
-      hydrationGoalMl * expectedProgress;
-
-    if (expectedMl <= 0) return 0;
-
-    const ratio =
-      hydrationMl / expectedMl;
-
-    return Math.min(
-      100,
-      Math.round(ratio * 100)
-    );
-
-  }, [
-    hydrationMl,
-    hydrationGoalMl,
-    clockNow,
-  ]);
+  /* ───────── kleuren op basis van score ───────── */
 
   const hydrationColor =
     hydrationScore >= 100
@@ -82,46 +63,12 @@ export default function FitLifeScoreCard() {
       ? "bg-orange-500 text-white"
       : "bg-[#C80000] text-white";
 
-  /* ───────── Activity Score ───────── */
-
-  const activityGoal = 400;
-
-  const activityScore = useMemo(() => {
-
-    const ratio =
-      activityCalories / activityGoal;
-
-    return Math.min(
-      100,
-      Math.round(ratio * 100)
-    );
-
-  }, [activityCalories]);
-
   const activityColor =
     activityScore >= 100
       ? "bg-green-600 text-white"
       : activityScore >= 70
       ? "bg-orange-500 text-white"
       : "bg-[#C80000] text-white";
-
-  /* ───────── Nutrition Score ───────── */
-
-  const calorieGoal = 2000;
-
-  const nutritionScore = useMemo(() => {
-
-    return calculateNutritionScore(
-      nutritionKcal,
-      calorieGoal,
-      "maintain",
-      clockNow
-    );
-
-  }, [
-    nutritionKcal,
-    clockNow,
-  ]);
 
   const nutritionColor =
     nutritionScore >= 100
@@ -130,7 +77,7 @@ export default function FitLifeScoreCard() {
       ? "bg-orange-500 text-white"
       : "bg-[#C80000] text-white";
 
-  /* ───────── FitLifeScore (lib) ───────── */
+  /* ───────── FitLifeScore ───────── */
 
   const fitLifeScore = useMemo(() => {
 
@@ -170,11 +117,25 @@ export default function FitLifeScoreCard() {
   const actualProgressWithinSchedule =
     expectedProgress * (fitLifeScore / 100);
 
-    const pillColor =
-    getFitLifeScoreColor(fitLifeScore);
-
-  const progressBarColor =
-    getFitLifeProgressColor(fitLifeScore);
+    let pillColor = "bg-[#C80000] text-white";
+    let progressBarColor = "bg-[#C80000]";
+    
+    if (expectedProgress > 0) {
+    
+      const ratio =
+        actualProgressWithinSchedule /
+        expectedProgress;
+    
+      if (ratio >= 1) {
+        pillColor = "bg-green-600 text-white";
+        progressBarColor = "bg-green-600";
+      }
+      else if (ratio >= 0.85) {
+        pillColor = "bg-orange-500 text-white";
+        progressBarColor = "bg-orange-500";
+      }
+    
+    }
 
   /* ───────── UI ───────── */
 

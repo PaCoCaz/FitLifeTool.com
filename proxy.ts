@@ -44,9 +44,18 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // ✅ veilige auth check (geen refresh token error spam)
+  let user = null
+
+  try {
+    const { data, error } = await supabase.auth.getUser()
+
+    if (!error) {
+      user = data.user
+    }
+  } catch {
+    user = null
+  }
 
   const isLoggedIn = !!user
 

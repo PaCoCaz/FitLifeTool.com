@@ -34,13 +34,26 @@ export function AuthProvider({
     let mounted = true;
 
     const loadUser = async () => {
-      // ✅ sneller dan getUser bij refresh
-      const { data } = await supabase.auth.getSession();
+      try {
+        const { data, error } =
+          await supabase.auth.getSession();
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      setUser(data.session?.user ?? null);
-      setLoading(false);
+        if (error) {
+          // refresh token ontbreekt → gewoon geen user
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        setUser(data.session?.user ?? null);
+        setLoading(false);
+      } catch {
+        if (!mounted) return;
+        setUser(null);
+        setLoading(false);
+      }
     };
 
     loadUser();
@@ -50,7 +63,6 @@ export function AuthProvider({
     } = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
         if (!mounted) return;
-
         setUser(session?.user ?? null);
       }
     );
@@ -63,7 +75,6 @@ export function AuthProvider({
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
-      {/* ✅ blokkeer render tot auth bekend is → voorkomt flicker */}
       {!loading && children}
     </AuthContext.Provider>
   );

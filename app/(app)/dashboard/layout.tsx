@@ -2,6 +2,7 @@
 
 import AppShell from "@/components/layout/AppShell";
 import DashboardBreadcrumb from "./breadcrumb";
+import { ScoreProvider } from "@/lib/ScoreContext";
 
 export default function DashboardLayout({
   children,
@@ -9,8 +10,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AppShell breadcrumb={<DashboardBreadcrumb />}>
-      {children}
-    </AppShell>
+    <ScoreProvider>
+      <AppShell breadcrumb={<DashboardBreadcrumb />}>
+        {children}
+      </AppShell>
+    </ScoreProvider>
   );
 }

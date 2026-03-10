@@ -20,6 +20,7 @@ import { uiText } from "@/lib/uiText";
 import { formatNumber } from "@/lib/formatNumber";
 
 import { useDashboard } from "@/lib/DashboardStore";
+import { useScores } from "@/lib/ScoreContext";
 
 /* ───────────────── Types ───────────────── */
 
@@ -51,6 +52,8 @@ export default function NutritionCard() {
   } = useDashboard();
 
   const now = useNow();
+
+  const { setNutritionScore: publishNutritionScore } = useScores();
 
   const lang = useLang();
   const t = uiText[lang];
@@ -115,6 +118,10 @@ export default function NutritionCard() {
     setNutritionScore(score);
 
   }, [currentCalories, activityBonus, baseGoal, goal, now]);
+
+  useEffect(() => {
+    publishNutritionScore(nutritionScore);
+  }, [nutritionScore, publishNutritionScore]);
 
   const statusKey =
     `${currentCalories}-${dailyLimit}-${goal}-${now.getHours()}-${lang}`;

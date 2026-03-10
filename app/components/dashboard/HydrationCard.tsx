@@ -17,6 +17,7 @@ import {
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
 import { formatNumber } from "@/lib/formatNumber";
+import { useScores } from "@/lib/ScoreContext";
 
 /* ───────────────── Component ───────────────── */
 
@@ -34,6 +35,8 @@ export default function HydrationCard() {
   const t = uiText[lang];
 
   const now = useNow();
+
+  const { setHydrationScore } = useScores();
 
   const hydrationGoal = hydrationGoalMl ?? 0;
   const currentMl = hydrationMl ?? 0;
@@ -66,6 +69,10 @@ export default function HydrationCard() {
 
     return Math.min(100, Math.round(ratio * 100));
   }, [currentMl, hydrationGoal, now]);
+
+  useEffect(() => {
+    setHydrationScore(hydrationScore);
+  }, [hydrationScore, setHydrationScore]);
 
   const pillScore =
     hydrationStatus.color === "bg-green-600 text-white"

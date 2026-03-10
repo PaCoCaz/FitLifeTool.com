@@ -50,29 +50,54 @@ export function calculateNutritionScore(
   goal: NutritionGoal,
   now: Date = new Date()
 ): number {
+
   if (dailyLimit <= 0) return 0;
 
-  const expectedProgress = getExpectedNutritionProgress(now);
-  const expectedCalories = dailyLimit * expectedProgress;
+  const expectedProgress =
+    getExpectedNutritionProgress(now);
 
-  if (goal === "gain_weight") {
-    if (expectedCalories <= 0) return 0;
-    if (consumedCalories >= expectedCalories) return 100;
-    return Math.round((consumedCalories / expectedCalories) * 100);
+  const expectedCalories =
+    dailyLimit * expectedProgress;
+
+  if (expectedCalories <= 0) return 0;
+
+  // ───────── basis ratio ─────────
+
+  let score =
+    (consumedCalories / expectedCalories) * 100;
+
+  // ───────── boven expected → langzaam omlaag ─────────
+
+  if (consumedCalories > expectedCalories) {
+
+    const excess =
+      consumedCalories - expectedCalories;
+
+    score -=
+      (excess / dailyLimit) * 100;
+
   }
 
-  const lowerBound = expectedCalories * 0.85;
-  const upperBound = expectedCalories * 1.15;
+  // ───────── boven daglimiet → extra straf ─────────
 
-  if (consumedCalories < lowerBound) {
-    if (expectedCalories <= 1) return 0;
-    return Math.round((consumedCalories / expectedCalories) * 100);
+  if (consumedCalories > dailyLimit) {
+
+    const excess =
+      consumedCalories - dailyLimit;
+
+    score -=
+      (excess / dailyLimit) * 100;
+
   }
 
-  if (consumedCalories <= upperBound) return 100;
+  // ───────── clamp ─────────
 
-  const excess = consumedCalories - expectedCalories;
-  return Math.max(0, Math.round((1 - excess / dailyLimit) * 100));
+  score = Math.round(score);
+
+  if (score > 100) score = 100;
+  if (score < 0) score = 0;
+
+  return score;
 }
 
 /* ───────────────── Status (tekst + schema-feedback) ───────────────── */

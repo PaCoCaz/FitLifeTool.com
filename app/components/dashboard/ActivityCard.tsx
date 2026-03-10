@@ -22,6 +22,7 @@ import { uiText } from "@/lib/uiText";
 import { formatNumber } from "@/lib/formatNumber";
 
 import { useDashboard } from "@/lib/DashboardStore";
+import { useScores } from "@/lib/ScoreContext";
 
 /* ───────────────── Types ───────────────── */
 
@@ -40,6 +41,8 @@ export default function ActivityCard() {
 
   const { ready } = useDashboard();
 
+  const { setActivityScore: publishActivityScore } = useScores();
+
   const lang = useLang();
   const t = uiText[lang];
 
@@ -49,6 +52,11 @@ export default function ActivityCard() {
 
   const [burnedCalories, setBurnedCalories] = useState(0);
   const [activityScore, setActivityScore] = useState(0);
+
+  useEffect(() => {
+    publishActivityScore(activityScore);
+  }, [activityScore, publishActivityScore]);
+
   const [activityGoal, setActivityGoal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
