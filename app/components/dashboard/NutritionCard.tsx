@@ -21,6 +21,7 @@ import { formatNumber } from "@/lib/formatNumber";
 
 import { useDashboard } from "@/lib/DashboardStore";
 import { useScores } from "@/lib/ScoreContext";
+import { useGoalContext } from "@/lib/GoalProvider"; // ✅ toegevoegd
 
 /* ───────────────── Types ───────────────── */
 
@@ -51,6 +52,8 @@ export default function NutritionCard() {
     activityCalories
   } = useDashboard();
 
+  const { goal: currentGoal } = useGoalContext(); // ✅ toegevoegd
+
   const now = useNow();
 
   const { setNutritionScore: publishNutritionScore } = useScores();
@@ -59,15 +62,18 @@ export default function NutritionCard() {
   const t = uiText[lang];
 
   const [baseGoal, setBaseGoal] = useState<number | null>(null);
+
   const [goal, setGoal] =
     useState<"lose_weight" | "maintain" | "gain_weight">("maintain");
 
   const [nutritionScore, setNutritionScore] = useState<number>(0);
+
   const [hasLoaded, setHasLoaded] = useState(false);
 
   /* ───────────────── Load profile ───────────────── */
 
   useEffect(() => {
+
     const userId = user?.id;
     if (!user) return;
 
@@ -90,11 +96,12 @@ export default function NutritionCard() {
 
     loadProfile();
 
-  }, [user]);
+  }, [user, currentGoal]); // ✅ FIX
 
   /* ───────────────── Derived values ───────────────── */
 
   const currentCalories = nutritionKcal ?? 0;
+
   const activityBonus = activityCalories ?? 0;
 
   const dailyLimit =
@@ -120,7 +127,9 @@ export default function NutritionCard() {
   }, [currentCalories, activityBonus, baseGoal, goal, now]);
 
   useEffect(() => {
+
     publishNutritionScore(nutritionScore);
+
   }, [nutritionScore, publishNutritionScore]);
 
   const statusKey =
@@ -152,6 +161,7 @@ export default function NutritionCard() {
       : Math.min(nutritionScore, 99);
 
   if (!ready || !hasLoaded || baseGoal === null) {
+
     return (
       <Card title={t.nutrition.title}>
         <div className="text-sm text-gray-500">
@@ -159,6 +169,7 @@ export default function NutritionCard() {
         </div>
       </Card>
     );
+
   }
 
   const actualProgress =
@@ -170,72 +181,75 @@ export default function NutritionCard() {
   const limitLabel = t.nutrition.goal;
 
   return (
-    <>
-      <Card
-        title={t.nutrition.title}
-        icon={<Image src="/nutrition.svg" alt="" width={16} height={16} />}
-        action={
-          <div
-            className={`rounded-[var(--radius)] px-3 py-1 text-xs font-semibold whitespace-nowrap ${nutritionStatus.color}`}
-          >
-            FitLifeScore {pillScore} / 100
-          </div>
-        }
-      >
-        <div className="h-full flex flex-col justify-between">
 
-          <div className="space-y-1">
+    <Card
+      title={t.nutrition.title}
+      icon={<Image src="/nutrition.svg" alt="" width={16} height={16} />}
+      action={
+        <div
+          className={`rounded-[var(--radius)] px-3 py-1 text-xs font-semibold whitespace-nowrap ${nutritionStatus.color}`}
+        >
+          FitLifeScore {pillScore} / 100
+        </div>
+      }
+    >
 
-            <div className="text-2xl font-semibold text-[#191970]">
-              {formatNumber(Math.round(currentCalories), lang)} kcal
-            </div>
+      <div className="h-full flex flex-col justify-between">
 
-            <div className="text-xs text-gray-500">
-              {limitLabel}: {formatNumber(Math.round(dailyLimit), lang)} kcal
-            </div>
+        <div className="space-y-1">
 
-            <div className="text-[11px] text-gray-400">
-              {t.nutrition.basePlusActivity
-                .replace(
-                  "{{base}}",
-                  formatNumber(Math.round(baseGoal ?? 0), lang)
-                )
-                .replace(
-                  "{{activity}}",
-                  formatNumber(Math.round(activityBonus), lang)
-                )}
-            </div>
-
+          <div className="text-2xl font-semibold text-[#191970]">
+            {formatNumber(Math.round(currentCalories), lang)} kcal
           </div>
 
-          <div className="mt-4 space-y-2">
+          <div className="text-xs text-gray-500">
+            {limitLabel}: {formatNumber(Math.round(dailyLimit), lang)} kcal
+          </div>
 
-            <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-
-              <div
-                className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
-                style={{
-                  width: `${nutritionStatus.expectedProgress * 100}%`,
-                }}
-              />
-
-              <div
-                className={`absolute left-0 top-0 h-full transition-all ${progressBarColor}`}
-                style={{
-                  width: `${actualProgress * 100}%`,
-                }}
-              />
-
-            </div>
-
-            <div className="text-xs text-gray-600">
-              {nutritionStatus.message}
-            </div>
-
+          <div className="text-[11px] text-gray-400">
+            {t.nutrition.basePlusActivity
+              .replace(
+                "{{base}}",
+                formatNumber(Math.round(baseGoal ?? 0), lang)
+              )
+              .replace(
+                "{{activity}}",
+                formatNumber(Math.round(activityBonus), lang)
+              )}
           </div>
 
         </div>
-      </Card>
-    </>
+
+        <div className="mt-4 space-y-2">
+
+          <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+
+            <div
+              className="absolute left-0 top-0 h-full bg-[#B8CAE0]"
+              style={{
+                width: `${nutritionStatus.expectedProgress * 100}%`,
+              }}
+            />
+
+            <div
+              className={`absolute left-0 top-0 h-full transition-all ${progressBarColor}`}
+              style={{
+                width: `${actualProgress * 100}%`,
+              }}
+            />
+
+          </div>
+
+          <div className="text-xs text-gray-600">
+            {nutritionStatus.message}
+          </div>
+
+        </div>
+
+      </div>
+
+    </Card>
+
   );
+
 }

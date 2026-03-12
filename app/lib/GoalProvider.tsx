@@ -47,6 +47,8 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
         .select("goal_key")
         .eq("user_id", userId)
         .is("end_at", null)
+        .order("start_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       setGoal(data?.goal_key ?? null);
@@ -61,59 +63,72 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
   const setUserGoal = useCallback(
     async (newGoal: GoalKey) => {
       if (!user) return;
-
+  
       const userId = user.id;
-      const todayStr = new Date().toISOString().split("T")[0];
-
+      const now = new Date().toISOString(); // ✅ FIX
+  
       if (newGoal === goal) return;
-
-      // 1️⃣ Check actieve periode
+  
+      // actieve periode zoeken
+  
       const { data: active } = await supabase
         .from("user_goal_periods")
-        .select("id, start_at")
+        .select("id")
         .eq("user_id", userId)
         .is("end_at", null)
         .maybeSingle();
-
+  
       if (active) {
-        const activeStart = new Date(active.start_at)
-          .toISOString()
-          .split("T")[0];
-
-        if (activeStart > todayStr) {
-          // Future periode → gewoon verwijderen
-          await supabase
-            .from("user_goal_periods")
-            .delete()
-            .eq("id", active.id);
-        } else {
-          // Lopende periode → sluiten vandaag
-          await supabase
-            .from("user_goal_periods")
-            .update({ end_at: todayStr })
-            .eq("id", active.id);
-        }
+        await supabase
+          .from("user_goal_periods")
+          .update({ end_at: now }) // ✅ FIX
+          .eq("id", active.id);
       }
-
-      // 2️⃣ Nieuwe periode starten
+  
+      // nieuwe periode
+  
       const { error } = await supabase
         .from("user_goal_periods")
         .insert({
           user_id: userId,
           goal_key: newGoal,
-          start_at: todayStr,
+          start_at: now, // ✅ FIX
           end_at: null,
         });
-
+  
       if (error) {
-        console.error("Error creating new goal:", error);
+        console.error(error);
+        return;
+      }
+  
+      // sync profile
+  
+      await supabase
+        .from("profiles")
+        .update({ goal: newGoal })
+        .eq("id", userId);
+  
+      // recalc
+
+      const { error: rpcError } = await supabase.rpc(
+        "recalculate_user_targets",
+        {
+          p_user_id: userId,
+        }
+      );
+
+      if (rpcError) {
+        console.error(rpcError);
         return;
       }
 
-      // 3️⃣ Targets opnieuw berekenen
-      await supabase.rpc("recalculate_user_targets", {
-        p_user_id: userId,
-      });
+      // force DB sync
+
+      await supabase
+        .from("profiles")
+        .select("calorie_goal")
+        .eq("id", userId)
+        .single();
 
       setGoal(newGoal);
     },

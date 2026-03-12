@@ -16,16 +16,12 @@ type ActivityLevel =
   | "active"
   | "very_active";
 
-type Goal = "LOSE" | "MAINTAIN" | "GAIN";
-
-type ProfileForCalculation = {
-  birthdate: string;
-  height_cm: number;
-  weight_kg: number;
-  calculation_sex: "male" | "female";
-  activity_level: ActivityLevel;
-  goal: Goal;
-};
+type Goal =
+  | "LOSE"
+  | "MAINTAIN"
+  | "GAIN"
+  | "GAIN_MUSCLE"
+  | "HOLIDAY";
 
 /* ───────────────── Component ───────────────── */
 
@@ -39,6 +35,7 @@ export default function OnboardingFinalStep({ onBack }: Props) {
 
   const [activityLevel, setActivityLevel] =
     useState<ActivityLevel | "">("");
+
   const [goal, setGoal] = useState<Goal | "">("");
 
   const [error, setError] = useState<string | null>(null);
@@ -60,12 +57,11 @@ export default function OnboardingFinalStep({ onBack }: Props) {
     setSaving(true);
     setError(null);
 
-    /* 1️⃣ Activiteitsniveau + doel opslaan */
+    // 1️⃣ Activiteitsniveau opslaan
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
         activity_level: activityLevel,
-        goal,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
@@ -76,16 +72,17 @@ export default function OnboardingFinalStep({ onBack }: Props) {
       return;
     }
 
-    /* 2️⃣ Eerste goal periode aanmaken */
-    const todayStr = new Date().toISOString().split("T")[0];
+    // 2️⃣ Eerste goal periode
+    const todayStr =
+      new Date().toISOString().split("T")[0];
 
     const { error: goalError } = await supabase
       .from("user_goal_periods")
       .insert({
         user_id: user.id,
         goal_key: goal,
-        start_date: todayStr,
-        end_date: null,
+        start_at: todayStr,
+        end_at: null,
       });
 
     if (goalError) {
@@ -94,13 +91,14 @@ export default function OnboardingFinalStep({ onBack }: Props) {
       return;
     }
 
-    /* 3️⃣ Alle doelen opnieuw laten berekenen */
-    const { error: recalcError } = await supabase.rpc(
-      "recalculate_user_targets",
-      {
-        p_user_id: user.id,
-      }
-    );
+    // 3️⃣ Targets herberekenen
+    const { error: recalcError } =
+      await supabase.rpc(
+        "recalculate_user_targets",
+        {
+          p_user_id: user.id,
+        }
+      );
 
     if (recalcError) {
       setError(recalcError.message);
@@ -108,21 +106,22 @@ export default function OnboardingFinalStep({ onBack }: Props) {
       return;
     }
 
-    /* 4️⃣ Klaar */
+    // 4️⃣ Klaar
     router.replace("/dashboard");
   };
 
   if (!user) return null;
 
-  /* ───────────────── Render ───────────────── */
+  /* ───────────────── UI ───────────────── */
 
   return (
     <div className="space-y-6">
-      {/* Activiteitsniveau */}
+
       <div>
         <label className="mb-1 block text-sm font-medium">
           Activiteitsniveau
         </label>
+
         <select
           value={activityLevel}
           onChange={(e) =>
@@ -133,31 +132,21 @@ export default function OnboardingFinalStep({ onBack }: Props) {
           className="w-full rounded border px-3 py-2"
         >
           <option value="">Selecteer</option>
-          <option value="sedentary">
-            Weinig tot geen beweging
-          </option>
-          <option value="light">
-            Licht actief (1–3× per week)
-          </option>
-          <option value="moderate">
-            Gemiddeld actief (3–5× per week)
-          </option>
-          <option value="active">
-            Zeer actief (6–7× per week)
-          </option>
-          <option value="very_active">
-            Extreem actief
-          </option>
+          <option value="sedentary">Weinig tot geen beweging</option>
+          <option value="light">Licht actief (1–3× per week)</option>
+          <option value="moderate">Gemiddeld actief (3–5× per week)</option>
+          <option value="active">Zeer actief (6–7× per week)</option>
+          <option value="very_active">Extreem actief</option>
         </select>
       </div>
 
-      {/* Doel */}
       <div>
         <label className="mb-1 block text-sm font-medium">
           Wat is je doel?
         </label>
 
         <div className="space-y-2">
+
           <label className="flex items-center gap-2">
             <input
               type="radio"
@@ -184,15 +173,18 @@ export default function OnboardingFinalStep({ onBack }: Props) {
             />
             Aankomen
           </label>
+
         </div>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600">
+          {error}
+        </p>
       )}
 
-      {/* Actions */}
       <div className="flex justify-between">
+
         <button
           onClick={onBack}
           className="text-sm text-gray-500"
@@ -215,7 +207,9 @@ export default function OnboardingFinalStep({ onBack }: Props) {
         >
           {saving ? "Instellen…" : "Naar dashboard"}
         </button>
+
       </div>
+
     </div>
   );
 }

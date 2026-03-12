@@ -24,7 +24,10 @@ type DashboardState = {
   hydrationGoalMl: number | null;
 
   nutritionKcal: number;
+  calorieGoal: number | null;
+
   activityCalories: number;
+  activityGoal: number | null;
 
   refreshDashboard: () => Promise<void>;
 
@@ -51,14 +54,14 @@ export function DashboardProvider({
   const [hydrationGoalMl, setHydrationGoalMl] = useState<number | null>(null);
 
   const [nutritionKcal, setNutritionKcal] = useState(0);
+  const [calorieGoal, setCalorieGoal] = useState<number | null>(null);
+
   const [activityCalories, setActivityCalories] = useState(0);
+  const [activityGoal, setActivityGoal] = useState<number | null>(null);
 
   const [ready, setReady] = useState(false);
 
-  // voorkomt dubbele refresh
   const refreshingRef = useRef(false);
-
-  // voorkomt state update na unmount
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -72,7 +75,6 @@ export function DashboardProvider({
 
   async function refreshDashboard() {
     if (!user?.id) return;
-
     if (refreshingRef.current) return;
 
     refreshingRef.current = true;
@@ -91,7 +93,9 @@ export function DashboardProvider({
 
       supabase
         .from("profiles")
-        .select("water_goal_ml")
+        .select(
+          "water_goal_ml, calorie_goal, activity_goal_kcal"
+        )
         .eq("id", user.id)
         .single(),
     ]);
@@ -117,16 +121,17 @@ export function DashboardProvider({
       setHydrationMl(drinkMl + foodMl);
 
       setActivityCalories(row.activity_kcal ?? 0);
-
-      setHydrationGoalMl(profile?.water_goal_ml ?? null);
     } else {
       setNutritionKcal(0);
       setHydrationMl(0);
       setHydrationDrinkMl(0);
       setHydrationFoodMl(0);
       setActivityCalories(0);
-      setHydrationGoalMl(profile?.water_goal_ml ?? null);
     }
+
+    setHydrationGoalMl(profile?.water_goal_ml ?? null);
+    setCalorieGoal(profile?.calorie_goal ?? null);
+    setActivityGoal(profile?.activity_goal_kcal ?? null);
 
     setReady(true);
 
@@ -153,8 +158,13 @@ export function DashboardProvider({
         hydrationDrinkMl,
         hydrationFoodMl,
         hydrationGoalMl,
+
         nutritionKcal,
+        calorieGoal,
+
         activityCalories,
+        activityGoal,
+
         refreshDashboard,
         ready,
       }}

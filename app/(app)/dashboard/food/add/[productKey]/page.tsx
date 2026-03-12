@@ -10,15 +10,12 @@ import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
 import { useLangContext } from "@/lib/LangProvider";
 import { useDashboard } from "@/lib/DashboardStore";
+import { useGoalContext } from "@/lib/GoalProvider";
 
 /* ───────────────── Types ───────────────── */
 
 type Params = {
   productKey: string;
-};
-
-type ProfileRow = {
-  goal: string;
 };
 
 type ProductTranslationRow = {
@@ -88,7 +85,7 @@ export default function AddFoodPage() {
 
   const { refreshDashboard } = useDashboard();
 
-  const [goal, setGoal] = useState<string>("maintain");
+  const { goal } = useGoalContext();
   const [productName, setProductName] = useState<string>("");
   const [productScore, setProductScore] = useState<number | null>(null);
 
@@ -104,24 +101,6 @@ export default function AddFoodPage() {
 
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
-
-  /* ───────────────── LOAD GOAL ───────────────── */
-
-  useEffect(() => {
-    if (!user) return;
-
-    async function loadProfile() {
-      const { data } = await supabase
-        .from("profiles")
-        .select("goal")
-        .eq("id", user!.id)
-        .single<ProfileRow>();
-
-      if (data?.goal) setGoal(data.goal);
-    }
-
-    loadProfile();
-  }, [user]);
 
   /* ⭐ CHECK FAVORITE */
 
@@ -172,7 +151,7 @@ export default function AddFoodPage() {
   /* ───────────────── PRODUCT SCORE ───────────────── */
 
   useEffect(() => {
-    if (!productKey || !goal || !selectedPreparation) return;
+    if (!productKey || !selectedPreparation || goal === null) return;
 
     async function loadProductScore() {
       const { data } = await supabase

@@ -23,6 +23,7 @@ import { formatNumber } from "@/lib/formatNumber";
 
 import { useDashboard } from "@/lib/DashboardStore";
 import { useScores } from "@/lib/ScoreContext";
+import { useGoalContext } from "@/lib/GoalProvider"; // ✅ toegevoegd
 
 /* ───────────────── Types ───────────────── */
 
@@ -37,9 +38,12 @@ type ActivityGoalProfileRow = {
 /* ───────────────── Component ───────────────── */
 
 export default function ActivityCard() {
+
   const { user } = useUser();
 
   const { ready } = useDashboard();
+
+  const { goal } = useGoalContext(); // ✅ toegevoegd
 
   const { setActivityScore: publishActivityScore } = useScores();
 
@@ -53,12 +57,12 @@ export default function ActivityCard() {
   const [burnedCalories, setBurnedCalories] = useState(0);
   const [activityScore, setActivityScore] = useState(0);
 
+  const [activityGoal, setActivityGoal] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     publishActivityScore(activityScore);
   }, [activityScore, publishActivityScore]);
-
-  const [activityGoal, setActivityGoal] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
 
   /* Reset bij dagwissel */
 
@@ -72,11 +76,14 @@ export default function ActivityCard() {
   /* Data laden */
 
   useEffect(() => {
+
     if (!user) return;
 
     const loadActivity = async () => {
+
       const [{ data: profile }, { data: logs }] =
         await Promise.all([
+
           supabase
             .from("profiles")
             .select("activity_goal_kcal")
@@ -88,13 +95,14 @@ export default function ActivityCard() {
             .select("calories")
             .eq("user_id", user.id)
             .eq("log_date", dayKey),
+
         ]);
 
-      const goal =
+      const goalValue =
         (profile as ActivityGoalProfileRow | null)
           ?.activity_goal_kcal ?? null;
 
-      setActivityGoal(goal);
+      setActivityGoal(goalValue);
 
       const total =
         (logs as ActivityLogRow[] | null)?.reduce(
@@ -104,9 +112,9 @@ export default function ActivityCard() {
 
       setBurnedCalories(total);
 
-      if (goal) {
+      if (goalValue) {
         setActivityScore(
-          calculateActivityScore(total, goal, now)
+          calculateActivityScore(total, goalValue, now)
         );
       }
 
@@ -114,11 +122,13 @@ export default function ActivityCard() {
     };
 
     loadActivity();
-  }, [user, dayKey, now]);
+
+  }, [user, dayKey, now, goal]); // ✅ FIX toegevoegd
 
   /* Status */
 
   const activityStatus = useMemo(() => {
+
     if (!activityGoal) {
       return {
         color: "bg-gray-400 text-white",
@@ -134,6 +144,7 @@ export default function ActivityCard() {
       t,
       lang
     );
+
   }, [burnedCalories, activityGoal, now, t]);
 
   if (!ready || loading || activityGoal === null) {
@@ -146,10 +157,11 @@ export default function ActivityCard() {
     );
   }
 
-  const actualProgress = Math.min(
-    burnedCalories / activityGoal,
-    1
-  );
+  const actualProgress =
+    Math.min(
+      burnedCalories / activityGoal,
+      1
+    );
 
   const barColor =
     activityStatus.color.replace(
@@ -158,6 +170,7 @@ export default function ActivityCard() {
     );
 
   return (
+
     <Card
       title={t.activity.title}
       icon={
@@ -176,6 +189,7 @@ export default function ActivityCard() {
         </div>
       }
     >
+
       <div className="h-full flex flex-col justify-between">
 
         <div className="space-y-1">
@@ -184,8 +198,7 @@ export default function ActivityCard() {
             {formatNumber(
               burnedCalories,
               lang
-            )}{" "}
-            kcal
+            )} kcal
           </div>
 
           <div className="text-xs text-gray-500">
@@ -193,8 +206,7 @@ export default function ActivityCard() {
             {formatNumber(
               activityGoal,
               lang
-            )}{" "}
-            kcal
+            )} kcal
           </div>
 
         </div>
@@ -231,6 +243,9 @@ export default function ActivityCard() {
         </div>
 
       </div>
+
     </Card>
+
   );
+
 }
