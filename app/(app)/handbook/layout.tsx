@@ -1,4 +1,4 @@
-// app/handbook/layout.tsx
+// app/(app)/handbook/layout.tsx
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabaseServer";

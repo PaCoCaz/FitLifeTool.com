@@ -1,3 +1,5 @@
+// app/lib/labels.ts
+
 export type Language = "nl" | "en" | "de" | "fr";
 
 export type Labels = {

@@ -1,4 +1,4 @@
-// app/handbook/handbookRegistry.ts
+// app/(app)/handbook/handbookRegistry.ts
 
 /* ───────────────── Types ───────────────── */
 

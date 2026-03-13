@@ -1,4 +1,5 @@
 // app/(app)/dashboard/page.tsx
+
 "use client";
 
 import DashboardGrid from "@/components/layout/DashboardGrid";

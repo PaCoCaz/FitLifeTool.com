@@ -1,3 +1,5 @@
+// app/lib/useDisplayTime.ts
+
 "use client";
 
 /**

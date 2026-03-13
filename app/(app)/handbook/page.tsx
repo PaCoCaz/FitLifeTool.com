@@ -1,4 +1,4 @@
-// app/handbook/page.tsx
+// app/(app)/handbook/page.tsx
 
 import Link from "next/link";
 import {

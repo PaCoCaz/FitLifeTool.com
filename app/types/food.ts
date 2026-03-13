@@ -1,3 +1,5 @@
+//  app/types/food.ts
+
 export type PortionMap = {
     [label: string]: number; // gram of ml
   };

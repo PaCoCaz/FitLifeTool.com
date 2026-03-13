@@ -1,3 +1,5 @@
+// app/lib/authActions.ts
+
 import { supabase } from "./supabaseClient";
 
 export async function login(email: string) {

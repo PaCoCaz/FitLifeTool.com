@@ -1,3 +1,5 @@
+// app/lib/getProfile.ts
+
 import { supabase } from "./supabaseClient";
 
 export async function getProfile(userId: string) {

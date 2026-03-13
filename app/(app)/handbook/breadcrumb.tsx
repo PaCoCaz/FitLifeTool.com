@@ -1,4 +1,4 @@
-// app/handbook/breadcrumb.tsx
+// app/(app)/handbook/breadcrumb.tsx
 
 "use client";
 

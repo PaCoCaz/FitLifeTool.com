@@ -1,4 +1,4 @@
-// app/handbook/documentPager.tsx
+// app/(app)/handbook/documentPager.tsx
 
 "use client";
 

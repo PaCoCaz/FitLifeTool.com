@@ -1,4 +1,4 @@
-// app/handbook/documentLayout.tsx
+// app/(app)/handbook/documentLayout.tsx
 
 import { ReactNode } from "react";
 import DocumentPager from "./documentPager";

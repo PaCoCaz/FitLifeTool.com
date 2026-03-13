@@ -1,4 +1,4 @@
-// app/handbook/navigation.tsx
+// app/(app)/handbook/navigation.tsx
 
 "use client";
 
