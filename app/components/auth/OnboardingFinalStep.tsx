@@ -132,11 +132,11 @@ export default function OnboardingFinalStep({ onBack }: Props) {
           className="w-full rounded border px-3 py-2"
         >
           <option value="">Selecteer</option>
-          <option value="sedentary">Weinig tot geen beweging</option>
-          <option value="light">Licht actief (1–3× per week)</option>
-          <option value="moderate">Gemiddeld actief (3–5× per week)</option>
-          <option value="active">Zeer actief (6–7× per week)</option>
-          <option value="very_active">Extreem actief</option>
+          <option value="sedentary">Weinig actief: Overwegend zittend werk, weinig beweging (bijv. minder dan 5000 stappen per dag).</option>
+          <option value="light">Licht actief: Zittend werk, maar regelmatig bewegen (bijv. 5000-8000 stappen of af en toe sporten).</option>
+          <option value="moderate">Gemiddeld actief: Actieve dagen met veel bewegen (bijv. 8000-12000 stappen, sport of fysiek werk).</option>
+          <option value="active">Actief: Veel dagelijkse beweging, fysiek werk of vaak sporten (meestal meer dan 12000 stappen).</option>
+          <option value="very_active">Zeer actief: Zwaar fysiek werk, intensieve training of topsport.</option>
         </select>
       </div>
 
