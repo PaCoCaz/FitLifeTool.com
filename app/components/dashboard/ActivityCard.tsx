@@ -64,6 +64,25 @@ export default function ActivityCard() {
     publishActivityScore(activityScore);
   }, [activityScore, publishActivityScore]);
 
+  useEffect(() => {
+
+    if (!activityGoal) return;
+  
+    setActivityScore(
+      calculateActivityScore(
+        burnedCalories,
+        activityGoal,
+        now
+      )
+    );
+  
+  }, [
+    burnedCalories,
+    activityGoal,
+    now.getHours(),
+    now.getMinutes(),
+  ]);
+
   /* Reset bij dagwissel */
 
   useEffect(() => {
@@ -112,11 +131,7 @@ export default function ActivityCard() {
 
       setBurnedCalories(total);
 
-      if (goalValue) {
-        setActivityScore(
-          calculateActivityScore(total, goalValue, now)
-        );
-      }
+      // score wordt apart berekend
 
       setLoading(false);
     };
@@ -145,7 +160,13 @@ export default function ActivityCard() {
       lang
     );
 
-  }, [burnedCalories, activityGoal, now, t]);
+  }, [
+    burnedCalories,
+    activityGoal,
+    now.getHours(),
+    now.getMinutes(),
+    t,
+  ]);
 
   if (!ready || loading || activityGoal === null) {
     return (

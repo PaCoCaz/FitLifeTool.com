@@ -73,24 +73,25 @@ export function DashboardProvider({
 
   /* ───────────────── Refresh ───────────────── */
 
-  async function refreshDashboard() {
+  async function refreshDashboard(dayKeyOverride?: string) {
     if (!user?.id) return;
     if (refreshingRef.current) return;
-
+  
     refreshingRef.current = true;
-
+  
     if (mountedRef.current) {
       setReady(false);
     }
-
-    const freshDayKey = getLocalDayKey(new Date());
-
+  
+    const freshDayKey =
+      dayKeyOverride ?? getLocalDayKey(new Date());
+  
     const [rpcResult, profileResult] = await Promise.all([
       supabase.rpc("dashboard_day_summary", {
         p_user_id: user.id,
         p_day: freshDayKey,
       }),
-
+  
       supabase
         .from("profiles")
         .select(
@@ -99,27 +100,27 @@ export function DashboardProvider({
         .eq("id", user.id)
         .single(),
     ]);
-
+  
     if (!mountedRef.current) {
       refreshingRef.current = false;
       return;
     }
-
+  
     const rows = rpcResult.data;
     const profile = profileResult.data;
-
+  
     const row = rows?.[0];
-
+  
     if (row) {
       setNutritionKcal(row.kcal ?? 0);
-
+  
       const drinkMl = row.drink_ml ?? 0;
       const foodMl = row.food_water_ml ?? 0;
-
+  
       setHydrationDrinkMl(drinkMl);
       setHydrationFoodMl(foodMl);
       setHydrationMl(drinkMl + foodMl);
-
+  
       setActivityCalories(row.activity_kcal ?? 0);
     } else {
       setNutritionKcal(0);
@@ -128,13 +129,13 @@ export function DashboardProvider({
       setHydrationFoodMl(0);
       setActivityCalories(0);
     }
-
+  
     setHydrationGoalMl(profile?.water_goal_ml ?? null);
     setCalorieGoal(profile?.calorie_goal ?? null);
     setActivityGoal(profile?.activity_goal_kcal ?? null);
-
+  
     setReady(true);
-
+  
     refreshingRef.current = false;
   }
 
@@ -145,8 +146,9 @@ export function DashboardProvider({
       setReady(false);
       return;
     }
-
-    refreshDashboard();
+  
+    refreshDashboard(dayKey);
+  
   }, [user?.id, dayKey]);
 
   /* ───────────────── Context ───────────────── */

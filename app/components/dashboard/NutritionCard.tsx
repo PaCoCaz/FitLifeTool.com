@@ -124,7 +124,14 @@ export default function NutritionCard() {
 
     setNutritionScore(score);
 
-  }, [currentCalories, activityBonus, baseGoal, goal, now]);
+  }, [
+    currentCalories,
+    activityBonus,
+    baseGoal,
+    goal,
+    now.getHours(),
+    now.getMinutes(),
+  ]);
 
   useEffect(() => {
 
@@ -133,7 +140,7 @@ export default function NutritionCard() {
   }, [nutritionScore, publishNutritionScore]);
 
   const statusKey =
-    `${currentCalories}-${dailyLimit}-${goal}-${now.getHours()}-${lang}`;
+  `${currentCalories}-${dailyLimit}-${goal}-${now.getHours()}-${now.getMinutes()}-${lang}`;
 
   const nutritionStatus = useMemo(() => {
 
@@ -143,7 +150,7 @@ export default function NutritionCard() {
         message: "",
         expectedProgress: 0,
       };
-
+  
     return getNutritionStatus(
       currentCalories,
       dailyLimit,
@@ -152,8 +159,16 @@ export default function NutritionCard() {
       t,
       lang
     );
-
-  }, [statusKey]);
+  
+  }, [
+    currentCalories,
+    dailyLimit,
+    goal,
+    now.getHours(),
+    now.getMinutes(),
+    t,
+    lang,
+  ]);
 
   const pillScore =
     nutritionStatus.color === "bg-green-600 text-white"

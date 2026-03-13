@@ -53,7 +53,7 @@ export default function HydrationCard() {
     }
 
     return getHydrationStatus(currentMl, hydrationGoal, now, t, lang);
-  }, [currentMl, hydrationGoal, now, t]);
+  }, [currentMl, hydrationGoal, now.getHours(), now.getMinutes(), t]);
 
   /* ───────────────── Score ───────────────── */
 
@@ -68,7 +68,7 @@ export default function HydrationCard() {
     const ratio = currentMl / expectedMl;
 
     return Math.min(100, Math.round(ratio * 100));
-  }, [currentMl, hydrationGoal, now]);
+  }, [currentMl, hydrationGoal, now.getHours(), now.getMinutes()]);
 
   useEffect(() => {
     setHydrationScore(hydrationScore);
