@@ -141,7 +141,7 @@ export default function BodyCard() {
     );
 
   return (
-    <Card title="Lichaam">
+    <Card title="Gezondheidsprofiel">
 
       <div className="space-y-4">
 

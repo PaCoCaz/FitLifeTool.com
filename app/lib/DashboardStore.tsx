@@ -29,6 +29,8 @@ type DashboardState = {
   activityCalories: number;
   activityGoal: number | null;
 
+  abonnement: string;
+
   refreshDashboard: () => Promise<void>;
 
   ready: boolean;
@@ -59,6 +61,8 @@ export function DashboardProvider({
   const [activityCalories, setActivityCalories] = useState(0);
   const [activityGoal, setActivityGoal] = useState<number | null>(null);
 
+  const [abonnement, setAbonnement] = useState("free");
+
   const [ready, setReady] = useState(false);
 
   const refreshingRef = useRef(false);
@@ -76,51 +80,51 @@ export function DashboardProvider({
   async function refreshDashboard(dayKeyOverride?: string) {
     if (!user?.id) return;
     if (refreshingRef.current) return;
-  
+
     refreshingRef.current = true;
-  
+
     if (mountedRef.current) {
       setReady(false);
     }
-  
+
     const freshDayKey =
       dayKeyOverride ?? getLocalDayKey(new Date());
-  
+
     const [rpcResult, profileResult] = await Promise.all([
       supabase.rpc("dashboard_day_summary", {
         p_user_id: user.id,
         p_day: freshDayKey,
       }),
-  
+
       supabase
         .from("profiles")
         .select(
-          "water_goal_ml, calorie_goal, activity_goal_kcal"
+          "water_goal_ml, calorie_goal, activity_goal_kcal, abonnement"
         )
         .eq("id", user.id)
         .single(),
     ]);
-  
+
     if (!mountedRef.current) {
       refreshingRef.current = false;
       return;
     }
-  
+
     const rows = rpcResult.data;
     const profile = profileResult.data;
-  
+
     const row = rows?.[0];
-  
+
     if (row) {
       setNutritionKcal(row.kcal ?? 0);
-  
+
       const drinkMl = row.drink_ml ?? 0;
       const foodMl = row.food_water_ml ?? 0;
-  
+
       setHydrationDrinkMl(drinkMl);
       setHydrationFoodMl(foodMl);
       setHydrationMl(drinkMl + foodMl);
-  
+
       setActivityCalories(row.activity_kcal ?? 0);
     } else {
       setNutritionKcal(0);
@@ -129,13 +133,15 @@ export function DashboardProvider({
       setHydrationFoodMl(0);
       setActivityCalories(0);
     }
-  
+
     setHydrationGoalMl(profile?.water_goal_ml ?? null);
     setCalorieGoal(profile?.calorie_goal ?? null);
     setActivityGoal(profile?.activity_goal_kcal ?? null);
-  
+
+    setAbonnement(profile?.abonnement ?? "free");
+
     setReady(true);
-  
+
     refreshingRef.current = false;
   }
 
@@ -146,9 +152,9 @@ export function DashboardProvider({
       setReady(false);
       return;
     }
-  
+
     refreshDashboard(dayKey);
-  
+
   }, [user?.id, dayKey]);
 
   /* ───────────────── Context ───────────────── */
@@ -166,6 +172,8 @@ export function DashboardProvider({
 
         activityCalories,
         activityGoal,
+
+        abonnement,
 
         refreshDashboard,
         ready,

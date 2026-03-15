@@ -2,17 +2,28 @@
 
 "use client";
 
+import HealthCard from "@/components/settings/HealthCard";
+import BodyCard from "@/components/settings/BodyCard";
 import LifestyleCard from "@/components/settings/LifestyleCard";
 import GoalCard from "@/components/settings/GoalCard";
 import LanguageCard from "@/components/settings/LanguageCard";
 import SubscriptionCard from "@/components/settings/SubscriptionCard";
-import BodyCard from "@/components/settings/BodyCard";
 
 export default function SettingsGrid() {
   return (
     <section className="grid grid-cols-12 auto-rows-auto gap-4 items-start">
 
       {/* Rij 1 */}
+
+      <div className="col-span-12 md:col-span-6">
+        <HealthCard />
+      </div>
+
+      <div className="col-span-12 md:col-span-6">
+        <BodyCard />
+      </div>
+
+      {/* Rij 2 */}
 
       <div className="col-span-12 md:col-span-6">
         <LifestyleCard />
@@ -22,7 +33,7 @@ export default function SettingsGrid() {
         <GoalCard />
       </div>
 
-      {/* Rij 2 */}
+      {/* Rij 3 */}
 
       <div className="col-span-12 md:col-span-6">
         <LanguageCard />
@@ -32,11 +43,7 @@ export default function SettingsGrid() {
         <SubscriptionCard />
       </div>
 
-      {/* Rij 3 */}
-
-      <div className="col-span-12 md:col-span-6">
-        <BodyCard />
-      </div>
+      {/* Rij 4 */}
 
     </section>
   );

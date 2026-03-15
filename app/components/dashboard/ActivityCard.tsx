@@ -85,12 +85,6 @@ export default function ActivityCard() {
 
   /* Reset bij dagwissel */
 
-  useEffect(() => {
-    setBurnedCalories(0);
-    setActivityScore(0);
-    setActivityGoal(null);
-    setLoading(true);
-  }, [dayKey]);
 
   /* Data laden */
 
@@ -138,7 +132,7 @@ export default function ActivityCard() {
 
     loadActivity();
 
-  }, [user, dayKey, now, goal]); // ✅ FIX toegevoegd
+  }, [user, dayKey, goal]);
 
   /* Status */
 
