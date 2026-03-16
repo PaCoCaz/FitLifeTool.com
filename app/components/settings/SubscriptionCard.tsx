@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
+import { useUser } from "@/lib/AuthProvider";
 
 const PLAN_LABEL: Record<string, string> = {
   free: "Free",
@@ -11,71 +12,50 @@ const PLAN_LABEL: Record<string, string> = {
   pro: "Pro",
 };
 
-const PLAN_PRICE: Record<string, string> = {
-  free: "Gratis",
-  premium: "€ 4,95 / maand",
-  pro: "€ 8,95 / maand",
+const PRICES = {
+  premium_month: "price_1TAso3HU07xU2AfQk4fucP73",
+  pro_month: "price_1TAsr7HU07xU2AfQhxqpau3T",
 };
 
-const PRICE_ID = {
-  premium:
-    "price_1TAso3HU07xU2AfQk4fucP73",
-
-  pro:
-    "price_1TAsr7HU07xU2AfQhxqpau3T",
+type SubscriptionDetails = {
+  plan: string;
+  status?: string | null;
+  current_period_end?: string | null;
 };
 
 export default function SubscriptionCard() {
+  const { user } = useUser();
 
-  const [plan, setPlan] =
-    useState<string>("free");
-
-  const [userId, setUserId] =
-    useState<string | null>(null);
+  const [data, setData] =
+    useState<SubscriptionDetails>({
+      plan: "free",
+    });
 
   const [loading, setLoading] =
     useState(true);
 
-  const [busy, setBusy] =
-    useState(false);
-
   // -------------------------
-  // load
+  // Load subscription details
   // -------------------------
 
   async function load() {
-
     try {
-
       const res =
         await fetch(
-          "/api/profile/subscription"
+          "/api/profile/subscription-details"
         );
 
-      const data =
+      const json =
         await res.json();
 
-      const p =
-        data?.abonnement ?? "free";
-
-      if (p === "coach") {
-        setPlan("pro");
-      } else {
-        setPlan(p);
-      }
-
-      setUserId(
-        data?.user_id ?? null
-      );
-
+      setData(json);
     } catch {
-
-      setPlan("free");
-
+      setData({
+        plan: "free",
+      });
     }
 
     setLoading(false);
-
   }
 
   useEffect(() => {
@@ -83,11 +63,43 @@ export default function SubscriptionCard() {
   }, []);
 
   // -------------------------
-  // portal
+  // Checkout
+  // -------------------------
+
+  async function checkout(
+    priceId: string
+  ) {
+    if (!user?.id) {
+      alert("Geen user");
+      return;
+    }
+
+    const res =
+      await fetch(
+        "/api/stripe/checkout",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            priceId,
+            userId: user.id,
+          }),
+        }
+      );
+
+    const json =
+      await res.json();
+
+    if (json.url) {
+      window.location.href =
+        json.url;
+    }
+  }
+
+  // -------------------------
+  // Portal
   // -------------------------
 
   async function openPortal() {
-
     const res =
       await fetch(
         "/api/stripe/portal",
@@ -96,87 +108,44 @@ export default function SubscriptionCard() {
         }
       );
 
-    const data =
+    const json =
       await res.json();
 
-    if (data.url) {
-
+    if (json.url) {
       window.location.href =
-        data.url;
-
+        json.url;
+    } else {
+      alert("Portal fout");
     }
-
   }
 
   // -------------------------
-  // checkout (free → premium)
+  // Helpers
   // -------------------------
 
-  async function checkout(
-    priceId: string
+  function formatDate(
+    value?: string | null
   ) {
+    if (!value) return null;
 
-    if (!userId) return;
+    const d =
+      new Date(value);
 
-    setBusy(true);
-
-    const res =
-      await fetch(
-        "/api/stripe/checkout",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            priceId,
-            userId,
-          }),
-        }
-      );
-
-    const data =
-      await res.json();
-
-    if (data.url) {
-
-      window.location.href =
-        data.url;
-
-    }
-
-    setBusy(false);
-
-  }
-
-  // -------------------------
-  // change plan (premium → pro)
-  // -------------------------
-
-  async function changePlan(
-    priceId: string
-  ) {
-
-    setBusy(true);
-
-    await fetch(
-      "/api/stripe/change-plan",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify({
-          priceId,
-        }),
-      }
+    return d.toLocaleDateString(
+      "nl-NL"
     );
-
-    location.reload();
-
   }
+
+  const plan =
+    data.plan ?? "free";
+
+  const status =
+    data.status ?? null;
+
+  const renewDate =
+    formatDate(
+      data.current_period_end
+    );
 
   // -------------------------
   // UI
@@ -184,91 +153,115 @@ export default function SubscriptionCard() {
 
   return (
     <Card title="Abonnement">
-
-      {loading && <div>Laden...</div>}
+      {loading && (
+        <div>Laden...</div>
+      )}
 
       {!loading && (
+        <>
+          {/* PLAN */}
 
-        <div className="space-y-3">
-
-          <div>
-
-            <div className="text-sm text-gray-500">
-              Plan
-            </div>
-
-            <div className="text-lg font-semibold">
-              {PLAN_LABEL[plan]}
-            </div>
-
+          <div className="mb-2">
+            Plan:
+            <b className="ml-2">
+              {
+                PLAN_LABEL[
+                  plan
+                ]
+              }
+            </b>
           </div>
 
-          <div>
+          {/* STATUS */}
 
-            <div className="text-sm text-gray-500">
-              Prijs
+          {status && (
+            <div className="text-sm text-gray-600 mb-1">
+              Status:
+              <span className="ml-2">
+                {status}
+              </span>
             </div>
+          )}
 
-            <div>
-              {PLAN_PRICE[plan]}
+          {/* RENEW DATE */}
+
+          {renewDate && (
+            <div className="text-sm text-gray-600 mb-3">
+              Volgende verlenging:
+              <span className="ml-2">
+                {renewDate}
+              </span>
             </div>
-
-          </div>
+          )}
 
           {/* FREE */}
 
           {plan === "free" && (
+            <>
+              <button
+                onClick={() =>
+                  checkout(
+                    PRICES.premium_month
+                  )
+                }
+                className="px-3 py-2 bg-green-600 text-white rounded mr-2"
+              >
+                Upgrade naar Premium
+              </button>
 
-            <button
-              disabled={busy}
-              onClick={() =>
-                checkout(
-                  PRICE_ID.premium
-                )
-              }
-              className="px-3 py-2 bg-green-600 text-white rounded"
-            >
-              Upgrade naar Premium
-            </button>
-
+              <button
+                onClick={() =>
+                  checkout(
+                    PRICES.pro_month
+                  )
+                }
+                className="px-3 py-2 bg-purple-600 text-white rounded"
+              >
+                Upgrade naar Pro
+              </button>
+            </>
           )}
 
           {/* PREMIUM */}
 
           {plan === "premium" && (
+            <>
+              <button
+                onClick={() =>
+                  checkout(
+                    PRICES.pro_month
+                  )
+                }
+                className="px-3 py-2 bg-purple-600 text-white rounded mr-2"
+              >
+                Upgrade naar Pro
+              </button>
 
-            <button
-              disabled={busy}
-              onClick={() =>
-                changePlan(
-                  PRICE_ID.pro
-                )
-              }
-              className="px-3 py-2 bg-green-600 text-white rounded"
-            >
-              Upgrade naar Pro
-            </button>
-
+              <button
+                onClick={
+                  openPortal
+                }
+                className="px-3 py-2 bg-blue-600 text-white rounded"
+              >
+                Beheer abonnement
+              </button>
+            </>
           )}
 
-          {/* betaald */}
+          {/* PRO */}
 
-          {plan !== "free" && (
-
+          {plan === "pro" && (
             <button
-              onClick={openPortal}
+              onClick={
+                openPortal
+              }
               className="px-3 py-2 bg-blue-600 text-white rounded"
             >
               Beheer abonnement
             </button>
-
           )}
-
-        </div>
-
+        </>
       )}
-
     </Card>
   );
-
 }

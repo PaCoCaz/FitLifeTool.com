@@ -1,7 +1,7 @@
 // app/lib/stripe/handlers/handleSubscription.ts
 
+import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
-
 
 
 // -------------------------
@@ -20,17 +20,29 @@ const PRICE_TO_PLAN: Record<string, string> = {
 };
 
 
-
 export async function handleSubscription(
   event: any
 ) {
   const supabase = createSupabaseServer();
 
-  const subscription = event.data.object;
+  const sub = event.data.object;
+
+  // ✅ altijd echte subscription ophalen
+  const subscription =
+    (await stripe.subscriptions.retrieve(
+      sub.id,
+      {
+        expand: ["items.data.price"],
+      }
+    )) as any;
+
 
   const stripeCustomerId =
     subscription.customer;
 
+  if (!stripeCustomerId) {
+    throw new Error("No customer");
+  }
 
 
   // -------------------------
@@ -48,10 +60,7 @@ export async function handleSubscription(
       .maybeSingle();
 
 
-
   if (!customer) {
-
-    // customer bestaat nog niet → maken
 
     await supabase
       .from("customers")
@@ -75,6 +84,17 @@ export async function handleSubscription(
   }
 
 
+  // -------------------------
+  // helper
+  // -------------------------
+
+  function toDate(
+    value: number | null | undefined
+  ) {
+    if (!value) return null;
+    return new Date(value * 1000);
+  }
+
 
   // -------------------------
   // Upsert subscription
@@ -88,54 +108,38 @@ export async function handleSubscription(
       customer_id:
         customer?.id ?? null,
 
-      status: subscription.status,
+      status:
+        subscription.status ?? null,
 
       current_period_start:
-        new Date(
-          subscription.current_period_start * 1000
+        toDate(
+          subscription.current_period_start
         ),
 
       current_period_end:
-        new Date(
-          subscription.current_period_end * 1000
+        toDate(
+          subscription.current_period_end
         ),
 
       cancel_at:
-        subscription.cancel_at
-          ? new Date(
-              subscription.cancel_at * 1000
-            )
-          : null,
+        toDate(subscription.cancel_at),
 
       canceled_at:
-        subscription.canceled_at
-          ? new Date(
-              subscription.canceled_at * 1000
-            )
-          : null,
+        toDate(subscription.canceled_at),
 
       trial_start:
-        subscription.trial_start
-          ? new Date(
-              subscription.trial_start * 1000
-            )
-          : null,
+        toDate(subscription.trial_start),
 
       trial_end:
-        subscription.trial_end
-          ? new Date(
-              subscription.trial_end * 1000
-            )
-          : null,
+        toDate(subscription.trial_end),
 
       metadata:
         subscription.metadata ?? {},
     });
 
 
-
   // -------------------------
-  // Sync items + plan bepalen
+  // Sync items + plan
   // -------------------------
 
   const items =
@@ -171,16 +175,12 @@ export async function handleSubscription(
   }
 
 
-
   // -------------------------
-  // Update profile
+  // Update profile plan
   // -------------------------
 
   let userId =
     customer?.user_id ?? null;
-
-
-  // als user_id nog niet bestaat → opnieuw ophalen
 
   if (!userId) {
 
@@ -197,7 +197,6 @@ export async function handleSubscription(
     userId = again?.user_id ?? null;
 
   }
-
 
 
   if (userId) {
