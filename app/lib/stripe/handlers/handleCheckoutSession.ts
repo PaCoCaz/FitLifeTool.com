@@ -15,6 +15,11 @@ export async function handleCheckoutSession(
   const userId =
     session.client_reference_id;
 
+  const email =
+    session.customer_details?.email ??
+    session.customer_email ??
+    null;
+
   if (!stripeCustomerId) {
     throw new Error(
       "Missing customer in session"
@@ -27,13 +32,15 @@ export async function handleCheckoutSession(
     );
   }
 
-  // ✅ upsert instead of update
+  console.log("CHECKOUT SESSION:", session);
+
   await supabase
     .from("customers")
     .upsert({
-      stripe_customer_id:
-        stripeCustomerId,
+      stripe_customer_id: stripeCustomerId,
 
       user_id: userId,
+
+      email,
     });
 }

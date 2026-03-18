@@ -35,7 +35,7 @@ export default function SubscriptionCard() {
     useState(true);
 
   // -------------------------
-  // Load subscription details
+  // Load
   // -------------------------
 
   async function load() {
@@ -63,16 +63,13 @@ export default function SubscriptionCard() {
   }, []);
 
   // -------------------------
-  // Checkout
+  // Checkout (free only)
   // -------------------------
 
   async function checkout(
     priceId: string
   ) {
-    if (!user?.id) {
-      alert("Geen user");
-      return;
-    }
+    if (!user?.id) return;
 
     const res =
       await fetch(
@@ -96,7 +93,7 @@ export default function SubscriptionCard() {
   }
 
   // -------------------------
-  // Portal
+  // Portal home
   // -------------------------
 
   async function openPortal() {
@@ -114,8 +111,28 @@ export default function SubscriptionCard() {
     if (json.url) {
       window.location.href =
         json.url;
-    } else {
-      alert("Portal fout");
+    }
+  }
+
+  // -------------------------
+  // Portal update
+  // -------------------------
+
+  async function openUpdate() {
+    const res =
+      await fetch(
+        "/api/stripe/portal-update",
+        {
+          method: "POST",
+        }
+      );
+
+    const json =
+      await res.json();
+
+    if (json.url) {
+      window.location.href =
+        json.url;
     }
   }
 
@@ -128,10 +145,9 @@ export default function SubscriptionCard() {
   ) {
     if (!value) return null;
 
-    const d =
-      new Date(value);
-
-    return d.toLocaleDateString(
+    return new Date(
+      value
+    ).toLocaleDateString(
       "nl-NL"
     );
   }
@@ -153,22 +169,16 @@ export default function SubscriptionCard() {
 
   return (
     <Card title="Abonnement">
-      {loading && (
-        <div>Laden...</div>
-      )}
+      {loading && <div>Laden...</div>}
 
       {!loading && (
         <>
           {/* PLAN */}
 
           <div className="mb-2">
-            Plan:
+            Huidig abonnement:
             <b className="ml-2">
-              {
-                PLAN_LABEL[
-                  plan
-                ]
-              }
+              {PLAN_LABEL[plan]}
             </b>
           </div>
 
@@ -183,7 +193,7 @@ export default function SubscriptionCard() {
             </div>
           )}
 
-          {/* RENEW DATE */}
+          {/* RENEW */}
 
           {renewDate && (
             <div className="text-sm text-gray-600 mb-3">
@@ -197,16 +207,31 @@ export default function SubscriptionCard() {
           {/* FREE */}
 
           {plan === "free" && (
-            <>
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() =>
                   checkout(
                     PRICES.premium_month
                   )
                 }
-                className="px-3 py-2 bg-green-600 text-white rounded mr-2"
+                className="
+                  w-full
+                  px-3 py-3
+                  bg-[#191970]
+                  text-white
+                  rounded-[var(--radius)]
+                  hover:bg-[#0BA4E0]
+                  transition-colors
+                  text-center
+                  leading-tight
+                  "
               >
-                Upgrade naar Premium
+                <div className="font-semibold">
+                  Premium
+                </div>
+                <div className="text-sm opacity-90">
+                  € 4,95 / maand
+                </div>
               </button>
 
               <button
@@ -215,50 +240,61 @@ export default function SubscriptionCard() {
                     PRICES.pro_month
                   )
                 }
-                className="px-3 py-2 bg-purple-600 text-white rounded"
+                className="
+                  w-full
+                  px-3 py-3
+                  bg-[#191970]
+                  text-white
+                  rounded-[var(--radius)]
+                  hover:bg-[#0BA4E0]
+                  transition-colors
+                  text-center
+                  leading-tight
+                  "
               >
-                Upgrade naar Pro
+                <div className="font-semibold">
+                  Pro
+                </div>
+                <div className="text-sm opacity-90">
+                  € 8,95 / maand
+                </div>
               </button>
-            </>
+            </div>
           )}
 
-          {/* PREMIUM */}
+          {/* PREMIUM / PRO */}
 
-          {plan === "premium" && (
-            <>
+          {(plan === "premium" ||
+            plan === "pro") && (
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
-                onClick={() =>
-                  checkout(
-                    PRICES.pro_month
-                  )
-                }
-                className="px-3 py-2 bg-purple-600 text-white rounded mr-2"
+                onClick={openUpdate}
+                className="
+                  w-full px-4 py-3
+                  bg-[#191970]
+                  text-white
+                  rounded-[var(--radius)]
+                  hover:bg-[#0BA4E0]
+                  transition-colors
+                "
               >
-                Upgrade naar Pro
+                Wijzig abonnement
               </button>
 
               <button
-                onClick={
-                  openPortal
-                }
-                className="px-3 py-2 bg-blue-600 text-white rounded"
+                onClick={openPortal}
+                className="
+                  w-full px-4 py-3
+                  bg-[#191970]
+                  text-white
+                  rounded-[var(--radius)]
+                  hover:bg-[#0BA4E0]
+                  transition-colors
+                "
               >
                 Beheer abonnement
               </button>
-            </>
-          )}
-
-          {/* PRO */}
-
-          {plan === "pro" && (
-            <button
-              onClick={
-                openPortal
-              }
-              className="px-3 py-2 bg-blue-600 text-white rounded"
-            >
-              Beheer abonnement
-            </button>
+            </div>
           )}
         </>
       )}

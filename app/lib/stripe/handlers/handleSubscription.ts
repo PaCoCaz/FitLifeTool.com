@@ -1,12 +1,6 @@
 // app/lib/stripe/handlers/handleSubscription.ts
 
-import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
-
-
-// -------------------------
-// PRICE → PLAN mapping
-// -------------------------
 
 const PRICE_TO_PLAN: Record<string, string> = {
   price_1TAso3HU07xU2AfQk4fucP73: "premium",
@@ -19,185 +13,135 @@ const PRICE_TO_PLAN: Record<string, string> = {
   price_1TAt1kHU07xU2AfQS3UxNprt: "coach",
 };
 
+function toDate(ts?: number | null) {
+  if (!ts) return null;
+  return new Date(ts * 1000);
+}
 
-export async function handleSubscription(
-  event: any
-) {
+export async function handleSubscription(event: any) {
+
   const supabase = createSupabaseServer();
 
   const sub = event.data.object;
 
-  // ✅ altijd echte subscription ophalen
-  const subscription =
-    (await stripe.subscriptions.retrieve(
-      sub.id,
-      {
-        expand: ["items.data.price"],
-      }
-    )) as any;
+  const stripeCustomerId = sub.customer;
 
-
-  const stripeCustomerId =
-    subscription.customer;
-
-  if (!stripeCustomerId) {
-    throw new Error("No customer");
-  }
+  if (!stripeCustomerId) return;
 
 
   // -------------------------
-  // Find customer
+  // find customer (retry safe)
   // -------------------------
 
   let { data: customer } =
     await supabase
       .from("customers")
-      .select("id, user_id")
-      .eq(
-        "stripe_customer_id",
-        stripeCustomerId
-      )
+      .select("*")
+      .eq("stripe_customer_id", stripeCustomerId)
       .maybeSingle();
 
 
   if (!customer) {
 
+    // create placeholder
+
     await supabase
       .from("customers")
       .insert({
-        stripe_customer_id:
-          stripeCustomerId,
+        stripe_customer_id: stripeCustomerId,
       });
 
     const { data: again } =
       await supabase
         .from("customers")
-        .select("id, user_id")
-        .eq(
-          "stripe_customer_id",
-          stripeCustomerId
-        )
+        .select("*")
+        .eq("stripe_customer_id", stripeCustomerId)
         .single();
 
     customer = again;
-
   }
 
 
   // -------------------------
-  // helper
+  // items
   // -------------------------
 
-  function toDate(
-    value: number | null | undefined
-  ) {
-    if (!value) return null;
-    return new Date(value * 1000);
-  }
+  const items = sub.items?.data ?? [];
 
-
-  // -------------------------
-  // Upsert subscription
-  // -------------------------
-
-  await supabase
-    .from("subscriptions")
-    .upsert({
-      id: subscription.id,
-
-      customer_id:
-        customer?.id ?? null,
-
-      status:
-        subscription.status ?? null,
-
-      current_period_start:
-        toDate(
-          subscription.current_period_start
-        ),
-
-      current_period_end:
-        toDate(
-          subscription.current_period_end
-        ),
-
-      cancel_at:
-        toDate(subscription.cancel_at),
-
-      canceled_at:
-        toDate(subscription.canceled_at),
-
-      trial_start:
-        toDate(subscription.trial_start),
-
-      trial_end:
-        toDate(subscription.trial_end),
-
-      metadata:
-        subscription.metadata ?? {},
-    });
-
-
-  // -------------------------
-  // Sync items + plan
-  // -------------------------
-
-  const items =
-    subscription.items.data;
+  let periodStart: number | null = null;
+  let periodEnd: number | null = null;
 
   let plan = "free";
+
 
   for (const item of items) {
 
     const priceId =
-      typeof item.price === "string"
-        ? item.price
-        : item.price.id;
+      item.price?.id ??
+      item.plan?.id ??
+      null;
+
+    if (!priceId) continue;
+
+    periodStart =
+      item.current_period_start ??
+      sub.current_period_start ??
+      periodStart;
+
+    periodEnd =
+      item.current_period_end ??
+      sub.current_period_end ??
+      periodEnd;
 
     await supabase
       .from("subscription_items")
       .upsert({
         id: item.id,
-
-        subscription_id:
-          subscription.id,
-
+        subscription_id: sub.id,
         price_id: priceId,
-
-        quantity:
-          item.quantity ?? 1,
+        quantity: item.quantity ?? 1,
       });
 
     if (PRICE_TO_PLAN[priceId]) {
       plan = PRICE_TO_PLAN[priceId];
     }
-
   }
 
 
   // -------------------------
-  // Update profile plan
+  // subscription
   // -------------------------
 
-  let userId =
-    customer?.user_id ?? null;
+  await supabase
+    .from("subscriptions")
+    .upsert({
+      id: sub.id,
 
-  if (!userId) {
+      customer_id: customer?.id ?? null,
 
-    const { data: again } =
-      await supabase
-        .from("customers")
-        .select("user_id")
-        .eq(
-          "stripe_customer_id",
-          stripeCustomerId
-        )
-        .single();
+      status: sub.status ?? null,
 
-    userId = again?.user_id ?? null;
+      current_period_start: toDate(periodStart),
 
-  }
+      current_period_end: toDate(periodEnd),
 
+      cancel_at: toDate(sub.cancel_at),
+
+      canceled_at: toDate(sub.canceled_at),
+
+      trial_start: toDate(sub.trial_start),
+
+      trial_end: toDate(sub.trial_end),
+
+      metadata: sub.metadata ?? {},
+    });
+
+
+  // -------------------------
+  // profile plan update
+  // -------------------------
+
+  const userId = customer?.user_id ?? null;
 
   if (userId) {
 
@@ -207,7 +151,6 @@ export async function handleSubscription(
         abonnement: plan,
       })
       .eq("id", userId);
-
   }
 
 }

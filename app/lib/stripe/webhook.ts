@@ -85,6 +85,9 @@ async function saveEvent(
 export async function handleStripeEvent(
   event: any
 ) {
+
+  console.log("STRIPE EVENT:", event.type);
+
   await ensureEventNotProcessed(event.id);
 
   try {
@@ -96,38 +99,42 @@ export async function handleStripeEvent(
         await handleProduct(event);
         break;
 
-
       case "price.created":
       case "price.updated":
         await handlePrice(event);
         break;
-
 
       case "customer.created":
       case "customer.updated":
         await handleCustomer(event);
         break;
 
-
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
+
+        console.log(
+          "SUBSCRIPTION EVENT DATA:",
+          event.data.object
+        );
+
         await handleSubscription(event);
         break;
-
 
       case "invoice.paid":
       case "invoice.payment_failed":
         await handleInvoice(event);
         break;
 
-
       case "checkout.session.completed":
         await handleCheckoutSession(event);
         break;
 
-
       default:
+        console.log(
+          "UNHANDLED EVENT:",
+          event.type
+        );
         break;
     }
 
