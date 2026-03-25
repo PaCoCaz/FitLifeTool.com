@@ -128,6 +128,7 @@ export async function handleStripeEvent(
 
       case "checkout.session.completed":
         await handleCheckoutSession(event);
+        await handleSubscription(event);
         break;
 
       default:
