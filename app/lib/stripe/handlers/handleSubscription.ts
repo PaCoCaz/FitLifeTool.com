@@ -1,7 +1,7 @@
 // app/lib/stripe/handlers/handleSubscription.ts
 
+import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
-import { stripe } from "../stripe";
 
 const PRICE_TO_PLAN: Record<string, string> = {
   price_1TAso3HU07xU2AfQk4fucP73: "premium",
@@ -23,25 +23,22 @@ export async function handleSubscription(event: any) {
 
   const supabase = createSupabaseServer();
 
-  const sub = event.data.object;
+  const subEvent = event.data.object;
+
+  if (!subEvent?.id) return;
+
+  // ✅ ALWAYS retrieve from Stripe
+  const sub =
+  (await stripe.subscriptions.retrieve(
+    subEvent.id,
+    {
+      expand: ["items.data.price"],
+    }
+  )) as any;
 
   const stripeCustomerId = sub.customer;
 
   if (!stripeCustomerId) return;
-
-
-  // -------------------------
-  // get full subscription (IMPORTANT)
-  // -------------------------
-
-  const subscription =
-  await stripe.subscriptions.retrieve(
-    sub.id,
-    {
-      expand: ["items.data.price"],
-    }
-  ) as any;
-
 
   // -------------------------
   // find customer
@@ -51,87 +48,55 @@ export async function handleSubscription(event: any) {
     await supabase
       .from("customers")
       .select("*")
-      .eq(
-        "stripe_customer_id",
-        stripeCustomerId
-      )
+      .eq("stripe_customer_id", stripeCustomerId)
       .maybeSingle();
-
 
   if (!customer) {
 
     await supabase
       .from("customers")
       .insert({
-        stripe_customer_id:
-          stripeCustomerId,
+        stripe_customer_id: stripeCustomerId,
       });
 
     const { data: again } =
       await supabase
         .from("customers")
         .select("*")
-        .eq(
-          "stripe_customer_id",
-          stripeCustomerId
-        )
+        .eq("stripe_customer_id", stripeCustomerId)
         .single();
 
     customer = again;
   }
 
-
   // -------------------------
   // items
   // -------------------------
 
-  let periodStart:
-    | number
-    | null = null;
-
-  let periodEnd:
-    | number
-    | null = null;
+  const items = sub.items.data;
 
   let plan = "free";
 
-
-  for (const item of subscription.items.data) {
+  for (const item of items) {
 
     const priceId =
-      item.price?.id;
-
-    if (!priceId) continue;
-
-    periodStart =
-      item.current_period_start ??
-      subscription.current_period_start ??
-      periodStart;
-
-    periodEnd =
-      item.current_period_end ??
-      subscription.current_period_end ??
-      periodEnd;
-
+      typeof item.price === "string"
+        ? item.price
+        : item.price.id;
 
     await supabase
       .from("subscription_items")
       .upsert({
         id: item.id,
-        subscription_id:
-          subscription.id,
+        subscription_id: sub.id,
         price_id: priceId,
-        quantity:
-          item.quantity ?? 1,
+        quantity: item.quantity ?? 1,
       });
 
-
     if (PRICE_TO_PLAN[priceId]) {
-      plan =
-        PRICE_TO_PLAN[priceId];
+      plan = PRICE_TO_PLAN[priceId];
     }
   }
-
 
   // -------------------------
   // subscription
@@ -140,52 +105,41 @@ export async function handleSubscription(event: any) {
   await supabase
     .from("subscriptions")
     .upsert({
-      id: subscription.id,
+      id: sub.id,
 
-      customer_id:
-        customer?.id ?? null,
+      customer_id: customer?.id ?? null,
 
-      status:
-        subscription.status ??
-        null,
+      status: sub.status ?? null,
 
       current_period_start:
-        toDate(periodStart),
+        toDate(sub.current_period_start),
 
       current_period_end:
-        toDate(periodEnd),
+        toDate(sub.current_period_end),
 
-      cancel_at: toDate(
-        subscription.cancel_at
-      ),
+      cancel_at:
+        toDate(sub.cancel_at),
 
-      canceled_at: toDate(
-        subscription.canceled_at
-      ),
+      canceled_at:
+        toDate(sub.canceled_at),
 
-      trial_start: toDate(
-        subscription.trial_start
-      ),
+      trial_start:
+        toDate(sub.trial_start),
 
-      trial_end: toDate(
-        subscription.trial_end
-      ),
+      trial_end:
+        toDate(sub.trial_end),
 
       metadata:
-        subscription.metadata ??
-        {},
+        sub.metadata ?? {},
     });
-
 
   // -------------------------
   // profile plan
   // -------------------------
 
-  const userId =
-    customer?.user_id ?? null;
+  const userId = customer?.user_id;
 
   if (userId) {
-
     await supabase
       .from("profiles")
       .update({
@@ -193,4 +147,5 @@ export async function handleSubscription(event: any) {
       })
       .eq("id", userId);
   }
+
 }
