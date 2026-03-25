@@ -1,6 +1,7 @@
 // app/lib/stripe/handlers/handleSubscription.ts
 
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import { stripe } from "../stripe";
 
 const PRICE_TO_PLAN: Record<string, string> = {
   price_1TAso3HU07xU2AfQk4fucP73: "premium",
@@ -30,32 +31,50 @@ export async function handleSubscription(event: any) {
 
 
   // -------------------------
-  // find customer (retry safe)
+  // get full subscription (IMPORTANT)
+  // -------------------------
+
+  const subscription =
+  await stripe.subscriptions.retrieve(
+    sub.id,
+    {
+      expand: ["items.data.price"],
+    }
+  ) as any;
+
+
+  // -------------------------
+  // find customer
   // -------------------------
 
   let { data: customer } =
     await supabase
       .from("customers")
       .select("*")
-      .eq("stripe_customer_id", stripeCustomerId)
+      .eq(
+        "stripe_customer_id",
+        stripeCustomerId
+      )
       .maybeSingle();
 
 
   if (!customer) {
 
-    // create placeholder
-
     await supabase
       .from("customers")
       .insert({
-        stripe_customer_id: stripeCustomerId,
+        stripe_customer_id:
+          stripeCustomerId,
       });
 
     const { data: again } =
       await supabase
         .from("customers")
         .select("*")
-        .eq("stripe_customer_id", stripeCustomerId)
+        .eq(
+          "stripe_customer_id",
+          stripeCustomerId
+        )
         .single();
 
     customer = again;
@@ -66,44 +85,50 @@ export async function handleSubscription(event: any) {
   // items
   // -------------------------
 
-  const items = sub.items?.data ?? [];
+  let periodStart:
+    | number
+    | null = null;
 
-  let periodStart: number | null = null;
-  let periodEnd: number | null = null;
+  let periodEnd:
+    | number
+    | null = null;
 
   let plan = "free";
 
 
-  for (const item of items) {
+  for (const item of subscription.items.data) {
 
     const priceId =
-      item.price?.id ??
-      item.plan?.id ??
-      null;
+      item.price?.id;
 
     if (!priceId) continue;
 
     periodStart =
       item.current_period_start ??
-      sub.current_period_start ??
+      subscription.current_period_start ??
       periodStart;
 
     periodEnd =
       item.current_period_end ??
-      sub.current_period_end ??
+      subscription.current_period_end ??
       periodEnd;
+
 
     await supabase
       .from("subscription_items")
       .upsert({
         id: item.id,
-        subscription_id: sub.id,
+        subscription_id:
+          subscription.id,
         price_id: priceId,
-        quantity: item.quantity ?? 1,
+        quantity:
+          item.quantity ?? 1,
       });
 
+
     if (PRICE_TO_PLAN[priceId]) {
-      plan = PRICE_TO_PLAN[priceId];
+      plan =
+        PRICE_TO_PLAN[priceId];
     }
   }
 
@@ -115,33 +140,49 @@ export async function handleSubscription(event: any) {
   await supabase
     .from("subscriptions")
     .upsert({
-      id: sub.id,
+      id: subscription.id,
 
-      customer_id: customer?.id ?? null,
+      customer_id:
+        customer?.id ?? null,
 
-      status: sub.status ?? null,
+      status:
+        subscription.status ??
+        null,
 
-      current_period_start: toDate(periodStart),
+      current_period_start:
+        toDate(periodStart),
 
-      current_period_end: toDate(periodEnd),
+      current_period_end:
+        toDate(periodEnd),
 
-      cancel_at: toDate(sub.cancel_at),
+      cancel_at: toDate(
+        subscription.cancel_at
+      ),
 
-      canceled_at: toDate(sub.canceled_at),
+      canceled_at: toDate(
+        subscription.canceled_at
+      ),
 
-      trial_start: toDate(sub.trial_start),
+      trial_start: toDate(
+        subscription.trial_start
+      ),
 
-      trial_end: toDate(sub.trial_end),
+      trial_end: toDate(
+        subscription.trial_end
+      ),
 
-      metadata: sub.metadata ?? {},
+      metadata:
+        subscription.metadata ??
+        {},
     });
 
 
   // -------------------------
-  // profile plan update
+  // profile plan
   // -------------------------
 
-  const userId = customer?.user_id ?? null;
+  const userId =
+    customer?.user_id ?? null;
 
   if (userId) {
 
@@ -152,5 +193,4 @@ export async function handleSubscription(event: any) {
       })
       .eq("id", userId);
   }
-
 }
