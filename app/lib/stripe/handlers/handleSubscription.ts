@@ -82,55 +82,58 @@ export async function handleSubscription(event: any) {
 
 
   // -------------------------
-  // items
-  // -------------------------
+// items
+// -------------------------
 
-  let periodStart:
-    | number
-    | null = null;
+let periodStart: number | null = null;
+let periodEnd: number | null = null;
 
-  let periodEnd:
-    | number
-    | null = null;
+let plan = "free";
 
-  let plan = "free";
+const items =
+  subscription.items?.data?.length
+    ? subscription.items.data
+    : [
+        {
+          id: subscription.id,
+          price: subscription.plan,
+          quantity: 1,
+        },
+      ];
 
+for (const item of items) {
 
-  for (const item of subscription.items.data) {
+  const priceId =
+    item.price?.id;
 
-    const priceId =
-      item.price?.id;
+  if (!priceId) continue;
 
-    if (!priceId) continue;
+  periodStart =
+    item.current_period_start ??
+    subscription.current_period_start ??
+    periodStart;
 
-    periodStart =
-      item.current_period_start ??
-      subscription.current_period_start ??
-      periodStart;
+  periodEnd =
+    item.current_period_end ??
+    subscription.current_period_end ??
+    periodEnd;
 
-    periodEnd =
-      item.current_period_end ??
-      subscription.current_period_end ??
-      periodEnd;
+  await supabase
+    .from("subscription_items")
+    .upsert({
+      id: item.id,
+      subscription_id:
+        subscription.id,
+      price_id: priceId,
+      quantity:
+        item.quantity ?? 1,
+    });
 
-
-    await supabase
-      .from("subscription_items")
-      .upsert({
-        id: item.id,
-        subscription_id:
-          subscription.id,
-        price_id: priceId,
-        quantity:
-          item.quantity ?? 1,
-      });
-
-
-    if (PRICE_TO_PLAN[priceId]) {
-      plan =
-        PRICE_TO_PLAN[priceId];
-    }
+  if (PRICE_TO_PLAN[priceId]) {
+    plan =
+      PRICE_TO_PLAN[priceId];
   }
+}
 
 
   // -------------------------
