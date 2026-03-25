@@ -90,15 +90,19 @@ export async function handleSubscription(event: any) {
   let plan = "free";
 
   const items =
-    subscription.items?.data?.length
-      ? subscription.items.data
-      : [
-          {
-            id: subscription.id,
-            price: subscription.plan,
-            quantity: 1,
+  subscription.items?.data?.length
+    ? subscription.items.data
+    : [
+        {
+          id: subscription.id,
+          price: {
+            id:
+              subscription.plan?.id ??
+              subscription.items?.data?.[0]?.price?.id,
           },
-        ];
+          quantity: 1,
+        },
+      ];
 
   for (const item of items) {
 
