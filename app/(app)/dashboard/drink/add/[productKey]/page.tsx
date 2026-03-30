@@ -83,7 +83,7 @@ export default function AddFoodPage() {
   const { lang } = useLangContext();
   const dayKey = getLocalDayKey(useDayNow());
 
-  const { refreshDashboard } = useDashboard();
+  const { refreshDashboard, limits } = useDashboard();
 
   const { goal } = useGoalContext();
   const [productName, setProductName] = useState<string>("");
@@ -102,16 +102,20 @@ export default function AddFoodPage() {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
 
+  const [favoriteCount, setFavoriteCount] = useState<number>(0);
+
   /* ⭐ CHECK FAVORITE */
 
   useEffect(() => {
     if (!user || !productKey) return;
 
+    const userId = user.id;
+
     async function checkFavorite() {
       const { data } = await supabase
         .from("nutrition_favorites")
         .select("id")
-        .eq("user_id", user!.id)
+        .eq("user_id", userId)
         .eq("product_key", productKey)
         .maybeSingle<FavoriteRow>();
 
@@ -126,6 +130,29 @@ export default function AddFoodPage() {
 
     checkFavorite();
   }, [user, productKey]);
+
+  /* ⭐ LOAD FAVORITE COUNT */
+
+  useEffect(() => {
+    if (!user) return;
+
+    const userId = user.id;
+
+    async function loadFavoriteCount() {
+      const { count } = await supabase
+        .from("nutrition_favorites")
+        .select("nutrition_products!inner(is_drink)", {
+          count: "exact",
+          head: true,
+        })
+        .eq("user_id", userId)
+        .eq("nutrition_products.is_drink", true);
+
+      setFavoriteCount(count ?? 0);
+    }
+
+    loadFavoriteCount();
+  }, [user, isFavorite]);
 
   /* ───────────────── PRODUCT NAME ───────────────── */
 
@@ -289,8 +316,6 @@ export default function AddFoodPage() {
     loadPortions();
   }, [selectedPreparation, productKey, lang]);
 
-  /* ───────────────── SAVE ───────────────── */
-
   /* ⭐ TOGGLE FAVORITE */
 
   async function toggleFavorite() {
@@ -307,6 +332,17 @@ export default function AddFoodPage() {
       return;
     }
 
+    // 🔥 LIMIT CHECK
+    if (
+      limits.max_favorite_foods !== null &&
+      favoriteCount >= limits.max_favorite_foods
+    ) {
+      alert(
+        `Je hebt je limiet bereikt (${limits.max_favorite_foods} favorieten). Upgrade om meer toe te voegen.`
+      );
+      return;
+    }
+
     const { data } = await supabase
       .from("nutrition_favorites")
       .insert({
@@ -319,8 +355,11 @@ export default function AddFoodPage() {
     if (data) {
       setIsFavorite(true);
       setFavoriteId(data.id);
+      setFavoriteCount((prev) => prev + 1);
     }
   }
+
+  /* ───────────────── SAVE ───────────────── */
 
   async function handleSave() {
     if (!user || !selectedPortion || !selectedPreparation) return;

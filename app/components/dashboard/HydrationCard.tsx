@@ -28,8 +28,13 @@ export default function HydrationCard() {
     hydrationDrinkMl,
     hydrationFoodMl,
     hydrationGoalMl,
-    ready
+    ready,
+    features,
+    limits
   } = useDashboard();
+
+  console.log("FEATURES:", features);
+  console.log("LIMITS:", limits);
 
   const lang = useLang();
   const t = uiText[lang];

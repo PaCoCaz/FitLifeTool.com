@@ -3,51 +3,48 @@
 import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 
-export async function POST(
-  req: Request
-) {
+export async function POST(req: Request) {
   const supabase = createSupabaseServer();
 
-  const body = await req.json();
+  try {
+    const body = await req.json() as {
+      priceId: string;
+      userId: string;
+    };
 
-  const { priceId, userId } = body;
+    const { priceId, userId } = body;
 
-  if (!priceId) {
-    return new Response(
-      JSON.stringify({
-        error: "Missing priceId",
-      }),
-      { status: 400 }
-    );
-  }
+    if (!priceId || !userId) {
+      return new Response(
+        JSON.stringify({ error: "Missing data" }),
+        { status: 400 }
+      );
+    }
 
-  if (!userId) {
-    return new Response(
-      JSON.stringify({
-        error: "Missing userId",
-      }),
-      { status: 400 }
-    );
-  }
-
-  // -------------------------
-  // Check existing customer
-  // -------------------------
-
-  const { data: customer } =
-    await supabase
+    const { data: customer } = await supabase
       .from("customers")
       .select("stripe_customer_id")
       .eq("user_id", userId)
       .maybeSingle();
 
-  // -------------------------
-  // Create checkout session
-  // -------------------------
+    let stripeCustomerId = customer?.stripe_customer_id ?? null;
 
-  const session =
-    await stripe.checkout.sessions.create({
+    if (!stripeCustomerId) {
+      const newCustomer = await stripe.customers.create({
+        metadata: { user_id: userId },
+      });
+
+      stripeCustomerId = newCustomer.id;
+
+      await supabase.from("customers").insert({
+        user_id: userId,
+        stripe_customer_id: stripeCustomerId,
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
       mode: "subscription",
+      customer: stripeCustomerId,
 
       line_items: [
         {
@@ -56,30 +53,19 @@ export async function POST(
         },
       ],
 
-      payment_method_types: [
-        "card",
-        "ideal",
-        "sepa_debit",
-      ],
-
-      success_url:
-        `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?success=1`,
-
-      cancel_url:
-        `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?canceled=1`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?success=1`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?canceled=1`,
 
       client_reference_id: userId,
-
-      customer:
-        customer?.stripe_customer_id ??
-        undefined,
-
-      allow_promotion_codes: true,
     });
 
-  return new Response(
-    JSON.stringify({
-      url: session.url,
-    })
-  );
+    return new Response(JSON.stringify({ url: session.url }));
+  } catch (err) {
+    console.error(err);
+
+    return new Response(
+      JSON.stringify({ error: "Server error" }),
+      { status: 500 }
+    );
+  }
 }

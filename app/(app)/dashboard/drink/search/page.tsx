@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/AuthProvider";
 import { useLangContext } from "@/lib/LangProvider";
+import { useDashboard } from "@/lib/DashboardStore";
 
 /* ───────────────── Types ───────────────── */
 
@@ -14,6 +15,7 @@ type Product = {
   product_key: string;
   name: string;
   is_drink: boolean;
+  is_basic: boolean;
 };
 
 type FavoriteKeyRow = {
@@ -36,6 +38,7 @@ export default function FoodSearchPage() {
   const router = useRouter();
   const { user } = useUser();
   const { lang } = useLangContext();
+  const { features } = useDashboard();
 
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Product[]>([]);
@@ -96,6 +99,7 @@ export default function FoodSearchPage() {
           product_key: p.product_key,
           name: nameMap.get(p.product_key) ?? p.product_key,
           is_drink: Boolean(p.is_drink),
+          is_basic: true,
         })
       );
 
@@ -120,7 +124,7 @@ export default function FoodSearchPage() {
 
       const { data } = await supabase
         .from("nutrition_products_search")
-        .select("product_key, name, is_drink")
+        .select("product_key, name, is_drink, is_basic")
         .eq("lang", lang)
         .eq("is_drink", true)
         .ilike("name", `%${search}%`);
@@ -153,6 +157,7 @@ export default function FoodSearchPage() {
         product_key: p.product_key,
         name: p.name,
         is_drink: Boolean(p.is_drink),
+        is_basic: Boolean(p.is_basic),
       }));
 
       setResults(mapped);
@@ -212,26 +217,47 @@ export default function FoodSearchPage() {
 
               {results.length > 0 && (
                 <div className="border border-t-0 border-[#0095D3] rounded-b-[var(--radius)] max-h-[400px] overflow-y-auto">
-                  {results.map((product) => (
-                    <div
-                      key={product.product_key}
-                      className="flex items-center justify-between px-4 py-3 text-sm border-b last:border-b-0 hover:bg-gray-50 cursor-pointer"
-                    >
-                      <span
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/drink/add/${product.product_key}`
-                          )
-                        }
-                      >
-                        {product.name}
-                      </span>
+                  {results.map((product) => {
+                    const isLocked =
+                      !features.has_full_food_database &&
+                      !product.is_basic;
 
-                      <button className="text-gray-400 hover:text-[#0095D3] text-lg">
-                        ★
-                      </button>
-                    </div>
-                  ))}
+                    return (
+                      <div
+                        key={product.product_key}
+                        className={`
+                          flex items-center justify-between px-4 py-3 text-sm border-b last:border-b-0
+                          ${isLocked
+                            ? "opacity-40 cursor-not-allowed"
+                            : "hover:bg-gray-50 cursor-pointer"}
+                        `}
+                      >
+                        <span
+                          onClick={() => {
+                            if (!isLocked) {
+                              router.push(
+                                `/dashboard/drink/add/${product.product_key}`
+                              );
+                            }
+                          }}
+                        >
+                          {product.name}
+                        </span>
+
+                        {isLocked && (
+                          <span className="text-xs text-gray-400">
+                            🔒 Premium
+                          </span>
+                        )}
+
+                        {!isLocked && (
+                          <button className="text-gray-400 hover:text-[#0095D3] text-lg">
+                            ★
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

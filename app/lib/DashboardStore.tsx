@@ -18,6 +18,9 @@ import { getLocalDayKey } from "@/lib/dayKey";
 /* ───────────────── Types ───────────────── */
 
 type DashboardState = {
+  features: PlanFeatures;
+  limits: PlanLimits;
+
   hydrationMl: number;
   hydrationDrinkMl: number;
   hydrationFoodMl: number;
@@ -34,6 +37,15 @@ type DashboardState = {
   refreshDashboard: () => Promise<void>;
 
   ready: boolean;
+};
+
+type PlanFeatures = {
+  has_full_food_database: boolean;
+  has_ai_coach: boolean;
+};
+
+type PlanLimits = {
+  max_favorite_foods: number | null;
 };
 
 const DashboardContext = createContext<DashboardState | null>(null);
@@ -62,6 +74,14 @@ export function DashboardProvider({
   const [activityGoal, setActivityGoal] = useState<number | null>(null);
 
   const [abonnement, setAbonnement] = useState("free");
+  const [features, setFeatures] = useState<PlanFeatures>({
+    has_full_food_database: false,
+    has_ai_coach: false,
+  });
+
+  const [limits, setLimits] = useState<PlanLimits>({
+    max_favorite_foods: 2,
+  });
 
   const [ready, setReady] = useState(false);
 
@@ -90,7 +110,7 @@ export function DashboardProvider({
     const freshDayKey =
       dayKeyOverride ?? getLocalDayKey(new Date());
 
-    const [rpcResult, profileResult] = await Promise.all([
+    const [rpcResult, profileResult, planResult] = await Promise.all([
       supabase.rpc("dashboard_day_summary", {
         p_user_id: user.id,
         p_day: freshDayKey,
@@ -103,7 +123,13 @@ export function DashboardProvider({
         )
         .eq("id", user.id)
         .single(),
+
+      supabase.rpc("get_user_plan_features", {
+        p_user_id: user.id,
+      }),
     ]);
+
+    console.log("PLAN RESULT RAW:", planResult.data);
 
     if (!mountedRef.current) {
       refreshingRef.current = false;
@@ -140,6 +166,24 @@ export function DashboardProvider({
 
     setAbonnement(profile?.abonnement ?? "free");
 
+    const plan = Array.isArray(planResult.data)
+      ? planResult.data[0]
+      : planResult.data;
+
+    if (plan) {
+      setFeatures(plan.features);
+      setLimits(plan.limits);
+    } else {
+      setFeatures({
+        has_full_food_database: false,
+        has_ai_coach: false,
+      });
+
+      setLimits({
+        max_favorite_foods: 2,
+      });
+    }
+
     setReady(true);
 
     refreshingRef.current = false;
@@ -162,6 +206,9 @@ export function DashboardProvider({
   return (
     <DashboardContext.Provider
       value={{
+        features,
+        limits,
+
         hydrationMl,
         hydrationDrinkMl,
         hydrationFoodMl,
