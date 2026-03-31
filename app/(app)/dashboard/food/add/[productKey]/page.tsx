@@ -11,31 +11,12 @@ import { getLocalDayKey } from "@/lib/dayKey";
 import { useLangContext } from "@/lib/LangProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useGoalContext } from "@/lib/GoalProvider";
+import "@/styles/category.css";
 
 /* ───────────────── Types ───────────────── */
 
 type Params = {
   productKey: string;
-};
-
-type ProductTranslationRow = {
-  name: string;
-};
-
-type PreparationKeyRow = {
-  preparation_key: string;
-};
-
-type PreparationTranslationRow = {
-  preparation_key: string;
-  name: string;
-};
-
-type PortionRow = {
-  unit_key: string;
-  grams: number | null;
-  ml: number | null;
-  sort_order: number | null;
 };
 
 type Preparation = {
@@ -50,28 +31,6 @@ type Portion = {
   label: string;
 };
 
-type UnitTranslationRow = {
-  unit_key: string;
-  label: string;
-};
-
-type NutritionRow = {
-  kcal_per_100g: number | null;
-  kcal_per_100ml: number | null;
-  protein_per_100g: number | null;
-  carbs_per_100g: number | null;
-  fat_per_100g: number | null;
-  fiber_per_100g: number | null;
-  sugar_per_100g: number | null;
-  alcohol_per_100g: number | null;
-  water_percent: number | null;
-  sodium_per_100g: number | null;
-};
-
-type FavoriteRow = {
-  id: string;
-};
-
 /* ───────────────── Component ───────────────── */
 
 export default function AddFoodPage() {
@@ -84,9 +43,9 @@ export default function AddFoodPage() {
   const dayKey = getLocalDayKey(useDayNow());
 
   const { refreshDashboard, limits } = useDashboard();
-
   const { goal } = useGoalContext();
-  const [productName, setProductName] = useState<string>("");
+
+  const [productName, setProductName] = useState("");
   const [productScore, setProductScore] = useState<number | null>(null);
 
   const [preparations, setPreparations] = useState<Preparation[]>([]);
@@ -97,247 +56,173 @@ export default function AddFoodPage() {
   const [selectedPortion, setSelectedPortion] =
     useState<Portion | null>(null);
 
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState(1);
 
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
+  const [favoriteCount, setFavoriteCount] = useState(0);
 
-  const [favoriteCount, setFavoriteCount] = useState<number>(0);
-
-  /* ⭐ CHECK FAVORITE */
+  /* ───────── FAVORITE CHECK ───────── */
 
   useEffect(() => {
     if (!user || !productKey) return;
 
-    async function checkFavorite() {
-      const { data } = await supabase
-        .from("nutrition_favorites")
-        .select("id")
-        .eq("user_id", user!.id)
-        .eq("product_key", productKey)
-        .maybeSingle<FavoriteRow>();
-
-      if (data) {
-        setIsFavorite(true);
-        setFavoriteId(data.id);
-      } else {
-        setIsFavorite(false);
-        setFavoriteId(null);
-      }
-    }
-
-    checkFavorite();
+    supabase
+      .from("nutrition_favorites")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_key", productKey)
+      .maybeSingle()
+      .then(({ data }: { data: { id: string } | null }) => {
+        if (data) {
+          setIsFavorite(true);
+          setFavoriteId(data.id);
+        }
+      });
   }, [user, productKey]);
 
-  /* ⭐ LOAD FAVORITE COUNT */
+  /* ───────── FAVORITE COUNT ───────── */
 
   useEffect(() => {
     if (!user) return;
 
-    const userId = user.id;
-
-    async function loadFavoriteCount() {
-      const { count } = await supabase
-        .from("nutrition_favorites")
-        .select("nutrition_products!inner(is_drink)", {
-          count: "exact",
-          head: true,
-        })
-        .eq("user_id", userId)
-        .eq("nutrition_products.is_drink", false);
-
-      setFavoriteCount(count ?? 0);
-    }
-
-    loadFavoriteCount();
+    supabase
+      .from("nutrition_favorites")
+      .select("nutrition_products!inner(is_drink)", {
+        count: "exact",
+        head: true,
+      })
+      .eq("user_id", user.id)
+      .eq("nutrition_products.is_drink", false)
+      .then(({ count }: { count: number | null }) => {
+        setFavoriteCount(count ?? 0);
+      });
   }, [user, isFavorite]);
 
-  /* ───────────────── PRODUCT NAME ───────────────── */
+  /* ───────── PRODUCT NAME ───────── */
 
   useEffect(() => {
     if (!productKey || !lang) return;
 
-    async function loadProduct() {
-      const { data } = await supabase
-        .from("nutrition_product_translations")
-        .select("name")
-        .eq("product_key", productKey)
-        .eq("lang", lang)
-        .single<ProductTranslationRow>();
-
-      if (data) {
-        setProductName(data.name);
-      }
-    }
-
-    loadProduct();
+    supabase
+      .from("nutrition_product_translations")
+      .select("name")
+      .eq("product_key", productKey)
+      .eq("lang", lang)
+      .single()
+      .then(({ data }: { data: { name: string } | null }) => {
+        if (data) setProductName(data.name);
+      });
   }, [productKey, lang]);
 
-  /* ───────────────── PRODUCT SCORE ───────────────── */
+  /* ───────── PRODUCT SCORE ───────── */
 
   useEffect(() => {
     if (!productKey || !selectedPreparation || goal === null) return;
 
-    async function loadProductScore() {
-      const { data } = await supabase
-        .from("nutrition_product_scores")
-        .select("score_numeric")
-        .eq("product_key", productKey)
-        .eq("preparation_key", selectedPreparation)
-        .eq("goal_key", goal)
-        .single();
+    supabase
+      .from("nutrition_product_scores")
+      .select("score_numeric")
+      .eq("product_key", productKey)
+      .eq("preparation_key", selectedPreparation)
+      .eq("goal_key", goal)
+      .single()
+      .then(({ data }: { data: { score_numeric: number } | null }) => {
+        setProductScore(data?.score_numeric ?? null);
+      });
+  }, [productKey, selectedPreparation, goal]);
 
-      if (data?.score_numeric !== undefined) {
-        setProductScore(data.score_numeric);
-      } else {
-        setProductScore(null);
-      }
-    }
-
-    loadProductScore();
-  }, [productKey, goal, selectedPreparation]);
-
-  /* ───────────────── PREPARATIONS ───────────────── */
+  /* ───────── PREPARATIONS ───────── */
 
   useEffect(() => {
     if (!productKey || !lang) return;
 
-    async function loadPreparations() {
-      const { data } = await supabase
-        .from("nutrition_product_preparations")
-        .select("preparation_key")
-        .eq("product_key", productKey);
+    supabase
+      .from("nutrition_product_preparations")
+      .select("preparation_key")
+      .eq("product_key", productKey)
+      .then(async ({ data }: { data: { preparation_key: string }[] | null }) => {
+        if (!data) return;
 
-      if (!data) return;
+        const keys = [...new Set(data.map(d => d.preparation_key))];
 
-      const typedKeys = data as PreparationKeyRow[];
+        const { data: translations } = await supabase
+          .from("nutrition_preparation_translations")
+          .select("preparation_key, name")
+          .in("preparation_key", keys)
+          .eq("lang", lang);
 
-      const uniqueKeys = Array.from(
-        new Set(typedKeys.map((d) => d.preparation_key))
-      );
+        const mapped: Preparation[] = keys.map((key) => {
+          const found = translations?.find(
+            (t: any) => t.preparation_key === key
+          );
 
-      if (uniqueKeys.length === 0) return;
+          return {
+            preparation_key: key,
+            label: found?.name ?? key,
+          };
+        });
 
-      const { data: translations } = await supabase
-        .from("nutrition_preparation_translations")
-        .select("preparation_key, name")
-        .in("preparation_key", uniqueKeys)
-        .eq("lang", lang);
-
-      const typedTranslations =
-        (translations as PreparationTranslationRow[]) ?? [];
-
-      const mapped: Preparation[] = uniqueKeys.map((key) => {
-        const found = typedTranslations.find(
-          (t) => t.preparation_key === key
-        );
-
-        return {
-          preparation_key: key,
-          label: found?.name ?? key,
-        };
+        setPreparations(mapped);
+        setSelectedPreparation(mapped[0]?.preparation_key ?? null);
       });
-
-      setPreparations(mapped);
-
-      setSelectedPreparation((prev) => {
-        if (prev && mapped.some(p => p.preparation_key === prev)) {
-          return prev;
-        }
-        return mapped[0]?.preparation_key ?? null;
-      });
-    }
-
-    loadPreparations();
   }, [productKey, lang]);
 
-  /* ───────────────── PORTIONS ───────────────── */
+  /* ───────── PORTIONS ───────── */
 
   useEffect(() => {
     if (!selectedPreparation || !lang) return;
 
-    async function loadPortions() {
-      setPortions([]);
-      setSelectedPortion(null);
+    supabase
+      .from("nutrition_portions")
+      .select("unit_key, grams, ml")
+      .eq("product_key", productKey)
+      .eq("preparation_key", selectedPreparation)
+      .then(async ({ data }: { data: any[] | null }) => {
+        if (!data) return;
 
-      const { data: portionsRaw } = await supabase
-        .from("nutrition_portions")
-        .select("unit_key, grams, ml, sort_order")
-        .eq("product_key", productKey)
-        .eq("preparation_key", selectedPreparation)
-        .order("sort_order", { ascending: true });
+        const unitKeys = [...new Set(data.map(p => p.unit_key))];
 
-      if (!portionsRaw) return;
+        const { data: unitTranslations } = await supabase
+          .from("nutrition_unit_translations")
+          .select("unit_key, label")
+          .in("unit_key", unitKeys)
+          .eq("lang", lang);
 
-      const portionsData = portionsRaw as PortionRow[];
-      if (portionsData.length === 0) return;
+        const unitMap = new Map(
+          (unitTranslations ?? []).map((u: any) => [u.unit_key, u.label])
+        );
 
-      const unitKeys = Array.from(
-        new Set(portionsData.map((p) => p.unit_key))
-      );
-
-      const { data: unitTranslationsRaw } = await supabase
-        .from("nutrition_unit_translations")
-        .select("unit_key, label")
-        .in("unit_key", unitKeys)
-        .eq("lang", lang);
-
-      const unitTranslations =
-        (unitTranslationsRaw as UnitTranslationRow[]) ?? [];
-
-      const unitMap = new Map<string, string>(
-        unitTranslations.map((u) => [u.unit_key, u.label])
-      );
-
-      const mapped: Portion[] = portionsData.map((row) => {
-        const unitLabel = unitMap.get(row.unit_key);
-
-        const amount =
-          row.grams !== null
-            ? `${row.grams} g`
-            : `${row.ml} ml`;
-
-        return {
+        const mapped: Portion[] = data.map((row: any) => ({
           unit_key: row.unit_key,
           grams: row.grams,
           ml: row.ml,
-          label: unitLabel
-            ? `${unitLabel} (${amount})`
-            : amount,
-        };
+          label: `${unitMap.get(row.unit_key) ?? row.unit_key} (${
+            row.grams ? `${row.grams} g` : `${row.ml} ml`
+          })`,
+        }));
+
+        setPortions(mapped);
+        setSelectedPortion(mapped[0] ?? null);
       });
-
-      setPortions(mapped);
-      setSelectedPortion(mapped[0] ?? null);
-    }
-
-    loadPortions();
   }, [selectedPreparation, productKey, lang]);
 
-  /* ⭐ TOGGLE FAVORITE */
+  /* ───────── FAVORITE TOGGLE ───────── */
 
   async function toggleFavorite() {
     if (!user) return;
 
     if (isFavorite && favoriteId) {
-      await supabase
-        .from("nutrition_favorites")
-        .delete()
-        .eq("id", favoriteId);
-
+      await supabase.from("nutrition_favorites").delete().eq("id", favoriteId);
       setIsFavorite(false);
-      setFavoriteId(null);
       return;
     }
 
-    // 🔥 LIMIT CHECK
     if (
       limits.max_favorite_foods !== null &&
       favoriteCount >= limits.max_favorite_foods
     ) {
-      alert(
-        `Je hebt je limiet bereikt (${limits.max_favorite_foods} favorieten). Upgrade om meer toe te voegen.`
-      );
+      alert("Limiet bereikt. Upgrade nodig.");
       return;
     }
 
@@ -353,56 +238,13 @@ export default function AddFoodPage() {
     if (data) {
       setIsFavorite(true);
       setFavoriteId(data.id);
-      setFavoriteCount((prev) => prev + 1);
     }
   }
 
-  /* ───────────────── SAVE ───────────────── */
+  /* ───────── SAVE ───────── */
 
   async function handleSave() {
     if (!user || !selectedPortion || !selectedPreparation) return;
-
-    const { data: nutrition } = await supabase
-      .from("nutrition_product_preparations")
-      .select("*")
-      .eq("product_key", productKey)
-      .eq("preparation_key", selectedPreparation)
-      .single<NutritionRow>();
-
-    if (!nutrition) return;
-
-    const totalGrams = selectedPortion.grams
-      ? selectedPortion.grams * quantity
-      : null;
-
-    const totalMl = selectedPortion.ml
-      ? selectedPortion.ml * quantity
-      : null;
-
-    const factor =
-      totalGrams !== null
-        ? totalGrams / 100
-        : totalMl !== null
-        ? totalMl / 100
-        : 0;
-
-    const kcal =
-      (nutrition.kcal_per_100g ??
-        nutrition.kcal_per_100ml ??
-        0) * factor;
-
-    const protein = (nutrition.protein_per_100g ?? 0) * factor;
-    const carbs = (nutrition.carbs_per_100g ?? 0) * factor;
-    const fat = (nutrition.fat_per_100g ?? 0) * factor;
-    const fiber = (nutrition.fiber_per_100g ?? 0) * factor;
-    const sugar = (nutrition.sugar_per_100g ?? 0) * factor;
-    const alcohol = (nutrition.alcohol_per_100g ?? 0) * factor;
-    const sodium = (nutrition.sodium_per_100g ?? 0) * factor;
-
-    const water =
-      nutrition.water_percent !== null && totalGrams !== null
-        ? (nutrition.water_percent / 100) * totalGrams
-        : null;
 
     await supabase.from("nutrition_logs").insert({
       user_id: user.id,
@@ -411,143 +253,95 @@ export default function AddFoodPage() {
       preparation_key: selectedPreparation,
       unit_key: selectedPortion.unit_key,
       quantity,
-      grams: totalGrams,
-      ml: totalMl,
-      kcal,
-      protein,
-      carbs,
-      fat,
-      fiber,
-      sugar,
-      alcohol,
-      water,
-      sodium,
     });
 
     await refreshDashboard();
-
-    window.dispatchEvent(new Event("consumption-changed"));
     router.push("/dashboard");
   }
 
-  /* ───────────────── UI ───────────────── */
+  /* ───────── UI ───────── */
 
   return (
-    <div className="grid grid-cols-12 gap-6">
-      <div className="col-span-12">
-        <div className="bg-white rounded-[var(--radius)] shadow-sm border">
+    <div className="category-grid">
+      <div className="category-span-full">
+        <div className="category-card">
 
-          <div className="px-6 py-4 border-b flex items-center justify-between">
-            <h1 className="text-lg font-semibold">
-              {productName}
-            </h1>
+          {/* HEADER */}
+          <div className="flex justify-between items-start mb-2">
+            <h2>{productName}</h2>
 
-            <div className="flex items-center gap-3">
-
-              {productScore !== null && (
-                <div
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    productScore >= 80
-                      ? "bg-green-100 text-green-700"
-                      : productScore >= 50
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  Score {productScore} / 100
-                </div>
-              )}
-
-              <button
-                onClick={toggleFavorite}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
-                  isFavorite
-                    ? "bg-[#0095D3] text-white border-[#0095D3]"
-                    : "border-gray-300 text-gray-600 hover:border-[#0095D3] hover:text-[#0095D3]"
-                }`}
-              >
-                {isFavorite ? "★ Favoriet" : "☆ Favoriet"}
-              </button>
-
-            </div>
-          </div>
-
-          <div className="px-6 py-6 space-y-10">
-
-            <div>
-              <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                Bereiding
-              </h2>
-
-              <div className="space-y-3">
-                {preparations.map((p) => (
-                  <button
-                    key={p.preparation_key}
-                    onClick={() =>
-                      setSelectedPreparation(p.preparation_key)
-                    }
-                    className={`w-full text-left px-4 py-3 rounded-[var(--radius)] border transition ${
-                      selectedPreparation === p.preparation_key
-                        ? "border-[#0095D3] bg-[#E6F4FA] text-[#0095D3]"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                Eenheid
-              </h2>
-
-              <div className="space-y-3">
-                {portions.map((p) => (
-                  <button
-                    key={p.unit_key}
-                    onClick={() => setSelectedPortion(p)}
-                    className={`w-full text-left px-4 py-3 rounded-[var(--radius)] border transition ${
-                      selectedPortion?.unit_key === p.unit_key
-                        ? "border-[#0095D3] bg-[#E6F4FA] text-[#0095D3]"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                Aantal
-              </h2>
-
-              <input
-                type="number"
-                min={1}
-                value={quantity}
-                onChange={(e) =>
-                  setQuantity(
-                    Math.max(1, parseInt(e.target.value) || 1)
-                  )
-                }
-                className="w-32 border rounded-[var(--radius)] px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0095D3] focus:border-[#0095D3]"
-              />
-            </div>
-
-          </div>
-
-          <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
-            <button
-              onClick={handleSave}
-              className="bg-[#0095D3] text-white px-6 py-3 rounded-[var(--radius)] font-medium hover:opacity-90 transition"
-            >
-              Gereed
+            <button onClick={toggleFavorite} className="text-xl">
+              {isFavorite ? "★" : "☆"}
             </button>
           </div>
+
+          {/* SCORE */}
+          {productScore !== null && (
+            <div className="flex justify-between items-start mb-2">
+              ProductScore:
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  productScore >= 80
+                    ? "bg-green-100 text-green-700"
+                    : productScore >= 50
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {productScore}
+              </span>
+            </div>
+          )}
+
+          <hr className="mb-4" />
+
+          {/* BEREIDING */}
+          <h3>Bereiding</h3>
+          <div className="space-y-2 mb-4">
+            {preparations.map((p) => (
+              <button
+                key={p.preparation_key}
+                onClick={() => setSelectedPreparation(p.preparation_key)}
+                className="w-full text-left border rounded px-3 py-2"
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* EENHEID */}
+          <h3>Eenheid</h3>
+          <div className="space-y-2 mb-4">
+            {portions.map((p) => (
+              <button
+                key={p.unit_key}
+                onClick={() => setSelectedPortion(p)}
+                className="w-full text-left border rounded px-3 py-2"
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* AANTAL */}
+          <h3>Aantal</h3>
+          <input
+            type="number"
+            value={quantity}
+            onChange={(e) =>
+              setQuantity(Math.max(1, Number(e.target.value)))
+            }
+            className="border rounded px-3 py-2 w-24 mb-6"
+          />
+
+          {/* BUTTON */}
+          <button
+            onClick={handleSave}
+            className="category-card-button category-card-link"
+          >
+            <span>Toevoegen</span>
+            <img src="/arrow_right_circle.svg" alt="" className="category-card-icon" aria-hidden="true" />
+          </button>
 
         </div>
       </div>
