@@ -11,6 +11,7 @@ import { getLocalDayKey } from "@/lib/dayKey";
 import { useLangContext } from "@/lib/LangProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useGoalContext } from "@/lib/GoalProvider";
+import NutritionPreview from "@/components/ui/NutritionPreview";
 import { useMemo } from "react";
 import Image from "next/image";
 import "@/styles/category.css";
@@ -48,6 +49,17 @@ type UnitTranslationRow = {
 type Preparation = {
   preparation_key: string;
   label: string;
+  sort_order: number;
+};
+
+type PreparationMetaRow = {
+  preparation_key: string;
+  sort_order: number;
+};
+
+type PreparationWithMeta = {
+  preparation_key: string;
+  is_default: boolean;
 };
 
 type Portion = {
@@ -55,6 +67,8 @@ type Portion = {
   grams: number | null;
   ml: number | null;
   label: string;
+  sort_order: number;
+  is_default: boolean;
 };
 
 type NutritionRow = {
@@ -68,6 +82,7 @@ type NutritionRow = {
   alcohol_per_100g: number | null;
   water_percent: number | null;
   sodium_per_100g: number | null;
+  salt_per_100g: number | null;
 };
 
 type FavoriteRow = {
@@ -211,44 +226,72 @@ export default function AddFoodPage() {
   /* ───────── PREPARATIONS ───────── */
 
   useEffect(() => {
-    if (!lang) return;
+    if (!productKey || !lang) return;
 
     async function loadPreparations() {
-      const { data } = await supabase
+      const { data: prepData } = await supabase
         .from("nutrition_product_preparations")
         .select("preparation_key")
         .eq("product_key", productKey);
 
-      if (!data) return;
+      if (!prepData) return;
 
-      const typed = data as PreparationKeyRow[];
+      const typedPrep = prepData as {
+        preparation_key: string;
+      }[];
 
+      // unieke keys
       const uniqueKeys = Array.from(
-        new Set(typed.map((d) => d.preparation_key))
+        new Map<string, { preparation_key: string }>(
+          typedPrep.map((d) => [d.preparation_key, d])
+        ).values()
       );
 
+      const keys = uniqueKeys.map((d) => d.preparation_key);
+
+      if (keys.length === 0) return;
+
+      // vertalingen
       const { data: translations } = await supabase
         .from("nutrition_preparation_translations")
         .select("preparation_key, name")
-        .in("preparation_key", uniqueKeys)
+        .in("preparation_key", keys)
         .eq("lang", lang);
 
-      const typedTranslations =
-        (translations as PreparationTranslationRow[]) ?? [];
+      const translationMap = new Map<string, string>(
+        ((translations as PreparationTranslationRow[]) ?? []).map((t) => [
+          t.preparation_key,
+          t.name,
+        ])
+      );
 
-      const mapped: Preparation[] = uniqueKeys.map((key) => {
-        const found = typedTranslations.find(
-          (t) => t.preparation_key === key
-        );
+      // sort_order
+      const { data: meta } = await supabase
+        .from("nutrition_preparations")
+        .select("preparation_key, sort_order");
 
-        return {
-          preparation_key: key,
-          label: found?.name ?? key,
-        };
-      });
+      const metaMap = new Map<string, number>(
+        ((meta as { preparation_key: string; sort_order: number }[]) ?? []).map(
+          (m) => [m.preparation_key, m.sort_order]
+        )
+      );
+
+      // mappen + sorteren
+      const mapped: Preparation[] = uniqueKeys
+        .map((row) => ({
+          preparation_key: row.preparation_key,
+          label:
+            translationMap.get(row.preparation_key) ??
+            row.preparation_key,
+          sort_order:
+            metaMap.get(row.preparation_key) ?? 999,
+        }))
+        .sort((a, b) => a.sort_order - b.sort_order);
 
       setPreparations(mapped);
-      setSelectedPreparation(mapped[0]?.preparation_key ?? null)
+
+      // default = eerste
+      setSelectedPreparation(mapped[0]?.preparation_key ?? null);
     }
 
     loadPreparations();
@@ -262,13 +305,20 @@ export default function AddFoodPage() {
     async function loadPortions() {
       const { data } = await supabase
         .from("nutrition_portions")
-        .select("unit_key, grams, ml")
+        .select("unit_key, grams, ml, sort_order, is_default")
         .eq("product_key", productKey)
-        .eq("preparation_key", selectedPreparation);
+        .eq("preparation_key", selectedPreparation)
+        .order("sort_order", { ascending: true });
 
       if (!data) return;
 
-      const typed = data as PortionRow[];
+      const typed = data as {
+        unit_key: string;
+        grams: number | null;
+        ml: number | null;
+        sort_order: number;
+        is_default: boolean;
+      }[];
 
       const unitKeys = Array.from(
         new Set(typed.map((p) => p.unit_key))
@@ -281,23 +331,47 @@ export default function AddFoodPage() {
         .eq("lang", lang);
 
       const unitMap = new Map<string, string>(
-        (unitTranslations as UnitTranslationRow[])?.map((u) => [
+        ((unitTranslations as UnitTranslationRow[]) ?? []).map((u) => [
           u.unit_key,
           u.label,
         ])
       );
 
-      const mapped: Portion[] = typed.map((row) => ({
-        unit_key: row.unit_key,
-        grams: row.grams,
-        ml: row.ml,
-        label: `${unitMap.get(row.unit_key)} (${
-          row.grams ? `${row.grams} g` : `${row.ml} ml`
-        })`,
-      }));
+      const mapped: Portion[] = typed.map((row) => {
+        const unitLabel =
+          unitMap.get(row.unit_key) ?? row.unit_key;
+
+        let label = unitLabel;
+
+        // ❗ geen suffix voor basis units
+        const isBaseUnit =
+          row.unit_key === "GRAM" || row.unit_key === "ML";
+
+        if (!isBaseUnit) {
+          if (row.grams) {
+            label += ` (${row.grams} gram)`;
+          } else if (row.ml) {
+            label += ` (${row.ml} ml)`;
+          }
+        }
+
+        return {
+          unit_key: row.unit_key,
+          grams: row.grams,
+          ml: row.ml,
+          label,
+          sort_order: row.sort_order,
+          is_default: row.is_default,
+        };
+      });
 
       setPortions(mapped);
-      setSelectedPortion(mapped[0] ?? null);
+
+      // ✅ default selectie
+      const defaultItem =
+        mapped.find((p) => p.is_default) ?? mapped[0] ?? null;
+
+      setSelectedPortion(defaultItem);
     }
 
     loadPortions();
@@ -364,6 +438,8 @@ export default function AddFoodPage() {
         ? totalMl / 100
         : 0;
 
+    const sodium = (nutrition.sodium_per_100g ?? 0) * factor;
+
     return {
       kcal:
         (nutrition.kcal_per_100g ??
@@ -373,6 +449,9 @@ export default function AddFoodPage() {
       protein: (nutrition.protein_per_100g ?? 0) * factor,
       carbs: (nutrition.carbs_per_100g ?? 0) * factor,
       fat: (nutrition.fat_per_100g ?? 0) * factor,
+      fiber: (nutrition.fiber_per_100g ?? 0) * factor,
+      sugar: (nutrition.sugar_per_100g ?? 0) * factor,
+      salt: (nutrition.salt_per_100g ?? 0) * factor,
     };
   }, [nutrition, selectedPortion, quantity]);
 
@@ -467,12 +546,12 @@ export default function AddFoodPage() {
 
           {productScore !== null && (
             <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              className={`px-3 py-1 rounded-[var(--radius)] text-xs font-semibold ${
                 productScore >= 80
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-green-600 text-white"
                   : productScore >= 50
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-red-100 text-red-700"
+                  ? "bg-yellow-300 text-black"
+                  : "bg-[#C80000] text-white"
               }`}
             >
               Score {productScore} / 100
@@ -497,66 +576,70 @@ export default function AddFoodPage() {
       </div>
 
       {/* CARD 2 — BEREIDING */}
-      <div className="category-card p-0 overflow-hidden">
-        <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
-          Bereiding
+      {preparations.length > 1 && (
+        <div className="category-card p-0 overflow-hidden">
+          <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
+            Bereiding
+          </div>
+
+          <div className="-mb-3 -mx-6">
+            {preparations.map((p) => {
+              const active = selectedPreparation === p.preparation_key;
+
+              return (
+                <button
+                  key={p.preparation_key}
+                  onClick={() => setSelectedPreparation(p.preparation_key)}
+                  className={`w-full text-left px-4 py-2 flex items-center gap-3 border-b border-[#DBE4F0] ${
+                    active ? "text-[#0BA4E0] font-medium" : ""
+                  }`}
+                >
+                  {active ? (
+                    <span className="text-[#0BA4E0]">✓</span>
+                  ) : (
+                    <span className="w-4" />
+                  )}
+
+                  <span>{p.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-
-        <div className="-mb-3 -mx-6">
-          {preparations.map((p) => {
-            const active = selectedPreparation === p.preparation_key;
-
-            return (
-              <button
-                key={p.preparation_key}
-                onClick={() => setSelectedPreparation(p.preparation_key)}
-                className={`w-full text-left px-4 py-2 flex items-center gap-3 border-b border-[#DBE4F0] ${
-                  active ? "text-[#0BA4E0] font-medium" : ""
-                }`}
-              >
-                {active ? (
-                  <span className="text-[#0BA4E0]">✓</span>
-                ) : (
-                  <span className="w-4" />
-                )}
-
-                <span>{p.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      )}
 
       {/* CARD 3 — EENHEID */}
-      <div className="category-card overflow-hidden">
-        <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
-          Eenheid
+      {portions.length > 1 && (
+        <div className="category-card p-0 overflow-hidden">
+          <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
+            Eenheid
+          </div>
+
+          <div className="-mb-3 -mx-6">
+            {portions.map((p) => {
+              const active = selectedPortion?.unit_key === p.unit_key;
+
+              return (
+                <button
+                  key={p.unit_key}
+                  onClick={() => setSelectedPortion(p)}
+                  className={`w-full text-left px-4 py-2 flex items-center gap-3 border-b border-[#DBE4F0] ${
+                    active ? "text-[#0BA4E0] font-medium" : ""
+                  }`}
+                >
+                  {active ? (
+                    <span className="text-[#0BA4E0]">✓</span>
+                  ) : (
+                    <span className="w-3" />
+                  )}
+
+                  <span>{p.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-
-        <div className="-mb-3 -mx-6">
-          {portions.map((p) => {
-            const active = selectedPortion?.unit_key === p.unit_key;
-
-            return (
-              <button
-                key={p.unit_key}
-                onClick={() => setSelectedPortion(p)}
-                className={`w-full text-left px-4 py-2 flex items-center gap-3 border-b border-[#DBE4F0] ${
-                  active ? "text-[#0BA4E0] font-medium" : ""
-                }`}
-              >
-                {active ? (
-                  <span className="text-[#0BA4E0]">✓</span>
-                ) : (
-                  <span className="w-3" />
-                )}
-
-                <span>{p.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      )}
 
       {/* CARD 4 — AANTAL */}
       <div className="category-card p-0 overflow-hidden">
@@ -564,22 +647,10 @@ export default function AddFoodPage() {
           Aantal
         </div>
 
-        <div className="mt-4 -mb-2">
+        <div className="mt-3 -mb-3 -mx-3">
 
           {/* ✅ PREVIEW (bovenaan) */}
-          {nutritionPreview && (
-            <div className="px-1 mb-3 text-sm text-[#191970] space-y-1">
-              <div className="font-semibold">
-                Energie: ≈ {Math.round(nutritionPreview.kcal)} kcal
-              </div>
-
-              <div className="flex flex-wrap gap-3 text-xs">
-                <span>Eiwitten: {Math.round(nutritionPreview.protein)} g</span>
-                <span>Koolhydraten: {Math.round(nutritionPreview.carbs)} g</span>
-                <span>Vetten: {Math.round(nutritionPreview.fat)} g</span>
-              </div>
-            </div>
-          )}
+            <NutritionPreview data={nutritionPreview} />
 
           {/* ✅ INPUT + BUTTON ROW */}
           <div className="flex items-stretch gap-3">
