@@ -12,6 +12,7 @@ import { useLangContext } from "@/lib/LangProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useGoalContext } from "@/lib/GoalProvider";
 import { useMemo } from "react";
+import Image from "next/image";
 import "@/styles/category.css";
 
 /* ───────── TYPES ───────── */
@@ -484,8 +485,13 @@ export default function AddFoodPage() {
             {productName}
           </div>
 
-          <button onClick={toggleFavorite} className="text-[#191970] ml-2">
-            {isFavorite ? "★" : "☆"}
+          <button onClick={toggleFavorite} className="ml-2 transition-transform hover:scale-110">
+            <Image
+              src={isFavorite ? "/favorite-active.svg" : "/favorite-not-active.svg"}
+              alt={isFavorite ? "Verwijder favoriet" : "Markeer als favoriet"}
+              width={23}
+              height={23}
+            />
           </button>
         </div>
       </div>
