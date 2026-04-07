@@ -367,11 +367,12 @@ export default function AddFoodPage() {
 
       setPortions(mapped);
 
-      // ✅ default selectie
-      const defaultItem =
-        mapped.find((p) => p.is_default) ?? mapped[0] ?? null;
-
-      setSelectedPortion(defaultItem);
+      setSelectedPortion((prev) => {
+        if (prev && mapped.some(p => p.unit_key === prev.unit_key)) {
+          return prev;
+        }
+        return mapped[0] ?? null;
+      });
     }
 
     loadPortions();

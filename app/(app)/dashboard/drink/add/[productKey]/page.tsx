@@ -11,6 +11,10 @@ import { getLocalDayKey } from "@/lib/dayKey";
 import { useLangContext } from "@/lib/LangProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useGoalContext } from "@/lib/GoalProvider";
+import NutritionPreview from "@/components/ui/NutritionPreview";
+import { useMemo } from "react";
+import Image from "next/image";
+import "@/styles/category.css";
 
 /* ───────────────── Types ───────────────── */
 
@@ -76,33 +80,31 @@ type FavoriteRow = {
 
 export default function AddFoodPage() {
   const params = useParams() as Params;
-  const productKey = params.productKey;
-
-  const router = useRouter();
-  const { user } = useUser();
-  const { lang } = useLangContext();
-  const dayKey = getLocalDayKey(useDayNow());
-
-  const { refreshDashboard, limits } = useDashboard();
-
-  const { goal } = useGoalContext();
-  const [productName, setProductName] = useState<string>("");
-  const [productScore, setProductScore] = useState<number | null>(null);
-
-  const [preparations, setPreparations] = useState<Preparation[]>([]);
-  const [selectedPreparation, setSelectedPreparation] =
-    useState<string | null>(null);
-
-  const [portions, setPortions] = useState<Portion[]>([]);
-  const [selectedPortion, setSelectedPortion] =
-    useState<Portion | null>(null);
-
-  const [quantity, setQuantity] = useState<number>(1);
-
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const [favoriteId, setFavoriteId] = useState<string | null>(null);
-
-  const [favoriteCount, setFavoriteCount] = useState<number>(0);
+    const productKey = params.productKey;
+  
+    const router = useRouter();
+    const { user } = useUser();
+    const { lang } = useLangContext();
+    const dayKey = getLocalDayKey(useDayNow());
+  
+    const { refreshDashboard, limits } = useDashboard();
+    const { goal } = useGoalContext();
+  
+    const [productName, setProductName] = useState<string>("");
+    const [productScore, setProductScore] = useState<number | null>(null);
+  
+    const [preparations, setPreparations] = useState<Preparation[]>([]);
+    const [selectedPreparation, setSelectedPreparation] = useState<string | null>(null);
+  
+    const [portions, setPortions] = useState<Portion[]>([]);
+    const [selectedPortion, setSelectedPortion] = useState<Portion | null>(null);
+  
+    const [quantity, setQuantity] = useState<number | null>(null);
+    const [nutrition, setNutrition] = useState<NutritionRow | null>(null);
+  
+    const [isFavorite, setIsFavorite] = useState<boolean>(false);
+    const [favoriteId, setFavoriteId] = useState<string | null>(null);
+    const [favoriteCount, setFavoriteCount] = useState<number>(0);
 
   /* ⭐ CHECK FAVORITE */
 
@@ -199,6 +201,23 @@ export default function AddFoodPage() {
     loadProductScore();
   }, [productKey, goal, selectedPreparation]);
 
+  useEffect(() => {
+    if (!productKey || !selectedPreparation) return;
+
+    async function loadNutrition() {
+      const { data } = await supabase
+        .from("nutrition_product_preparations")
+        .select("*")
+        .eq("product_key", productKey)
+        .eq("preparation_key", selectedPreparation)
+        .single<NutritionRow>();
+
+      setNutrition(data ?? null);
+    }
+
+    loadNutrition();
+  }, [productKey, selectedPreparation]);
+
   /* ───────────────── PREPARATIONS ───────────────── */
 
   useEffect(() => {
@@ -259,8 +278,7 @@ export default function AddFoodPage() {
     if (!selectedPreparation || !lang) return;
 
     async function loadPortions() {
-      setPortions([]);
-      setSelectedPortion(null);
+
 
       const { data: portionsRaw } = await supabase
         .from("nutrition_portions")
@@ -297,7 +315,9 @@ export default function AddFoodPage() {
         const amount =
           row.grams !== null
             ? `${row.grams} g`
-            : `${row.ml} ml`;
+            : row.ml !== null
+            ? `${row.ml} ml`
+            : "";
 
         return {
           unit_key: row.unit_key,
@@ -310,7 +330,13 @@ export default function AddFoodPage() {
       });
 
       setPortions(mapped);
-      setSelectedPortion(mapped[0] ?? null);
+
+      setSelectedPortion((prev) => {
+        if (prev && mapped.some(p => p.unit_key === prev.unit_key)) {
+          return prev;
+        }
+        return mapped[0] ?? null;
+      });
     }
 
     loadPortions();
@@ -361,24 +387,17 @@ export default function AddFoodPage() {
 
   /* ───────────────── SAVE ───────────────── */
 
-  async function handleSave() {
-    if (!user || !selectedPortion || !selectedPreparation) return;
+  const nutritionPreview = useMemo(() => {
+    if (!nutrition || !selectedPortion) return null;
 
-    const { data: nutrition } = await supabase
-      .from("nutrition_product_preparations")
-      .select("*")
-      .eq("product_key", productKey)
-      .eq("preparation_key", selectedPreparation)
-      .single<NutritionRow>();
-
-    if (!nutrition) return;
+    const qty = quantity ?? 1;
 
     const totalGrams = selectedPortion.grams
-      ? selectedPortion.grams * quantity
+      ? selectedPortion.grams * qty
       : null;
 
     const totalMl = selectedPortion.ml
-      ? selectedPortion.ml * quantity
+      ? selectedPortion.ml * qty
       : null;
 
     const factor =
@@ -388,170 +407,252 @@ export default function AddFoodPage() {
         ? totalMl / 100
         : 0;
 
-    const kcal =
-      (nutrition.kcal_per_100g ??
-        nutrition.kcal_per_100ml ??
-        0) * factor;
-
-    const protein = (nutrition.protein_per_100g ?? 0) * factor;
-    const carbs = (nutrition.carbs_per_100g ?? 0) * factor;
-    const fat = (nutrition.fat_per_100g ?? 0) * factor;
-    const fiber = (nutrition.fiber_per_100g ?? 0) * factor;
-    const sugar = (nutrition.sugar_per_100g ?? 0) * factor;
-    const alcohol = (nutrition.alcohol_per_100g ?? 0) * factor;
     const sodium = (nutrition.sodium_per_100g ?? 0) * factor;
 
-    const water =
-      nutrition.water_percent !== null && totalGrams !== null
-        ? (nutrition.water_percent / 100) * totalGrams
+    return {
+      kcal:
+        (nutrition.kcal_per_100g ??
+          nutrition.kcal_per_100ml ??
+          0) * factor,
+
+      protein: (nutrition.protein_per_100g ?? 0) * factor,
+      carbs: (nutrition.carbs_per_100g ?? 0) * factor,
+      fat: (nutrition.fat_per_100g ?? 0) * factor,
+      fiber: (nutrition.fiber_per_100g ?? 0) * factor,
+      sugar: (nutrition.sugar_per_100g ?? 0) * factor,
+      salt: 0,
+    };
+  }, [nutrition, selectedPortion, quantity]);
+
+  async function handleSave() {
+      if (!user || !selectedPortion || !selectedPreparation) return;
+  
+      const finalQuantity = quantity ?? 1;
+  
+      const { data: nutrition } = await supabase
+        .from("nutrition_product_preparations")
+        .select("*")
+        .eq("product_key", productKey)
+        .eq("preparation_key", selectedPreparation)
+        .single<NutritionRow>();
+  
+      if (!nutrition) return;
+  
+      const totalGrams = selectedPortion.grams
+        ? selectedPortion.grams * finalQuantity
         : null;
+  
+      const totalMl = selectedPortion.ml
+        ? selectedPortion.ml * finalQuantity
+        : null;
+  
+      const factor =
+        totalGrams !== null
+          ? totalGrams / 100
+          : totalMl !== null
+          ? totalMl / 100
+          : 0;
+  
+      const kcal =
+        (nutrition.kcal_per_100g ?? nutrition.kcal_per_100ml ?? 0) * factor;
+  
+      const protein = (nutrition.protein_per_100g ?? 0) * factor;
+      const carbs = (nutrition.carbs_per_100g ?? 0) * factor;
+      const fat = (nutrition.fat_per_100g ?? 0) * factor;
+      const fiber = (nutrition.fiber_per_100g ?? 0) * factor;
+      const sugar = (nutrition.sugar_per_100g ?? 0) * factor;
+      const alcohol = (nutrition.alcohol_per_100g ?? 0) * factor;
+      const sodium = (nutrition.sodium_per_100g ?? 0) * factor;
+  
+      const water =
+        nutrition.water_percent !== null && totalGrams !== null
+          ? (nutrition.water_percent / 100) * totalGrams
+          : null;
+  
+      const { error } = await supabase.from("nutrition_logs").insert({
+        user_id: user.id,
+        log_date: dayKey,
+        product_key: productKey,
+        preparation_key: selectedPreparation,
+        unit_key: selectedPortion.unit_key,
+        quantity: finalQuantity, // 👈 BELANGRIJK
+        grams: totalGrams,
+        ml: totalMl,
+        kcal,
+        protein,
+        carbs,
+        fat,
+        fiber,
+        sugar,
+        alcohol,
+        water,
+        sodium,
+      });
+  
+      if (error) {
+        console.error(error);
+        alert(error.message);
+        return;
+     }
+  
+      await refreshDashboard();
+      router.push("/dashboard");
+    }
 
-    await supabase.from("nutrition_logs").insert({
-      user_id: user.id,
-      log_date: dayKey,
-      product_key: productKey,
-      preparation_key: selectedPreparation,
-      unit_key: selectedPortion.unit_key,
-      quantity,
-      grams: totalGrams,
-      ml: totalMl,
-      kcal,
-      protein,
-      carbs,
-      fat,
-      fiber,
-      sugar,
-      alcohol,
-      water,
-      sodium,
-    });
-
-    await refreshDashboard();
-
-    window.dispatchEvent(new Event("consumption-changed"));
-    router.push("/dashboard");
-  }
-
-  /* ───────────────── UI ───────────────── */
-
-  return (
-    <div className="grid grid-cols-12 gap-6">
-      <div className="col-span-12">
-        <div className="bg-white rounded-[var(--radius)] shadow-sm border">
-
-          <div className="px-6 py-4 border-b flex items-center justify-between">
-            <h1 className="text-lg font-semibold">
-              {productName}
-            </h1>
-
-            <div className="flex items-center gap-3">
-
-              {productScore !== null && (
-                <div
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    productScore >= 80
-                      ? "bg-green-100 text-green-700"
-                      : productScore >= 50
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  Score {productScore} / 100
-                </div>
-              )}
-
-              <button
-                onClick={toggleFavorite}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
-                  isFavorite
-                    ? "bg-[#0095D3] text-white border-[#0095D3]"
-                    : "border-gray-300 text-gray-600 hover:border-[#0095D3] hover:text-[#0095D3]"
+  /* ───────── UI ───────── */
+  
+    return (
+    <div className="category-grid">
+      <div className="category-span-full space-y-3">
+  
+        {/* CARD 1 — PRODUCT */}
+        <div className="category-card p-0 overflow-hidden">
+          <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 flex justify-between items-center">
+            <span className="font-semibold text-[#191970]">
+              <img src="/nutrition.svg" alt="" aria-hidden="true" className="title-icon" />
+              Product
+            </span>
+  
+            {productScore !== null && (
+              <span
+                className={`px-3 py-1 rounded-[var(--radius)] text-xs font-semibold ${
+                  productScore >= 80
+                    ? "bg-green-600 text-white"
+                    : productScore >= 50
+                    ? "bg-yellow-300 text-black"
+                    : "bg-[#C80000] text-white"
                 }`}
               >
-                {isFavorite ? "★ Favoriet" : "☆ Favoriet"}
-              </button>
-
-            </div>
+                Score {productScore} / 100
+              </span>
+            )}
           </div>
-
-          <div className="px-6 py-6 space-y-10">
-
-            <div>
-              <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                Bereiding
-              </h2>
-
-              <div className="space-y-3">
-                {preparations.map((p) => (
+  
+          <div className="py-3 px-0 -mx-3 -mb-4 flex justify-between items-start">
+            <div className="text-[#191970] font-semibold">
+              {productName}
+            </div>
+  
+            <button onClick={toggleFavorite} className="ml-2 transition-transform hover:scale-110">
+              <Image
+                src={isFavorite ? "/favorite-active.svg" : "/favorite-not-active.svg"}
+                alt={isFavorite ? "Verwijder favoriet" : "Markeer als favoriet"}
+                width={23}
+                height={23}
+              />
+            </button>
+          </div>
+        </div>
+  
+        {/* CARD 2 — BEREIDING */}
+        {preparations.length > 1 && (
+          <div className="category-card p-0 overflow-hidden">
+            <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
+              Bereiding
+            </div>
+  
+            <div className="-mb-3 -mx-6">
+              {preparations.map((p) => {
+                const active = selectedPreparation === p.preparation_key;
+  
+                return (
                   <button
                     key={p.preparation_key}
-                    onClick={() =>
-                      setSelectedPreparation(p.preparation_key)
-                    }
-                    className={`w-full text-left px-4 py-3 rounded-[var(--radius)] border transition ${
-                      selectedPreparation === p.preparation_key
-                        ? "border-[#0095D3] bg-[#E6F4FA] text-[#0095D3]"
-                        : "border-gray-200 hover:border-gray-300"
+                    onClick={() => setSelectedPreparation(p.preparation_key)}
+                    className={`w-full text-left px-4 py-2 flex items-center gap-3 border-b border-[#DBE4F0] ${
+                      active ? "text-[#0BA4E0] font-medium" : ""
                     }`}
                   >
-                    {p.label}
+                    {active ? (
+                      <span className="text-[#0BA4E0]">✓</span>
+                    ) : (
+                      <span className="w-4" />
+                    )}
+  
+                    <span>{p.label}</span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
-
-            <div>
-              <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                Eenheid
-              </h2>
-
-              <div className="space-y-3">
-                {portions.map((p) => (
+          </div>
+        )}
+  
+        {/* CARD 3 — EENHEID */}
+        {portions.length > 1 && (
+          <div className="category-card p-0 overflow-hidden">
+            <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
+              Eenheid
+            </div>
+  
+            <div className="-mb-3 -mx-6">
+              {portions.map((p) => {
+                const active = selectedPortion?.unit_key === p.unit_key;
+  
+                return (
                   <button
                     key={p.unit_key}
                     onClick={() => setSelectedPortion(p)}
-                    className={`w-full text-left px-4 py-3 rounded-[var(--radius)] border transition ${
-                      selectedPortion?.unit_key === p.unit_key
-                        ? "border-[#0095D3] bg-[#E6F4FA] text-[#0095D3]"
-                        : "border-gray-200 hover:border-gray-300"
+                    className={`w-full text-left px-4 py-2 flex items-center gap-3 border-b border-[#DBE4F0] ${
+                      active ? "text-[#0BA4E0] font-medium" : ""
                     }`}
                   >
-                    {p.label}
+                    {active ? (
+                      <span className="text-[#0BA4E0]">✓</span>
+                    ) : (
+                      <span className="w-3" />
+                    )}
+  
+                    <span>{p.label}</span>
                   </button>
-                ))}
+                );
+              })}
+            </div>
+          </div>
+        )}
+  
+        {/* CARD 4 — AANTAL */}
+        <div className="category-card p-0 overflow-hidden">
+                <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
+                  Aantal
+                </div>
+        
+                <div className="mt-3 -mb-3 -mx-3">
+        
+                  {/* ✅ PREVIEW (bovenaan) */}
+                    <NutritionPreview data={nutritionPreview} />
+        
+                  {/* ✅ INPUT + BUTTON ROW */}
+                  <div className="flex items-stretch gap-3">
+                    <input
+                      type="number"
+                      placeholder="1"
+                      value={quantity ?? ""}
+                      onChange={(e) =>
+                        setQuantity(
+                          e.target.value === ""
+                            ? null
+                            : Math.max(1, Number(e.target.value))
+                        )
+                      }
+                      className="text-right border border-[#191970] rounded px-4 w-24"
+                    />
+        
+                    <button
+                      onClick={handleSave}
+                      className="category-card-link flex-1 h-[42px] text-sm !justify-between px-4 items-center"
+                    >
+                      <span>Toevoegen</span>
+                      <img
+                        src="/arrow_right_circle.svg"
+                        alt=""
+                        className="category-card-icon"
+                      />
+                    </button>
+                  </div>
+        
+                </div>
               </div>
-            </div>
-
-            <div>
-              <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                Aantal
-              </h2>
-
-              <input
-                type="number"
-                min={1}
-                value={quantity}
-                onChange={(e) =>
-                  setQuantity(
-                    Math.max(1, parseInt(e.target.value) || 1)
-                  )
-                }
-                className="w-32 border rounded-[var(--radius)] px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0095D3] focus:border-[#0095D3]"
-              />
-            </div>
-
-          </div>
-
-          <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
-            <button
-              onClick={handleSave}
-              className="bg-[#0095D3] text-white px-6 py-3 rounded-[var(--radius)] font-medium hover:opacity-90 transition"
-            >
-              Gereed
-            </button>
-          </div>
-
-        </div>
+  
       </div>
     </div>
   );
