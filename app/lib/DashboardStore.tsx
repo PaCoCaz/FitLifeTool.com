@@ -46,6 +46,7 @@ type PlanFeatures = {
 
 type PlanLimits = {
   max_favorite_foods: number | null;
+  max_favorite_drinks: number | null;
 };
 
 const DashboardContext = createContext<DashboardState | null>(null);
@@ -80,7 +81,8 @@ export function DashboardProvider({
   });
 
   const [limits, setLimits] = useState<PlanLimits>({
-    max_favorite_foods: 2,
+    max_favorite_foods: 3,
+    max_favorite_drinks: 3,
   });
 
   const [ready, setReady] = useState(false);
@@ -180,7 +182,8 @@ export function DashboardProvider({
       });
 
       setLimits({
-        max_favorite_foods: 2,
+        max_favorite_foods: 3,
+        max_favorite_drinks: 3,
       });
     }
 

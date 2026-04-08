@@ -310,22 +310,31 @@ export default function AddFoodPage() {
       );
 
       const mapped: Portion[] = portionsData.map((row) => {
-        const unitLabel = unitMap.get(row.unit_key);
+        const unitLabel = unitMap.get(row.unit_key) ?? row.unit_key;
 
-        const amount =
-          row.grams !== null
-            ? `${row.grams} g`
-            : row.ml !== null
-            ? `${row.ml} ml`
-            : "";
+        const isBaseUnit =
+          row.unit_key === "GRAM" || row.unit_key === "ML";
+
+        let label = unitLabel;
+
+        if (!isBaseUnit) {
+          const amount =
+            row.grams !== null
+              ? `${row.grams} g`
+              : row.ml !== null
+              ? `${row.ml} ml`
+              : "";
+
+          if (amount) {
+            label += ` (${amount})`;
+          }
+        }
 
         return {
           unit_key: row.unit_key,
           grams: row.grams,
           ml: row.ml,
-          label: unitLabel
-            ? `${unitLabel} (${amount})`
-            : amount,
+          label,
         };
       });
 
@@ -364,7 +373,7 @@ export default function AddFoodPage() {
       favoriteCount >= limits.max_favorite_foods
     ) {
       alert(
-        `Je hebt je limiet bereikt (${limits.max_favorite_foods} favorieten). Upgrade om meer toe te voegen.`
+        `Je hebt je limiet van ${limits.max_favorite_foods} favorieten bereikt, upgrade je account om meer favorieten toe te kunnen voegen.`
       );
       return;
     }

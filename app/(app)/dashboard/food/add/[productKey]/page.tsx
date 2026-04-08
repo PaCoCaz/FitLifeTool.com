@@ -400,7 +400,7 @@ export default function AddFoodPage() {
       limits.max_favorite_foods !== null &&
       favoriteCount >= limits.max_favorite_foods
     ) {
-      alert("Limiet bereikt. Upgrade nodig.");
+      alert("Je hebt je limiet van ${limits.max_favorite_foods} favorieten bereikt, upgrade je account om meer favorieten toe te kunnen voegen");
       return;
     }
 
