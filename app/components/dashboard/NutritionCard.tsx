@@ -5,6 +5,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
+
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 
@@ -198,17 +200,15 @@ export default function NutritionCard() {
   return (
 
     <Card
-      title={t.nutrition.title}
-      icon={<Image src="/nutrition.svg" alt="" width={16} height={16} />}
-      action={
-        <div
-          className={`rounded-[var(--radius)] px-3 py-1 text-xs font-semibold whitespace-nowrap ${nutritionStatus.color}`}
-        >
-          FitLifeScore {pillScore} / 100
-        </div>
+      header={
+        <CardHeader
+          icon="/nutrition.svg"
+          title={t.nutrition.title}
+          score={pillScore}
+          scoreColor={nutritionStatus.color}
+        />
       }
     >
-
       <div className="h-full flex flex-col justify-between">
 
         <div className="space-y-1">

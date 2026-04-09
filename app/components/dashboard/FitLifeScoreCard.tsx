@@ -4,6 +4,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 
 import { useClockNow } from "@/lib/useClockNow";
 import { getExpectedHydrationProgress } from "@/lib/hydrationScore";
@@ -141,21 +142,24 @@ export default function FitLifeScoreCard() {
 
   return (
     <Card
-      title="FitLifeScore"
-      action={
-        <div
-          className={`
-            rounded-[var(--radius)]
-            px-3 py-1
-            text-xs
-            font-semibold
-            min-w-[130px]
-            text-center
-            ${pillColor}
-          `}
-        >
-          Vandaag | {mounted ? formatTime(clockNow) : "—"}
-        </div>
+      header={
+        <CardHeader
+          icon="/logo.svg"
+          title="FitLifeScore"
+          rightContent={
+            <div className={`
+              rounded-[var(--radius)]
+              px-3 py-1
+              text-xs
+              font-semibold
+              min-w-[130px]
+              text-center
+              ${pillColor}
+            `}>
+              Vandaag | {mounted ? formatTime(clockNow) : "—"}
+            </div>
+          }
+        />
       }
     >
       <div className="h-full flex flex-col justify-between">

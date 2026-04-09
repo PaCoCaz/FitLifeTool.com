@@ -6,8 +6,6 @@ import WaterCard from "@/components/dashboard/HydrationCard";
 import ActivityCard from "@/components/dashboard/ActivityCard";
 import NutritionCard from "@/components/dashboard/NutritionCard";
 import WeightCard from "@/components/dashboard/WeightCard";
-import WeekOverviewCard from "@/components/dashboard/WeekOverviewCard";
-import DailyGoalsCard from "@/components/dashboard/DailyGoalsCard";
 import TipOfTheDayCard from "@/components/dashboard/TipOfTheDayCard";
 
 export default function DashboardGrid() {
@@ -43,16 +41,6 @@ export default function DashboardGrid() {
       </div>
 
       {/* Rij 4 */}
-      <div className="col-span-12">
-        <WeekOverviewCard />
-      </div>
-
-      {/* Rij 5 */}
-      <div className="col-span-12">
-        <DailyGoalsCard />
-      </div>
-
-      {/* Rij 6 */}
       <div className="col-span-12">
         <TipOfTheDayCard />
       </div>

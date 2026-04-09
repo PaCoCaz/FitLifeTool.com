@@ -49,7 +49,7 @@ const en = {
   },
 
   activity: {
-    title: "Daily Activity",
+    title: "Activity",
     goal: "Daily goal",
     minutes: "min",
     loading: "Loading activity…",
@@ -170,7 +170,7 @@ const nl = {
   },
 
   activity: {
-    title: "Dagelijkse activiteiten",
+    title: "Activiteiten",
     goal: "Dagdoel",
     minutes: "min",
     loading: "Activiteiten laden…",

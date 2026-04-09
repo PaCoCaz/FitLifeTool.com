@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
+import { useLabels } from "@/lib/useLabels";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useRouter } from "next/navigation";
@@ -153,8 +155,12 @@ export default function WeightCard() {
 
   return (
     <Card
-      title="Gewicht"
-      icon={<Image src="/weight.svg" alt="" width={16} height={16} />}
+      header={
+        <CardHeader
+          icon="/weight.svg"
+          title="Gewicht"
+        />
+      }
     >
       <div className="space-y-1">
 

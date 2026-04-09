@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { useLabels } from "@/lib/useLabels";
 
 export default function WeekOverviewCard() {
@@ -16,13 +17,10 @@ export default function WeekOverviewCard() {
 
   return (
     <Card
-      title={t.title}
-      icon={
-        <Image
-          src="/week.svg"
-          alt=""
-          width={16}
-          height={16}
+      header={
+        <CardHeader
+          icon="/week.svg"
+          title={t.title}
         />
       }
     >

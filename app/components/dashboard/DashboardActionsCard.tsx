@@ -4,6 +4,8 @@
 
 import Card from "@/components/ui/Card";
 import Link from "next/link";
+import Image from "next/image";
+import "@/styles/category.css";
 
 function ActionButton({
   href,
@@ -15,20 +17,30 @@ function ActionButton({
   return (
     <Link
       href={href}
-      className="
-        flex items-center justify-center
+      className=" 
+        category-card-link
+        flex-1
+        h-[40px]
+        text-xs
+        !justify-between
+        items-center
         rounded-[var(--radius)]
-        border
         px-3 py-2
-        text-xs font-medium
         transition
-        border-[#0095D3]
-        text-[#0095D3]
+        border-[#191970]
+        bg-[#191970]
+        text-white
+        hover:border-[#0095D3]
         hover:bg-[#0095D3]
         hover:text-white
       "
     >
       {label}
+      <img
+        src="/plus_sign_circle.svg"
+        alt=""
+        className="category-card-icon"
+      />
     </Link>
   );
 }
@@ -40,22 +52,22 @@ export default function DashboardActionsCard() {
 
         <ActionButton
           href="/dashboard/drink/search"
-          label="+ Drinken"
+          label="Drinken"
         />
 
         <ActionButton
           href="/dashboard/food/search"
-          label="+ Voeding"
+          label="Voeding"
         />
 
         <ActionButton
           href="/dashboard/activity"
-          label="+ Activiteit"
+          label="Activiteit"
         />
 
         <ActionButton
           href="/dashboard/weight"
-          label="+ Gewicht"
+          label="Gewicht"
         />
 
       </div>

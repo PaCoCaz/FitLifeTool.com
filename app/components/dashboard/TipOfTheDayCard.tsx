@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { useLabels } from "@/lib/useLabels";
 
 export default function TipOfTheDayCard() {
@@ -13,13 +14,10 @@ export default function TipOfTheDayCard() {
 
   return (
     <Card
-      title={t.title}
-      icon={
-        <Image
-          src="/lightbulb.svg"
-          alt=""
-          width={16}
-          height={16}
+      header={
+        <CardHeader
+          icon="/lightbulb.svg"
+          title="Tip van vandaag"
         />
       }
     >

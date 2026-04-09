@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 
@@ -187,24 +188,15 @@ export default function ActivityCard() {
   return (
 
     <Card
-      title={t.activity.title}
-      icon={
-        <Image
-          src="/activity.svg"
-          alt=""
-          width={16}
-          height={16}
+      header={
+        <CardHeader
+          icon="/activity.svg"
+          title={t.activity.title}
+          score={activityScore}
+          scoreColor={activityStatus.color}
         />
       }
-      action={
-        <div
-          className={`rounded-[var(--radius)] px-3 py-1 text-xs font-semibold whitespace-nowrap ${activityStatus.color}`}
-        >
-          FitLifeScore {activityScore} / 100
-        </div>
-      }
     >
-
       <div className="h-full flex flex-col justify-between">
 
         <div className="space-y-1">

@@ -5,6 +5,7 @@
 import { useMemo, useEffect } from "react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { useDashboard } from "@/lib/DashboardStore";
 
 import { useNow } from "@/lib/TimeProvider";
@@ -100,21 +101,13 @@ export default function HydrationCard() {
 
   return (
     <Card
-      title={t.hydration.title}
-      icon={<Image src="/water_drop.svg" alt="" width={16} height={16} />}
-      action={
-        <div
-          className={`
-            rounded-[var(--radius)]
-            px-3 py-1
-            text-xs
-            font-semibold
-            whitespace-nowrap
-            ${hydrationStatus.color}
-          `}
-        >
-          FitLifeScore {pillScore} / 100
-        </div>
+      header={
+        <CardHeader
+          icon="/water_drop.svg"
+          title={t.hydration.title}
+          score={pillScore}
+          scoreColor={hydrationStatus.color}
+        />
       }
     >
       <div className="h-full flex flex-col justify-between">
