@@ -144,7 +144,7 @@ export default function FitLifeScoreCard() {
     <Card
       header={
         <CardHeader
-          icon="/logo.svg"
+          icon="/heart.svg"
           title="FitLifeScore"
           rightContent={
             <div className={`
