@@ -12,6 +12,8 @@ import { useLangContext } from "@/lib/LangProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useGoalContext } from "@/lib/GoalProvider";
 import NutritionPreview from "@/components/ui/NutritionPreview";
+import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { useMemo } from "react";
 import Image from "next/image";
 import "@/styles/category.css";
@@ -538,52 +540,51 @@ export default function AddFoodPage() {
     <div className="category-span-full space-y-3">
 
       {/* CARD 1 — PRODUCT */}
-      <div className="category-card p-0 overflow-hidden">
-        <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 flex justify-between items-center">
-          <span className="font-semibold text-[#191970]">
-            <img src="/nutrition.svg" alt="" aria-hidden="true" className="title-icon" />
-            Product
-          </span>
-
-          {productScore !== null && (
-            <span
-              className={`px-3 py-1 rounded-[var(--radius)] text-xs font-semibold ${
-                productScore >= 80
+      <Card
+        header={
+          <CardHeader
+            icon="/nutrition.svg"
+            title="Product"
+            scoreLabel="Score"
+            score={productScore ?? undefined}
+            scoreColor={
+              productScore !== null
+                ? productScore >= 80
                   ? "bg-green-600 text-white"
                   : productScore >= 50
                   ? "bg-yellow-300 text-black"
                   : "bg-[#C80000] text-white"
-              }`}
-            >
-              Score {productScore} / 100
-            </span>
-          )}
-        </div>
-
-        <div className="py-3 px-0 -mx-3 -mb-4 flex justify-between items-start">
+                : undefined
+            }
+          />
+        }
+      >
+        <div className="flex justify-between items-start">
           <div className="text-[#191970] font-semibold">
             {productName}
           </div>
 
-          <button onClick={toggleFavorite} className="ml-2 transition-transform hover:scale-110">
+          <button
+            onClick={toggleFavorite}
+            className="ml-2 transition-transform hover:scale-110"
+          >
             <Image
               src={isFavorite ? "/favorite-active.svg" : "/favorite-not-active.svg"}
-              alt={isFavorite ? "Verwijder favoriet" : "Markeer als favoriet"}
+              alt=""
               width={23}
               height={23}
             />
           </button>
         </div>
-      </div>
+      </Card>
 
       {/* CARD 2 — BEREIDING */}
       {preparations.length > 1 && (
-        <div className="category-card p-0 overflow-hidden">
-          <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
-            Bereiding
-          </div>
-
-          <div className="-mb-3 -mx-6">
+        <Card
+          header={<CardHeader title="Bereiding" />}
+          headerSpacing="compact"
+        >
+          <div className="-mx-4">
             {preparations.map((p) => {
               const active = selectedPreparation === p.preparation_key;
 
@@ -591,32 +592,33 @@ export default function AddFoodPage() {
                 <button
                   key={p.preparation_key}
                   onClick={() => setSelectedPreparation(p.preparation_key)}
-                  className={`w-full text-left px-4 py-2 flex items-center gap-3 border-b border-[#DBE4F0] ${
-                    active ? "text-[#0BA4E0] font-medium" : ""
-                  }`}
+                  className={`
+                    w-full text-left px-4 py-2
+                    flex items-center gap-3
+                    border-b border-[#DBE4F0]
+                    leading-tight
+                    ${active ? "text-[#0BA4E0] font-medium" : ""}
+                  `}
                 >
-                  {active ? (
-                    <span className="text-[#0BA4E0]">✓</span>
-                  ) : (
-                    <span className="w-4" />
-                  )}
+                  <div className="w-4 flex items-center justify-center">
+                    <span className={active ? "" : "invisible"}>✓</span>
+                  </div>
 
                   <span>{p.label}</span>
                 </button>
               );
             })}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* CARD 3 — EENHEID */}
       {portions.length > 1 && (
-        <div className="category-card p-0 overflow-hidden">
-          <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
-            Eenheid
-          </div>
-
-          <div className="-mb-3 -mx-6">
+        <Card
+          header={<CardHeader title="Eenheid" />}
+          headerSpacing="compact"
+        >
+          <div className="-mx-4">
             {portions.map((p) => {
               const active = selectedPortion?.unit_key === p.unit_key;
 
@@ -624,36 +626,36 @@ export default function AddFoodPage() {
                 <button
                   key={p.unit_key}
                   onClick={() => setSelectedPortion(p)}
-                  className={`w-full text-left px-4 py-2 flex items-center gap-3 border-b border-[#DBE4F0] ${
-                    active ? "text-[#0BA4E0] font-medium" : ""
-                  }`}
+                  className={`
+                    w-full text-left px-4 py-2
+                    flex items-center gap-3
+                    border-b border-[#DBE4F0]
+                    leading-tight
+                    ${active ? "text-[#0BA4E0] font-medium" : ""}
+                  `}
                 >
-                  {active ? (
-                    <span className="text-[#0BA4E0]">✓</span>
-                  ) : (
-                    <span className="w-3" />
-                  )}
+                  <div className="w-4 flex items-center justify-center">
+                    <span className={active ? "" : "invisible"}>✓</span>
+                  </div>
 
                   <span>{p.label}</span>
                 </button>
               );
             })}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* CARD 4 — AANTAL */}
-      <div className="category-card p-0 overflow-hidden">
-        <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 mb-0 text-[#191970] font-semibold text-sm">
-          Aantal
-        </div>
+      <Card
+        header={<CardHeader title="Aantal" />}
+      >
+        <div className="space-y-3">
 
-        <div className="mt-3 -mb-3 -mx-3">
+          {/* PREVIEW */}
+          <NutritionPreview data={nutritionPreview} />
 
-          {/* ✅ PREVIEW (bovenaan) */}
-            <NutritionPreview data={nutritionPreview} />
-
-          {/* ✅ INPUT + BUTTON ROW */}
+          {/* INPUT + BUTTON */}
           <div className="flex items-stretch gap-3">
             <input
               type="number"
@@ -666,24 +668,25 @@ export default function AddFoodPage() {
                     : Math.max(1, Number(e.target.value))
                 )
               }
-              className="text-right border border-[#191970] rounded px-4 w-24"
+              className="text-right border border-[#191970] rounded px-4 w-24 h-[42px]"
             />
 
             <button
               onClick={handleSave}
-              className="category-card-link flex-1 h-[42px] text-sm !justify-between px-4 items-center"
+              className="flex-1 h-[42px] text-sm flex justify-between items-center px-4 rounded-[var(--radius)] bg-[#191970] text-white"
             >
               <span>Toevoegen</span>
-              <img
+              <Image
                 src="/arrow_right_circle.svg"
                 alt=""
-                className="category-card-icon"
+                width={20}
+                height={20}
               />
             </button>
           </div>
 
         </div>
-      </div>
+      </Card>
 
     </div>
   </div>

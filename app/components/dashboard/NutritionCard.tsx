@@ -204,6 +204,7 @@ export default function NutritionCard() {
         <CardHeader
           icon="/nutrition.svg"
           title={t.nutrition.title}
+          scoreLabel="FitLifeScore"
           score={pillScore}
           scoreColor={nutritionStatus.color}
         />

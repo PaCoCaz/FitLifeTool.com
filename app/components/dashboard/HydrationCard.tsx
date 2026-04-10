@@ -105,6 +105,7 @@ export default function HydrationCard() {
         <CardHeader
           icon="/water_drop.svg"
           title={t.hydration.title}
+          scoreLabel="FitLifeScore"
           score={pillScore}
           scoreColor={hydrationStatus.color}
         />

@@ -192,6 +192,7 @@ export default function ActivityCard() {
         <CardHeader
           icon="/activity.svg"
           title={t.activity.title}
+          scoreLabel="FitLifeScore"
           score={activityScore}
           scoreColor={activityStatus.color}
         />
