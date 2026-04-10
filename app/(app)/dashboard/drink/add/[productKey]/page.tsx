@@ -355,45 +355,56 @@ export default function AddFoodPage() {
 
   /* ⭐ TOGGLE FAVORITE */
 
-  async function toggleFavorite() {
+  async function toggleFavorite(productKeyInput: string) {
     if (!user) return;
 
-    if (isFavorite && favoriteId) {
+    const { data: existing } = await supabase
+      .from("nutrition_favorites")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_key", productKeyInput)
+      .maybeSingle();
+
+    if (existing) {
       await supabase
         .from("nutrition_favorites")
         .delete()
-        .eq("id", favoriteId);
+        .eq("id", existing.id);
 
+      // 🔥 DIRECT UI FIX
       setIsFavorite(false);
       setFavoriteId(null);
-      return;
+
+    } else {
+      if (
+        limits.max_favorite_drinks !== null &&
+        favoriteCount >= limits.max_favorite_drinks
+      ) {
+        alert(
+          `Je hebt je limiet van ${limits.max_favorite_drinks} favorieten bereikt`
+        );
+        return;
+      }
+
+      const { data } = await supabase
+        .from("nutrition_favorites")
+        .insert({
+          user_id: user.id,
+          product_key: productKeyInput,
+        })
+        .select("id")
+        .single();
+
+      if (data) {
+        // 🔥 DIRECT UI FIX
+        setIsFavorite(true);
+        setFavoriteId(data.id);
+        setFavoriteCount((prev) => prev + 1);
+      }
     }
 
-    // 🔥 LIMIT CHECK
-    if (
-      limits.max_favorite_foods !== null &&
-      favoriteCount >= limits.max_favorite_foods
-    ) {
-      alert(
-        `Je hebt je limiet van ${limits.max_favorite_foods} favorieten bereikt, upgrade je account om meer favorieten toe te kunnen voegen.`
-      );
-      return;
-    }
-
-    const { data } = await supabase
-      .from("nutrition_favorites")
-      .insert({
-        user_id: user.id,
-        product_key: productKey,
-      })
-      .select("id")
-      .single();
-
-    if (data) {
-      setIsFavorite(true);
-      setFavoriteId(data.id);
-      setFavoriteCount((prev) => prev + 1);
-    }
+    // optioneel (voor globale sync)
+    await refreshDashboard();
   }
 
   /* ───────────────── SAVE ───────────────── */
@@ -544,7 +555,7 @@ export default function AddFoodPage() {
               {productName}
             </div>
   
-            <button onClick={toggleFavorite} className="ml-2 transition-transform hover:scale-110">
+            <button onClick={() => toggleFavorite(productKey)} className="ml-2 transition-transform hover:scale-110">
               <Image
                 src={isFavorite ? "/favorite-active.svg" : "/favorite-not-active.svg"}
                 alt={isFavorite ? "Verwijder favoriet" : "Markeer als favoriet"}

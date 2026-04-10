@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/AuthProvider";
 import { useLangContext } from "@/lib/LangProvider";
 import { useDashboard } from "@/lib/DashboardStore";
+import FavoritesCard from "@/components/dashboard/FavoritesCard";
+import SearchCard from "@/components/dashboard/SearchCard";
 
 /* ───────────────── Types ───────────────── */
 
@@ -38,77 +40,103 @@ export default function FoodSearchPage() {
   const router = useRouter();
   const { user } = useUser();
   const { lang } = useLangContext();
-  const { features } = useDashboard();
+  const { features, limits } = useDashboard();
 
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Product[]>([]);
-
-  const [drinkFavorites, setDrinkFavorites] = useState<Product[]>([]);
   const [foodFavorites, setFoodFavorites] = useState<Product[]>([]);
 
   /* ───────────────── LOAD FAVORITES ───────────────── */
 
-  useEffect(() => {
+  async function loadFavorites() {
     if (!user?.id) return;
 
-    const userId = user.id;
+    const { data: favorites } = await supabase
+      .from("nutrition_favorites")
+      .select("product_key")
+      .eq("user_id", user.id)
+      .order("sort_order", { ascending: true });
 
-    async function loadFavorites() {
-      const { data: favorites } = await supabase
+    const typedFavorites = (favorites ?? []) as FavoriteKeyRow[];
+
+    if (typedFavorites.length === 0) {
+      setFoodFavorites([]);
+      return;
+    }
+
+    const productKeys = typedFavorites.map((f) => f.product_key);
+
+    const { data: products } = await supabase
+      .from("nutrition_products")
+      .select("product_key, is_drink")
+      .in("product_key", productKeys);
+
+    const typedProducts = (products ?? []) as ProductRow[];
+
+    const { data: translations } = await supabase
+      .from("nutrition_product_translations")
+      .select("product_key, name")
+      .in("product_key", productKeys)
+      .eq("lang", lang);
+
+    const typedTranslations = (translations ?? []) as TranslationRow[];
+
+    const nameMap = new Map<string, string>(
+      typedTranslations.map((t) => [t.product_key, t.name])
+    );
+
+    const mapped: Product[] = typedProducts.map((p) => ({
+      product_key: p.product_key,
+      name: nameMap.get(p.product_key) ?? p.product_key,
+      is_drink: Boolean(p.is_drink),
+      is_basic: true,
+    }));
+
+    // 🔥 alleen FOOD
+    setFoodFavorites(mapped.filter((p) => !p.is_drink));
+  }
+
+  useEffect(() => {
+    loadFavorites();
+  }, [user?.id, lang]);
+
+  /* ───────────────── TOGGLE FAVORITE ───────────────── */
+
+  async function toggleFavorite(productKey: string) {
+    if (!user) return;
+
+    const { data: existing } = await supabase
+      .from("nutrition_favorites")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_key", productKey)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
         .from("nutrition_favorites")
-        .select("product_key")
-        .eq("user_id", userId)
-        .order("sort_order", { ascending: true });
-
-      const typedFavorites = (favorites ?? []) as FavoriteKeyRow[];
-
-      if (typedFavorites.length === 0) {
-        setDrinkFavorites([]);
-        setFoodFavorites([]);
+        .delete()
+        .eq("id", existing.id);
+    } else {
+      // 🔥 FOOD LIMIT
+      if (
+        limits.max_favorite_foods !== null &&
+        foodFavorites.length >= limits.max_favorite_foods
+      ) {
+        alert(
+          `Je hebt je limiet van ${limits.max_favorite_foods} favorieten bereikt`
+        );
         return;
       }
 
-      const productKeys = typedFavorites.map(
-        (f: FavoriteKeyRow) => f.product_key
-      );
-
-      const { data: products } = await supabase
-        .from("nutrition_products")
-        .select("product_key, is_drink")
-        .in("product_key", productKeys);
-
-      const typedProducts = (products ?? []) as ProductRow[];
-
-      const { data: translations } = await supabase
-        .from("nutrition_product_translations")
-        .select("product_key, name")
-        .in("product_key", productKeys)
-        .eq("lang", lang);
-
-      const typedTranslations =
-        (translations ?? []) as TranslationRow[];
-
-      const nameMap = new Map<string, string>(
-        typedTranslations.map(
-          (t: TranslationRow) => [t.product_key, t.name]
-        )
-      );
-
-      const mapped: Product[] = typedProducts.map(
-        (p: ProductRow) => ({
-          product_key: p.product_key,
-          name: nameMap.get(p.product_key) ?? p.product_key,
-          is_drink: Boolean(p.is_drink),
-          is_basic: true,
-        })
-      );
-
-      setDrinkFavorites(mapped.filter((p) => p.is_drink));
-      setFoodFavorites(mapped.filter((p) => !p.is_drink));
+      await supabase.from("nutrition_favorites").insert({
+        user_id: user.id,
+        product_key: productKey,
+      });
     }
 
-    loadFavorites();
-  }, [user?.id, lang]);
+    await loadFavorites();
+  }
 
   /* ───────────────── SEARCH ───────────────── */
 
@@ -128,19 +156,14 @@ export default function FoodSearchPage() {
         .eq("is_drink", false)
         .ilike("name", `%${search}%`);
 
-      if (!data || data.length === 0) {
+      if (!data) {
         setResults([]);
         return;
       }
 
       const sorted = data.sort((a: any, b: any) => {
-        const aStarts = a.name
-          .toLowerCase()
-          .startsWith(search.toLowerCase());
-
-        const bStarts = b.name
-          .toLowerCase()
-          .startsWith(search.toLowerCase());
+        const aStarts = a.name.toLowerCase().startsWith(search.toLowerCase());
+        const bStarts = b.name.toLowerCase().startsWith(search.toLowerCase());
 
         if (aStarts && !bStarts) return -1;
         if (!aStarts && bStarts) return 1;
@@ -150,14 +173,14 @@ export default function FoodSearchPage() {
         });
       });
 
-      const mapped: Product[] = sorted.map((p: any) => ({
-        product_key: p.product_key,
-        name: p.name,
-        is_drink: Boolean(p.is_drink),
-        is_basic: Boolean(p.is_basic),
-      }));
-
-      setResults(mapped);
+      setResults(
+        sorted.map((p: any) => ({
+          product_key: p.product_key,
+          name: p.name,
+          is_drink: Boolean(p.is_drink),
+          is_basic: Boolean(p.is_basic),
+        }))
+      );
     }, 300);
 
     return () => clearTimeout(timeout);
@@ -167,98 +190,30 @@ export default function FoodSearchPage() {
 
   return (
     <div className="grid grid-cols-12 gap-6">
-      <div className="col-span-12">
-        <div className="bg-white rounded-[var(--radius)] shadow-sm border">
+      <div className="col-span-12 space-y-6">
 
-          <div className="px-6 py-4 border-b">
-            <h1 className="text-lg font-semibold">
-              Voeding toevoegen
-            </h1>
-          </div>
+        <FavoritesCard
+          title="Favorieten"
+          items={foodFavorites}
+          onSelect={(key) =>
+            router.push(`/dashboard/food/add/${key}`)
+          }
+          onToggleFavorite={toggleFavorite}
+        />
 
-          <div className="px-6 py-6 space-y-10">
+        <SearchCard
+          title="Zoeken"
+          search={search}
+          setSearch={setSearch}
+          results={results}
+          features={features}
+          favorites={foodFavorites}
+          onSelect={(key) =>
+            router.push(`/dashboard/food/add/${key}`)
+          }
+          onToggleFavorite={toggleFavorite}
+        />
 
-            {foodFavorites.length > 0 && (
-              <div>
-                <h2 className="text-sm font-semibold text-gray-500 mb-4">
-                  Eten
-                </h2>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {foodFavorites.map((product) => (
-                    <button
-                      key={product.product_key}
-                      onClick={() =>
-                        router.push(
-                          `/dashboard/food/add/${product.product_key}`
-                        )
-                      }
-                      className="group flex items-center justify-center rounded-[var(--radius)] border px-3 py-2 text-xs font-medium transition border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
-                    >
-                      {product.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Zoek product..."
-                className="w-full border border-[#0095D3] rounded-t-[var(--radius)] px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0095D3]/30"
-              />
-
-              {results.length > 0 && (
-                <div className="border border-t-0 border-[#0095D3] rounded-b-[var(--radius)] max-h-[400px] overflow-y-auto">
-                  {results.map((product) => {
-                    const isLocked =
-                      !features.has_full_food_database &&
-                      !product.is_basic;
-
-                    return (
-                      <div
-                        key={product.product_key}
-                        className={`
-                          flex items-center justify-between px-4 py-3 text-sm border-b last:border-b-0
-                          ${isLocked
-                            ? "opacity-40 cursor-not-allowed"
-                            : "hover:bg-gray-50 cursor-pointer"}
-                        `}
-                      >
-                        <span
-                          onClick={() => {
-                            if (!isLocked) {
-                              router.push(
-                                `/dashboard/food/add/${product.product_key}`
-                              );
-                            }
-                          }}
-                        >
-                          {product.name}
-                        </span>
-
-                        {isLocked && (
-                          <span className="text-xs text-gray-400">
-                            🔒 Premium
-                          </span>
-                        )}
-
-                        {!isLocked && (
-                          <button className="text-gray-400 hover:text-[#0095D3] text-lg">
-                            ★
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-          </div>
-        </div>
       </div>
     </div>
   );
