@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { useUser } from "@/lib/AuthProvider";
 
 const PLAN_LABEL: Record<string, string> = {
@@ -168,14 +169,16 @@ export default function SubscriptionCard() {
   // -------------------------
 
   return (
-    <Card title="Abonnement">
+    <Card
+      header={<CardHeader title="Abonnement" />}
+    >
       {loading && <div>Laden...</div>}
 
       {!loading && (
         <>
           {/* PLAN */}
 
-          <div className="mb-2">
+          <div className="mt-3 mb-2">
             Huidig abonnement:
             <b className="ml-2">
               {PLAN_LABEL[plan]}

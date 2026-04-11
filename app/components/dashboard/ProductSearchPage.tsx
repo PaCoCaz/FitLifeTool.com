@@ -137,7 +137,9 @@ export default function ProductSearchPage({ type }: Props) {
         .select("product_key, name, is_drink, is_basic")
         .eq("lang", lang)
         .eq("is_drink", isDrink)
-        .ilike("name", `%${search}%`);
+        // TODO: vervangen door `${search}%` + index zodra product database groeit (>1000 producten)
+        .ilike("name", `%${search}%`)
+        .limit(20)
 
       if (!data) {
         setResults([]);

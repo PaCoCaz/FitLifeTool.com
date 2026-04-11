@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { useLang, useSetUserLanguage } from "@/lib/useLang";
 
 type Lang = "en" | "nl" | "de" | "fr" | "pl";
@@ -82,13 +83,15 @@ export default function LanguageCard() {
   );
 
   return (
-    <Card title="Taal">
+    <Card
+      header={<CardHeader title="Taal" />}
+    >
 
       <div className="space-y-3">
 
         {/* label */}
 
-        <div className="text-xs font-semibold text-gray-400">
+        <div className="pt-3 text-xs font-semibold text-gray-400">
           Taal van het dashboard
         </div>
 

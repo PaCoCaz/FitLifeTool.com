@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useDashboard } from "@/lib/DashboardStore";
@@ -122,13 +123,15 @@ export default function LifestyleCard() {
   );
 
   return (
-    <Card title="Lifestyle">
+    <Card
+      header={<CardHeader title="Lifestyle" />}
+    >
 
       <div className="space-y-3">
 
         {/* label */}
 
-        <div className="text-xs font-semibold text-gray-400">
+        <div className="pt-3 text-xs font-semibold text-gray-400">
           Activiteitsniveau
         </div>
 

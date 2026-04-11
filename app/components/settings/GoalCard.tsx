@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { useGoalContext, GoalKey } from "@/lib/GoalProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 
@@ -81,13 +82,15 @@ export default function GoalCard() {
   );
 
   return (
-    <Card title="Doel">
+    <Card
+      header={<CardHeader title="Doel" />}
+    >
 
       <div className="space-y-3">
 
         {/* label */}
 
-        <div className="text-xs font-semibold text-gray-400">
+        <div className="pt-3 text-xs font-semibold text-gray-400">
           Huidig doel
         </div>
 

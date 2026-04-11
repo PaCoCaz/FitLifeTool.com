@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useDashboard } from "@/lib/DashboardStore";
@@ -141,13 +142,15 @@ export default function BodyCard() {
     );
 
   return (
-    <Card title="Gezondheidsprofiel">
+    <Card
+      header={<CardHeader title="Gezondheidsprofiel" />}
+    >
 
       <div className="space-y-4">
 
         {/* birthdate */}
 
-        <div>
+        <div className="pt-3">
 
           <div className="text-xs font-semibold text-gray-400">
             Geboortedatum
