@@ -7,11 +7,22 @@ type Props = {
   icon?: React.ReactNode
   header?: React.ReactNode
   headerSpacing?: "default" | "compact"
+  className?: string
 }
 
-export default function Card({ title, children, action, icon, header, headerSpacing = "default", }: Props) {
+export default function Card({ title, children, action, icon, header, headerSpacing = "default", className, }: Props) {
   return (
-    <div className="rounded-[var(--radius)] bg-white p-4 shadow-sm flex flex-col overflow-hidden">
+    <div
+      className={`
+        rounded-[var(--radius)]
+        bg-white
+        p-4
+        shadow-sm
+        flex flex-col
+        overflow-hidden
+        ${className ?? ""}
+      `}
+    >
 
       {/* Custom Header (override) */}
       {header ? (

@@ -7,6 +7,7 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useRouter } from "next/navigation";
 
@@ -207,6 +208,32 @@ export default function WeightPage() {
   const [draftTarget, setDraftTarget] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [dirty, setDirty] = useState(false);
+
+  const originalWeightRef = useRef<string>("");
+  const originalTargetRef = useRef<string>("");
+
+  const invalid =
+    !draftWeight ||
+    isNaN(parseFloat(draftWeight)) ||
+    parseFloat(draftWeight) <= 0;
+
+  const handleSave = async () => {
+    await saveWeight(
+      user,
+      draftWeight,
+      draftTarget,
+      heightCm,
+      setSaving,
+      refreshDashboard,
+      router
+    );
+
+    originalWeightRef.current = draftWeight;
+    originalTargetRef.current = draftTarget;
+    setDirty(false);
+  };
+
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [periodDays, setPeriodDays] =
@@ -223,6 +250,14 @@ export default function WeightPage() {
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const isDirty =
+      draftWeight !== originalWeightRef.current ||
+      draftTarget !== originalTargetRef.current;
+
+    setDirty(isDirty);
+  }, [draftWeight, draftTarget]);
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
@@ -277,17 +312,23 @@ export default function WeightPage() {
       setHeightCm(profile?.height_cm ?? null);
       setData(withMA);
       setTargetWeight(profile?.target_weight_kg ?? null);
-      setDraftWeight(
+
+      const w =
         profile?.weight_kg != null
           ? String(profile.weight_kg)
-          : ""
-      );
-      
-      setDraftTarget(
+          : "";
+
+      const t =
         profile?.target_weight_kg != null
           ? String(profile.target_weight_kg)
-          : ""
-      );
+          : "";
+
+      setDraftWeight(w);
+      setDraftTarget(t);
+
+      originalWeightRef.current = w;
+      originalTargetRef.current = t;
+
       setLoading(false);
     };
 
@@ -316,85 +357,88 @@ export default function WeightPage() {
   return (
     <div className="space-y-6">
 
-<Card title="Gewicht aanpassen">
+      <Card header={<CardHeader title="Gewicht aanpassen" />}>
+        <div className="space-y-4">
 
-<div className="space-y-4">
+          <div className="flex items-end gap-3">
 
-  <div className="flex gap-4">
+            <div>
+              <div className="text-xs text-gray-500 mb-1">
+                Gewicht
+              </div>
+              <input
+                type="number"
+                step="0.1"
+                value={draftWeight}
+                onChange={(e) => setDraftWeight(e.target.value)}
+                className="border rounded-[var(--radius)] px-3 py-1.5 w-20"
+              />
+            </div>
 
-    <div>
-      <div className="text-xs text-gray-500">
-        Gewicht
-      </div>
+            <div>
+              <div className="text-xs text-gray-500 mb-1">
+                Streefgewicht
+              </div>
+              <input
+                type="number"
+                step="0.1"
+                value={draftTarget}
+                onChange={(e) => setDraftTarget(e.target.value)}
+                className="border rounded-[var(--radius)] px-3 py-1.5 w-20"
+              />
+            </div>
 
-      <input
-        type="number"
-        step="0.1"
-        value={draftWeight}
-        onChange={(e) =>
-          setDraftWeight(e.target.value)
-        }
-        className="border rounded px-3 py-2 w-24"
-      />
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={handleSave}
+                disabled={!dirty || invalid || saving}
+                className={`
+                  rounded-[var(--radius)]
+                  border
+                  px-4
+                  py-2
+                  text-sm
 
-    </div>
-
-    <div>
-      <div className="text-xs text-gray-500">
-        Streefgewicht
-      </div>
-
-      <input
-        type="number"
-        step="0.1"
-        value={draftTarget}
-        onChange={(e) =>
-          setDraftTarget(e.target.value)
-        }
-        className="border rounded px-3 py-2 w-24"
-      />
-
-    </div>
-
-  </div>
-
-  <button
-    onClick={() =>
-      saveWeight(
-        user,
-        draftWeight,
-        draftTarget,
-        heightCm,
-        setSaving,
-        refreshDashboard,
-        router
-      )
-    }
-    disabled={saving}
-    className="
-      rounded-[var(--radius)]
-      border border-[#0095D3]
-      px-4 py-2
-      text-sm
-      text-[#0095D3]
-      hover:bg-[#0095D3]
-      hover:text-white
-    "
-  >
-    Opslaan
-  </button>
-
-</div>
-
-</Card>
+                  ${
+                    saving
+                      ? "border-gray-300 text-gray-400"
+                      : !dirty || invalid
+                      ? "border-green-500 text-green-600"
+                      : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
+                  }
+                `}
+              >
+                {saving
+                  ? "Opslaan…"
+                  : !dirty || invalid
+                  ? "Opgeslagen"
+                  : "Opslaan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* ================= GEWICHT CARD — ONGWIJZIGD ================= */}
 
       <Card
-        title="Gewicht"
-        icon={<Image src="/weight.svg" alt="" width={16} height={16} />}
-        action={
+        header={
+          <CardHeader
+            icon="/weight.svg"
+            title="Gewicht"
+          />
+        }
+      >
+        <div className="mt-2 flex items-center justify-between">
+  
+          {/* LINKS: Periode */}
+          <div className="text-base font-medium text-[#191970]">
+            Periode: {currentPeriod.label}
+          </div>
+
+          {/* RECHTS: buttons */}
           <div className="flex items-center gap-2">
+    
             <button
               onClick={() => setShowBMI((v) => !v)}
               className="
@@ -418,10 +462,8 @@ export default function WeightPage() {
                   rounded-[var(--radius)]
                   bg-[#191970]
                   border border-[#191970]
-                  px-3
-                  py-1.5
-                  text-xs
-                  font-medium
+                  px-3 py-1.5
+                  text-xs font-medium
                   text-white
                 "
               >
@@ -463,10 +505,6 @@ export default function WeightPage() {
               )}
             </div>
           </div>
-        }
-      >
-        <div className="mt-2 text-base font-medium text-[#191970]">
-          Periode: {currentPeriod.label}
         </div>
 
         <div className="mt-2 space-y-1 text-xs text-gray-600">
@@ -549,7 +587,9 @@ export default function WeightPage() {
       {/* ================= BMI CARD — MET ZONES ================= */}
 
       {showBMI && heightCm && (
-        <Card title="BMI">
+        <Card
+          header={<CardHeader title="BMI" />}
+        >
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height={256}>
               <LineChart

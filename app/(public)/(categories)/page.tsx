@@ -2,6 +2,8 @@
 
 import CategoryGrid from "@/components/layout/CategoryGrid";
 import RegisterButton from "@/components/cta/RegisterButton";
+import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 
 export default function HomePage() {
   return (
@@ -29,18 +31,22 @@ export default function HomePage() {
       </div>
 
       {/* ================= RIJ 1 ================= */}
-      <div className="home-grid-2col category-card home-preview-card">
-        <h2>
-          <img src="/water_drop.svg" alt="" aria-hidden="true" className="title-icon" />
-          Drink je genoeg water op een dag?
-        </h2>
+      <Card
+        className="home-grid-2col category-card home-preview-card"
+        header={
+          <CardHeader
+            icon="/water_drop.svg"
+            title="Drink je genoeg water op een dag?"
+          />
+        }
+      >
         <p>
           Zie direct of je achterloopt op je persoonlijke hydratatiedoel en houd je vochtbalans eenvoudig op peil.
         </p>
         <div className="home-preview-image">
           <img src="/images/home/hydration.png" alt="Hydratatie overzicht" />
         </div>
-      </div>
+      </Card>
 
       <div className="home-grid-2col category-card home-preview-card">
         <h2>
@@ -84,7 +90,7 @@ export default function HomePage() {
 
       <div className="home-grid-2col category-card home-preview-card">
         <h2>
-          <img src="/logo_transparant.png" alt="" aria-hidden="true" className="title-icon" />
+          <img src="/heart.svg" alt="" aria-hidden="true" className="title-icon" />
           Hoe gezond was jouw dag écht?
         </h2>
         <p>

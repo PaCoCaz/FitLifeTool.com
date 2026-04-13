@@ -4,11 +4,13 @@ import Image from "next/image";
 
 type Props = {
   icon?: string;
+  action?: React.ReactNode;
   title: string;
   score?: number;
   scoreLabel?: string;
   scoreColor?: string;
   rightContent?: React.ReactNode;
+  as?: "h2" | "h3" | "div";
 };
 
 export default function CardHeader({
@@ -18,7 +20,11 @@ export default function CardHeader({
   scoreLabel,
   scoreColor = "bg-gray-200 text-black",
   rightContent,
+  as, // 👈 toevoegen
 }: Props) {
+
+  const Tag = as ?? "div"; // 👈 dynamische tag
+
   const scoreClasses =
     "rounded-[var(--radius)] px-3 py-1 text-xs font-semibold whitespace-nowrap";
 
@@ -30,7 +36,10 @@ export default function CardHeader({
         {icon && (
           <Image src={icon} alt="" width={16} height={16} />
         )}
-        <span className="truncate">{title}</span>
+
+        <Tag className="truncate m-0 text-[15px] sm:text-base font-semibold text-[#191970] leading-tight">
+          {title}
+        </Tag>
       </div>
 
       {/* Spacer */}
