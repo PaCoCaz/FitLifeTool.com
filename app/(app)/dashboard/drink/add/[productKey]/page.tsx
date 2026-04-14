@@ -528,33 +528,30 @@ export default function AddFoodPage() {
       <div className="category-span-full space-y-3">
   
         {/* CARD 1 — PRODUCT */}
-        <div className="category-card p-0 overflow-hidden">
-          <div className="bg-[#B8CAE0] py-2 -mt-6 px-3 -mx-6 flex justify-between items-center">
-            <span className="font-semibold text-[#191970]">
-              <img src="/nutrition.svg" alt="" aria-hidden="true" className="title-icon" />
-              Product
-            </span>
-  
-            {productScore !== null && (
-              <span
-                className={`px-3 py-1 rounded-[var(--radius)] text-xs font-semibold ${
-                  productScore >= 80
+        <Card
+          header={
+            <CardHeader
+              icon="/nutrition.svg"
+              title="Product"
+              scoreLabel="Score"
+              score={productScore ?? undefined}
+              scoreColor={
+                productScore !== null
+                  ? productScore >= 80
                     ? "bg-green-600 text-white"
                     : productScore >= 50
                     ? "bg-yellow-300 text-black"
                     : "bg-[#C80000] text-white"
-                }`}
-              >
-                Score {productScore} / 100
-              </span>
-            )}
-          </div>
-  
-          <div className="py-3 px-0 -mx-3 -mb-4 flex justify-between items-start">
+                  : undefined
+              }
+            />
+          }
+        >
+          <div className="flex justify-between items-start">
             <div className="text-[#191970] font-semibold">
               {productName}
             </div>
-  
+
             <button onClick={() => toggleFavorite(productKey)} className="ml-2 transition-transform hover:scale-110">
               <Image
                 src={isFavorite ? "/favorite-active.svg" : "/favorite-not-active.svg"}
@@ -564,7 +561,7 @@ export default function AddFoodPage() {
               />
             </button>
           </div>
-        </div>
+        </Card>
   
         {/* CARD 2 — BEREIDING */}
         {preparations.length > 1 && (
