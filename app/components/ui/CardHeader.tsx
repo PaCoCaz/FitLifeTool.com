@@ -20,10 +20,9 @@ export default function CardHeader({
   scoreLabel,
   scoreColor = "bg-gray-200 text-black",
   rightContent,
-  as, // 👈 toevoegen
+  as,
 }: Props) {
-
-  const Tag = as ?? "div"; // 👈 dynamische tag
+  const Tag = as ?? "div";
 
   const scoreClasses =
     "rounded-[var(--radius)] px-3 py-1 text-xs font-semibold whitespace-nowrap";
@@ -32,13 +31,21 @@ export default function CardHeader({
     <div className="bg-[#B8CAE0] py-2 px-3 flex items-center rounded-t-[var(--radius)] min-h-[36px]">
 
       {/* Left */}
-      <div className="flex items-center gap-2 text-[#191970] font-semibold truncate">
+      <div className="flex items-center gap-2 text-[#191970] truncate">
         {icon && (
-          <Image src={icon} alt="" width={16} height={16} />
+          <Image
+            src={icon}
+            alt=""
+            width={16}
+            height={16}
+            className="block"
+          />
         )}
 
-        <Tag className="truncate m-0 text-[15px] sm:text-base font-semibold text-[#191970] leading-tight">
-          {title}
+        <Tag className="m-0 leading-none contents">
+          <span className="truncate text-[15px] sm:text-base font-semibold text-[#191970]">
+            {title}
+          </span>
         </Tag>
       </div>
 

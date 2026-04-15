@@ -54,7 +54,7 @@ export default function Card({ title, children, action, icon, header, headerSpac
       )}
 
       {/* Content */}
-      <div className="flex-1">
+      <div className="flex flex-col flex-1">
         {children ?? (
           <div className="h-full rounded-[var(--radius)] bg-gray-50" />
         )}

@@ -37,6 +37,7 @@ export default function HomePage() {
           <CardHeader
             icon="/water_drop.svg"
             title="Drink je genoeg water op een dag?"
+            as="h2"
           />
         }
       >
@@ -48,71 +49,97 @@ export default function HomePage() {
         </div>
       </Card>
 
-      <div className="home-grid-2col category-card home-preview-card">
-        <h2>
-          <img src="/activity.svg" alt="" aria-hidden="true" className="title-icon" />
-          Beweeg je genoeg voor jouw doel?
-        </h2>
+      <Card
+        className="home-grid-2col category-card home-preview-card"
+        header={
+          <CardHeader
+            icon="/activity.svg"
+            title="Beweeg je genoeg voor jouw doel?"
+            as="h2"
+          />
+        }
+      >
         <p>
           Volg je dagelijkse activiteiten en ontdek of je energieverbruik aansluit bij je gezondheidsdoelen.
         </p>
         <div className="home-preview-image">
           <img src="/images/home/activity.png" alt="Beweging en activiteit" />
         </div>
-      </div>
+      </Card>  
 
-      <div className="home-grid-2col category-card home-preview-card">
-        <h2>
-          <img src="/nutrition.svg" alt="" aria-hidden="true" className="title-icon" />
-          Grip op calorieën zonder obsessie
-        </h2>
+      <Card
+        className="home-grid-2col category-card home-preview-card"
+        header={
+          <CardHeader
+            icon="/nutrition.svg"
+            title="Grip op calorieën zonder obsessie"
+            as="h2"
+          />
+        }
+      >
         <p>
           Krijg inzicht in je voedingspatroon en begrijp hoe je keuzes bijdragen aan je totale gezondheid.
         </p>
         <div className="home-preview-image">
           <img src="/images/home/nutrition.png" alt="Voeding en calorie-inzicht" />
         </div>
-      </div>
+      </Card>
 
       {/* ================= RIJ 2 ================= */}
-      <div className="home-grid-2col category-card home-preview-card">
-        <h2>
-          <img src="/weight.svg" alt="" aria-hidden="true" className="title-icon" />
-          Zie of je écht vooruitgaat
-        </h2>
+
+      <Card
+        className="home-grid-2col category-card home-preview-card"
+        header={
+          <CardHeader
+            icon="/weight.svg"
+            title="Zie of je écht vooruitgaat"
+            as="h2"
+          />
+        }
+      >
         <p>
           Volg gewicht, BMI en trends over tijd zodat je niet wordt misleid door losse momentopnames.
         </p>
         <div className="home-preview-image">
           <img src="/images/home/weight.png" alt="Gewicht en voortgang grafiek" />
         </div>
-      </div>
+      </Card>
 
-      <div className="home-grid-2col category-card home-preview-card">
-        <h2>
-          <img src="/heart.svg" alt="" aria-hidden="true" className="title-icon" />
-          Hoe gezond was jouw dag écht?
-        </h2>
+      <Card
+        className="home-grid-2col category-card home-preview-card"
+        header={
+          <CardHeader
+            icon="/heart.svg"
+            title="Hoe gezond was jouw dag écht?"
+            as="h2"
+          />
+        }
+      >
         <p>
           Combineer voeding, beweging en hydratatie in één duidelijke dagbalans en zie direct hoe je dag scoort.
         </p>
         <div className="home-preview-image">
           <img src="/images/home/score.png" alt="Dagelijkse gezondheidsbalans" />
         </div>
-      </div>
+      </Card>
 
-      <div className="home-grid-2col category-card home-preview-card">
-        <h2>
-          <img src="/target.svg" alt="" aria-hidden="true" className="title-icon" />
-          Werk gericht aan je doelen
-        </h2>
+      <Card
+        className="home-grid-2col category-card home-preview-card"
+        header={
+          <CardHeader
+            icon="/target.svg"
+            title="Werk gericht aan je doelen"
+            as="h2"
+          />
+        }
+      >
         <p>
           Stel persoonlijke doelen en volg je vooruitgang met duidelijke trends in plaats van losse cijfers.
         </p>
         <div className="home-preview-image">
           <img src="/images/home/goals.png" alt="Gezondheidsdoelen en voortgang" />
         </div>
-      </div>
+      </Card>
 
       {/* CTA ONDERAAN */}
       <div className="category-span-full category-card" style={{ textAlign: "center" }}>
