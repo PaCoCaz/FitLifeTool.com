@@ -21,6 +21,9 @@ const PUBLIC_NAV_ITEMS = [
 
 const AUTH_NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
+  { label: "Hydratatie", href: "/dashboard/hydration" },
+  { label: "Voeding", href: "/dashboard/food/search" },
+  { label: "Activiteiten", href: "/dashboard/activity" },
   { label: "Gewicht", href: "/dashboard/weight" },
   { label: "Handboek", href: "/handbook" },
 ];
