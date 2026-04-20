@@ -29,10 +29,23 @@ import {
 } from "recharts";
 
 import { getExpectedHydrationProgress } from "@/lib/hydrationScore";
+import { useRef } from "react";
 
-const toHalfHour = (date: Date) => {
+/* ───────────────── Helpers ───────────────── */
+
+const toQuarterHour = (date: Date) => {
   const h = date.getHours() + date.getMinutes() / 60;
-  return Math.round(h * 2) / 2;
+  return Math.floor(h * 4) / 4;
+};
+
+const getCumulativeAtTime = (logs: DrinkLog[], time: Date) => {
+  return logs.reduce((sum, log) => {
+    const t = new Date(log.created_at);
+
+    if (t >= time) return sum;
+
+    return sum + (log.ml ?? 0) + (log.water ?? 0);
+  }, 0);
 };
 
 /* ───────────────── Types ───────────────── */
@@ -78,7 +91,7 @@ type DrinkItem = {
 
 /* ───────────────── Page ───────────────── */
 
-export default function DrinkTodayPage() {
+export default function HydrationPage() {
   const { user } = useUser();
   const { lang } = useLangContext();
 
@@ -88,9 +101,23 @@ export default function DrinkTodayPage() {
   const [items, setItems] = useState<DrinkItem[]>([]);
   const [logs, setLogs] = useState<DrinkLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [legendOpen, setLegendOpen] = useState(false);
+  const legendRef = useRef<HTMLDivElement | null>(null);
 
   const { hydrationGoalMl } = useDashboard();
   const safeGoal = hydrationGoalMl ?? 0;
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (!legendRef.current) return;
+      if (!legendRef.current.contains(e.target as Node)) {
+        setLegendOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   /* ───────────────── Load ───────────────── */
 
@@ -283,14 +310,7 @@ export default function DrinkTodayPage() {
       pointTime.setMinutes((hour % 1) * 60);
       pointTime.setSeconds(0);
 
-      const cumulative = sortedLogs.reduce((sum, log) => {
-        const t = new Date(log.created_at);
-        const logHour = toHalfHour(t);
-
-        if (logHour > hour) return sum;
-
-        return sum + (log.ml ?? 0) + (log.water ?? 0);
-      }, 0);
+      const cumulative = getCumulativeAtTime(sortedLogs, pointTime);
 
       return {
         hour,
@@ -315,7 +335,7 @@ export default function DrinkTodayPage() {
 
     logs.forEach((log) => {
       const d = new Date(log.created_at);
-      const hour = toHalfHour(d);
+      const hour = toQuarterHour(d);
 
       const current = grouped.get(hour) ?? { drink: 0, food: 0 };
 
@@ -331,14 +351,10 @@ export default function DrinkTodayPage() {
     });
 
     return Array.from(grouped.entries()).map(([hour, values]) => {
-      const cumulative = logs.reduce((sum, l) => {
-        const t = new Date(l.created_at);
-        const h = toHalfHour(t);
+      const dotTime = new Date();
+      dotTime.setHours(Math.floor(hour), (hour % 1) * 60, 0);
 
-        if (h > hour) return sum;
-
-        return sum + (l.ml ?? 0) + (l.water ?? 0);
-      }, 0);
+      const cumulative = getCumulativeAtTime(logs, dotTime);
 
       return {
         hour,
@@ -366,7 +382,69 @@ export default function DrinkTodayPage() {
             />
           }
         >
-          <div className="h-[220px] w-full">
+          <div className="relative h-[220px] w-full">
+            <div ref={legendRef} className="absolute top-3 left-3 z-20">
+              <button
+                onClick={() => setLegendOpen((v) => !v)}
+                className="
+                  flex items-center gap-2
+                  rounded-[var(--radius)]
+                  bg-[#191970]
+                  border border-[#191970]
+                  px-3 py-1.5
+                  text-xs font-medium
+                  text-white
+                "
+              >
+                Legenda
+                <span className="text-[10px]">▼</span>
+              </button>
+
+              {legendOpen && (
+                <div
+                  className="
+                    absolute left-0 mt-2
+                    w-60
+                    rounded-[var(--radius)]
+                    border border-[#191970]
+                    bg-white
+                    py-2
+                    shadow-xl
+                    z-50
+                  "
+                >
+                  {/* Drink */}
+                  <div className="flex items-center gap-2 px-4 py-2 text-xs">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0284c7]" />
+                    Hydratatie uit drinken
+                  </div>
+
+                  {/* Food */}
+                  <div className="flex items-center gap-2 px-4 py-2 text-xs">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#f97316]" />
+                    Hydratatie uit eten
+                  </div>
+
+                  {/* Beide */}
+                  <div className="flex items-center gap-2 px-4 py-2 text-xs">
+                    <div className="relative w-2.5 h-2.5 rounded-full overflow-hidden">
+                      {/* linker helft (drinken) */}
+                      <div className="absolute left-0 top-0 w-1/2 h-full bg-[#0284c7]" />
+
+                      {/* rechter helft (eten) */}
+                      <div className="absolute right-0 top-0 w-1/2 h-full bg-[#f97316]" />
+                    </div>
+                    Hydratatie uit eten & drinken
+                  </div>
+
+                  {/* Doel */}
+                  <div className="flex items-center gap-2 px-4 py-2 text-xs">
+                    <div className="w-3 h-[2px] border-t border-dashed border-gray-400" />
+                    Dagdoel
+                  </div>
+                </div>
+              )}
+            </div>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -400,7 +478,7 @@ export default function DrinkTodayPage() {
                   data={combinedDots}
                   dataKey="value"
                   shape={({ cx, cy, payload }: any) => {
-                    const r = 5;
+                    const r = 5.5;
 
                     // alleen drinken
                     if (payload.hasDrink && !payload.hasFood) {
@@ -433,44 +511,44 @@ export default function DrinkTodayPage() {
                     // 🔥 BEIDE → half-half
                     return (
                       <g>
-  <defs>
-    <clipPath id={`left-${cx}-${cy}`}>
-      <rect x={cx - r} y={cy - r} width={r} height={r * 2} />
-    </clipPath>
+                        <defs>
+                          <clipPath id={`left-${cx}-${cy}`}>
+                            <rect x={cx - r} y={cy - r} width={r} height={r * 2} />
+                          </clipPath>
 
-    <clipPath id={`right-${cx}-${cy}`}>
-      <rect x={cx} y={cy - r} width={r} height={r * 2} />
-    </clipPath>
-  </defs>
+                          <clipPath id={`right-${cx}-${cy}`}>
+                            <rect x={cx} y={cy - r} width={r} height={r * 2} />
+                          </clipPath>
+                        </defs>
 
-  {/* linker helft = drink */}
-  <circle
-    cx={cx}
-    cy={cy}
-    r={r}
-    fill="#0284c7"
-    clipPath={`url(#left-${cx}-${cy})`}
-  />
+                        {/* linker helft = drink */}
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={r}
+                          fill="#0284c7"
+                          clipPath={`url(#left-${cx}-${cy})`}
+                        />
 
-  {/* rechter helft = food */}
-  <circle
-    cx={cx}
-    cy={cy}
-    r={r}
-    fill="#f97316"
-    clipPath={`url(#right-${cx}-${cy})`}
-  />
+                        {/* rechter helft = food */}
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={r}
+                          fill="#f97316"
+                          clipPath={`url(#right-${cx}-${cy})`}
+                        />
 
-  {/* border */}
-  <circle
-    cx={cx}
-    cy={cy}
-    r={r}
-    fill="none"
-    stroke="white"
-    strokeWidth={2}
-  />
-</g>
+                        {/* border */}
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={r}
+                          fill="none"
+                          stroke="white"
+                          strokeWidth={2}
+                        />
+                      </g>
                     );
                   }}
                 />
@@ -487,6 +565,7 @@ export default function DrinkTodayPage() {
 
         {/* DRINKS */}
         <Card
+          headerSpacing="compact"
           header={
             <CardHeader
               icon="/water_drop.svg"
@@ -501,11 +580,16 @@ export default function DrinkTodayPage() {
               Nog niets gedronken vandaag
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="-mx-4">
               {items.map((item, i) => (
                 <div
                   key={`${item.product_key}-${item.preparation_key}-${item.unit_key}-${i}`}
-                  className="flex justify-between border rounded px-3 py-2"
+                  className="
+                    w-full px-4 py-2
+                    flex items-center justify-between
+                    border-b border-[#DBE4F0]
+                    leading-tight
+                  "
                 >
                   <div>
                     <div className="text-sm font-medium text-[#191970]">
@@ -529,6 +613,7 @@ export default function DrinkTodayPage() {
 
         {/* TOTAL */}
         <Card
+          headerSpacing="compact"
           header={
             <CardHeader
               icon="/target.svg"
@@ -536,21 +621,21 @@ export default function DrinkTodayPage() {
             />
           }
         >
-          <div className="flex flex-col gap-3">
+          <div className="-mx-4">
 
-            <div className="flex justify-between border rounded px-3 py-2">
-              <span>Totaal</span>
-              <span>{total} ml</span>
+            <div className="w-full px-4 py-2 flex justify-between border-b border-[#DBE4F0]">
+              <span className="text-sm">Totaal</span>
+              <span className="text-sm font-medium text-[#191970]">{total} ml</span>
             </div>
 
-            <div className="flex justify-between border rounded px-3 py-2">
-              <span>🥤 Drinken</span>
-              <span>{totalDrink} ml</span>
+            <div className="w-full px-4 py-2 flex justify-between border-b border-[#DBE4F0]">
+              <span className="text-sm">🥤 Drinken</span>
+              <span className="text-sm font-medium text-[#191970]">{totalDrink} ml</span>
             </div>
 
-            <div className="flex justify-between border rounded px-3 py-2">
-              <span>🥗 Voeding</span>
-              <span>{totalFood} ml</span>
+            <div className="w-full px-4 py-2 flex justify-between border-b border-[#DBE4F0]">
+              <span className="text-sm">🥗 Voeding</span>
+              <span className="text-sm font-medium text-[#191970]">{totalFood} ml</span>
             </div>
 
           </div>
