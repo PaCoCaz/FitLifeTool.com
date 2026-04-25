@@ -38,14 +38,34 @@ const toQuarterHour = (date: Date) => {
   return Math.floor(h * 4) / 4;
 };
 
-const getCumulativeAtTime = (logs: DrinkLog[], time: Date) => {
+const getCumulativeAtTime = (
+  logs: DrinkLog[],
+  time: Date,
+  hydrationFactorMap: Map<string, number>
+) => {
   return logs.reduce((sum, log) => {
     const t = new Date(log.created_at);
 
     if (t >= time) return sum;
 
-    return sum + (log.ml ?? 0) + (log.water ?? 0);
+    const factor =
+      hydrationFactorMap.get(log.product_key) ?? 1;
+
+    const drinkHydration =
+      (log.ml ?? 0) * factor;
+
+    return sum + drinkHydration + (log.water ?? 0);
   }, 0);
+};
+
+const getDrinkHydration = (
+  log: DrinkLog,
+  hydrationFactorMap: Map<string, number>
+) => {
+  const factor =
+    hydrationFactorMap.get(log.product_key) ?? 1;
+
+  return (log.ml ?? 0) * factor;
 };
 
 /* ───────────────── Types ───────────────── */
@@ -62,6 +82,7 @@ type DrinkLog = {
 type Product = {
   product_key: string;
   is_drink: boolean;
+  hydration_factor: number | null;
 };
 
 type ProductTranslation = {
@@ -85,6 +106,8 @@ type DrinkItem = {
   unit_key: string;
   name: string;
   total_ml: number;
+  hydration_factor: number;
+  hydration_ml: number;
   preparation: string;
   unit: string;
 };
@@ -100,6 +123,8 @@ export default function HydrationPage() {
 
   const [items, setItems] = useState<DrinkItem[]>([]);
   const [logs, setLogs] = useState<DrinkLog[]>([]);
+  const [hydrationFactorMap, setHydrationFactorMap] =
+    useState<Map<string, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [legendOpen, setLegendOpen] = useState(false);
   const legendRef = useRef<HTMLDivElement | null>(null);
@@ -151,7 +176,7 @@ export default function HydrationPage() {
 
       const { data: products } = await supabase
         .from("nutrition_products")
-        .select("product_key, is_drink")
+        .select("product_key, is_drink, hydration_factor")
         .in("product_key", productKeys) as {
         data: Product[] | null;
       };
@@ -161,6 +186,15 @@ export default function HydrationPage() {
           .filter((p) => p.is_drink)
           .map((p) => p.product_key)
       );
+
+      const hydrationFactorMap = new Map<string, number>(
+        (products ?? []).map((p) => [
+          p.product_key,
+          p.hydration_factor ?? 1,
+        ])
+      );
+
+      setHydrationFactorMap(hydrationFactorMap);
 
       const drinkLogs = logs.filter((l) =>
         drinkKeys.has(l.product_key)
@@ -218,13 +252,24 @@ export default function HydrationPage() {
       const grouped = new Map<string, number>();
 
       drinkLogs.forEach((log) => {
-        const key = `${log.product_key}_${log.preparation_key}_${log.unit_key}`;
+        const key = JSON.stringify({
+          product_key: log.product_key,
+          preparation_key: log.preparation_key,
+          unit_key: log.unit_key,
+        });
         grouped.set(key, (grouped.get(key) ?? 0) + (log.ml ?? 0));
       });
 
       const result: DrinkItem[] = Array.from(grouped.entries()).map(
         ([key, total]) => {
-          const [product_key, preparation_key, unit_key] = key.split("_");
+          const {
+            product_key,
+            preparation_key,
+            unit_key,
+          } = JSON.parse(key);
+
+          const factor =
+            hydrationFactorMap.get(product_key) ?? 1;
 
           return {
             product_key,
@@ -232,6 +277,8 @@ export default function HydrationPage() {
             unit_key,
             name: nameMap.get(product_key) ?? product_key,
             total_ml: total,
+            hydration_factor: factor,
+            hydration_ml: total * factor,
             preparation: prepMap.get(preparation_key) ?? "",
             unit: unitMap.get(unit_key) ?? "",
           };
@@ -250,7 +297,13 @@ export default function HydrationPage() {
 
   /* ───────────────── Totals ───────────────── */
 
-  const totalDrink = items.reduce((acc, i) => acc + i.total_ml, 0);
+  const totalDrink = logs.reduce((sum, log) => {
+    return sum + getDrinkHydration(
+      log,
+      hydrationFactorMap
+    );
+  }, 0);
+
   const totalFood = logs.reduce(
     (sum, l) => sum + (l.water ?? 0),
     0
@@ -310,7 +363,11 @@ export default function HydrationPage() {
       pointTime.setMinutes((hour % 1) * 60);
       pointTime.setSeconds(0);
 
-      const cumulative = getCumulativeAtTime(sortedLogs, pointTime);
+      const cumulative = getCumulativeAtTime(
+        sortedLogs,
+        pointTime,
+        hydrationFactorMap
+      );
 
       return {
         hour,
@@ -340,7 +397,10 @@ export default function HydrationPage() {
       const current = grouped.get(hour) ?? { drink: 0, food: 0 };
 
       if ((log.ml ?? 0) > 0) {
-        current.drink += log.ml;
+        current.drink += getDrinkHydration(
+          log,
+          hydrationFactorMap
+        );
       }
 
       if ((log.water ?? 0) > 0) {
@@ -354,7 +414,11 @@ export default function HydrationPage() {
       const dotTime = new Date();
       dotTime.setHours(Math.floor(hour), (hour % 1) * 60, 0);
 
-      const cumulative = getCumulativeAtTime(logs, dotTime);
+      const cumulative = getCumulativeAtTime(
+        logs,
+        dotTime,
+        hydrationFactorMap
+      );
 
       return {
         hour,
@@ -581,32 +645,109 @@ export default function HydrationPage() {
             </div>
           ) : (
             <div className="-mx-4">
+
+              {/* Header */}
+              <div
+                className="
+                  w-full px-4 py-2
+                  grid
+                  grid-cols-[minmax(0,1fr)_72px_52px_72px]
+                  sm:grid-cols-[minmax(0,1fr)_112px_96px_112px]
+                  items-center
+                  gap-1
+                  border-b border-[#DBE4F0]
+                  text-[11px] sm:text-xs
+                  font-semibold
+                  text-gray-500
+                "
+              >
+                <div>Drank</div>
+                <div className="text-right">Hoeveelheid</div>
+                <div className="text-right">Factor</div>
+                <div className="text-right">Hydratie</div>
+              </div>
+
+              {/* Rows */}
               {items.map((item, i) => (
                 <div
                   key={`${item.product_key}-${item.preparation_key}-${item.unit_key}-${i}`}
                   className="
                     w-full px-4 py-2
-                    flex items-center justify-between
+                    grid
+                    grid-cols-[minmax(0,1fr)_72px_52px_72px]
+                    sm:grid-cols-[minmax(0,1fr)_112px_96px_112px]
+                    items-center
+                    gap-1
                     border-b border-[#DBE4F0]
-                    leading-tight
                   "
                 >
-                  <div>
-                    <div className="text-sm font-medium text-[#191970]">
-                      {item.name}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {[item.preparation, item.unit]
-                        .filter(Boolean)
-                        .join(" • ")}
-                    </div>
+                  <div
+                    className="
+                      text-xs sm:text-sm
+                      text-[#191970]
+                      font-medium
+                      leading-tight
+                      line-clamp-2
+                      pr-2
+                    "
+                  >
+                    {item.name}
                   </div>
 
-                  <div className="text-sm font-medium text-[#191970]">
+                  <div className="text-right text-xs sm:text-sm text-[#191970]">
                     {item.total_ml} ml
+                  </div>
+
+                  <div className="text-right text-xs sm:text-sm text-[#0284c7]">
+                    {item.hydration_factor.toFixed(2)}
+                  </div>
+
+                  <div className="text-right text-xs sm:text-sm text-[#0284c7] font-medium">
+                    {Math.round(item.hydration_ml)} ml
                   </div>
                 </div>
               ))}
+
+              {/* Total */}
+              <div
+                className="
+                  w-full px-4 py-2
+                  grid
+                  grid-cols-[minmax(0,1fr)_72px_52px_72px]
+                  sm:grid-cols-[minmax(0,1fr)_112px_96px_112px]
+                  items-center
+                  gap-1
+                  font-semibold
+                  border-t border-[#DBE4F0]
+                "
+              >
+                <div className="text-xs sm:text-sm text-[#191970]">
+                  Totaal
+                </div>
+
+                <div className="text-right text-xs sm:text-sm text-[#191970]">
+                  {items.reduce((sum, i) => sum + i.total_ml, 0)} ml
+                </div>
+
+                {/* lege factor kolom */}
+                <div />
+
+                <div className="text-right text-xs sm:text-sm text-[#191970]">
+                  {Math.round(
+                    items.reduce((sum, i) => sum + i.hydration_ml, 0)
+                  )} ml
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="px-4 py-4 text-xs sm:text-sm text-gray-500 leading-relaxed">
+                <span className="font-semibold">
+                  Hydratatiefactor:
+                </span>{" "}
+                Niet alle dranken hydrateren even sterk als water, de hydratatiefactor van water is 1.
+                Dranken met cafeïne, suiker of alcohol dragen minder bij aan je hydratatie.
+              </div>
+
             </div>
           )}
         </Card>
