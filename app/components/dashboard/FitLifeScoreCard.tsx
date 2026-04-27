@@ -19,6 +19,9 @@ import {
 import { useDashboard } from "@/lib/DashboardStore";
 import { useScores } from "@/lib/ScoreContext";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 /* ───────────────── Helpers ───────────────── */
 
 function formatTime(now: Date): string {
@@ -34,6 +37,9 @@ function formatTime(now: Date): string {
 export default function FitLifeScoreCard() {
 
   const clockNow = useClockNow();
+
+  const langCode = useLang();
+  const t = uiText[langCode];
 
   const {
     hydrationMl,
@@ -156,7 +162,7 @@ export default function FitLifeScoreCard() {
               text-center
               ${pillColor}
             `}>
-              Vandaag | {mounted ? formatTime(clockNow) : "—"}
+              {t.common.today} | {mounted ? formatTime(clockNow) : "—"}
             </div>
           }
         />

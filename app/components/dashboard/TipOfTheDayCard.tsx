@@ -5,24 +5,25 @@ import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
 import { useLabels } from "@/lib/useLabels";
 
-export default function TipOfTheDayCard() {
-  const t = useLabels("nl").tip;
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
 
-  // Dummy content – later Supabase / AI
-  const tip =
-    "Drink bij elke maaltijd een glas water om je dagdoel makkelijker te halen.";
+export default function TipOfTheDayCard() {
+
+  const langCode = useLang();
+  const t = uiText[langCode];
 
   return (
     <Card
       header={
         <CardHeader
           icon="/lightbulb.svg"
-          title="Tip van vandaag"
+          title={t.common.tipOfTheDay}
         />
       }
     >
       <p className="text-sm text-gray-700 leading-relaxed">
-        {tip}
+        {t.common.tipHydration}
       </p>
     </Card>
   );

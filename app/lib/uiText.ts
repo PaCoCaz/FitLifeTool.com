@@ -7,38 +7,26 @@ import { Lang } from "./useLang";
 const en = {
   hydration: {
     title: "Hydration",
-    addDrink: "Add drink",
-    goal: "Daily goal",
+
+    addDrink: "Drink",
+    amount: "Amount",
+    dailyGoal: "Daily goal",
+    drink: "Drink",
+    drinkToday: "Today's drinks",
+    factor: "Factor",
+    factorTitle: "Hydration factor:",
+    factorLine1: "Not all drinks hydrate as effectively as water. Water has a hydration factor of 1.",
+    factorLine2: "Drinks containing caffeine, sugar or alcohol contribute less to hydration.",
+    fromDrinks: "Hydration from drinks",
+    fromFood: "Hydration from food",
+    fromFoodAndDrinks: "Hydration from food & drinks",
+    hydration: "Hydration",
+    hydrationToday: "Today's hydration",
+    legend: "Legend",
     loading: "Loading hydration…",
-
-    modalWhatDidYouDrink: "What did you drink?",
-    modalHowMuch: "How much did you drink?",
-    modalCustomAmount: "Or enter a custom amount (ml)",
-    modalToday: "Today's drinks",
-    modalDrink: "Drink",
-    modalAmount: "Amount",
-    modalHydration: "Hydration",
-    modalTotal: "Total",
-    modalFactorTitle: "Hydration factor:",
-    modalFactorLine1:
-      "Not all drinks hydrate as effectively as water. Water has a hydration factor of 1.",
-    modalFactorLine2:
-      "Drinks containing caffeine, sugar or alcohol contribute less to hydration.",
-
-    drinkLabels: {
-      water: "Water",
-      tea: "Tea",
-      coffee: "Coffee",
-      milk: "Milk",
-      soda: "Soft drink",
-      juice: "Juice / Smoothie",
-      sports: "Sports drink",
-      energy: "Energy drink",
-      beer: "Beer",
-      wine: "Wine",
-      cocktail: "Cocktail",
-      liquor: "Liquor",
-    },
+    nothingDrunkToday: "Nothing logged today yet",
+    scoreToday: "Today's score",
+    total: "Total",
 
     status: {
       noGoal: "No hydration goal set",
@@ -50,10 +38,12 @@ const en = {
 
   activity: {
     title: "Activity",
+
+    addActivity: "Activity",
     goal: "Daily goal",
     minutes: "min",
     loading: "Loading activity…",
-    addActivity: "Add activity",
+
 
     whichActivity: "Which activity?",
     howLong: "How long?",
@@ -85,7 +75,8 @@ const en = {
 
   nutrition: {
     title: "Nutrition",
-    addFood: "Add food",
+
+    addFood: "Food",
     goal: "Daily limit",
     loading: "Loading nutrition…",
     basePlusActivity: "Base {{base}} + daily activity {{activity}}",
@@ -118,8 +109,24 @@ const en = {
     },
   },
 
+  weight: {
+    title: "Weight",
+
+    addWeight: "Weight",
+    bmi: "BMI",
+    healthy: "Healthy",
+    loading: "Loading weight…",
+    obesity: "Obesity",
+    overweight: "Overweight",
+    targetWeight: "Target weight",
+    underweight: "Underweight",
+  },
+
   common: {
     close: "Close",
+    tipOfTheDay: "Tip of the day",
+    tipHydration: "Drink a glass of water with every meal to reach your daily goal more easily.",
+    today: "Today",
   },
 };
 
@@ -128,38 +135,26 @@ const en = {
 const nl = {
   hydration: {
     title: "Hydratatie",
-    addDrink: "Drinken toevoegen",
-    goal: "Dagdoel",
+
+    addDrink: "Drinken",
+    amount: "Hoeveel",
+    dailyGoal: "Dagdoel",
+    drink: "Drank",
+    drinkToday: "Vandaag gedronken",
+    factor: "Factor",
+    factorTitle: "Hydratatiefactor:",
+    factorLine1: "Niet alle dranken hydrateren even sterk als water, de hydratatiefactor van water is 1.",
+    factorLine2: "Dranken met cafeïne, suiker of alcohol dragen minder bij aan je hydratatie.",
+    fromDrinks: "Hydratatie uit dranken",
+    fromFood: "Hydratatie uit voeding",
+    fromFoodAndDrinks: "Hydratatie uit voeding en dranken",
+    hydration: "Hydratatie",
+    hydrationToday: "Hydratatie vandaag",
+    legend: "Legenda",
     loading: "Hydratatie laden…",
-
-    modalWhatDidYouDrink: "Wat heb je gedronken?",
-    modalHowMuch: "Hoeveel heb je gedronken?",
-    modalCustomAmount: "Of voer zelf een hoeveelheid in (ml)",
-    modalToday: "Vandaag gedronken",
-    modalDrink: "Drank",
-    modalAmount: "Hoeveelheid",
-    modalHydration: "Hydratatie",
-    modalTotal: "Totaal",
-    modalFactorTitle: "Hydratatiefactor:",
-    modalFactorLine1:
-      "Niet alle dranken hydrateren even sterk als water, de hydratatiefactor van water is 1.",
-    modalFactorLine2:
-      "Dranken met cafeïne, suiker of alcohol dragen minder bij aan je hydratatie.",
-
-    drinkLabels: {
-      water: "Water",
-      tea: "Thee",
-      coffee: "Koffie",
-      milk: "Melk",
-      soda: "Frisdrank",
-      juice: "Sap / Smoothie",
-      sports: "Sportdrank",
-      energy: "Energy drink",
-      beer: "Bier",
-      wine: "Wijn",
-      cocktail: "Cocktail",
-      liquor: "Sterke drank",
-    },
+    nothingDrunkToday: "Nog niets gedronken vandaag",
+    scoreToday: "Score vandaag",
+    total: "Totaal",
 
     status: {
       noGoal: "Geen hydratatiedoel ingesteld",
@@ -171,10 +166,11 @@ const nl = {
 
   activity: {
     title: "Activiteiten",
+
+    addActivity: "Activiteit",
     goal: "Dagdoel",
     minutes: "min",
     loading: "Activiteiten laden…",
-    addActivity: "Activiteit toevoegen",
 
     whichActivity: "Welke activiteit?",
     howLong: "Hoe lang?",
@@ -206,7 +202,8 @@ const nl = {
 
   nutrition: {
     title: "Voeding",
-    addFood: "Voeding toevoegen",
+
+    addFood: "Voeding",
     goal: "Daglimiet",
     loading: "Voeding laden…",
     basePlusActivity: "Basis {{base}} + dagelijkse activiteiten {{activity}}",
@@ -239,8 +236,24 @@ const nl = {
     },
   },
 
+  weight: {
+    title: "Gewicht",
+
+    addWeight: "Gewicht",
+    bmi: "BMI",
+    healthy: "Gezond",
+    loading: "Gewicht laden…",
+    obesity: "Obesitas",
+    overweight: "Overgewicht",
+    targetWeight: "Streefgewicht",
+    underweight: "Ondergewicht",
+  },
+
   common: {
     close: "Sluiten",
+    tipOfTheDay: "Tip van vandaag",
+    tipHydration: "Drink bij elke maaltijd een glas water om je dagdoel makkelijker te halen.",
+    today: "Vandaag",
   },
 };
 
@@ -249,38 +262,26 @@ const nl = {
 const fr = {
   hydration: {
     title: "Hydratation",
-    addDrink: "Ajouter une boisson",
-    goal: "Objectif quotidien",
+
+    addDrink: "Boire",
+    amount: "Quantité",
+    dailyGoal: "Objectif quotidien",
+    drink: "Boisson",
+    drinkToday: "Boissons d'aujourd'hui",
+    factor: "Facteur",
+    factorTitle: "Facteur d'hydratation :",
+    factorLine1: "Toutes les boissons n'hydratent pas aussi bien que l'eau. L'eau a un facteur d'hydratation de 1.",
+    factorLine2: "Les boissons contenant de la caféine, du sucre ou de l'alcool contribuent moins à l'hydratation.",
+    fromDrinks: "Hydratation provenant des boissons",
+    fromFood: "Hydratation provenant de l'alimentation",
+    fromFoodAndDrinks: "Hydratation provenant de l'alimentation et des boissons",
+    hydration: "Hydratation",
+    hydrationToday: "Hydratation du jour",
+    legend: "Légende",
     loading: "Chargement de l'hydratation…",
-
-    modalWhatDidYouDrink: "Qu'avez-vous bu ?",
-    modalHowMuch: "Combien avez-vous bu ?",
-    modalCustomAmount: "Ou saisissez une quantité personnalisée (ml)",
-    modalToday: "Boissons d'aujourd'hui",
-    modalDrink: "Boisson",
-    modalAmount: "Quantité",
-    modalHydration: "Hydratation",
-    modalTotal: "Total",
-    modalFactorTitle: "Facteur d'hydratation :",
-    modalFactorLine1:
-      "Toutes les boissons n'hydratent pas aussi bien que l'eau. L'eau a un facteur d'hydratation de 1.",
-    modalFactorLine2:
-      "Les boissons contenant de la caféine, du sucre ou de l'alcool contribuent moins à l'hydratation.",
-
-    drinkLabels: {
-      water: "Eau",
-      tea: "Thé",
-      coffee: "Café",
-      milk: "Lait",
-      soda: "Soda",
-      juice: "Jus / Smoothie",
-      sports: "Boisson sportive",
-      energy: "Boisson énergisante",
-      beer: "Bière",
-      wine: "Vin",
-      cocktail: "Cocktail",
-      liquor: "Alcool fort",
-    },
+    nothingDrunkToday: "Rien bu aujourd'hui",
+    scoreToday: "Score du jour",
+    total: "Total",
 
     status: {
       noGoal: "Aucun objectif d'hydratation défini",
@@ -292,10 +293,12 @@ const fr = {
 
   activity: {
     title: "Activité quotidienne",
+
+    addActivity: "Activité",
     goal: "Objectif quotidien",
     minutes: "min",
     loading: "Chargement de l'activité…",
-    addActivity: "Ajouter une activité",
+
 
     whichActivity: "Quelle activité ?",
     howLong: "Combien de temps ?",
@@ -327,7 +330,8 @@ const fr = {
 
   nutrition: {
     title: "Nutrition",
-    addFood: "Ajouter un aliment",
+
+    addFood: "Alimentation",
     goal: "Limite quotidienne",
     loading: "Chargement de la nutrition…",
     basePlusActivity: "Base {{base}} + activité quotidienne {{activity}}",
@@ -339,7 +343,7 @@ const fr = {
     modalToday: "Repas d'aujourd'hui",
     modalMeal: "Repas",
     modalCalories: "Calories",
-    modalTotal: "Total",
+    total: "Total",
 
     mealLabels: {
       breakfast: "Petit-déjeuner",
@@ -360,8 +364,24 @@ const fr = {
     },
   },
 
+  weight: {
+    title: "Poids",
+
+    addWeight: "Poids",
+    bmi: "IMC",
+    healthy: "Poids normal",
+    loading: "Chargement du poids…",
+    obesity: "Obésité",
+    overweight: "Surpoids",
+    targetWeight: "Poids cible",
+    underweight: "Insuffisance pondérale",
+  },
+
   common: {
     close: "Fermer",
+    tipOfTheDay: "Conseil du jour",
+    tipHydration: "Buvez un verre d'eau à chaque repas pour atteindre plus facilement votre objectif quotidien.",
+    today: "Aujourd'hui",
   },
 };
 
@@ -370,38 +390,26 @@ const fr = {
 const de = {
   hydration: {
     title: "Flüssigkeitszufuhr",
-    addDrink: "Getränk hinzufügen",
-    goal: "Tagesziel",
+
+    addDrink: "Trinken",
+    amount: "Menge",
+    dailyGoal: "Tagesziel",
+    drink: "Getränk",
+    drinkToday: "Heute getrunken",
+    factor: "Faktor",
+    factorTitle: "Hydrationsfaktor:",
+    factorLine1: "Nicht alle Getränke hydratisieren so gut wie Wasser. Wasser hat einen Hydrationsfaktor von 1.",
+    factorLine2: "Getränke mit Koffein, Zucker oder Alkohol tragen weniger zur Hydration bei.",
+    fromDrinks: "Hydration aus Getränken",
+    fromFood: "Hydration aus Nahrung",
+    fromFoodAndDrinks: "Hydration aus Nahrung und Getränken",
+    hydration: "Hydratation",
+    hydrationToday: "Heutige Flüssigkeitszufuhr",
+    legend: "Legende",
     loading: "Lade Flüssigkeitsdaten…",
-
-    modalWhatDidYouDrink: "Was hast du getrunken?",
-    modalHowMuch: "Wie viel hast du getrunken?",
-    modalCustomAmount: "Oder gib eine eigene Menge ein (ml)",
-    modalToday: "Heute getrunken",
-    modalDrink: "Getränk",
-    modalAmount: "Menge",
-    modalHydration: "Hydration",
-    modalTotal: "Gesamt",
-    modalFactorTitle: "Hydrationsfaktor:",
-    modalFactorLine1:
-      "Nicht alle Getränke hydratisieren so gut wie Wasser. Wasser hat einen Hydrationsfaktor von 1.",
-    modalFactorLine2:
-      "Getränke mit Koffein, Zucker oder Alkohol tragen weniger zur Hydration bei.",
-
-    drinkLabels: {
-      water: "Wasser",
-      tea: "Tee",
-      coffee: "Kaffee",
-      milk: "Milch",
-      soda: "Softdrink",
-      juice: "Saft / Smoothie",
-      sports: "Sportgetränk",
-      energy: "Energy-Drink",
-      beer: "Bier",
-      wine: "Wein",
-      cocktail: "Cocktail",
-      liquor: "Schnaps",
-    },
+    nothingDrunkToday: "Heute noch nichts getrunken",
+    scoreToday: "Heutiger Score",
+    total: "Gesamt",
 
     status: {
       noGoal: "Kein Flüssigkeitsziel festgelegt",
@@ -413,10 +421,12 @@ const de = {
 
   activity: {
     title: "Tägliche Aktivität",
+
+    addActivity: "Aktivität",
     goal: "Tagesziel",
     minutes: "Min",
     loading: "Lade Aktivitätsdaten…",
-    addActivity: "Aktivität hinzufügen",
+
 
     whichActivity: "Welche Aktivität?",
     howLong: "Wie lange?",
@@ -448,7 +458,8 @@ const de = {
 
   nutrition: {
     title: "Ernährung",
-    addFood: "Mahlzeit hinzufügen",
+
+    addFood: "Ernährung",
     goal: "Tageslimit",
     loading: "Lade Ernährungsdaten…",
     basePlusActivity: "Basis {{base}} + tägliche Aktivität {{activity}}",
@@ -481,8 +492,24 @@ const de = {
     },
   },
 
+  weight: {
+    title: "Gewicht",
+
+    addWeight: "Gewicht",
+    bmi: "BMI",
+    healthy: "Normalgewicht",
+    loading: "Gewicht wird geladen…",
+    obesity: "Adipositas",
+    overweight: "Übergewicht",
+    targetWeight: "Zielgewicht",
+    underweight: "Untergewicht",
+  },
+
   common: {
     close: "Schließen",
+    tipOfTheDay: "Tipp des Tages",
+    tipHydration: "Trinke zu jeder Mahlzeit ein Glas Wasser, um dein Tagesziel leichter zu erreichen.",
+    today: "Heute",
   },
 };
 
@@ -491,38 +518,26 @@ const de = {
 const pl = {
   hydration: {
     title: "Nawodnienie",
-    addDrink: "Dodaj napój",
-    goal: "Cel dzienny",
+
+    addDrink: "Picie",
+    amount: "Ile",
+    dailyGoal: "Cel dzienny",
+    drink: "Napój",
+    drinkToday: "Dzisiejsze napoje",
+    factor: "Współczynnik",
+    factorTitle: "Współczynnik nawodnienia:",
+    factorLine1: "Nie wszystkie napoje nawadniają tak skutecznie jak woda. Woda ma współczynnik nawodnienia równy 1.",
+    factorLine2: "Napoje zawierające kofeinę, cukier lub alkohol mniej wspierają nawodnienie.",
+    fromDrinks: "Nawodnienie z napojów",
+    fromFood: "Nawodnienie z żywności",
+    fromFoodAndDrinks: "Nawodnienie z jedzenia i napojów",
+    hydration: "Nawodnienie",
+    hydrationToday: "Dzisiejsze nawodnienie",
+    legend: "Legenda",
     loading: "Ładowanie nawodnienia…",
-
-    modalWhatDidYouDrink: "Co wypiłeś?",
-    modalHowMuch: "Ile wypiłeś?",
-    modalCustomAmount: "Lub wpisz własną ilość (ml)",
-    modalToday: "Dzisiejsze napoje",
-    modalDrink: "Napój",
-    modalAmount: "Ilość",
-    modalHydration: "Nawodnienie",
-    modalTotal: "Suma",
-    modalFactorTitle: "Współczynnik nawodnienia:",
-    modalFactorLine1:
-      "Nie wszystkie napoje nawadniają tak skutecznie jak woda. Woda ma współczynnik nawodnienia równy 1.",
-    modalFactorLine2:
-      "Napoje zawierające kofeinę, cukier lub alkohol mniej wspierają nawodnienie.",
-
-    drinkLabels: {
-      water: "Woda",
-      tea: "Herbata",
-      coffee: "Kawa",
-      milk: "Mleko",
-      soda: "Napój gazowany",
-      juice: "Sok / Smoothie",
-      sports: "Napój sportowy",
-      energy: "Napój energetyczny",
-      beer: "Piwo",
-      wine: "Wino",
-      cocktail: "Koktajl",
-      liquor: "Alkohol mocny",
-    },
+    nothingDrunkToday: "Jeszcze nic dziś nie wypito",
+    scoreToday: "Dzisiejszy wynik",
+    total: "Suma",
 
     status: {
       noGoal: "Brak ustawionego celu nawodnienia",
@@ -534,10 +549,12 @@ const pl = {
 
   activity: {
     title: "Dzienne aktywności",
+
+    addActivity: "Aktywność",
     goal: "Cel dzienny",
     minutes: "min",
     loading: "Ładowanie aktywności…",
-    addActivity: "Dodaj aktywność",
+
 
     whichActivity: "Jaką aktywność?",
     howLong: "Jak długo?",
@@ -569,7 +586,8 @@ const pl = {
 
   nutrition: {
     title: "Odżywianie",
-    addFood: "Dodaj posiłek",
+
+    addFood: "Jedzenie",
     goal: "Limit dzienny",
     loading: "Ładowanie danych o odżywianiu…",
     basePlusActivity: "Podstawa {{base}} + dzienna aktywność {{activity}}",
@@ -602,8 +620,24 @@ const pl = {
     },
   },
 
+  weight: {
+    title: "Waga",
+
+    addWeight: "Waga",
+    bmi: "BMI",
+    healthy: "Prawidłowa waga",
+    loading: "Ładowanie wagi…",
+    obesity: "Otyłość",
+    overweight: "Nadwaga",
+    targetWeight: "Docelowa waga",
+    underweight: "Niedowaga",
+  },
+
   common: {
     close: "Zamknij",
+    tipOfTheDay: "Wskazówka dnia",
+    tipHydration: "Pij szklankę wody do każdego posiłku, aby łatwiej osiągnąć swój dzienny cel.",
+    today: "Dziś",
   },
 };
 

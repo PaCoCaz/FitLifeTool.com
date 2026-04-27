@@ -252,35 +252,30 @@ export default function HydrationPage() {
       const grouped = new Map<string, number>();
 
       drinkLogs.forEach((log) => {
-        const key = JSON.stringify({
-          product_key: log.product_key,
-          preparation_key: log.preparation_key,
-          unit_key: log.unit_key,
-        });
-        grouped.set(key, (grouped.get(key) ?? 0) + (log.ml ?? 0));
+        const key = log.product_key;
+
+        grouped.set(
+          key,
+          (grouped.get(key) ?? 0) + (log.ml ?? 0)
+        );
       });
 
       const result: DrinkItem[] = Array.from(grouped.entries()).map(
-        ([key, total]) => {
-          const {
-            product_key,
-            preparation_key,
-            unit_key,
-          } = JSON.parse(key);
+        ([product_key, total]) => {
 
           const factor =
             hydrationFactorMap.get(product_key) ?? 1;
 
           return {
             product_key,
-            preparation_key,
-            unit_key,
+            preparation_key: "",
+            unit_key: "",
             name: nameMap.get(product_key) ?? product_key,
             total_ml: total,
             hydration_factor: factor,
             hydration_ml: total * factor,
-            preparation: prepMap.get(preparation_key) ?? "",
-            unit: unitMap.get(unit_key) ?? "",
+            preparation: "",
+            unit: "",
           };
         }
       );
@@ -304,9 +299,11 @@ export default function HydrationPage() {
     );
   }, 0);
 
-  const totalFood = logs.reduce(
-    (sum, l) => sum + (l.water ?? 0),
-    0
+  const totalFood = Math.round(
+    logs.reduce(
+      (sum, l) => sum + (l.water ?? 0),
+      0
+    )
   );
   const total = totalDrink + totalFood;
 
@@ -439,14 +436,14 @@ export default function HydrationPage() {
           header={
             <CardHeader
               icon="/water_drop.svg"
-              title="Hydratatie vandaag"
+              title={t.hydration.scoreToday}
               scoreLabel="FitLifeScore"
               score={pillScore}
               scoreColor={hydrationStatus.color}
             />
           }
         >
-          <div className="relative h-[220px] w-full">
+          <div className="relative h-[220px] -mb-5 -mt-1 -mx-2 min-h-[220px] text-xs sm:text-sm">
             <div ref={legendRef} className="absolute top-3 left-3 z-20">
               <button
                 onClick={() => setLegendOpen((v) => !v)}
@@ -460,7 +457,7 @@ export default function HydrationPage() {
                   text-white
                 "
               >
-                Legenda
+                {t.hydration.legend}
                 <span className="text-[10px]">▼</span>
               </button>
 
@@ -468,7 +465,7 @@ export default function HydrationPage() {
                 <div
                   className="
                     absolute left-0 mt-2
-                    w-60
+                    w-72
                     rounded-[var(--radius)]
                     border border-[#191970]
                     bg-white
@@ -478,19 +475,19 @@ export default function HydrationPage() {
                   "
                 >
                   {/* Drink */}
-                  <div className="flex items-center gap-2 px-4 py-2 text-xs">
+                  <div className="flex items-center gap-2 px-2 py-1 text-xs">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#0284c7]" />
-                    Hydratatie uit drinken
+                    {t.hydration.fromDrinks}
                   </div>
 
                   {/* Food */}
-                  <div className="flex items-center gap-2 px-4 py-2 text-xs">
+                  <div className="flex items-center gap-2 px-2 py-1 text-xs">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#f97316]" />
-                    Hydratatie uit eten
+                    {t.hydration.fromFood}
                   </div>
 
                   {/* Beide */}
-                  <div className="flex items-center gap-2 px-4 py-2 text-xs">
+                  <div className="flex items-center gap-2 px-2 py-1 text-xs">
                     <div className="relative w-2.5 h-2.5 rounded-full overflow-hidden">
                       {/* linker helft (drinken) */}
                       <div className="absolute left-0 top-0 w-1/2 h-full bg-[#0284c7]" />
@@ -498,18 +495,18 @@ export default function HydrationPage() {
                       {/* rechter helft (eten) */}
                       <div className="absolute right-0 top-0 w-1/2 h-full bg-[#f97316]" />
                     </div>
-                    Hydratatie uit eten & drinken
+                    {t.hydration.fromFoodAndDrinks}
                   </div>
 
                   {/* Doel */}
-                  <div className="flex items-center gap-2 px-4 py-2 text-xs">
+                  <div className="flex items-center gap-1 px-2 py-1 text-xs">
                     <div className="w-3 h-[2px] border-t border-dashed border-gray-400" />
-                    Dagdoel
+                    {t.hydration.dailyGoal}
                   </div>
                 </div>
               )}
             </div>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={220}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
 
@@ -633,15 +630,15 @@ export default function HydrationPage() {
           header={
             <CardHeader
               icon="/water_drop.svg"
-              title="Vandaag gedronken"
+              title={t.hydration.drinkToday}
             />
           }
         >
           {loading ? (
-            <div className="text-sm text-gray-500">Laden…</div>
+            <div className="text-sm text-gray-500">{t.hydration.loading}</div>
           ) : items.length === 0 ? (
             <div className="text-sm text-gray-500">
-              Nog niets gedronken vandaag
+              {t.hydration.nothingDrunkToday}
             </div>
           ) : (
             <div className="-mx-4">
@@ -651,20 +648,20 @@ export default function HydrationPage() {
                 className="
                   w-full px-4 py-2
                   grid
-                  grid-cols-[minmax(0,1fr)_72px_52px_72px]
+                  grid-cols-[minmax(0,1fr)_minmax(45px,auto)_minmax(70px,auto)_minmax(70px,auto)]
                   sm:grid-cols-[minmax(0,1fr)_112px_96px_112px]
                   items-center
-                  gap-1
+                  gap-2
                   border-b border-[#DBE4F0]
                   text-[11px] sm:text-xs
                   font-semibold
                   text-gray-500
                 "
               >
-                <div>Drank</div>
-                <div className="text-right">Hoeveelheid</div>
-                <div className="text-right">Factor</div>
-                <div className="text-right">Hydratie</div>
+                <div>{t.hydration.modalDrink}</div>
+                <div className="text-right whitespace-nowrap">{t.hydration.amount}</div>
+                <div className="text-right whitespace-nowrap">{t.hydration.factor}</div>
+                <div className="text-right whitespace-nowrap">{t.hydration.hydration}</div>
               </div>
 
               {/* Rows */}
@@ -674,10 +671,10 @@ export default function HydrationPage() {
                   className="
                     w-full px-4 py-2
                     grid
-                    grid-cols-[minmax(0,1fr)_72px_52px_72px]
+                    grid-cols-[minmax(0,1fr)_minmax(45px,auto)_minmax(70px,auto)_minmax(70px,auto)]
                     sm:grid-cols-[minmax(0,1fr)_112px_96px_112px]
                     items-center
-                    gap-1
+                    gap-2
                     border-b border-[#DBE4F0]
                   "
                 >
@@ -713,16 +710,16 @@ export default function HydrationPage() {
                 className="
                   w-full px-4 py-2
                   grid
-                  grid-cols-[minmax(0,1fr)_72px_52px_72px]
+                  grid-cols-[minmax(0,1fr)_minmax(45px,auto)_minmax(70px,auto)_minmax(70px,auto)]
                   sm:grid-cols-[minmax(0,1fr)_112px_96px_112px]
                   items-center
-                  gap-1
+                  gap-2
                   font-semibold
                   border-t border-[#DBE4F0]
                 "
               >
                 <div className="text-xs sm:text-sm text-[#191970]">
-                  Totaal
+                  {t.hydration.total}
                 </div>
 
                 <div className="text-right text-xs sm:text-sm text-[#191970]">
@@ -742,10 +739,10 @@ export default function HydrationPage() {
               {/* Info */}
               <div className="px-4 py-4 text-xs sm:text-sm text-gray-500 leading-relaxed">
                 <span className="font-semibold">
-                  Hydratatiefactor:
+                  {t.hydration.factorTitle}
                 </span>{" "}
-                Niet alle dranken hydrateren even sterk als water, de hydratatiefactor van water is 1.
-                Dranken met cafeïne, suiker of alcohol dragen minder bij aan je hydratatie.
+                <div />
+                  {t.hydration.factorLine1} {t.hydration.factorLine2}
               </div>
 
             </div>
@@ -757,26 +754,26 @@ export default function HydrationPage() {
           headerSpacing="compact"
           header={
             <CardHeader
-              icon="/target.svg"
-              title="Totale hydratatie vandaag"
+              icon="/water_drop.svg"
+              title={t.hydration.hydrationToday}
             />
           }
         >
           <div className="-mx-4">
 
             <div className="w-full px-4 py-2 flex justify-between border-b border-[#DBE4F0]">
-              <span className="text-sm">Totaal</span>
-              <span className="text-sm font-medium text-[#191970]">{total} ml</span>
+              <span className="text-xs sm:text-sm text-[#191970]">{t.hydration.fromDrinks}</span>
+              <span className="text-xs sm:text-sm text-[#191970]">{Math.round(totalDrink)} ml</span>
             </div>
 
             <div className="w-full px-4 py-2 flex justify-between border-b border-[#DBE4F0]">
-              <span className="text-sm">🥤 Drinken</span>
-              <span className="text-sm font-medium text-[#191970]">{totalDrink} ml</span>
+              <span className="text-xs sm:text-sm text-[#191970]">{t.hydration.fromFood}</span>
+              <span className="text-xs sm:text-sm text-[#191970]">{Math.round(totalFood)} ml</span>
             </div>
 
-            <div className="w-full px-4 py-2 flex justify-between border-b border-[#DBE4F0]">
-              <span className="text-sm">🥗 Voeding</span>
-              <span className="text-sm font-medium text-[#191970]">{totalFood} ml</span>
+            <div className="w-full px-4 py-2 flex justify-between border-t border-[#DBE4F0]">
+              <span className="text-xs sm:text-sm text-[#191970] font-semibold">{t.hydration.total}</span>
+              <span className="text-xs sm:text-sm text-[#191970] font-semibold">{Math.round(total)} ml</span>
             </div>
 
           </div>

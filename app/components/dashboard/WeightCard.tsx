@@ -9,6 +9,9 @@ import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useRouter } from "next/navigation";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 /* ───────────────── Types ───────────────── */
 
 type WeightProfileResult = {
@@ -20,11 +23,13 @@ type WeightProfileResult = {
 
 /* ───────────────── Helpers ───────────────── */
 
-function getBMICategory(bmi: number): string {
-  if (bmi < 18.5) return "Ondergewicht";
-  if (bmi < 25) return "Gezond";
-  if (bmi < 30) return "Overgewicht";
-  return "Obesitas";
+function getBMICategory(
+  bmi: number
+): "underweight" | "healthy" | "overweight" | "obesity" {
+  if (bmi < 18.5) return "underweight";
+  if (bmi < 25) return "healthy";
+  if (bmi < 30) return "overweight";
+  return "obesity";
 }
 
 /* ───────────────── BMI segmentdefinitie ───────────────── */
@@ -57,6 +62,9 @@ function getBMIPercentage(bmi: number): number {
 function BMIBar({ bmi }: { bmi: number }) {
   const percentage = getBMIPercentage(bmi);
 
+  const lang = useLang();
+  const t = uiText[lang];
+
   return (
     <div className="mt-4">
       <div className="relative w-full">
@@ -82,13 +90,13 @@ function BMIBar({ bmi }: { bmi: number }) {
       <div className="mt-2 grid grid-cols-[22%_28%_25%_25%] text-center">
         <div>
           <div className="text-[10px] font-medium text-gray-600">
-            Ondergewicht
+            {t.weight.underweight}
           </div>
           <div className="text-[9px] text-gray-400">&lt; 18.5</div>
         </div>
         <div>
           <div className="text-[10px] font-medium text-gray-600">
-            Gezond
+            {t.weight.healthy}
           </div>
           <div className="text-[9px] text-gray-400">
             18.5 – 24.9
@@ -96,7 +104,7 @@ function BMIBar({ bmi }: { bmi: number }) {
         </div>
         <div>
           <div className="text-[10px] font-medium text-gray-600">
-            Overgewicht
+            {t.weight.overweight}
           </div>
           <div className="text-[9px] text-gray-400">
             25 – 29.9
@@ -104,7 +112,7 @@ function BMIBar({ bmi }: { bmi: number }) {
         </div>
         <div>
           <div className="text-[10px] font-medium text-gray-600">
-            Obesitas
+            {t.weight.obesity}
           </div>
           <div className="text-[9px] text-gray-400">≥ 30</div>
         </div>
@@ -122,6 +130,9 @@ export default function WeightCard() {
   const [weight, setWeight] = useState<number | null>(null);
   const [bmi, setBmi] = useState<number | null>(null);
   const [targetWeight, setTargetWeight] = useState<number | null>(null);
+
+  const lang = useLang();
+  const t = uiText[lang];
 
   /* ───────────────── Load profile ───────────────── */
 
@@ -147,18 +158,20 @@ export default function WeightCard() {
     return (
       <Card title="Gewicht">
         <div className="text-sm text-gray-500">
-          Gegevens laden…
+          {t.weight.loading}
         </div>
       </Card>
     );
   }
+
+  const bmiCategory = getBMICategory(bmi);
 
   return (
     <Card
       header={
         <CardHeader
           icon="/weight.svg"
-          title="Gewicht"
+          title={t.weight.title}
         />
       }
     >
@@ -170,12 +183,12 @@ export default function WeightCard() {
 
         {targetWeight && (
           <div className="text-xs text-gray-500">
-            Streefgewicht: {targetWeight} kg
+            {t.weight.targetWeight}: {targetWeight} kg
           </div>
         )}
 
         <div className="text-xs text-gray-500">
-          BMI: {bmi.toFixed(1)} ({getBMICategory(bmi)})
+          {t.weight.bmi}: {bmi.toFixed(1)} ({t.weight[bmiCategory]})
         </div>
 
         <BMIBar bmi={bmi} />

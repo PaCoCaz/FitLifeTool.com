@@ -120,7 +120,7 @@ export default function HydrationCard() {
           </div>
 
           <div className="text-xs text-gray-500">
-            {t.hydration.goal}: {formatNumber(hydrationGoal, lang)} ml
+            {t.hydration.dailyGoal}: {formatNumber(hydrationGoal, lang)} ml
           </div>
 
           {/* NIEUW: drink vs food */}
@@ -128,11 +128,11 @@ export default function HydrationCard() {
           <div className="text-xs text-gray-400 space-y-1 pt-1">
 
             <div>
-              🥤 {t.hydration.drinks}: {formatNumber(hydrationDrinkMl, lang)} ml
+              {t.hydration.fromDrinks}: {formatNumber(hydrationDrinkMl, lang)} ml
             </div>
 
             <div>
-              🥗 {t.hydration.food}: {formatNumber(hydrationFoodMl, lang)} ml
+              {t.hydration.fromFood}: {formatNumber(hydrationFoodMl, lang)} ml
             </div>
 
           </div>

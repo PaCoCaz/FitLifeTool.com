@@ -7,6 +7,9 @@ import Link from "next/link";
 import Image from "next/image";
 import "@/styles/category.css";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 function ActionButton({
   href,
   label,
@@ -46,28 +49,32 @@ function ActionButton({
 }
 
 export default function DashboardActionsCard() {
+
+  const lang = useLang();
+  const t = uiText[lang];
+
   return (
     <Card>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
 
         <ActionButton
           href="/dashboard/drink/search"
-          label="Drinken"
+          label={t.hydration.addDrink}
         />
 
         <ActionButton
           href="/dashboard/food/search"
-          label="Voeding"
+          label={t.nutrition.addFood}
         />
 
         <ActionButton
           href="/dashboard/activity"
-          label="Activiteit"
+          label={t.activity.addActivity}
         />
 
         <ActionButton
           href="/dashboard/weight"
-          label="Gewicht"
+          label={t.weight.addWeight}
         />
 
       </div>

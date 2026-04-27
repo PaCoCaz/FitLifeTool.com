@@ -43,7 +43,7 @@ export default function CardHeader({
         )}
 
         <Tag className="m-0 leading-none contents">
-          <span className="truncate text-[15px] sm:text-base font-semibold text-[#191970]">
+          <span className="truncate text-[14px] sm:text-base font-semibold text-[#191970]">
             {title}
           </span>
         </Tag>
