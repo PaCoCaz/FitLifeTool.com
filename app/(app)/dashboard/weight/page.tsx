@@ -362,7 +362,7 @@ export default function WeightPage() {
   return (
     <div className="space-y-6">
 
-      <Card header={<CardHeader title={t.weight.editWeight} />}>
+      <Card header={<CardHeader icon="/weight.svg" title={t.weight.editWeight} />}>
         <div className="space-y-4">
 
           <div className="flex items-end gap-3">
