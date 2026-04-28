@@ -11,6 +11,9 @@ import { useDashboard } from "@/lib/DashboardStore";
 import FavoritesCard from "@/components/dashboard/FavoritesCard";
 import SearchCard from "@/components/dashboard/SearchCard";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 /* ───────────────── Types ───────────────── */
 
 type Product = {
@@ -27,6 +30,9 @@ type Props = {
 /* ───────────────── Component ───────────────── */
 
 export default function ProductSearchPage({ type }: Props) {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
   const router = useRouter();
   const { user } = useUser();
   const { lang } = useLangContext();
@@ -171,7 +177,7 @@ export default function ProductSearchPage({ type }: Props) {
       <div className="col-span-12 space-y-6">
 
         <FavoritesCard
-          title="Favorieten"
+          title={t.common.favorites}
           items={favorites}
           onSelect={(key) =>
             router.push(`/dashboard/${type}/add/${key}`)
@@ -180,7 +186,7 @@ export default function ProductSearchPage({ type }: Props) {
         />
 
         <SearchCard
-          title="Zoeken"
+          title={t.common.search}
           search={search}
           setSearch={setSearch}
           results={results}

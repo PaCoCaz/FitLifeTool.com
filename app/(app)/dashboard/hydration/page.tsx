@@ -658,7 +658,7 @@ export default function HydrationPage() {
                   text-gray-500
                 "
               >
-                <div>{t.hydration.modalDrink}</div>
+                <div>{t.hydration.drink}</div>
                 <div className="text-right whitespace-nowrap">{t.hydration.amount}</div>
                 <div className="text-right whitespace-nowrap">{t.hydration.factor}</div>
                 <div className="text-right whitespace-nowrap">{t.hydration.hydration}</div>

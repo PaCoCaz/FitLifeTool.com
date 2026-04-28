@@ -7,6 +7,10 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@/lib/AuthProvider";
 
+
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 /* ───────────────── Navigatiesets ───────────────── */
 
 const PUBLIC_NAV_ITEMS = [
@@ -19,16 +23,19 @@ const PUBLIC_NAV_ITEMS = [
   { label: "Leefstijl", href: "/leefstijl" },
 ];
 
-const AUTH_NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Hydratatie", href: "/dashboard/hydration" },
-  { label: "Voeding", href: "/dashboard/food/search" },
-  { label: "Activiteiten", href: "/dashboard/activity" },
-  { label: "Gewicht", href: "/dashboard/weight" },
-  { label: "Handboek", href: "/handbook" },
+const getAuthNavItems = (t: typeof uiText.en) => [
+  { label: t.nav.dashboard, href: "/dashboard" },
+  { label: t.nav.hydration, href: "/dashboard/hydration" },
+  { label: t.nav.nutrition, href: "/dashboard/food/search" },
+  { label: t.nav.activity, href: "/dashboard/activity" },
+  { label: t.nav.weight, href: "/dashboard/weight" },
+  { label: t.nav.handbook, href: "/handbook" },
 ];
 
 export default function TopNavigation() {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
   const pathname = usePathname();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -38,8 +45,8 @@ export default function TopNavigation() {
   const role = undefined;
 
   const navItems = isLoggedIn
-    ? AUTH_NAV_ITEMS
-    : PUBLIC_NAV_ITEMS;
+  ? getAuthNavItems(t)
+  : PUBLIC_NAV_ITEMS;
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);

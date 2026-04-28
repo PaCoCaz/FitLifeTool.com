@@ -5,6 +5,15 @@ import { Lang } from "./useLang";
 /* ───────────────── ENGLISH ───────────────── */
 
 const en = {
+  nav: {
+    dashboard: "Dashboard",
+    hydration: "Hydration",
+    nutrition: "Nutrition",
+    activity: "Activity",
+    weight: "Weight",
+    handbook: "Handbook",
+  },
+
   hydration: {
     title: "Hydration",
 
@@ -114,16 +123,29 @@ const en = {
 
     addWeight: "Weight",
     bmi: "BMI",
+    editWeight: "Update weight",
+    estimatedTargetDate: "Estimated target date around",
+    gained: "Weight increased",
     healthy: "Healthy",
+    hideBMI: "Hide BMI",
     loading: "Loading weight…",
+    lost: "Weight decreased",
     obesity: "Obesity",
     overweight: "Overweight",
+    showBMI: "Show BMI",
+    stable: "Weight stable",
     targetWeight: "Target weight",
     underweight: "Underweight",
   },
 
   common: {
     close: "Close",
+    favorites: "Favorites",
+    period: "Period:",
+    save: "Save",
+    saved: "Saved",
+    saving: "Saving…",
+    search: "Search",
     tipOfTheDay: "Tip of the day",
     tipHydration: "Drink a glass of water with every meal to reach your daily goal more easily.",
     today: "Today",
@@ -133,6 +155,15 @@ const en = {
 /* ───────────────── DUTCH ───────────────── */
 
 const nl = {
+  nav: {
+    dashboard: "Dashboard",
+    hydration: "Hydratatie",
+    nutrition: "Voeding",
+    activity: "Activiteiten",
+    weight: "Gewicht",
+    handbook: "Handboek",
+  },
+
   hydration: {
     title: "Hydratatie",
 
@@ -241,16 +272,29 @@ const nl = {
 
     addWeight: "Gewicht",
     bmi: "BMI",
+    editWeight: "Gewicht bijwerken",
+    estimatedTargetDate: "Verwachte datum streefgewicht rond",
+    gained: "Gewicht toegenomen",
     healthy: "Gezond",
+    hideBMI: "Verberg BMI",
     loading: "Gewicht laden…",
+    lost: "Gewicht afgenomen",
     obesity: "Obesitas",
     overweight: "Overgewicht",
+    showBMI: "Toon BMI",
+    stable: "Gewicht stabiel",
     targetWeight: "Streefgewicht",
     underweight: "Ondergewicht",
   },
 
   common: {
     close: "Sluiten",
+    favorites: "Favorieten",
+    period: "Periode:",
+    save: "Opslaan",
+    saved: "Opgeslagen",
+    saving: "Opslaan…",
+    search: "Zoeken",
     tipOfTheDay: "Tip van vandaag",
     tipHydration: "Drink bij elke maaltijd een glas water om je dagdoel makkelijker te halen.",
     today: "Vandaag",
@@ -260,6 +304,15 @@ const nl = {
 /* ───────────────── FRENCH ───────────────── */
 
 const fr = {
+  nav: {
+    dashboard: "Dashboard",
+    hydration: "Hydratation",
+    nutrition: "Nutrition",
+    activity: "Activités",
+    weight: "Poids",
+    handbook: "Guide",
+  },
+
   hydration: {
     title: "Hydratation",
 
@@ -369,16 +422,29 @@ const fr = {
 
     addWeight: "Poids",
     bmi: "IMC",
+    editWeight: "Mettre à jour le poids",
+    estimatedTargetDate: "Date estimée de l’objectif vers",
+    gained: "Poids augmenté",
     healthy: "Poids normal",
+    hideBMI: "Masquer l'IMC",
     loading: "Chargement du poids…",
+    lost: "Poids diminué",
     obesity: "Obésité",
     overweight: "Surpoids",
+    showBMI: "Afficher l'IMC",
+    stable: "Poids stable",
     targetWeight: "Poids cible",
     underweight: "Insuffisance pondérale",
   },
 
   common: {
     close: "Fermer",
+    favorites: "Favoris",
+    period: "Période :",
+    save: "Enregistrer",
+    saved: "Enregistré",
+    saving: "Enregistrement…",
+    search: "Rechercher",
     tipOfTheDay: "Conseil du jour",
     tipHydration: "Buvez un verre d'eau à chaque repas pour atteindre plus facilement votre objectif quotidien.",
     today: "Aujourd'hui",
@@ -388,6 +454,15 @@ const fr = {
 /* ───────────────── GERMAN ───────────────── */
 
 const de = {
+  nav: {
+    dashboard: "Dashboard",
+    hydration: "Hydration",
+    nutrition: "Ernährung",
+    activity: "Aktivitäten",
+    weight: "Gewicht",
+    handbook: "Handbuch",
+  },
+
   hydration: {
     title: "Flüssigkeitszufuhr",
 
@@ -497,16 +572,29 @@ const de = {
 
     addWeight: "Gewicht",
     bmi: "BMI",
+    editWeight: "Gewicht aktualisieren",
+    estimatedTargetDate: "Voraussichtliches Zielgewicht-Datum etwa",
+    gained: "Gewicht gestiegen",
     healthy: "Normalgewicht",
+    hideBMI: "BMI ausblenden",
     loading: "Gewicht wird geladen…",
+    lost: "Gewicht gesunken",
     obesity: "Adipositas",
     overweight: "Übergewicht",
+    showBMI: "BMI anzeigen",
+    stable: "Gewicht stabil",
     targetWeight: "Zielgewicht",
     underweight: "Untergewicht",
   },
 
   common: {
     close: "Schließen",
+    favorites: "Favoriten",
+    period: "Zeitraum:",
+    save: "Speichern",
+    saved: "Gespeichert",
+    saving: "Speichern…",
+    search: "Suchen",
     tipOfTheDay: "Tipp des Tages",
     tipHydration: "Trinke zu jeder Mahlzeit ein Glas Wasser, um dein Tagesziel leichter zu erreichen.",
     today: "Heute",
@@ -516,6 +604,15 @@ const de = {
 /* ───────────────── POLISH ───────────────── */
 
 const pl = {
+  nav: {
+    dashboard: "Dashboard",
+    hydration: "Nawodnienie",
+    nutrition: "Odżywianie",
+    activity: "Aktywności",
+    weight: "Waga",
+    handbook: "Poradnik",
+  },
+
   hydration: {
     title: "Nawodnienie",
 
@@ -625,16 +722,29 @@ const pl = {
 
     addWeight: "Waga",
     bmi: "BMI",
+    editWeight: "Zaktualizuj wagę",
+    estimatedTargetDate: "Przewidywana data osiągnięcia celu około",
+    gained: "Waga wzrosła",
     healthy: "Prawidłowa waga",
+    hideBMI: "Ukryj BMI",
     loading: "Ładowanie wagi…",
+    lost: "Waga spadła",
     obesity: "Otyłość",
     overweight: "Nadwaga",
+    showBMI: "Pokaż BMI",
+    stable: "Waga stabilna",
     targetWeight: "Docelowa waga",
     underweight: "Niedowaga",
   },
 
   common: {
     close: "Zamknij",
+    favorites: "Ulubione",
+    period: "Okres:",
+    save: "Zapisz",
+    saved: "Zapisano",
+    saving: "Zapisywanie…",
+    search: "Szukaj",
     tipOfTheDay: "Wskazówka dnia",
     tipHydration: "Pij szklankę wody do każdego posiłku, aby łatwiej osiągnąć swój dzienny cel.",
     today: "Dziś",

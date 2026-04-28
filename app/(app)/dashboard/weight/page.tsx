@@ -11,6 +11,9 @@ import CardHeader from "@/components/ui/CardHeader";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useRouter } from "next/navigation";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 import {
   LineChart,
   Line,
@@ -47,9 +50,8 @@ const PERIOD_OPTIONS: PeriodOption[] = [
 
 /* ───────────────── Helpers ───────────────── */
 
-function formatDateNL(date: string) {
-  const d = new Date(date);
-  return d.toLocaleDateString("nl-NL", {
+function formatDate(date: Date, lang: string) {
+  return date.toLocaleDateString(lang, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -200,6 +202,9 @@ async function saveWeight(
 /* ───────────────── Page ───────────────── */
 
 export default function WeightPage() {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
   const { user } = useUser();
   const router = useRouter();
 
@@ -337,7 +342,7 @@ export default function WeightPage() {
 
   if (loading) {
     return (
-      <Card title="Gewicht">
+      <Card title={t.weight.title}>
         <div className="text-sm text-gray-500">
           Gewichtsgeschiedenis laden…
         </div>
@@ -357,14 +362,14 @@ export default function WeightPage() {
   return (
     <div className="space-y-6">
 
-      <Card header={<CardHeader title="Gewicht aanpassen" />}>
+      <Card header={<CardHeader title={t.weight.editWeight} />}>
         <div className="space-y-4">
 
           <div className="flex items-end gap-3">
 
             <div>
               <div className="text-xs text-gray-500 mb-1">
-                Gewicht
+                {t.weight.title}
               </div>
               <input
                 type="number"
@@ -377,7 +382,7 @@ export default function WeightPage() {
 
             <div>
               <div className="text-xs text-gray-500 mb-1">
-                Streefgewicht
+                {t.weight.targetWeight}
               </div>
               <input
                 type="number"
@@ -409,10 +414,10 @@ export default function WeightPage() {
                 `}
               >
                 {saving
-                  ? "Opslaan…"
+                  ? t.common.saving
                   : !dirty || invalid
-                  ? "Opgeslagen"
-                  : "Opslaan"}
+                  ? t.common.saved
+                  : t.common.save}
               </button>
             </div>
           </div>
@@ -425,7 +430,7 @@ export default function WeightPage() {
         header={
           <CardHeader
             icon="/weight.svg"
-            title="Gewicht"
+            title={t.weight.title}
           />
         }
       >
@@ -433,7 +438,7 @@ export default function WeightPage() {
   
           {/* LINKS: Periode */}
           <div className="text-base font-medium text-[#191970]">
-            Periode: {currentPeriod.label}
+            {t.common.period} {currentPeriod.label}
           </div>
 
           {/* RECHTS: buttons */}
@@ -451,7 +456,7 @@ export default function WeightPage() {
                 hover:bg-[#0095D3] hover:text-white
               "
             >
-              {showBMI ? "Verberg BMI" : "Toon BMI"}
+              {showBMI ? t.weight.hideBMI : t.weight.showBMI}
             </button>
 
             <div ref={dropdownRef} className="relative">
@@ -510,22 +515,20 @@ export default function WeightPage() {
         <div className="mt-2 space-y-1 text-xs text-gray-600">
           {trend?.type === "down" && (
             <div>
-              ↓ Gewicht afgenomen ({trend.diff.toFixed(1)} kg)
+              ↓ {t.weight.lost} ({trend.diff.toFixed(1)} kg)
             </div>
           )}
           {trend?.type === "up" && (
             <div>
-              ↑ Gewicht toegenomen (+{trend.diff.toFixed(1)} kg)
+              ↑ {t.weight.gained} (+{trend.diff.toFixed(1)} kg)
             </div>
           )}
-          {trend?.type === "stable" && <div>→ Gewicht stabiel</div>}
+          {trend?.type === "stable" && <div>→ {t.weight.stable}</div>}
 
           {targetDate && (
             <div className="text-gray-500">
-              Verwachte datum streefgewicht rond{" "}
-              {formatDateNL(
-                targetDate.toISOString().slice(0, 10)
-              )}
+              {t.weight.estimatedTargetDate}{" "}
+              {formatDate(targetDate, langCode)}
             </div>
           )}
         </div>
@@ -568,7 +571,7 @@ export default function WeightPage() {
                     strokeWidth={1}
                     ifOverflow="extendDomain"
                     label={{
-                      value: `Streefgewicht ${targetWeight.toFixed(
+                      value: `${t.weight.targetWeight} ${targetWeight.toFixed(
                         1
                       )} kg`,
                       position: "insideTopRight",
@@ -588,7 +591,7 @@ export default function WeightPage() {
 
       {showBMI && heightCm && (
         <Card
-          header={<CardHeader title="BMI" />}
+          header={<CardHeader title={t.weight.bmi} />}
         >
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height={256}>
