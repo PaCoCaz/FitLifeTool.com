@@ -3,7 +3,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import Card from "@/components/ui/Card";
@@ -40,12 +39,27 @@ type PeriodOption = {
 
 /* ───────────────── Constants ───────────────── */
 
-const PERIOD_OPTIONS: PeriodOption[] = [
-  { label: "Laatste 7 dagen", days: 7 },
-  { label: "Laatste 30 dagen", days: 30 },
-  { label: "Laatste 90 dagen", days: 90 },
-  { label: "Laatste 180 dagen", days: 180 },
-  { label: "Laatste 365 dagen", days: 365 },
+const getPeriodOptions = (t: typeof uiText.en): PeriodOption[] => [
+  {
+    label: t.common.lastDays.replace("{{days}}", "7"),
+    days: 7,
+  },
+  {
+    label: t.common.lastDays.replace("{{days}}", "30"),
+    days: 30,
+  },
+  {
+    label: t.common.lastDays.replace("{{days}}", "90"),
+    days: 90,
+  },
+  {
+    label: t.common.lastDays.replace("{{days}}", "180"),
+    days: 180,
+  },
+  {
+    label: t.common.lastDays.replace("{{days}}", "365"),
+    days: 365,
+  },
 ];
 
 /* ───────────────── Helpers ───────────────── */
@@ -147,7 +161,7 @@ async function saveWeight(
 
   const w = parseFloat(draftWeight);
 
-  const t =
+  const targetWeight =
     draftTarget.trim() === ""
       ? null
       : parseFloat(draftTarget);
@@ -167,7 +181,7 @@ async function saveWeight(
     .from("profiles")
     .update({
       weight_kg: w,
-      target_weight_kg: t,
+      target_weight_kg: targetWeight,
       bmi,
       water_goal_ml: waterGoal,
     })
@@ -204,6 +218,8 @@ async function saveWeight(
 export default function WeightPage() {
   const langCode = useLang();
   const t = uiText[langCode];
+
+  const PERIOD_OPTIONS = getPeriodOptions(t);
 
   const { user } = useUser();
   const router = useRouter();
@@ -323,16 +339,16 @@ export default function WeightPage() {
           ? String(profile.weight_kg)
           : "";
 
-      const t =
+      const target =
         profile?.target_weight_kg != null
           ? String(profile.target_weight_kg)
           : "";
 
       setDraftWeight(w);
-      setDraftTarget(t);
+      setDraftTarget(target);
 
       originalWeightRef.current = w;
-      originalTargetRef.current = t;
+      originalTargetRef.current = target;
 
       setLoading(false);
     };
@@ -344,7 +360,7 @@ export default function WeightPage() {
     return (
       <Card title={t.weight.title}>
         <div className="text-sm text-gray-500">
-          Gewichtsgeschiedenis laden…
+          {t.weight.loadingHistory}
         </div>
       </Card>
     );
@@ -540,14 +556,41 @@ export default function WeightPage() {
                 data={data}
                 margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
               >
-                <XAxis dataKey="log_date" tick={{ fontSize: 11 }} />
+                <XAxis
+                  dataKey="log_date"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(value) =>
+                    formatDate(new Date(value), langCode)
+                  }
+                />
                 <YAxis
                   width={32}
-                  domain={["dataMin - 1", "dataMax + 1"]}
+                  domain={[
+                    (dataMin: number) => Math.floor(dataMin - 1),
+                    (dataMax: number) => Math.ceil(dataMax + 1),
+                  ]}
                   tick={{ fontSize: 11 }}
                   padding={{ top: 10, bottom: 10 }}
+                  allowDecimals={false}
                 />
-                <Tooltip />
+                <Tooltip
+                  labelFormatter={(label) =>
+                    formatDate(new Date(label), langCode)
+                  }
+                  formatter={(value, name) => {
+                    const num = Number(value);
+
+                    if (name === "weight_kg") {
+                      return [`${num.toFixed(1)} kg`, t.weight.title];
+                    }
+
+                    if (name === "moving_avg") {
+                      return [`${num.toFixed(1)} kg`, t.weight.average];
+                    }
+
+                    return [String(value), String(name)];
+                  }}
+                />
                 <Line
                   type="monotone"
                   dataKey="weight_kg"
@@ -599,10 +642,23 @@ export default function WeightPage() {
                 data={data}
                 margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
               >
-                <XAxis dataKey="log_date" tick={{ fontSize: 11 }} />
+                <XAxis
+                  dataKey="log_date"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(value) =>
+                    formatDate(new Date(value), langCode)
+                  }
+                />
                 <YAxis width={32} domain={[18, 35]} tick={{ fontSize: 11 }} />
-                <Tooltip />
-
+                <Tooltip
+                  labelFormatter={(label) =>
+                    formatDate(new Date(label), langCode)
+                  }
+                  formatter={(value) => [
+                    Number(value).toFixed(1),
+                    t.weight.bmi,
+                  ]}
+                />
                 {/* BMI zones — ENIGE FUNCTIONELE TOEVOEGING */}
                 <ReferenceArea y1={18} y2={18.5} fill="#0095D3" fillOpacity={0.4} />
                 <ReferenceArea y1={18.5} y2={25} fill="#dcfce7" fillOpacity={0.6} />

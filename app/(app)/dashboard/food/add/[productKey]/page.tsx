@@ -18,6 +18,9 @@ import { useMemo } from "react";
 import Image from "next/image";
 import "@/styles/category.css";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 /* ───────── TYPES ───────── */
 
 type Params = {
@@ -94,6 +97,9 @@ type FavoriteRow = {
 /* ───────── COMPONENT ───────── */
 
 export default function AddFoodPage() {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
   const params = useParams() as Params;
   const productKey = params.productKey;
 
@@ -544,8 +550,8 @@ export default function AddFoodPage() {
         header={
           <CardHeader
             icon="/nutrition.svg"
-            title="Product"
-            scoreLabel="Score"
+            title={t.common.product}
+            scoreLabel="FitLifeScore"
             score={productScore ?? undefined}
             scoreColor={
               productScore !== null
@@ -581,7 +587,7 @@ export default function AddFoodPage() {
       {/* CARD 2 — BEREIDING */}
       {preparations.length > 1 && (
         <Card
-          header={<CardHeader title="Bereiding" />}
+          header={<CardHeader title={t.nutrition.preparation} />}
           headerSpacing="compact"
         >
           <div className="-mx-4">
@@ -615,7 +621,7 @@ export default function AddFoodPage() {
       {/* CARD 3 — EENHEID */}
       {portions.length > 1 && (
         <Card
-          header={<CardHeader title="Eenheid" />}
+          header={<CardHeader title={t.nutrition.unit} />}
           headerSpacing="compact"
         >
           <div className="-mx-4">
@@ -648,7 +654,7 @@ export default function AddFoodPage() {
 
       {/* CARD 4 — AANTAL */}
       <Card
-        header={<CardHeader title="Aantal" />}
+        header={<CardHeader title={t.nutrition.amount} />}
       >
         <div className="space-y-3">
 
@@ -675,7 +681,7 @@ export default function AddFoodPage() {
               onClick={handleSave}
               className="flex-1 h-[42px] text-sm flex justify-between items-center px-4 rounded-[var(--radius)] bg-[#191970] text-white"
             >
-              <span>Toevoegen</span>
+              <span>{t.common.add}</span>
               <Image
                 src="/arrow_right_circle.svg"
                 alt=""
