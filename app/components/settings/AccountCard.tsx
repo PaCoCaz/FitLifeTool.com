@@ -9,6 +9,7 @@ import CardHeader from "@/components/ui/CardHeader";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useLang, useSetUserLanguage } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
 
 type Lang = "en" | "nl" | "de" | "fr" | "pl";
 
@@ -26,6 +27,9 @@ const OPTIONS: {
 ];
 
 export default function AccountCard() {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
   const { user } = useUser();
 
   const lang = useLang();
@@ -128,14 +132,14 @@ export default function AccountCard() {
   /* ───────── UI ───────── */
 
   return (
-    <Card header={<CardHeader title="Account" />}>
+    <Card header={<CardHeader title={t.common.account} />}>
 
       <div className="space-y-4">
 
         {/* voornaam */}
         <div className="pt-3">
           <div className="text-xs font-semibold text-gray-400">
-            Voornaam
+            {t.common.firstName}
           </div>
 
           <input
@@ -153,7 +157,7 @@ export default function AccountCard() {
         {/* achternaam */}
         <div>
           <div className="text-xs font-semibold text-gray-400">
-            Achternaam
+            {t.common.lastName}
           </div>
 
           <input
@@ -171,7 +175,7 @@ export default function AccountCard() {
         {/* email */}
         <div>
           <div className="text-xs font-semibold text-gray-400">
-            Email
+            {t.common.email}
           </div>
 
           <div className="border-t border-b py-2 text-sm text-gray-400">
@@ -182,7 +186,7 @@ export default function AccountCard() {
         {/* taal */}
         <div>
           <div className="text-xs font-semibold text-gray-400">
-            Taal
+            {t.common.language}
           </div>
 
           <div
@@ -276,10 +280,10 @@ export default function AccountCard() {
             `}
           >
             {saving
-              ? "Opslaan…"
+              ? t.common.saving
               : !dirty || invalid
-              ? "Opgeslagen"
-              : "Opslaan"}
+              ? t.common.saved
+              : t.common.save}
           </button>
         </div>
 

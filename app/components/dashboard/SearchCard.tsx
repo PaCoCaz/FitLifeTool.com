@@ -3,6 +3,8 @@
 import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
 import Image from "next/image";
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
 
 type Props = {
   title: string;
@@ -33,6 +35,10 @@ export default function SearchCard({
   features,
   favorites,
 }: Props) {
+
+  const langCode = useLang();
+  const t = uiText[langCode];
+
   return (
     <Card header={<CardHeader icon="/search.svg" title={title} />}>
 
@@ -41,7 +47,7 @@ export default function SearchCard({
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Zoek product..."
+          placeholder={t.nutrition.searchProduct}
           className="
             w-full px-4 py-2
             border-t border-b border-[#DBE4F0]

@@ -14,6 +14,37 @@ const en = {
     handbook: "Handbook",
   },
 
+  profile: {
+    healthProfile: "Health profile",
+    birthDate: "Date of birth",
+
+    gender: {
+      description: "We use biological sex for accurate health and energy calculations.",
+      female: "Female",
+      label: "Gender",
+      male: "Male",
+    },
+
+    height: "Height",
+    weight: "Weight",
+  },
+
+  settings: {
+    title: "Settings",
+  },
+
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
+  goals: {
+    lose: "Lose weight",
+    maintain: "Maintain weight",
+    gain: "Gain weight",
+    holiday: "Holiday mode",
+  },
+
   hydration: {
     title: "Hydration",
 
@@ -96,6 +127,7 @@ const en = {
     preparation: "Preparation",
     protein: "Protein",
     salt: "Salt",
+    searchProduct: "Search product...",
     sugar: "Sugar",
     unit: "Unit",
 
@@ -152,10 +184,18 @@ const en = {
   },
 
   common: {
+    account: "Account",
     add: "Add",
     close: "Close",
+    email: "Email",
+    favoriteLimitUpgrade: "You have reached your limit of {{limit}} favorites.\nUpgrade your account to add more favorites.",
     favorites: "Favorites",
+    firstName: "First name",
+    goal: "Goal",
+    language: "Language",
     lastDays: "Last {{days}} days",
+    lastName: "Last name",
+    logout: "Logout",
     period: "Period:",
     product: "Product",
     save: "Save",
@@ -163,6 +203,7 @@ const en = {
     saving: "Saving…",
     score: "Score",
     search: "Search",
+    select: "Select",
     tipOfTheDay: "Tip of the day",
     tipHydration: "Drink a glass of water with every meal to reach your daily goal more easily.",
     today: "Today",
@@ -179,6 +220,37 @@ const nl = {
     activity: "Activiteiten",
     weight: "Gewicht",
     handbook: "Handboek",
+  },
+
+  profile: {
+    healthProfile: "Gezondheidsprofiel",
+    birthDate: "Geboortedatum",
+
+    gender: {
+      description: "Voor nauwkeurige gezondheids- en energieberekeningen gebruiken we biologisch geslacht.",
+      female: "Vrouw",
+      label: "Geslacht",
+      male: "Man",
+    },
+
+    height: "Lengte",
+    weight: "Gewicht",
+  },
+
+  settings: {
+    title: "Instellingen",
+  },
+
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
+  goals: {
+    lose: "Afvallen",
+    maintain: "Gewicht behouden",
+    gain: "Aankomen",
+    holiday: "Vakantiemodus",
   },
 
   hydration: {
@@ -262,6 +334,7 @@ const nl = {
     preparation: "Bereiding",
     protein: "Eiwitten",
     salt: "Zout",
+    searchProduct: "Zoek product...",
     sugar: "Suiker",
     unit: "Eenheid",
 
@@ -318,10 +391,18 @@ const nl = {
   },
 
   common: {
+    account: "Account",
     add: "Toevoegen",
     close: "Sluiten",
+    email: "E-mail",
+    favoriteLimitUpgrade: "Je hebt je limiet van {{limit}} favorieten bereikt.\nUpgrade je account om meer favorieten toe te kunnen voegen.",
     favorites: "Favorieten",
+    firstName: "Voornaam",
+    goal: "Doel",
+    language: "Taal",
     lastDays: "Laatste {{days}} dagen",
+    lastName: "Achternaam",
+    logout: "Uitloggen",
     period: "Periode:",
     product: "Product",
     save: "Opslaan",
@@ -329,6 +410,7 @@ const nl = {
     saving: "Opslaan…",
     score: "Score",
     search: "Zoeken",
+    select: "Selecteer",
     tipOfTheDay: "Tip van vandaag",
     tipHydration: "Drink bij elke maaltijd een glas water om je dagdoel makkelijker te halen.",
     today: "Vandaag",
@@ -345,6 +427,37 @@ const fr = {
     activity: "Activités",
     weight: "Poids",
     handbook: "Guide",
+  },
+
+  profile: {
+    healthProfile: "Profil de santé",
+    birthDate: "Date de naissance",
+
+    gender: {
+      description: "Nous utilisons le sexe biologique pour des calculs précis de santé et d'énergie.",
+      female: "Femme",
+      label: "Sexe",
+      male: "Homme",
+    },
+
+    height: "Taille",
+    weight: "Poids",
+  },
+
+  settings: {
+    title: "Paramètres",
+  },
+  
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
+  goals: {
+    lose: "Perdre du poids",
+    maintain: "Maintenir son poids",
+    gain: "Prendre du poids",
+    holiday: "Mode vacances",
   },
 
   hydration: {
@@ -429,6 +542,7 @@ const fr = {
     preparation: "Préparation",
     protein: "Protéines",
     salt: "Sel",
+    searchProduct: "Rechercher un produit...",
     sugar: "Sucre",
     unit: "Unité",
 
@@ -485,10 +599,18 @@ const fr = {
   },
 
   common: {
+    account: "Compte",
     add: "Ajouter",
     close: "Fermer",
+    email: "E-mail",
+    favoriteLimitUpgrade: "Vous avez atteint votre limite de {{limit}} favoris.\nMettez à niveau votre compte pour pouvoir ajouter plus de favoris.",
     favorites: "Favoris",
+    firstName: "Prénom",
+    goal: "Doel",
+    language: "Langue",
     lastDays: "Derniers {{days}} jours",
+    lastName: "Nom de famille",
+    logout: "Déconnexion",
     period: "Période :",
     product: "Produit",
     save: "Enregistrer",
@@ -496,6 +618,7 @@ const fr = {
     saving: "Enregistrement…",
     score: "Score",
     search: "Rechercher",
+    select: "Select",
     tipOfTheDay: "Conseil du jour",
     tipHydration: "Buvez un verre d'eau à chaque repas pour atteindre plus facilement votre objectif quotidien.",
     today: "Aujourd'hui",
@@ -512,6 +635,37 @@ const de = {
     activity: "Aktivitäten",
     weight: "Gewicht",
     handbook: "Handbuch",
+  },
+
+  profile: {
+    healthProfile: "Gesundheitsprofil",
+    birthDate: "Geburtsdatum",
+
+    gender: {
+      description: "Für genaue Gesundheits- und Energieberechnungen verwenden wir das biologische Geschlecht.",
+      female: "Weiblich",
+      label: "Geschlecht",
+      male: "Männlich",
+    },
+
+    height: "Größe",
+    weight: "Gewicht",
+  },
+
+  settings: {
+    title: "Einstellungen",
+  },
+
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
+  goals: {
+    lose: "Abnehmen",
+    maintain: "Gewicht halten",
+    gain: "Zunehmen",
+    holiday: "Urlaubsmodus",
   },
 
   hydration: {
@@ -596,6 +750,7 @@ const de = {
     preparation: "Zubereitung",
     protein: "Eiweiß",
     salt: "Salz",
+    searchProduct: "Produkt suchen...",
     sugar: "Zucker",
     unit: "Einheit",
 
@@ -652,10 +807,18 @@ const de = {
   },
 
   common: {
+    account: "Konto",
     add: "Hinzufügen",
     close: "Schließen",
+    email: "E-Mail",
+    favoriteLimitUpgrade: "Du hast dein Limit von {{limit}} Favoriten erreicht.\nUpgrade dein Konto, um mehr Favoriten hinzufügen zu können.",
     favorites: "Favoriten",
+    firstName: "Vorname",
+    goal: "Ziel",
+    language: "Sprache",
     lastDays: "Letzte {{days}} Tage",
+    lastName: "Nachname",
+    logout: "Abmelden",
     period: "Zeitraum:",
     product: "Produkt",
     save: "Speichern",
@@ -663,6 +826,7 @@ const de = {
     saving: "Speichern…",
     score: "Score",
     search: "Suchen",
+    select: "Select",
     tipOfTheDay: "Tipp des Tages",
     tipHydration: "Trinke zu jeder Mahlzeit ein Glas Wasser, um dein Tagesziel leichter zu erreichen.",
     today: "Heute",
@@ -679,6 +843,37 @@ const pl = {
     activity: "Aktywności",
     weight: "Waga",
     handbook: "Poradnik",
+  },
+
+  profile: {
+    healthProfile: "Profil zdrowotny",
+    birthDate: "Data urodzenia",
+
+    gender: {
+      description: "Do dokładnych obliczeń zdrowia i energii używamy płci biologicznej.",
+      female: "Kobieta",
+      label: "Płeć",
+      male: "Mężczyzna",
+    },
+
+    height: "Wzrost",
+    weight: "Waga",
+  },
+
+  settings: {
+    title: "Ustawienia",
+  },
+
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
+  goals: {
+    lose: "Schudnąć",
+    maintain: "Utrzymać wagę",
+    gain: "Przytyć",
+    holiday: "Tryb wakacyjny",
   },
 
   hydration: {
@@ -763,6 +958,7 @@ const pl = {
     preparation: "Przygotowanie",
     protein: "Białko",
     salt: "Sól",
+    searchProduct: "Szukaj produktu...",
     sugar: "Cukier",
     unit: "Jednostka",
 
@@ -819,10 +1015,18 @@ const pl = {
   },
 
   common: {
+    account: "Konto",
     add: "Dodaj",
     close: "Zamknij",
+    email: "E-mail",
+    favoriteLimitUpgrade: "Osiągnąłeś limit {{limit}} ulubionych.\nUlepsz konto, aby móc dodać więcej ulubionych.",
     favorites: "Ulubione",
+    firstName: "Imię",
+    goal: "Cel",
+    language: "Język",
     lastDays: "Ostatnie {{days}} dni",
+    lastName: "Nazwisko",
+    logout: "Wyloguj",
     period: "Okres:",
     product: "Produkt",
     save: "Zapisz",
@@ -830,6 +1034,7 @@ const pl = {
     saving: "Zapisywanie…",
     score: "Wynik",
     search: "Szukaj",
+    select: "Select",
     tipOfTheDay: "Wskazówka dnia",
     tipHydration: "Pij szklankę wody do każdego posiłku, aby łatwiej osiągnąć swój dzienny cel.",
     today: "Dziś",

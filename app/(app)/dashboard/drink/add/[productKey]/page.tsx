@@ -387,7 +387,10 @@ export default function AddFoodPage() {
         favoriteCount >= limits.max_favorite_drinks
       ) {
         alert(
-          `Je hebt je limiet van ${limits.max_favorite_drinks} favorieten bereikt`
+          t.common.favoriteLimitUpgrade.replace(
+            "{{limit}}",
+            String(limits.max_favorite_drinks)
+          )
         );
         return;
       }
@@ -561,7 +564,7 @@ export default function AddFoodPage() {
             <button onClick={() => toggleFavorite(productKey)} className="ml-2 transition-transform hover:scale-110">
               <Image
                 src={isFavorite ? "/favorite-active.svg" : "/favorite-not-active.svg"}
-                alt={isFavorite ? "Verwijder favoriet" : "Markeer als favoriet"}
+                alt=""
                 width={23}
                 height={23}
               />

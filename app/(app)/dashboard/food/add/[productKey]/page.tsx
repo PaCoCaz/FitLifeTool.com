@@ -408,7 +408,12 @@ export default function AddFoodPage() {
       limits.max_favorite_foods !== null &&
       favoriteCount >= limits.max_favorite_foods
     ) {
-      alert("Je hebt je limiet van ${limits.max_favorite_foods} favorieten bereikt, upgrade je account om meer favorieten toe te kunnen voegen");
+      alert(
+        t.common.favoriteLimitUpgrade.replace(
+          "{{limit}}",
+          String(limits.max_favorite_foods)
+        )
+      );
       return;
     }
 

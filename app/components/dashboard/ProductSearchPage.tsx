@@ -114,7 +114,12 @@ export default function ProductSearchPage({ type }: Props) {
         : limits.max_favorite_foods;
 
       if (limit !== null && favorites.length >= limit) {
-        alert(`Je hebt je limiet van ${limit} favorieten bereikt`);
+        alert(
+          t.common.favoriteLimitUpgrade.replace(
+            "{{limit}}",
+            String(limit)
+          )
+        );
         return;
       }
 

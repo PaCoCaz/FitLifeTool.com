@@ -9,22 +9,17 @@ import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 type Gender = "male" | "female";
 
-const GENDER_OPTIONS = [
-  {
-    value: "male",
-    label: "Man",
-    desc:
-      "Voor nauwkeurige gezondheids- en energieberekeningen gebruiken we biologisch geslacht.",
-  },
-  {
-    value: "female",
-    label: "Vrouw",
-    desc:
-      "Voor nauwkeurige gezondheids- en energieberekeningen gebruiken we biologisch geslacht.",
-  },
-];
+type Profile = {
+  birthdate: string | null;
+  gender: Gender | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+};
 
 const HEIGHTS = Array.from(
   { length: 81 },
@@ -32,10 +27,26 @@ const HEIGHTS = Array.from(
 );
 
 export default function BodyCard() {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
+  const GENDER_OPTIONS = [
+  {
+    value: "male",
+    label: t.profile.gender.male,
+    desc: t.profile.gender.description,
+  },
+  {
+    value: "female",
+    label: t.profile.gender.female,
+    desc: t.profile.gender.description,
+  },
+];
+
   const { user } = useUser();
   const { refreshDashboard } = useDashboard();
 
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   const [draft, setDraft] = useState({
     birthdate: "",
@@ -64,18 +75,16 @@ export default function BodyCard() {
       )
       .eq("id", user.id)
       .single()
-      .then((res: any) => {
-        if (!res.data) return;
+      .then(({ data }: { data: Profile | null }) => {
+        if (!data) return;
 
-        setProfile(res.data);
+        setProfile(data);
 
         setDraft({
-          birthdate: res.data.birthdate ?? "",
-          gender: res.data.gender ?? "",
-          height_cm:
-            res.data.height_cm?.toString() ?? "",
-          weight_kg:
-            res.data.weight_kg?.toString() ?? "",
+          birthdate: data.birthdate ?? "",
+          gender: data.gender ?? "",
+          height_cm: data.height_cm?.toString() ?? "",
+          weight_kg: data.weight_kg?.toString() ?? "",
         });
       });
   }, [user]);
@@ -128,9 +137,12 @@ export default function BodyCard() {
 
     setProfile({
       birthdate: draft.birthdate,
-      gender: draft.gender,
-      height_cm: draft.height_cm,
-      weight_kg: draft.weight_kg,
+      gender:
+        draft.gender === "male" || draft.gender === "female"
+          ? draft.gender
+          : null,
+      height_cm: draft.height_cm ? Number(draft.height_cm) : null,
+      weight_kg: draft.weight_kg ? Number(draft.weight_kg) : null,
     });
 
     setSaving(false);
@@ -143,7 +155,7 @@ export default function BodyCard() {
 
   return (
     <Card
-      header={<CardHeader title="Gezondheidsprofiel" />}
+      header={<CardHeader title={t.profile.healthProfile} />}
     >
 
       <div className="space-y-4">
@@ -153,7 +165,7 @@ export default function BodyCard() {
         <div className="pt-3">
 
           <div className="text-xs font-semibold text-gray-400">
-            Geboortedatum
+            {t.profile.birthDate}
           </div>
 
           <input
@@ -180,7 +192,7 @@ export default function BodyCard() {
         <div>
 
           <div className="text-xs font-semibold text-gray-400">
-            Geslacht
+            {t.profile.gender.label}
           </div>
 
           <div
@@ -198,8 +210,7 @@ export default function BodyCard() {
             <div className="flex justify-between">
 
               <span className="text-[#191970] text-sm">
-                {activeGender?.label ??
-                  "Selecteer"}
+                {activeGender?.label ?? t.common.select}
               </span>
 
               <span
@@ -272,7 +283,7 @@ export default function BodyCard() {
         <div>
 
           <div className="text-xs font-semibold text-gray-400">
-            Lengte (cm)
+            {t.profile.height} ({t.units.cm})
           </div>
 
           <div
@@ -291,8 +302,8 @@ export default function BodyCard() {
 
               <span className="text-[#191970] text-sm">
                 {draft.height_cm
-                  ? `${draft.height_cm} cm`
-                  : "Selecteer"}
+                  ? `${draft.height_cm} ${t.units.cm}`
+                  : t.common.select}
               </span>
 
               <span
@@ -349,7 +360,7 @@ export default function BodyCard() {
         <div>
 
           <div className="text-xs font-semibold text-gray-400">
-            Gewicht (kg)
+            {t.profile.weight} ({t.units.kg})
           </div>
 
           <input
@@ -396,10 +407,10 @@ export default function BodyCard() {
             `}
           >
             {saving
-              ? "Opslaan…"
+              ? t.common.saving
               : !dirty || invalid
-              ? "Opgeslagen"
-              : "Opslaan"}
+              ? t.common.saved
+              : t.common.save}
           </button>
 
         </div>

@@ -6,14 +6,19 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLang, useSetUserLanguage } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
 import { useGoalContext } from "@/lib/GoalProvider";
 import { useDashboard } from "@/lib/DashboardStore";
+
 
 type Props = {
   firstName: string;
 };
 
 export default function AvatarMenu({ firstName }: Props) {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
   const [open, setOpen] = useState(false);
   const [openSection, setOpenSection] = useState<"language" | "goal" | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -69,10 +74,10 @@ export default function AvatarMenu({ firstName }: Props) {
   ];
 
   const goals = [
-    { code: "LOSE", label: "Lose weight" },
-    { code: "MAINTAIN", label: "Maintain weight" },
-    { code: "GAIN", label: "Gain weight" },
-    { code: "HOLIDAY", label: "Holiday mode" },
+    { code: "LOSE", label: t.goals.lose },
+    { code: "MAINTAIN", label: t.goals.maintain },
+    { code: "GAIN", label: t.goals.gain },
+    { code: "HOLIDAY", label: t.goals.holiday },
   ];
 
   const activeLanguage = languages.find(l => l.code === lang);
@@ -95,7 +100,7 @@ export default function AvatarMenu({ firstName }: Props) {
 
           {/* ACCOUNT */}
           <div className="px-4 pb-2 text-xs font-semibold text-gray-400">
-            Account
+            {t.common.account}
           </div>
 
           <button
@@ -105,14 +110,14 @@ export default function AvatarMenu({ firstName }: Props) {
             }}
             className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
           >
-            Settings
+            {t.settings.title}
           </button>
 
           <div className="my-2 h-px bg-gray-100" />
 
           {/* LANGUAGE */}
           <div className="px-4 pb-2 text-xs font-semibold text-gray-400">
-            Language
+            {t.common.language}
           </div>
 
           <div className="px-4">
@@ -170,7 +175,7 @@ export default function AvatarMenu({ firstName }: Props) {
 
           {/* GOAL */}
           <div className="px-4 pb-2 text-xs font-semibold text-gray-400">
-            Goal
+            {t.common.goal}
           </div>
 
           <div className="px-4">
@@ -217,7 +222,7 @@ export default function AvatarMenu({ firstName }: Props) {
             onClick={handleLogout}
             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
           >
-            Logout
+            {t.common.logout}
           </button>
 
         </div>
