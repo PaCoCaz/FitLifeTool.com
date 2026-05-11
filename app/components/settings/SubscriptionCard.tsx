@@ -7,11 +7,8 @@ import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
 import { useUser } from "@/lib/AuthProvider";
 
-const PLAN_LABEL: Record<string, string> = {
-  free: "Free",
-  premium: "Premium",
-  pro: "Pro",
-};
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
 
 const PRICES = {
   premium_month: "price_1TAso3HU07xU2AfQk4fucP73",
@@ -25,6 +22,9 @@ type SubscriptionDetails = {
 };
 
 export default function SubscriptionCard() {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
   const { user } = useUser();
 
   const [data, setData] =
@@ -149,7 +149,7 @@ export default function SubscriptionCard() {
     return new Date(
       value
     ).toLocaleDateString(
-      "nl-NL"
+      langCode
     );
   }
 
@@ -170,18 +170,18 @@ export default function SubscriptionCard() {
 
   return (
     <Card
-      header={<CardHeader title="Abonnement" />}
+      header={<CardHeader title={t.subscription.title} />}
     >
-      {loading && <div>Laden...</div>}
+      {loading && <div>{t.subscription.loading}</div>}
 
       {!loading && (
         <>
           {/* PLAN */}
 
           <div className="mt-3 mb-2">
-            Huidig abonnement:
+            {t.subscription.currentPlan}:
             <b className="ml-2">
-              {PLAN_LABEL[plan]}
+              {t.subscription.plans[plan]}
             </b>
           </div>
 
@@ -189,10 +189,8 @@ export default function SubscriptionCard() {
 
           {status && (
             <div className="text-sm text-gray-600 mb-1">
-              Status:
-              <span className="ml-2">
-                {status}
-              </span>
+              {t.subscription.status}:
+              <span className="ml-2">{status}</span>
             </div>
           )}
 
@@ -200,10 +198,8 @@ export default function SubscriptionCard() {
 
           {renewDate && (
             <div className="text-sm text-gray-600 mb-3">
-              Volgende verlenging:
-              <span className="ml-2">
-                {renewDate}
-              </span>
+              {t.subscription.renew}:
+              <span className="ml-2">{renewDate}</span>
             </div>
           )}
 
@@ -230,10 +226,10 @@ export default function SubscriptionCard() {
                   "
               >
                 <div className="font-semibold">
-                  Premium
+                  {t.subscription.plans.premium}
                 </div>
                 <div className="text-sm opacity-90">
-                  € 4,95 / maand
+                  {t.subscription.pricing.premium}
                 </div>
               </button>
 
@@ -256,10 +252,10 @@ export default function SubscriptionCard() {
                   "
               >
                 <div className="font-semibold">
-                  Pro
+                  {t.subscription.plans.pro}
                 </div>
                 <div className="text-sm opacity-90">
-                  € 8,95 / maand
+                  {t.subscription.pricing.pro}
                 </div>
               </button>
             </div>
@@ -281,7 +277,7 @@ export default function SubscriptionCard() {
                   transition-colors
                 "
               >
-                Wijzig abonnement
+                {t.subscription.actions.change}
               </button>
 
               <button
@@ -295,7 +291,7 @@ export default function SubscriptionCard() {
                   transition-colors
                 "
               >
-                Beheer abonnement
+                {t.subscription.actions.manage}
               </button>
             </div>
           )}

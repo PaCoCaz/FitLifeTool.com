@@ -9,6 +9,9 @@ import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
+
 type ActivityLevel =
   | "sedentary"
   | "light"
@@ -16,48 +19,42 @@ type ActivityLevel =
   | "active"
   | "very_active";
 
-const OPTIONS: {
-  value: ActivityLevel;
-  label: string;
-  desc: string;
-}[] = [
-  {
-    value: "sedentary",
-    label: "Weinig actief",
-    desc:
-      "Overwegend zittend werk, weinig beweging (bijv. minder dan 5000 stappen per dag).",
-  },
-
-  {
-    value: "light",
-    label: "Licht actief",
-    desc:
-      "Zittend werk, maar regelmatig bewegen (bijv. 5000-8000 stappen of af en toe sporten).",
-  },
-
-  {
-    value: "moderate",
-    label: "Gemiddeld actief",
-    desc:
-      "Actieve dagen met veel bewegen (bijv. 8000-12000 stappen, sport of fysiek werk).",
-  },
-
-  {
-    value: "active",
-    label: "Actief",
-    desc:
-      "Veel dagelijkse beweging, fysiek werk of vaak sporten (meestal meer dan 12000 stappen).",
-  },
-
-  {
-    value: "very_active",
-    label: "Zeer actief",
-    desc:
-      "Zwaar fysiek werk, intensieve training of topsport.",
-  },
-];
-
 export default function LifestyleCard() {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
+  const OPTIONS: {
+    value: ActivityLevel;
+    label: string;
+    desc: string;
+  }[] = [
+    {
+      value: "sedentary",
+      label: t.lifestyle.sedentary.label,
+      desc: t.lifestyle.sedentary.desc,
+    },
+    {
+      value: "light",
+      label: t.lifestyle.light.label,
+      desc: t.lifestyle.light.desc,
+    },
+    {
+      value: "moderate",
+      label: t.lifestyle.moderate.label,
+      desc: t.lifestyle.moderate.desc,
+    },
+    {
+      value: "active",
+      label: t.lifestyle.active.label,
+      desc: t.lifestyle.active.desc,
+    },
+    {
+      value: "very_active",
+      label: t.lifestyle.veryActive.label,
+      desc: t.lifestyle.veryActive.desc,
+    },
+  ];
+
   const { user } = useUser();
   const { refreshDashboard } = useDashboard();
 
@@ -118,13 +115,11 @@ export default function LifestyleCard() {
     setSaving(false);
   }
 
-  const active = OPTIONS.find(
-    o => o.value === draft
-  );
+  const active = OPTIONS.find(o => o.value === draft) ?? null;
 
   return (
     <Card
-      header={<CardHeader title="Lifestyle" />}
+      header={<CardHeader title={t.lifestyle.title} />}
     >
 
       <div className="space-y-3">
@@ -132,7 +127,7 @@ export default function LifestyleCard() {
         {/* label */}
 
         <div className="pt-3 text-xs font-semibold text-gray-400">
-          Activiteitsniveau
+          {t.lifestyle.activityLevel}
         </div>
 
         {/* header */}
@@ -149,7 +144,7 @@ export default function LifestyleCard() {
           <div className="flex justify-between">
 
             <div className="text-[#191970] text-sm">
-              {active?.label ?? "Selecteer"}
+              {active?.label ?? t.common.select}
             </div>
 
             <div
@@ -232,10 +227,10 @@ export default function LifestyleCard() {
             `}
         >
             {saving
-                ? "Opslaan…"
+                ? t.common.saving
                 : !dirty
-                ? "Opgeslagen"
-                : "Opslaan"}
+                ? t.common.saved
+                : t.common.save}
         </button>
 
         </div>

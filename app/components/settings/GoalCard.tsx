@@ -8,41 +8,40 @@ import CardHeader from "@/components/ui/CardHeader";
 import { useGoalContext, GoalKey } from "@/lib/GoalProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 
-const OPTIONS: {
-  value: GoalKey;
-  label: string;
-  desc: string;
-}[] = [
-  {
-    value: "LOSE",
-    label: "Afvallen",
-    desc:
-      "Je wilt geleidelijk gewicht verliezen en gezonder leven.",
-  },
-
-  {
-    value: "MAINTAIN",
-    label: "Gewicht behouden",
-    desc:
-      "Je wilt je huidige gewicht en leefstijl in balans houden.",
-  },
-
-  {
-    value: "GAIN",
-    label: "Aankomen",
-    desc:
-      "Je wilt geleidelijk aankomen in gewicht en gezonder leven.",
-  },
-
-  {
-    value: "HOLIDAY",
-    label: "Vakantiemodus",
-    desc:
-      "Lekker ontspannen zonder doel en alleen je gewoonten bijhouden.",
-  },
-];
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
 
 export default function GoalCard() {
+  const langCode = useLang();
+  const t = uiText[langCode];
+
+  const OPTIONS: {
+    value: GoalKey;
+    label: string;
+    desc: string;
+  }[] = [
+    {
+      value: "LOSE",
+      label: t.goals.lose,
+      desc: t.goalDescriptions.lose,
+    },
+    {
+      value: "MAINTAIN",
+      label: t.goals.maintain,
+      desc: t.goalDescriptions.maintain,
+    },
+    {
+      value: "GAIN",
+      label: t.goals.gain,
+      desc: t.goalDescriptions.gain,
+    },
+    {
+      value: "HOLIDAY",
+      label: t.goals.holiday,
+      desc: t.goalDescriptions.holiday,
+    },
+  ];
+  
   const { goal, setUserGoal } = useGoalContext();
   const { refreshDashboard } = useDashboard();
 
@@ -83,7 +82,7 @@ export default function GoalCard() {
 
   return (
     <Card
-      header={<CardHeader title="Doel" />}
+      header={<CardHeader title={t.common.goal} />}
     >
 
       <div className="space-y-3">
@@ -91,7 +90,7 @@ export default function GoalCard() {
         {/* label */}
 
         <div className="pt-3 text-xs font-semibold text-gray-400">
-          Huidig doel
+          {t.goal.current}
         </div>
 
         {/* header */}
@@ -108,7 +107,7 @@ export default function GoalCard() {
           <div className="flex justify-between">
 
             <div className="text-[#191970] text-sm">
-              {active?.label ?? "Selecteer"}
+              {active?.label ?? t.common.select}
             </div>
 
             <div
@@ -191,10 +190,10 @@ export default function GoalCard() {
             `}
           >
             {saving
-              ? "Opslaan…"
+              ? t.common.saving
               : !dirty
-              ? "Opgeslagen"
-              : "Opslaan"}
+              ? t.common.saved
+              : t.common.save}
           </button>
 
         </div>

@@ -5,6 +5,36 @@ import { Lang } from "./useLang";
 /* ───────────────── ENGLISH ───────────────── */
 
 const en = {
+  lifestyle: {
+    title: "Lifestyle",
+    activityLevel: "Activity level",
+
+    sedentary: {
+      label: "Sedentary",
+      desc: "Mostly sitting, little movement (e.g. less than 5000 steps per day).",
+    },
+
+    light: {
+      label: "Lightly active",
+      desc: "Mostly sitting but some movement (e.g. 5000–8000 steps or occasional exercise).",
+    },
+
+    moderate: {
+      label: "Moderately active",
+      desc: "Active days with movement (e.g. 8000–12000 steps, sports or physical work).",
+    },
+
+    active: {
+      label: "Active",
+      desc: "High daily movement, physical work or frequent exercise (usually more than 12000 steps).",
+    },
+
+    veryActive: {
+      label: "Very active",
+      desc: "Heavy physical work, intense training or professional sports.",
+    },
+  },
+
   nav: {
     dashboard: "Dashboard",
     hydration: "Hydration",
@@ -33,9 +63,45 @@ const en = {
     title: "Settings",
   },
 
+  subscription: {
+    title: "Subscription",
+    loading: "Loading...",
+
+    currentPlan: "Current plan",
+    status: "Status",
+    renew: "Next renewal",
+
+    actions: {
+      change: "Change subscription",
+      manage: "Manage subscription",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4.95 / month",
+      pro: "€ 8.95 / month",
+    },
+  },
+
   units: {
     cm: "cm",
     kg: "kg",
+  },
+
+  goal: {
+    current: "Current goal",
+  },
+
+  goalDescriptions: {
+    lose: "You want to gradually lose weight and live healthier.",
+    maintain: "You want to maintain your current weight and lifestyle.",
+    gain: "You want to gradually gain weight and live healthier.",
+    holiday: "Relax without a goal and just track your habits.",
   },
 
   goals: {
@@ -213,6 +279,36 @@ const en = {
 /* ───────────────── DUTCH ───────────────── */
 
 const nl = {
+  lifestyle: {
+    title: "Lifestyle",
+    activityLevel: "Activiteitsniveau",
+
+    sedentary: {
+      label: "Weinig actief",
+      desc: "Overwegend zittend werk, weinig beweging (bijv. minder dan 5000 stappen per dag).",
+    },
+
+    light: {
+      label: "Licht actief",
+      desc: "Zittend werk, maar regelmatig bewegen (bijv. 5000-8000 stappen of af en toe sporten).",
+    },
+
+    moderate: {
+      label: "Gemiddeld actief",
+      desc: "Actieve dagen met veel bewegen (bijv. 8000-12000 stappen, sport of fysiek werk).",
+    },
+
+    active: {
+      label: "Actief",
+      desc: "Veel dagelijkse beweging, fysiek werk of vaak sporten (meestal meer dan 12000 stappen).",
+    },
+
+    veryActive: {
+      label: "Zeer actief",
+      desc: "Zwaar fysiek werk, intensieve training of topsport.",
+    },
+  },
+
   nav: {
     dashboard: "Dashboard",
     hydration: "Hydratatie",
@@ -241,9 +337,45 @@ const nl = {
     title: "Instellingen",
   },
 
+  subscription: {
+    title: "Abonnement",
+    loading: "Laden...",
+
+    currentPlan: "Huidig abonnement",
+    status: "Status",
+    renew: "Volgende verlenging",
+
+    actions: {
+      change: "Wijzig abonnement",
+      manage: "Beheer abonnement",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4,95 / maand",
+      pro: "€ 8,95 / maand",
+    },
+  },
+
   units: {
     cm: "cm",
     kg: "kg",
+  },
+
+  goal: {
+    current: "Huidig doel",
+  },
+
+  goalDescriptions: {
+    lose: "Je wilt geleidelijk gewicht verliezen en gezonder leven.",
+    maintain: "Je wilt je huidige gewicht en leefstijl in balans houden.",
+    gain: "Je wilt geleidelijk aankomen en gezonder leven.",
+    holiday: "Even geen doel, alleen je gewoonten bijhouden.",
   },
 
   goals: {
@@ -420,6 +552,36 @@ const nl = {
 /* ───────────────── FRENCH ───────────────── */
 
 const fr = {
+  lifestyle: {
+    title: "Mode de vie",
+    activityLevel: "Niveau d'activité",
+
+    sedentary: {
+      label: "Peu actif",
+      desc: "Travail principalement assis, peu de mouvement (par ex. moins de 5000 pas par jour).",
+    },
+
+    light: {
+      label: "Légèrement actif",
+      desc: "Travail assis mais avec des mouvements réguliers (par ex. 5000–8000 pas ou activité occasionnelle).",
+    },
+
+    moderate: {
+      label: "Modérément actif",
+      desc: "Journées actives avec beaucoup de mouvement (par ex. 8000–12000 pas, sport ou travail physique).",
+    },
+
+    active: {
+      label: "Actif",
+      desc: "Beaucoup de mouvement quotidien, travail physique ou sport fréquent (généralement plus de 12000 pas).",
+    },
+
+    veryActive: {
+      label: "Très actif",
+      desc: "Travail physique intense, entraînement intensif ou sport de haut niveau.",
+    },
+  },
+
   nav: {
     dashboard: "Dashboard",
     hydration: "Hydratation",
@@ -447,10 +609,46 @@ const fr = {
   settings: {
     title: "Paramètres",
   },
+
+  subscription: {
+    title: "Abonnement",
+    loading: "Chargement...",
+
+    currentPlan: "Abonnement actuel",
+    status: "Statut",
+    renew: "Prochain renouvellement",
+
+    actions: {
+      change: "Modifier l'abonnement",
+      manage: "Gérer l'abonnement",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4,95 / mois",
+      pro: "€ 8,95 / mois",
+    },
+  },
   
   units: {
     cm: "cm",
     kg: "kg",
+  },
+
+  goal: {
+    current: "Objectif actuel",
+  },
+
+  goalDescriptions: {
+    lose: "Vous souhaitez perdre du poids progressivement et vivre plus sainement.",
+    maintain: "Vous souhaitez maintenir votre poids actuel.",
+    gain: "Vous souhaitez prendre du poids progressivement.",
+    holiday: "Se détendre sans objectif et suivre ses habitudes.",
   },
 
   goals: {
@@ -628,6 +826,36 @@ const fr = {
 /* ───────────────── GERMAN ───────────────── */
 
 const de = {
+  lifestyle: {
+    title: "Lebensstil",
+    activityLevel: "Aktivitätsniveau",
+
+    sedentary: {
+      label: "Wenig aktiv",
+      desc: "Überwiegend sitzende Tätigkeit, wenig Bewegung (z. B. weniger als 5000 Schritte pro Tag).",
+    },
+
+    light: {
+      label: "Leicht aktiv",
+      desc: "Sitzende Tätigkeit, aber regelmäßige Bewegung (z. B. 5000–8000 Schritte oder gelegentlich Sport).",
+    },
+
+    moderate: {
+      label: "Mäßig aktiv",
+      desc: "Aktive Tage mit viel Bewegung (z. B. 8000–12000 Schritte, Sport oder körperliche Arbeit).",
+    },
+
+    active: {
+      label: "Aktiv",
+      desc: "Viel tägliche Bewegung, körperliche Arbeit oder häufig Sport (meist mehr als 12000 Schritte).",
+    },
+
+    veryActive: {
+      label: "Sehr aktiv",
+      desc: "Schwere körperliche Arbeit, intensives Training oder Leistungssport.",
+    },
+  },
+
   nav: {
     dashboard: "Dashboard",
     hydration: "Hydration",
@@ -656,9 +884,45 @@ const de = {
     title: "Einstellungen",
   },
 
+  subscription: {
+    title: "Abonnement",
+    loading: "Laden...",
+
+    currentPlan: "Aktuelles Abonnement",
+    status: "Status",
+    renew: "Nächste Verlängerung",
+
+    actions: {
+      change: "Abonnement ändern",
+      manage: "Abonnement verwalten",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4,95 / Monat",
+      pro: "€ 8,95 / Monat",
+    },
+  },
+
   units: {
     cm: "cm",
     kg: "kg",
+  },
+
+  goal: {
+    current: "Aktuelles Ziel",
+  },
+
+  goalDescriptions: {
+    lose: "Du möchtest schrittweise abnehmen und gesünder leben.",
+    maintain: "Du möchtest dein Gewicht und deinen Lebensstil beibehalten.",
+    gain: "Du möchtest schrittweise zunehmen und gesünder leben.",
+    holiday: "Entspannt ohne Ziel, nur deine Gewohnheiten verfolgen.",
   },
 
   goals: {
@@ -836,6 +1100,36 @@ const de = {
 /* ───────────────── POLISH ───────────────── */
 
 const pl = {
+  lifestyle: {
+    title: "Styl życia",
+    activityLevel: "Poziom aktywności",
+
+    sedentary: {
+      label: "Mało aktywny",
+      desc: "Praca głównie siedząca, mało ruchu (np. mniej niż 5000 kroków dziennie).",
+    },
+
+    light: {
+      label: "Lekko aktywny",
+      desc: "Praca siedząca, ale regularny ruch (np. 5000–8000 kroków lub okazjonalne ćwiczenia).",
+    },
+
+    moderate: {
+      label: "Umiarkowanie aktywny",
+      desc: "Aktywne dni z dużą ilością ruchu (np. 8000–12000 kroków, sport lub praca fizyczna).",
+    },
+
+    active: {
+      label: "Aktywny",
+      desc: "Dużo codziennego ruchu, praca fizyczna lub częsty sport (zwykle ponad 12000 kroków).",
+    },
+
+    veryActive: {
+      label: "Bardzo aktywny",
+      desc: "Ciężka praca fizyczna, intensywny trening lub sport wyczynowy.",
+    },
+  },
+
   nav: {
     dashboard: "Dashboard",
     hydration: "Nawodnienie",
@@ -864,9 +1158,45 @@ const pl = {
     title: "Ustawienia",
   },
 
+  subscription: {
+    title: "Subskrypcja",
+    loading: "Ładowanie...",
+
+    currentPlan: "Obecny plan",
+    status: "Status",
+    renew: "Następne odnowienie",
+
+    actions: {
+      change: "Zmień subskrypcję",
+      manage: "Zarządzaj subskrypcją",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4,95 / miesiąc",
+      pro: "€ 8,95 / miesiąc",
+    },
+  },
+
   units: {
     cm: "cm",
     kg: "kg",
+  },
+
+  goal: {
+    current: "Obecny cel",
+  },
+
+  goalDescriptions: {
+    lose: "Chcesz stopniowo schudnąć i prowadzić zdrowszy tryb życia.",
+    maintain: "Chcesz utrzymać obecną wagę i styl życia.",
+    gain: "Chcesz stopniowo przytyć i prowadzić zdrowszy tryb życia.",
+    holiday: "Zrelaksuj się bez celu i śledź swoje nawyki.",
   },
 
   goals: {
