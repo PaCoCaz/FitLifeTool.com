@@ -5,92 +5,68 @@ import { Lang } from "./useLang";
 /* ───────────────── ENGLISH ───────────────── */
 
 const en = {
-  lifestyle: {
-    title: "Lifestyle",
-    activityLevel: "Activity level",
 
-    sedentary: {
-      label: "Sedentary",
-      desc: "Mostly sitting, little movement (e.g. less than 5000 steps per day).",
+  activity: {
+    title: "Activity",
+
+    addActivity: "Activity",
+    goal: "Daily goal",
+    minutes: "min",
+    loading: "Loading activity…",
+
+
+    whichActivity: "Which activity?",
+    howLong: "How long?",
+    customMinutesPlaceholder: "Or enter minutes manually",
+    burnPreview: "Estimated burn:",
+    todayOverview: "Today's activity",
+    activityLabel: "Activity",
+    duration: "Duration",
+    total: "Total",
+
+    labels: {
+      walking: "Walking",
+      cycling: "Cycling",
+      running: "Running",
+      strength_training: "Strength training",
+      yoga: "Yoga",
+      swimming: "Swimming",
+      skating: "Skating",
+      stairs: "Climbing stairs",
     },
 
-    light: {
-      label: "Lightly active",
-      desc: "Mostly sitting but some movement (e.g. 5000–8000 steps or occasional exercise).",
-    },
-
-    moderate: {
-      label: "Moderately active",
-      desc: "Active days with movement (e.g. 8000–12000 steps, sports or physical work).",
-    },
-
-    active: {
-      label: "Active",
-      desc: "High daily movement, physical work or frequent exercise (usually more than 12000 steps).",
-    },
-
-    veryActive: {
-      label: "Very active",
-      desc: "Heavy physical work, intense training or professional sports.",
-    },
-  },
-
-  nav: {
-    dashboard: "Dashboard",
-    hydration: "Hydration",
-    nutrition: "Nutrition",
-    activity: "Activity",
-    weight: "Weight",
-    handbook: "Handbook",
-  },
-
-  profile: {
-    healthProfile: "Health profile",
-    birthDate: "Date of birth",
-
-    gender: {
-      description: "We use biological sex for accurate health and energy calculations.",
-      female: "Female",
-      label: "Gender",
-      male: "Male",
-    },
-
-    height: "Height",
-    weight: "Weight",
-  },
-
-  settings: {
-    title: "Settings",
-  },
-
-  subscription: {
-    title: "Subscription",
-    loading: "Loading...",
-
-    currentPlan: "Current plan",
-    status: "Status",
-    renew: "Next renewal",
-
-    actions: {
-      change: "Change subscription",
-      manage: "Manage subscription",
-    },
-
-    plans: {
-      free: "Free",
-      premium: "Premium",
-      pro: "Pro",
-    },
-
-    pricing: {
-      premium: "€ 4.95 / month",
-      pro: "€ 8.95 / month",
+    status: {
+      noGoal: "No activity goal set",
+      goalReached: "Great job, you reached your daily goal.",
+      ahead: "You're {{value}} kcal ahead of schedule",
+      behind: "You're {{value}} kcal behind schedule",
     },
   },
 
-  units: {
-    cm: "cm",
-    kg: "kg",
+  common: {
+    account: "Account",
+    add: "Add",
+    close: "Close",
+    email: "Email",
+    favoriteLimitUpgrade: "You have reached your limit of {{limit}} favorites.\nUpgrade your account to add more favorites.",
+    favorites: "Favorites",
+    firstName: "First name",
+    goal: "Goal",
+    language: "Language",
+    lastDays: "Last {{days}} days",
+    lastName: "Last name",
+    logout: "Logout",
+    period: "Period:",
+    product: "Product",
+    save: "Save",
+    saved: "Saved",
+    saving: "Saving…",
+    score: "Score",
+    search: "Search",
+    select: "Select",
+    tipOfTheDay: "Tip of the day",
+    tipHydration: "Drink a glass of water with every meal to reach your daily goal more easily.",
+    today: "Today",
   },
 
   goal: {
@@ -142,41 +118,44 @@ const en = {
     },
   },
 
-  activity: {
-    title: "Activity",
+  lifestyle: {
+    title: "Lifestyle",
+    activityLevel: "Activity level",
 
-    addActivity: "Activity",
-    goal: "Daily goal",
-    minutes: "min",
-    loading: "Loading activity…",
-
-
-    whichActivity: "Which activity?",
-    howLong: "How long?",
-    customMinutesPlaceholder: "Or enter minutes manually",
-    burnPreview: "Estimated burn:",
-    todayOverview: "Today's activity",
-    activityLabel: "Activity",
-    duration: "Duration",
-    total: "Total",
-
-    labels: {
-      walking: "Walking",
-      cycling: "Cycling",
-      running: "Running",
-      strength_training: "Strength training",
-      yoga: "Yoga",
-      swimming: "Swimming",
-      skating: "Skating",
-      stairs: "Climbing stairs",
+    sedentary: {
+      label: "Sedentary",
+      desc: "Mostly sitting, little movement (e.g. less than 5000 steps per day).",
     },
 
-    status: {
-      noGoal: "No activity goal set",
-      goalReached: "Great job, you reached your daily goal.",
-      ahead: "You're {{value}} kcal ahead of schedule",
-      behind: "You're {{value}} kcal behind schedule",
+    light: {
+      label: "Lightly active",
+      desc: "Mostly sitting but some movement (e.g. 5000–8000 steps or occasional exercise).",
     },
+
+    moderate: {
+      label: "Moderately active",
+      desc: "Active days with movement (e.g. 8000–12000 steps, sports or physical work).",
+    },
+
+    active: {
+      label: "Active",
+      desc: "High daily movement, physical work or frequent exercise (usually more than 12000 steps).",
+    },
+
+    veryActive: {
+      label: "Very active",
+      desc: "Heavy physical work, intense training or professional sports.",
+    },
+  },
+
+  nav: {
+    dashboard: "Dashboard",
+    drink: "Drink",
+    hydration: "Hydration",
+    nutrition: "Nutrition",
+    activity: "Activity",
+    weight: "Weight",
+    handbook: "Handbook",
   },
 
   nutrition: {
@@ -227,6 +206,55 @@ const en = {
     },
   },
 
+  profile: {
+    healthProfile: "Health profile",
+    birthDate: "Date of birth",
+
+    gender: {
+      description: "We use biological sex for accurate health and energy calculations.",
+      female: "Female",
+      label: "Gender",
+      male: "Male",
+    },
+
+    height: "Height",
+    weight: "Weight",
+  },
+
+  settings: {
+    title: "Settings",
+  },
+
+  subscription: {
+    title: "Subscription",
+    loading: "Loading...",
+
+    currentPlan: "Current plan",
+    status: "Status",
+    renew: "Next renewal",
+
+    actions: {
+      change: "Change subscription",
+      manage: "Manage subscription",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4.95 / month",
+      pro: "€ 8.95 / month",
+    },
+  },
+
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
   weight: {
     title: "Weight",
 
@@ -249,122 +277,72 @@ const en = {
     underweight: "Underweight",
   },
 
-  common: {
-    account: "Account",
-    add: "Add",
-    close: "Close",
-    email: "Email",
-    favoriteLimitUpgrade: "You have reached your limit of {{limit}} favorites.\nUpgrade your account to add more favorites.",
-    favorites: "Favorites",
-    firstName: "First name",
-    goal: "Goal",
-    language: "Language",
-    lastDays: "Last {{days}} days",
-    lastName: "Last name",
-    logout: "Logout",
-    period: "Period:",
-    product: "Product",
-    save: "Save",
-    saved: "Saved",
-    saving: "Saving…",
-    score: "Score",
-    search: "Search",
-    select: "Select",
-    tipOfTheDay: "Tip of the day",
-    tipHydration: "Drink a glass of water with every meal to reach your daily goal more easily.",
-    today: "Today",
-  },
 };
 
 /* ───────────────── DUTCH ───────────────── */
 
 const nl = {
-  lifestyle: {
-    title: "Lifestyle",
-    activityLevel: "Activiteitsniveau",
 
-    sedentary: {
-      label: "Weinig actief",
-      desc: "Overwegend zittend werk, weinig beweging (bijv. minder dan 5000 stappen per dag).",
+  activity: {
+    title: "Activiteiten",
+
+    addActivity: "Activiteit",
+    goal: "Dagdoel",
+    minutes: "min",
+    loading: "Activiteiten laden…",
+
+    whichActivity: "Welke activiteit?",
+    howLong: "Hoe lang?",
+    customMinutesPlaceholder: "Of vul zelf minuten in",
+    burnPreview: "Verbranding:",
+    todayOverview: "Vandaag bewogen",
+    activityLabel: "Activiteit",
+    duration: "Duur",
+    total: "Totaal",
+
+    labels: {
+      walking: "Wandelen",
+      cycling: "Fietsen",
+      running: "Hardlopen",
+      strength_training: "Krachttraining",
+      yoga: "Yoga",
+      swimming: "Zwemmen",
+      skating: "Schaatsen",
+      stairs: "Traplopen",
     },
 
-    light: {
-      label: "Licht actief",
-      desc: "Zittend werk, maar regelmatig bewegen (bijv. 5000-8000 stappen of af en toe sporten).",
-    },
-
-    moderate: {
-      label: "Gemiddeld actief",
-      desc: "Actieve dagen met veel bewegen (bijv. 8000-12000 stappen, sport of fysiek werk).",
-    },
-
-    active: {
-      label: "Actief",
-      desc: "Veel dagelijkse beweging, fysiek werk of vaak sporten (meestal meer dan 12000 stappen).",
-    },
-
-    veryActive: {
-      label: "Zeer actief",
-      desc: "Zwaar fysiek werk, intensieve training of topsport.",
-    },
-  },
-
-  nav: {
-    dashboard: "Dashboard",
-    hydration: "Hydratatie",
-    nutrition: "Voeding",
-    activity: "Activiteiten",
-    weight: "Gewicht",
-    handbook: "Handboek",
-  },
-
-  profile: {
-    healthProfile: "Gezondheidsprofiel",
-    birthDate: "Geboortedatum",
-
-    gender: {
-      description: "Voor nauwkeurige gezondheids- en energieberekeningen gebruiken we biologisch geslacht.",
-      female: "Vrouw",
-      label: "Geslacht",
-      male: "Man",
-    },
-
-    height: "Lengte",
-    weight: "Gewicht",
-  },
-
-  settings: {
-    title: "Instellingen",
-  },
-
-  subscription: {
-    title: "Abonnement",
-    loading: "Laden...",
-
-    currentPlan: "Huidig abonnement",
-    status: "Status",
-    renew: "Volgende verlenging",
-
-    actions: {
-      change: "Wijzig abonnement",
-      manage: "Beheer abonnement",
-    },
-
-    plans: {
-      free: "Free",
-      premium: "Premium",
-      pro: "Pro",
-    },
-
-    pricing: {
-      premium: "€ 4,95 / maand",
-      pro: "€ 8,95 / maand",
+    status: {
+      noGoal: "Geen activiteitsdoel ingesteld",
+      goalReached: "Goed bezig, je hebt je dagdoel gehaald.",
+      ahead: "Je loopt {{value}} kcal voor op je dagschema",
+      behind: "Je loopt {{value}} kcal achter op je dagschema",
     },
   },
 
-  units: {
-    cm: "cm",
-    kg: "kg",
+  common: {
+    account: "Account",
+    add: "Toevoegen",
+    close: "Sluiten",
+    email: "E-mail",
+    favoriteLimitUpgrade: "Je hebt je limiet van {{limit}} favorieten bereikt.\nUpgrade je account om meer favorieten toe te kunnen voegen.",
+    favorites: "Favorieten",
+    firstName: "Voornaam",
+    goal: "Doel",
+    language: "Taal",
+    lastDays: "Laatste {{days}} dagen",
+    lastName: "Achternaam",
+    logout: "Uitloggen",
+    period: "Periode:",
+    product: "Product",
+    save: "Opslaan",
+    saved: "Opgeslagen",
+    saving: "Opslaan…",
+    score: "Score",
+    search: "Zoeken",
+    select: "Selecteer",
+    tipOfTheDay: "Tip van vandaag",
+    tipHydration: "Drink bij elke maaltijd een glas water om je dagdoel makkelijker te halen.",
+    today: "Vandaag",
   },
 
   goal: {
@@ -416,40 +394,44 @@ const nl = {
     },
   },
 
-  activity: {
-    title: "Activiteiten",
+  lifestyle: {
+    title: "Lifestyle",
+    activityLevel: "Activiteitsniveau",
 
-    addActivity: "Activiteit",
-    goal: "Dagdoel",
-    minutes: "min",
-    loading: "Activiteiten laden…",
-
-    whichActivity: "Welke activiteit?",
-    howLong: "Hoe lang?",
-    customMinutesPlaceholder: "Of vul zelf minuten in",
-    burnPreview: "Verbranding:",
-    todayOverview: "Vandaag bewogen",
-    activityLabel: "Activiteit",
-    duration: "Duur",
-    total: "Totaal",
-
-    labels: {
-      walking: "Wandelen",
-      cycling: "Fietsen",
-      running: "Hardlopen",
-      strength_training: "Krachttraining",
-      yoga: "Yoga",
-      swimming: "Zwemmen",
-      skating: "Schaatsen",
-      stairs: "Traplopen",
+    sedentary: {
+      label: "Weinig actief",
+      desc: "Overwegend zittend werk, weinig beweging (bijv. minder dan 5000 stappen per dag).",
     },
 
-    status: {
-      noGoal: "Geen activiteitsdoel ingesteld",
-      goalReached: "Goed bezig, je hebt je dagdoel gehaald.",
-      ahead: "Je loopt {{value}} kcal voor op je dagschema",
-      behind: "Je loopt {{value}} kcal achter op je dagschema",
+    light: {
+      label: "Licht actief",
+      desc: "Zittend werk, maar regelmatig bewegen (bijv. 5000-8000 stappen of af en toe sporten).",
     },
+
+    moderate: {
+      label: "Gemiddeld actief",
+      desc: "Actieve dagen met veel bewegen (bijv. 8000-12000 stappen, sport of fysiek werk).",
+    },
+
+    active: {
+      label: "Actief",
+      desc: "Veel dagelijkse beweging, fysiek werk of vaak sporten (meestal meer dan 12000 stappen).",
+    },
+
+    veryActive: {
+      label: "Zeer actief",
+      desc: "Zwaar fysiek werk, intensieve training of topsport.",
+    },
+  },
+
+  nav: {
+    dashboard: "Dashboard",
+    drink: "Drinken",
+    hydration: "Hydratatie",
+    nutrition: "Voeding",
+    activity: "Activiteiten",
+    weight: "Gewicht",
+    handbook: "Handboek",
   },
 
   nutrition: {
@@ -500,6 +482,55 @@ const nl = {
     },
   },
 
+  profile: {
+    healthProfile: "Gezondheidsprofiel",
+    birthDate: "Geboortedatum",
+
+    gender: {
+      description: "Voor nauwkeurige gezondheids- en energieberekeningen gebruiken we biologisch geslacht.",
+      female: "Vrouw",
+      label: "Geslacht",
+      male: "Man",
+    },
+
+    height: "Lengte",
+    weight: "Gewicht",
+  },
+
+  settings: {
+    title: "Instellingen",
+  },
+
+  subscription: {
+    title: "Abonnement",
+    loading: "Laden...",
+
+    currentPlan: "Huidig abonnement",
+    status: "Status",
+    renew: "Volgende verlenging",
+
+    actions: {
+      change: "Wijzig abonnement",
+      manage: "Beheer abonnement",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4,95 / maand",
+      pro: "€ 8,95 / maand",
+    },
+  },
+
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
   weight: {
     title: "Gewicht",
 
@@ -522,122 +553,73 @@ const nl = {
     underweight: "Ondergewicht",
   },
 
-  common: {
-    account: "Account",
-    add: "Toevoegen",
-    close: "Sluiten",
-    email: "E-mail",
-    favoriteLimitUpgrade: "Je hebt je limiet van {{limit}} favorieten bereikt.\nUpgrade je account om meer favorieten toe te kunnen voegen.",
-    favorites: "Favorieten",
-    firstName: "Voornaam",
-    goal: "Doel",
-    language: "Taal",
-    lastDays: "Laatste {{days}} dagen",
-    lastName: "Achternaam",
-    logout: "Uitloggen",
-    period: "Periode:",
-    product: "Product",
-    save: "Opslaan",
-    saved: "Opgeslagen",
-    saving: "Opslaan…",
-    score: "Score",
-    search: "Zoeken",
-    select: "Selecteer",
-    tipOfTheDay: "Tip van vandaag",
-    tipHydration: "Drink bij elke maaltijd een glas water om je dagdoel makkelijker te halen.",
-    today: "Vandaag",
-  },
 };
 
 /* ───────────────── FRENCH ───────────────── */
 
 const fr = {
-  lifestyle: {
-    title: "Mode de vie",
-    activityLevel: "Niveau d'activité",
 
-    sedentary: {
-      label: "Peu actif",
-      desc: "Travail principalement assis, peu de mouvement (par ex. moins de 5000 pas par jour).",
+  activity: {
+    title: "Activité quotidienne",
+
+    addActivity: "Activité",
+    goal: "Objectif quotidien",
+    minutes: "min",
+    loading: "Chargement de l'activité…",
+
+
+    whichActivity: "Quelle activité ?",
+    howLong: "Combien de temps ?",
+    customMinutesPlaceholder: "Ou saisissez les minutes manuellement",
+    burnPreview: "Calories estimées :",
+    todayOverview: "Activité d'aujourd'hui",
+    activityLabel: "Activité",
+    duration: "Durée",
+    total: "Total",
+
+    labels: {
+      walking: "Marche",
+      cycling: "Vélo",
+      running: "Course",
+      strength_training: "Musculation",
+      yoga: "Yoga",
+      swimming: "Natation",
+      skating: "Patinage",
+      stairs: "Escaliers",
     },
 
-    light: {
-      label: "Légèrement actif",
-      desc: "Travail assis mais avec des mouvements réguliers (par ex. 5000–8000 pas ou activité occasionnelle).",
-    },
-
-    moderate: {
-      label: "Modérément actif",
-      desc: "Journées actives avec beaucoup de mouvement (par ex. 8000–12000 pas, sport ou travail physique).",
-    },
-
-    active: {
-      label: "Actif",
-      desc: "Beaucoup de mouvement quotidien, travail physique ou sport fréquent (généralement plus de 12000 pas).",
-    },
-
-    veryActive: {
-      label: "Très actif",
-      desc: "Travail physique intense, entraînement intensif ou sport de haut niveau.",
-    },
-  },
-
-  nav: {
-    dashboard: "Dashboard",
-    hydration: "Hydratation",
-    nutrition: "Nutrition",
-    activity: "Activités",
-    weight: "Poids",
-    handbook: "Guide",
-  },
-
-  profile: {
-    healthProfile: "Profil de santé",
-    birthDate: "Date de naissance",
-
-    gender: {
-      description: "Nous utilisons le sexe biologique pour des calculs précis de santé et d'énergie.",
-      female: "Femme",
-      label: "Sexe",
-      male: "Homme",
-    },
-
-    height: "Taille",
-    weight: "Poids",
-  },
-
-  settings: {
-    title: "Paramètres",
-  },
-
-  subscription: {
-    title: "Abonnement",
-    loading: "Chargement...",
-
-    currentPlan: "Abonnement actuel",
-    status: "Statut",
-    renew: "Prochain renouvellement",
-
-    actions: {
-      change: "Modifier l'abonnement",
-      manage: "Gérer l'abonnement",
-    },
-
-    plans: {
-      free: "Free",
-      premium: "Premium",
-      pro: "Pro",
-    },
-
-    pricing: {
-      premium: "€ 4,95 / mois",
-      pro: "€ 8,95 / mois",
+    status: {
+      noGoal: "Aucun objectif d'activité défini",
+      goalReached: "Bravo, vous avez atteint votre objectif quotidien.",
+      ahead: "Vous avez {{value}} kcal d'avance sur votre programme",
+      behind: "Vous avez {{value}} kcal de retard sur votre programme",
     },
   },
-  
-  units: {
-    cm: "cm",
-    kg: "kg",
+
+  common: {
+    account: "Compte",
+    add: "Ajouter",
+    close: "Fermer",
+    email: "E-mail",
+    favoriteLimitUpgrade: "Vous avez atteint votre limite de {{limit}} favoris.\nMettez à niveau votre compte pour pouvoir ajouter plus de favoris.",
+    favorites: "Favoris",
+    firstName: "Prénom",
+    goal: "Doel",
+    language: "Langue",
+    lastDays: "Derniers {{days}} jours",
+    lastName: "Nom de famille",
+    logout: "Déconnexion",
+    period: "Période :",
+    product: "Produit",
+    save: "Enregistrer",
+    saved: "Enregistré",
+    saving: "Enregistrement…",
+    score: "Score",
+    search: "Rechercher",
+    select: "Select",
+    tipOfTheDay: "Conseil du jour",
+    tipHydration: "Buvez un verre d'eau à chaque repas pour atteindre plus facilement votre objectif quotidien.",
+    today: "Aujourd'hui",
   },
 
   goal: {
@@ -689,41 +671,44 @@ const fr = {
     },
   },
 
-  activity: {
-    title: "Activité quotidienne",
+  lifestyle: {
+    title: "Mode de vie",
+    activityLevel: "Niveau d'activité",
 
-    addActivity: "Activité",
-    goal: "Objectif quotidien",
-    minutes: "min",
-    loading: "Chargement de l'activité…",
-
-
-    whichActivity: "Quelle activité ?",
-    howLong: "Combien de temps ?",
-    customMinutesPlaceholder: "Ou saisissez les minutes manuellement",
-    burnPreview: "Calories estimées :",
-    todayOverview: "Activité d'aujourd'hui",
-    activityLabel: "Activité",
-    duration: "Durée",
-    total: "Total",
-
-    labels: {
-      walking: "Marche",
-      cycling: "Vélo",
-      running: "Course",
-      strength_training: "Musculation",
-      yoga: "Yoga",
-      swimming: "Natation",
-      skating: "Patinage",
-      stairs: "Escaliers",
+    sedentary: {
+      label: "Peu actif",
+      desc: "Travail principalement assis, peu de mouvement (par ex. moins de 5000 pas par jour).",
     },
 
-    status: {
-      noGoal: "Aucun objectif d'activité défini",
-      goalReached: "Bravo, vous avez atteint votre objectif quotidien.",
-      ahead: "Vous avez {{value}} kcal d'avance sur votre programme",
-      behind: "Vous avez {{value}} kcal de retard sur votre programme",
+    light: {
+      label: "Légèrement actif",
+      desc: "Travail assis mais avec des mouvements réguliers (par ex. 5000–8000 pas ou activité occasionnelle).",
     },
+
+    moderate: {
+      label: "Modérément actif",
+      desc: "Journées actives avec beaucoup de mouvement (par ex. 8000–12000 pas, sport ou travail physique).",
+    },
+
+    active: {
+      label: "Actif",
+      desc: "Beaucoup de mouvement quotidien, travail physique ou sport fréquent (généralement plus de 12000 pas).",
+    },
+
+    veryActive: {
+      label: "Très actif",
+      desc: "Travail physique intense, entraînement intensif ou sport de haut niveau.",
+    },
+  },
+
+  nav: {
+    dashboard: "Dashboard",
+    drink: "Boisson",
+    hydration: "Hydratation",
+    nutrition: "Nutrition",
+    activity: "Activités",
+    weight: "Poids",
+    handbook: "Guide",
   },
 
   nutrition: {
@@ -774,6 +759,55 @@ const fr = {
     },
   },
 
+  profile: {
+    healthProfile: "Profil de santé",
+    birthDate: "Date de naissance",
+
+    gender: {
+      description: "Nous utilisons le sexe biologique pour des calculs précis de santé et d'énergie.",
+      female: "Femme",
+      label: "Sexe",
+      male: "Homme",
+    },
+
+    height: "Taille",
+    weight: "Poids",
+  },
+
+  settings: {
+    title: "Paramètres",
+  },
+
+  subscription: {
+    title: "Abonnement",
+    loading: "Chargement...",
+
+    currentPlan: "Abonnement actuel",
+    status: "Statut",
+    renew: "Prochain renouvellement",
+
+    actions: {
+      change: "Modifier l'abonnement",
+      manage: "Gérer l'abonnement",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4,95 / mois",
+      pro: "€ 8,95 / mois",
+    },
+  },
+  
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
   weight: {
     title: "Poids",
 
@@ -796,122 +830,73 @@ const fr = {
     underweight: "Insuffisance pondérale",
   },
 
-  common: {
-    account: "Compte",
-    add: "Ajouter",
-    close: "Fermer",
-    email: "E-mail",
-    favoriteLimitUpgrade: "Vous avez atteint votre limite de {{limit}} favoris.\nMettez à niveau votre compte pour pouvoir ajouter plus de favoris.",
-    favorites: "Favoris",
-    firstName: "Prénom",
-    goal: "Doel",
-    language: "Langue",
-    lastDays: "Derniers {{days}} jours",
-    lastName: "Nom de famille",
-    logout: "Déconnexion",
-    period: "Période :",
-    product: "Produit",
-    save: "Enregistrer",
-    saved: "Enregistré",
-    saving: "Enregistrement…",
-    score: "Score",
-    search: "Rechercher",
-    select: "Select",
-    tipOfTheDay: "Conseil du jour",
-    tipHydration: "Buvez un verre d'eau à chaque repas pour atteindre plus facilement votre objectif quotidien.",
-    today: "Aujourd'hui",
-  },
 };
 
 /* ───────────────── GERMAN ───────────────── */
 
 const de = {
-  lifestyle: {
-    title: "Lebensstil",
-    activityLevel: "Aktivitätsniveau",
 
-    sedentary: {
-      label: "Wenig aktiv",
-      desc: "Überwiegend sitzende Tätigkeit, wenig Bewegung (z. B. weniger als 5000 Schritte pro Tag).",
+  activity: {
+    title: "Tägliche Aktivität",
+
+    addActivity: "Aktivität",
+    goal: "Tagesziel",
+    minutes: "Min",
+    loading: "Lade Aktivitätsdaten…",
+
+
+    whichActivity: "Welche Aktivität?",
+    howLong: "Wie lange?",
+    customMinutesPlaceholder: "Oder Minuten manuell eingeben",
+    burnPreview: "Geschätzter Verbrauch:",
+    todayOverview: "Heutige Aktivität",
+    activityLabel: "Aktivität",
+    duration: "Dauer",
+    total: "Gesamt",
+
+    labels: {
+      walking: "Gehen",
+      cycling: "Radfahren",
+      running: "Laufen",
+      strength_training: "Krafttraining",
+      yoga: "Yoga",
+      swimming: "Schwimmen",
+      skating: "Schlittschuhlaufen",
+      stairs: "Treppensteigen",
     },
 
-    light: {
-      label: "Leicht aktiv",
-      desc: "Sitzende Tätigkeit, aber regelmäßige Bewegung (z. B. 5000–8000 Schritte oder gelegentlich Sport).",
-    },
-
-    moderate: {
-      label: "Mäßig aktiv",
-      desc: "Aktive Tage mit viel Bewegung (z. B. 8000–12000 Schritte, Sport oder körperliche Arbeit).",
-    },
-
-    active: {
-      label: "Aktiv",
-      desc: "Viel tägliche Bewegung, körperliche Arbeit oder häufig Sport (meist mehr als 12000 Schritte).",
-    },
-
-    veryActive: {
-      label: "Sehr aktiv",
-      desc: "Schwere körperliche Arbeit, intensives Training oder Leistungssport.",
-    },
-  },
-
-  nav: {
-    dashboard: "Dashboard",
-    hydration: "Hydration",
-    nutrition: "Ernährung",
-    activity: "Aktivitäten",
-    weight: "Gewicht",
-    handbook: "Handbuch",
-  },
-
-  profile: {
-    healthProfile: "Gesundheitsprofil",
-    birthDate: "Geburtsdatum",
-
-    gender: {
-      description: "Für genaue Gesundheits- und Energieberechnungen verwenden wir das biologische Geschlecht.",
-      female: "Weiblich",
-      label: "Geschlecht",
-      male: "Männlich",
-    },
-
-    height: "Größe",
-    weight: "Gewicht",
-  },
-
-  settings: {
-    title: "Einstellungen",
-  },
-
-  subscription: {
-    title: "Abonnement",
-    loading: "Laden...",
-
-    currentPlan: "Aktuelles Abonnement",
-    status: "Status",
-    renew: "Nächste Verlängerung",
-
-    actions: {
-      change: "Abonnement ändern",
-      manage: "Abonnement verwalten",
-    },
-
-    plans: {
-      free: "Free",
-      premium: "Premium",
-      pro: "Pro",
-    },
-
-    pricing: {
-      premium: "€ 4,95 / Monat",
-      pro: "€ 8,95 / Monat",
+    status: {
+      noGoal: "Kein Aktivitätsziel festgelegt",
+      goalReached: "Super, du hast dein Tagesziel erreicht.",
+      ahead: "Du bist {{value}} kcal vor deinem Zeitplan",
+      behind: "Du bist {{value}} kcal hinter deinem Zeitplan",
     },
   },
 
-  units: {
-    cm: "cm",
-    kg: "kg",
+  common: {
+    account: "Konto",
+    add: "Hinzufügen",
+    close: "Schließen",
+    email: "E-Mail",
+    favoriteLimitUpgrade: "Du hast dein Limit von {{limit}} Favoriten erreicht.\nUpgrade dein Konto, um mehr Favoriten hinzufügen zu können.",
+    favorites: "Favoriten",
+    firstName: "Vorname",
+    goal: "Ziel",
+    language: "Sprache",
+    lastDays: "Letzte {{days}} Tage",
+    lastName: "Nachname",
+    logout: "Abmelden",
+    period: "Zeitraum:",
+    product: "Produkt",
+    save: "Speichern",
+    saved: "Gespeichert",
+    saving: "Speichern…",
+    score: "Score",
+    search: "Suchen",
+    select: "Select",
+    tipOfTheDay: "Tipp des Tages",
+    tipHydration: "Trinke zu jeder Mahlzeit ein Glas Wasser, um dein Tagesziel leichter zu erreichen.",
+    today: "Heute",
   },
 
   goal: {
@@ -963,41 +948,44 @@ const de = {
     },
   },
 
-  activity: {
-    title: "Tägliche Aktivität",
+  lifestyle: {
+    title: "Lebensstil",
+    activityLevel: "Aktivitätsniveau",
 
-    addActivity: "Aktivität",
-    goal: "Tagesziel",
-    minutes: "Min",
-    loading: "Lade Aktivitätsdaten…",
-
-
-    whichActivity: "Welche Aktivität?",
-    howLong: "Wie lange?",
-    customMinutesPlaceholder: "Oder Minuten manuell eingeben",
-    burnPreview: "Geschätzter Verbrauch:",
-    todayOverview: "Heutige Aktivität",
-    activityLabel: "Aktivität",
-    duration: "Dauer",
-    total: "Gesamt",
-
-    labels: {
-      walking: "Gehen",
-      cycling: "Radfahren",
-      running: "Laufen",
-      strength_training: "Krafttraining",
-      yoga: "Yoga",
-      swimming: "Schwimmen",
-      skating: "Schlittschuhlaufen",
-      stairs: "Treppensteigen",
+    sedentary: {
+      label: "Wenig aktiv",
+      desc: "Überwiegend sitzende Tätigkeit, wenig Bewegung (z. B. weniger als 5000 Schritte pro Tag).",
     },
 
-    status: {
-      noGoal: "Kein Aktivitätsziel festgelegt",
-      goalReached: "Super, du hast dein Tagesziel erreicht.",
-      ahead: "Du bist {{value}} kcal vor deinem Zeitplan",
-      behind: "Du bist {{value}} kcal hinter deinem Zeitplan",
+    light: {
+      label: "Leicht aktiv",
+      desc: "Sitzende Tätigkeit, aber regelmäßige Bewegung (z. B. 5000–8000 Schritte oder gelegentlich Sport).",
     },
+
+    moderate: {
+      label: "Mäßig aktiv",
+      desc: "Aktive Tage mit viel Bewegung (z. B. 8000–12000 Schritte, Sport oder körperliche Arbeit).",
+    },
+
+    active: {
+      label: "Aktiv",
+      desc: "Viel tägliche Bewegung, körperliche Arbeit oder häufig Sport (meist mehr als 12000 Schritte).",
+    },
+
+    veryActive: {
+      label: "Sehr aktiv",
+      desc: "Schwere körperliche Arbeit, intensives Training oder Leistungssport.",
+    },
+  },
+
+  nav: {
+    dashboard: "Dashboard",
+    drink: "Getränk",
+    hydration: "Hydration",
+    nutrition: "Ernährung",
+    activity: "Aktivitäten",
+    weight: "Gewicht",
+    handbook: "Handbuch",
   },
 
   nutrition: {
@@ -1048,6 +1036,55 @@ const de = {
     },
   },
 
+  profile: {
+    healthProfile: "Gesundheitsprofil",
+    birthDate: "Geburtsdatum",
+
+    gender: {
+      description: "Für genaue Gesundheits- und Energieberechnungen verwenden wir das biologische Geschlecht.",
+      female: "Weiblich",
+      label: "Geschlecht",
+      male: "Männlich",
+    },
+
+    height: "Größe",
+    weight: "Gewicht",
+  },
+
+  settings: {
+    title: "Einstellungen",
+  },
+
+  subscription: {
+    title: "Abonnement",
+    loading: "Laden...",
+
+    currentPlan: "Aktuelles Abonnement",
+    status: "Status",
+    renew: "Nächste Verlängerung",
+
+    actions: {
+      change: "Abonnement ändern",
+      manage: "Abonnement verwalten",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4,95 / Monat",
+      pro: "€ 8,95 / Monat",
+    },
+  },
+
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
   weight: {
     title: "Gewicht",
 
@@ -1070,122 +1107,73 @@ const de = {
     underweight: "Untergewicht",
   },
 
-  common: {
-    account: "Konto",
-    add: "Hinzufügen",
-    close: "Schließen",
-    email: "E-Mail",
-    favoriteLimitUpgrade: "Du hast dein Limit von {{limit}} Favoriten erreicht.\nUpgrade dein Konto, um mehr Favoriten hinzufügen zu können.",
-    favorites: "Favoriten",
-    firstName: "Vorname",
-    goal: "Ziel",
-    language: "Sprache",
-    lastDays: "Letzte {{days}} Tage",
-    lastName: "Nachname",
-    logout: "Abmelden",
-    period: "Zeitraum:",
-    product: "Produkt",
-    save: "Speichern",
-    saved: "Gespeichert",
-    saving: "Speichern…",
-    score: "Score",
-    search: "Suchen",
-    select: "Select",
-    tipOfTheDay: "Tipp des Tages",
-    tipHydration: "Trinke zu jeder Mahlzeit ein Glas Wasser, um dein Tagesziel leichter zu erreichen.",
-    today: "Heute",
-  },
 };
 
 /* ───────────────── POLISH ───────────────── */
 
 const pl = {
-  lifestyle: {
-    title: "Styl życia",
-    activityLevel: "Poziom aktywności",
 
-    sedentary: {
-      label: "Mało aktywny",
-      desc: "Praca głównie siedząca, mało ruchu (np. mniej niż 5000 kroków dziennie).",
+  activity: {
+    title: "Dzienne aktywności",
+
+    addActivity: "Aktywność",
+    goal: "Cel dzienny",
+    minutes: "min",
+    loading: "Ładowanie aktywności…",
+
+
+    whichActivity: "Jaką aktywność?",
+    howLong: "Jak długo?",
+    customMinutesPlaceholder: "Lub wpisz liczbę minut ręcznie",
+    burnPreview: "Szacowane spalanie:",
+    todayOverview: "Dzisiejsza aktywność",
+    activityLabel: "Aktywność",
+    duration: "Czas trwania",
+    total: "Suma",
+
+    labels: {
+      walking: "Spacer",
+      cycling: "Jazda na rowerze",
+      running: "Bieganie",
+      strength_training: "Trening siłowy",
+      yoga: "Joga",
+      swimming: "Pływanie",
+      skating: "Jazda na łyżwach",
+      stairs: "Wchodzenie po schodach",
     },
 
-    light: {
-      label: "Lekko aktywny",
-      desc: "Praca siedząca, ale regularny ruch (np. 5000–8000 kroków lub okazjonalne ćwiczenia).",
-    },
-
-    moderate: {
-      label: "Umiarkowanie aktywny",
-      desc: "Aktywne dni z dużą ilością ruchu (np. 8000–12000 kroków, sport lub praca fizyczna).",
-    },
-
-    active: {
-      label: "Aktywny",
-      desc: "Dużo codziennego ruchu, praca fizyczna lub częsty sport (zwykle ponad 12000 kroków).",
-    },
-
-    veryActive: {
-      label: "Bardzo aktywny",
-      desc: "Ciężka praca fizyczna, intensywny trening lub sport wyczynowy.",
-    },
-  },
-
-  nav: {
-    dashboard: "Dashboard",
-    hydration: "Nawodnienie",
-    nutrition: "Odżywianie",
-    activity: "Aktywności",
-    weight: "Waga",
-    handbook: "Poradnik",
-  },
-
-  profile: {
-    healthProfile: "Profil zdrowotny",
-    birthDate: "Data urodzenia",
-
-    gender: {
-      description: "Do dokładnych obliczeń zdrowia i energii używamy płci biologicznej.",
-      female: "Kobieta",
-      label: "Płeć",
-      male: "Mężczyzna",
-    },
-
-    height: "Wzrost",
-    weight: "Waga",
-  },
-
-  settings: {
-    title: "Ustawienia",
-  },
-
-  subscription: {
-    title: "Subskrypcja",
-    loading: "Ładowanie...",
-
-    currentPlan: "Obecny plan",
-    status: "Status",
-    renew: "Następne odnowienie",
-
-    actions: {
-      change: "Zmień subskrypcję",
-      manage: "Zarządzaj subskrypcją",
-    },
-
-    plans: {
-      free: "Free",
-      premium: "Premium",
-      pro: "Pro",
-    },
-
-    pricing: {
-      premium: "€ 4,95 / miesiąc",
-      pro: "€ 8,95 / miesiąc",
+    status: {
+      noGoal: "Brak ustawionego celu aktywności",
+      goalReached: "Świetnie, osiągnąłeś dzienny cel.",
+      ahead: "Masz {{value}} kcal przewagi względem planu",
+      behind: "Masz {{value}} kcal opóźnienia względem planu",
     },
   },
 
-  units: {
-    cm: "cm",
-    kg: "kg",
+  common: {
+    account: "Konto",
+    add: "Dodaj",
+    close: "Zamknij",
+    email: "E-mail",
+    favoriteLimitUpgrade: "Osiągnąłeś limit {{limit}} ulubionych.\nUlepsz konto, aby móc dodać więcej ulubionych.",
+    favorites: "Ulubione",
+    firstName: "Imię",
+    goal: "Cel",
+    language: "Język",
+    lastDays: "Ostatnie {{days}} dni",
+    lastName: "Nazwisko",
+    logout: "Wyloguj",
+    period: "Okres:",
+    product: "Produkt",
+    save: "Zapisz",
+    saved: "Zapisano",
+    saving: "Zapisywanie…",
+    score: "Wynik",
+    search: "Szukaj",
+    select: "Select",
+    tipOfTheDay: "Wskazówka dnia",
+    tipHydration: "Pij szklankę wody do każdego posiłku, aby łatwiej osiągnąć swój dzienny cel.",
+    today: "Dziś",
   },
 
   goal: {
@@ -1237,41 +1225,44 @@ const pl = {
     },
   },
 
-  activity: {
-    title: "Dzienne aktywności",
+  lifestyle: {
+    title: "Styl życia",
+    activityLevel: "Poziom aktywności",
 
-    addActivity: "Aktywność",
-    goal: "Cel dzienny",
-    minutes: "min",
-    loading: "Ładowanie aktywności…",
-
-
-    whichActivity: "Jaką aktywność?",
-    howLong: "Jak długo?",
-    customMinutesPlaceholder: "Lub wpisz liczbę minut ręcznie",
-    burnPreview: "Szacowane spalanie:",
-    todayOverview: "Dzisiejsza aktywność",
-    activityLabel: "Aktywność",
-    duration: "Czas trwania",
-    total: "Suma",
-
-    labels: {
-      walking: "Spacer",
-      cycling: "Jazda na rowerze",
-      running: "Bieganie",
-      strength_training: "Trening siłowy",
-      yoga: "Joga",
-      swimming: "Pływanie",
-      skating: "Jazda na łyżwach",
-      stairs: "Wchodzenie po schodach",
+    sedentary: {
+      label: "Mało aktywny",
+      desc: "Praca głównie siedząca, mało ruchu (np. mniej niż 5000 kroków dziennie).",
     },
 
-    status: {
-      noGoal: "Brak ustawionego celu aktywności",
-      goalReached: "Świetnie, osiągnąłeś dzienny cel.",
-      ahead: "Masz {{value}} kcal przewagi względem planu",
-      behind: "Masz {{value}} kcal opóźnienia względem planu",
+    light: {
+      label: "Lekko aktywny",
+      desc: "Praca siedząca, ale regularny ruch (np. 5000–8000 kroków lub okazjonalne ćwiczenia).",
     },
+
+    moderate: {
+      label: "Umiarkowanie aktywny",
+      desc: "Aktywne dni z dużą ilością ruchu (np. 8000–12000 kroków, sport lub praca fizyczna).",
+    },
+
+    active: {
+      label: "Aktywny",
+      desc: "Dużo codziennego ruchu, praca fizyczna lub częsty sport (zwykle ponad 12000 kroków).",
+    },
+
+    veryActive: {
+      label: "Bardzo aktywny",
+      desc: "Ciężka praca fizyczna, intensywny trening lub sport wyczynowy.",
+    },
+  },
+
+  nav: {
+    dashboard: "Dashboard",
+    drink: "Napój",
+    hydration: "Nawodnienie",
+    nutrition: "Odżywianie",
+    activity: "Aktywności",
+    weight: "Waga",
+    handbook: "Poradnik",
   },
 
   nutrition: {
@@ -1322,6 +1313,55 @@ const pl = {
     },
   },
 
+  profile: {
+    healthProfile: "Profil zdrowotny",
+    birthDate: "Data urodzenia",
+
+    gender: {
+      description: "Do dokładnych obliczeń zdrowia i energii używamy płci biologicznej.",
+      female: "Kobieta",
+      label: "Płeć",
+      male: "Mężczyzna",
+    },
+
+    height: "Wzrost",
+    weight: "Waga",
+  },
+
+  settings: {
+    title: "Ustawienia",
+  },
+
+  subscription: {
+    title: "Subskrypcja",
+    loading: "Ładowanie...",
+
+    currentPlan: "Obecny plan",
+    status: "Status",
+    renew: "Następne odnowienie",
+
+    actions: {
+      change: "Zmień subskrypcję",
+      manage: "Zarządzaj subskrypcją",
+    },
+
+    plans: {
+      free: "Free",
+      premium: "Premium",
+      pro: "Pro",
+    },
+
+    pricing: {
+      premium: "€ 4,95 / miesiąc",
+      pro: "€ 8,95 / miesiąc",
+    },
+  },
+
+  units: {
+    cm: "cm",
+    kg: "kg",
+  },
+
   weight: {
     title: "Waga",
 
@@ -1344,31 +1384,6 @@ const pl = {
     underweight: "Niedowaga",
   },
 
-  common: {
-    account: "Konto",
-    add: "Dodaj",
-    close: "Zamknij",
-    email: "E-mail",
-    favoriteLimitUpgrade: "Osiągnąłeś limit {{limit}} ulubionych.\nUlepsz konto, aby móc dodać więcej ulubionych.",
-    favorites: "Ulubione",
-    firstName: "Imię",
-    goal: "Cel",
-    language: "Język",
-    lastDays: "Ostatnie {{days}} dni",
-    lastName: "Nazwisko",
-    logout: "Wyloguj",
-    period: "Okres:",
-    product: "Produkt",
-    save: "Zapisz",
-    saved: "Zapisano",
-    saving: "Zapisywanie…",
-    score: "Wynik",
-    search: "Szukaj",
-    select: "Select",
-    tipOfTheDay: "Wskazówka dnia",
-    tipHydration: "Pij szklankę wody do każdego posiłku, aby łatwiej osiągnąć swój dzienny cel.",
-    today: "Dziś",
-  },
 };
 
 export const uiText: Record<Lang, any> = { en, nl, fr, de, pl };

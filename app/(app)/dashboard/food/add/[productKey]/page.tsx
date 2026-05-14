@@ -684,7 +684,7 @@ export default function AddFoodPage() {
 
             <button
               onClick={handleSave}
-              className="flex-1 h-[42px] text-sm flex justify-between items-center px-4 rounded-[var(--radius)] bg-[#191970] text-white"
+              className="flex-1 h-[42px] text-sm flex justify-between items-center px-4 rounded-[var(--radius)] bg-[#191970] text-white hover:bg-[#0BA4E0] transition-colors"
             >
               <span>{t.common.add}</span>
               <Image
