@@ -86,7 +86,7 @@ export default function DashboardBreadcrumb() {
             >
               {/* separator */}
               {index > 0 && (
-                <span className="mx-1 text-white/40 shrink-0 select-none">
+                <span className="mx-1 text-white/60 shrink-0 select-none">
                   ›
                 </span>
               )}
