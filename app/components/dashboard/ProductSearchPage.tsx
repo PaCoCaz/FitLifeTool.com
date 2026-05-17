@@ -37,6 +37,8 @@ export default function ProductSearchPage({ type }: Props) {
   const { user } = useUser();
   const { lang } = useLangContext();
   const { features, limits } = useDashboard();
+  
+  console.log("FEATURES FROM DASHBOARD", features);
 
   const isDrink = type === "drink";
 

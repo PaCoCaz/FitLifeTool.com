@@ -234,16 +234,29 @@ export default function AddFoodPage() {
     async function loadPreparations() {
       const { data } = await supabase
         .from("nutrition_product_preparations")
-        .select("preparation_key")
+        .select(`
+          preparation_key,
+          nutrition_preparations (
+            sort_order
+          )
+        `)
         .eq("product_key", productKey);
 
       if (!data) return;
 
-      const typedKeys = data as PreparationKeyRow[];
+      const sortedKeys = [...(data ?? [])]
+        .sort((a: any, b: any) => {
+          const aOrder =
+            a.nutrition_preparations?.sort_order ?? 999;
 
-      const uniqueKeys = Array.from(
-        new Set(typedKeys.map((d) => d.preparation_key))
-      );
+          const bOrder =
+            b.nutrition_preparations?.sort_order ?? 999;
+
+          return aOrder - bOrder;
+        })
+        .map((d: any) => d.preparation_key);
+
+      const uniqueKeys = Array.from(new Set(sortedKeys));
 
       if (uniqueKeys.length === 0) return;
 

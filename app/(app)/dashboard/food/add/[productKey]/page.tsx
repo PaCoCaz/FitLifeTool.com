@@ -33,6 +33,9 @@ type ProductTranslationRow = {
 
 type PreparationKeyRow = {
   preparation_key: string;
+  nutrition_preparations?: {
+    sort_order: number;
+  };
 };
 
 type PreparationTranslationRow = {
@@ -55,16 +58,6 @@ type Preparation = {
   preparation_key: string;
   label: string;
   sort_order: number;
-};
-
-type PreparationMetaRow = {
-  preparation_key: string;
-  sort_order: number;
-};
-
-type PreparationWithMeta = {
-  preparation_key: string;
-  is_default: boolean;
 };
 
 type Portion = {
@@ -239,13 +232,21 @@ export default function AddFoodPage() {
     async function loadPreparations() {
       const { data: prepData } = await supabase
         .from("nutrition_product_preparations")
-        .select("preparation_key")
+        .select(`
+          preparation_key,
+          nutrition_preparations (
+            sort_order
+          )
+        `)
         .eq("product_key", productKey);
 
       if (!prepData) return;
 
-      const typedPrep = prepData as {
+      const typedPrep = (prepData ?? []) as {
         preparation_key: string;
+        nutrition_preparations?: {
+          sort_order: number;
+        };
       }[];
 
       // unieke keys
