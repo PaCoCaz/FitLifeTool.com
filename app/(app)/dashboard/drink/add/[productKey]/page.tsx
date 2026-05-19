@@ -81,6 +81,28 @@ type FavoriteRow = {
   id: string;
 };
 
+function getNutritionScoreColor(grade: string | null) {
+  switch (grade) {
+    case "A":
+      return "bg-green-600 text-white";
+
+    case "B":
+      return "bg-green-200 text-green-800";
+
+    case "C":
+      return "bg-yellow-300 text-[#191970]";
+
+    case "D":
+      return "bg-orange-500 text-white";
+
+    case "E":
+      return "bg-[#C80000] text-white";
+
+    default:
+      return "bg-gray-400 text-white";
+  }
+}
+
 /* ───────────────── Component ───────────────── */
 
 export default function AddFoodPage() {
@@ -100,6 +122,7 @@ export default function AddFoodPage() {
   
   const [productName, setProductName] = useState<string>("");
   const [productScore, setProductScore] = useState<number | null>(null);
+  const [productGrade, setProductGrade] = useState<string | null>(null);
   
   const [preparations, setPreparations] = useState<Preparation[]>([]);
   const [selectedPreparation, setSelectedPreparation] = useState<string | null>(null);
@@ -193,16 +216,18 @@ export default function AddFoodPage() {
     async function loadProductScore() {
       const { data } = await supabase
         .from("nutrition_product_scores")
-        .select("score_numeric")
+        .select("score_numeric, score_grade")
         .eq("product_key", productKey)
         .eq("preparation_key", selectedPreparation)
         .eq("goal_key", goal)
         .single();
 
-      if (data?.score_numeric !== undefined) {
-        setProductScore(data.score_numeric);
+      if (data) {
+        setProductScore(data.score_numeric ?? null);
+        setProductGrade(data.score_grade ?? null);
       } else {
         setProductScore(null);
+        setProductGrade(null);
       }
     }
 
@@ -556,14 +581,22 @@ export default function AddFoodPage() {
               icon="/nutrition.svg"
               title={t.common.product}
               scoreLabel="FitLifeScore"
-              score={productScore ?? undefined}
+              score={
+                productScore !== null && productGrade
+                  ? `${productGrade} ${productScore}`
+                  : undefined
+              }
               scoreColor={
-                productScore !== null
-                  ? productScore >= 80
-                    ? "bg-green-600 text-white"
-                    : productScore >= 50
-                    ? "bg-yellow-300 text-black"
-                    : "bg-[#C80000] text-white"
+                productGrade === "A"
+                  ? "bg-green-600 text-white"
+                  : productGrade === "B"
+                  ? "bg-green-200 text-green-800"
+                  : productGrade === "C"
+                  ? "bg-yellow-300 text-[#191970]"
+                  : productGrade === "D"
+                  ? "bg-orange-500 text-white"
+                  : productGrade === "E"
+                  ? "bg-[#C80000] text-white"
                   : undefined
               }
             />

@@ -6,7 +6,7 @@ type Props = {
   icon?: string;
   action?: React.ReactNode;
   title: string;
-  score?: number;
+  score?: string | number;
   scoreLabel?: string;
   scoreColor?: string;
   rightContent?: React.ReactNode;
