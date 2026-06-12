@@ -581,11 +581,8 @@ export default function AddFoodPage() {
               icon="/nutrition.svg"
               title={t.common.product}
               scoreLabel="FitLifeScore"
-              score={
-                productScore !== null && productGrade
-                  ? `${productGrade} ${productScore}`
-                  : undefined
-              }
+              score={productScore ?? undefined}
+              grade={productGrade ?? undefined}
               scoreColor={
                 productGrade === "A"
                   ? "bg-green-600 text-white"
