@@ -1,26 +1,32 @@
-// app/handbook/doc-l3-0015/page.tsx
+// app/(app)/handbook/doc-l3-0015/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30015() {
   return (
     <DocumentLayout>
-
       <header>
         <h1>5.1 Kernprincipes uitbreidbaarheid</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Dit hoofdstuk beschrijft de kernprincipes die bepalen
-          hoe FitLifeTool uitbreidbaar blijft zonder dat
-          bestaande logica fragiel of complex wordt.
+          Dit hoofdstuk beschrijft hoe FitLifeTool ontworpen is om nieuwe
+          functionaliteit toe te voegen zonder bestaande onderdelen te
+          herschrijven of bestaande gebruikersdata te wijzigen.
         </p>
 
         <p>
-          Uitbreidbaarheid binnen FitLifeTool is geen losstaand
-          technisch doel, maar een direct gevolg van
-          consistente architectuurkeuzes.
+          Uitbreidbaarheid is geen aparte technische laag, maar een gevolg
+          van consistente keuzes in datamodel, businesslogica en
+          gebruikersinterface.
+        </p>
+
+        <p>
+          Nieuwe functionaliteit moet aansluiten op bestaande patronen.
+          Het systeem groeit door uitbreiding, niet door vervanging.
         </p>
       </section>
 
@@ -28,73 +34,164 @@ export default function DocL30015() {
         <h2>Conceptueel model</h2>
 
         <p>
-          Uitbreidbaarheid wordt benaderd als <strong>gecontroleerde groei</strong>, niet als
-          onbeperkte flexibiliteit.
+          FitLifeTool behandelt uitbreidingen als nieuwe domeinen binnen
+          dezelfde architectuur.
         </p>
 
         <p>
-          Het systeem is opgebouwd rond stabiele kernconcepten
-          die zelden wijzigen, met uitbreidingen die
-          hier logisch op aansluiten.
+          Een nieuw domein volgt dezelfde basisstructuur:
         </p>
 
         <ul>
-          <li>vaste kernmodellen</li>
-          <li>duidelijke verantwoordelijkheden</li>
-          <li>losgekoppelde UI-lagen</li>
-          <li>configuratie boven conditionele logica</li>
+          <li>brondata wordt opgeslagen als logs</li>
+
+          <li>berekeningen leveren afgeleide waarden</li>
+
+          <li>status ontstaat uit vergelijking met verwachtingen</li>
+
+          <li>de UI presenteert de actuele toestand</li>
         </ul>
 
         <p>
-          Nieuwe functionaliteit wordt toegevoegd door <em>uitbreiding</em>, niet door herschrijven.
+          Hierdoor kunnen nieuwe onderdelen worden toegevoegd zonder de
+          bestaande werking van Hydration, Activity, Nutrition of andere
+          modules te beïnvloeden.
         </p>
       </section>
 
       <section>
-        <h2>Implementatie</h2>
+        <h2>Architectuurpatronen</h2>
 
         <p>
-          In de praktijk wordt uitbreidbaarheid gerealiseerd via:
+          Nieuwe functionaliteit gebruikt zoveel mogelijk bestaande
+          bouwstenen.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Onderdeel</th>
+                <th>Uitbreidingsprincipe</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Database</td>
+                <td>
+                  Nieuwe data wordt toegevoegd zonder bestaande structuren te
+                  breken.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Logs</td>
+                <td>
+                  Gebeurtenissen blijven de primaire bron van waarheid.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Scores</td>
+                <td>
+                  Scores worden berekend en niet permanent opgeslagen.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Cards</td>
+                <td>
+                  Nieuwe functies gebruiken dezelfde card-compositie.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Vertalingen</td>
+                <td>
+                  Nieuwe teksten worden toegevoegd via het vertaalsysteem.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Gecontroleerde groei</h2>
+
+        <p>
+          Uitbreidbaarheid betekent niet dat iedere mogelijkheid vooraf wordt
+          ingebouwd.
+        </p>
+
+        <p>
+          FitLifeTool kiest bewust voor een stabiele kern met duidelijke
+          uitbreidingspunten:
         </p>
 
         <ul>
-          <li>modulaire cards en UI-componenten</li>
-          <li>gescheiden berekenings- en presentatielogica</li>
-          <li>duidelijke data-interfaces per feature</li>
-          <li>centrale providers voor tijd, gebruiker en context</li>
+          <li>nieuwe domeinen volgen bestaande lifecycle</li>
+
+          <li>bestaande berekeningen blijven reproduceerbaar</li>
+
+          <li>oude gebruikersdata blijft geldig</li>
+
+          <li>nieuwe features introduceren geen uitzonderingsstromen</li>
         </ul>
 
         <p>
-          Nieuwe features volgen bestaande patronen: dezelfde lifecycle, dezelfde datastromen, dezelfde visuele hiërarchie.
-          Hierdoor kunnen features onafhankelijk worden ontwikkeld en getest, zonder impact op de kern.
+          Hierdoor blijft groei beheersbaar zonder toenemende complexiteit.
         </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Voorbeelden toekomstige uitbreiding</h2>
+
+        <p>
+          Door deze architectuur kunnen toekomstige onderdelen dezelfde
+          structuur volgen.
+        </p>
 
         <ul>
-          <li>
-            <strong>Stabiele kern boven snelle flexibiliteit:</strong> voorkomt technische schuld.
-          </li>
-          <li>
-            <strong>Patroonherhaling:</strong> verlaagt cognitieve last voor toekomstige uitbreiding.
-          </li>
-          <li>
-            <strong>Beperkte configuratie:</strong> uitbreidbaarheid mag nooit onbegrensd worden.
-          </li>
-          <li>
-            <strong>Expliciete grenzen:</strong> niet alles hoeft uitbreidbaar te zijn.
-          </li>
+          <li>nieuwe gezondheidsdomeinen</li>
+
+          <li>nieuwe scoremodellen</li>
+
+          <li>persoonlijke inzichten en analyses</li>
+
+          <li>coaching en aanbevelingen</li>
         </ul>
 
         <p>
-          Deze principes zorgen ervoor dat FitLifeTool kan
-          meegroeien in functionaliteit, zonder instabiel
-          of onvoorspelbaar te worden.
+          Deze uitbreidingen voegen nieuwe lagen toe zonder de bestaande
+          basisprincipes te wijzigen.
         </p>
       </section>
 
+      <section>
+        <h2>Belangrijke ontwerpprincipes</h2>
+
+        <ul>
+          <li>Uitbreiden gaat boven herschrijven.</li>
+
+          <li>Bestaande data blijft altijd geldig.</li>
+
+          <li>Nieuwe features volgen bestaande patronen.</li>
+
+          <li>Configuratie heeft voorkeur boven uitzonderingslogica.</li>
+
+          <li>De kern blijft klein en voorspelbaar.</li>
+
+          <li>Complexiteit wordt niet doorgeschoven naar de gebruiker.</li>
+        </ul>
+
+        <p>
+          Door uitbreidbaarheid als architectuurprincipe te behandelen kan
+          FitLifeTool doorgroeien zonder dat betrouwbaarheid,
+          voorspelbaarheid of onderhoudbaarheid verloren gaat.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

@@ -1,31 +1,34 @@
-// app/handbook/doc-l3-0002/page.tsx
+// app/(app)/handbook/doc-l3-0002/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30002() {
   return (
     <DocumentLayout>
-
       <header>
-        <h1>2.1 Profielen & Autorisatie</h1>
+        <h1>2.1 Gebruikersidentiteit & Autorisatie</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Gebruikersidentiteit, rollen en toegangscontrole binnen FitLifeTool.
+          Iedere gebruiker binnen FitLifeTool beschikt over een unieke identiteit
+          die wordt gebruikt voor authenticatie, autorisatie en het koppelen van
+          persoonlijke gegevens aan de applicatie.
         </p>
 
         <p>
           FitLifeTool maakt een strikt onderscheid tussen
           <strong> authenticatie</strong> en <strong>autorisatie</strong>.
-          Authenticatie bepaalt <em>wie</em> iemand is, autorisatie bepaalt
-          <em> wat</em> iemand mag.
+          Authenticatie bepaalt <em>wie</em> een gebruiker is, autorisatie
+          bepaalt <em>welke onderdelen</em> van de applicatie toegankelijk zijn.
         </p>
 
         <p>
           Dit hoofdstuk beschrijft hoe gebruikersprofielen zijn opgebouwd,
-          waarom er een aparte <code>profiles</code>-tabel bestaat en hoe
-          rollen systematisch worden toegepast in de applicatie.
+          waarom een aparte <code>profiles</code>-tabel wordt gebruikt en hoe
+          toegangsrechten binnen de applicatie worden toegepast.
         </p>
       </section>
 
@@ -33,8 +36,7 @@ export default function DocL30002() {
         <h2>Conceptueel model</h2>
 
         <p>
-          Elke gebruiker in FitLifeTool bestaat uit twee conceptueel
-          gescheiden entiteiten:
+          Iedere gebruiker bestaat uit twee logisch gescheiden onderdelen.
         </p>
 
         <div className="table-scroll">
@@ -48,30 +50,31 @@ export default function DocL30002() {
             <tbody>
               <tr>
                 <td>Auth user</td>
-                <td>Beheerd door Supabase Auth</td>
+                <td>Gebruiker beheerd door Supabase Authentication.</td>
               </tr>
               <tr>
                 <td>Profile</td>
-                <td>Domeinspecifieke gebruikersdata</td>
+                <td>Applicatiespecifieke gebruikersgegevens.</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <p>
-          Het profiel fungeert als centrale bron voor:
+          Het profiel vormt de centrale bron voor alle domeinspecifieke
+          gebruikersinformatie.
         </p>
 
         <ul>
           <li>persoonlijke kenmerken (gewicht, lengte, leeftijd)</li>
-          <li>doelstellingen (afvallen, onderhouden, aankomen)</li>
+          <li>persoonlijke doelstellingen</li>
           <li>rol en toegangsrechten</li>
-          <li>feature-gating (abonnementen)</li>
+          <li>taal- en gebruikersinstellingen</li>
         </ul>
 
         <p>
-          De applicatie werkt <em>nooit</em> rechtstreeks met alleen de
-          auth-user; vrijwel alle logica verloopt via het profiel.
+          Vrijwel alle businesslogica werkt via het profiel en niet rechtstreeks
+          via de auth-gebruiker.
         </p>
       </section>
 
@@ -79,35 +82,36 @@ export default function DocL30002() {
         <h2>Implementatie</h2>
 
         <p>
-          Technisch is deze scheiding geïmplementeerd via:
+          De scheiding tussen authenticatie en gebruikersgegevens is technisch
+          geïmplementeerd via:
         </p>
 
         <ul>
-          <li>Supabase Auth voor login, sessies en tokens</li>
+          <li>Supabase Authentication voor login, sessies en tokens.</li>
+
           <li>
-            Een <code>profiles</code>-tabel gekoppeld via
-            <code> id = auth.user.id</code>
+            Een <code>profiles</code>-tabel gekoppeld via{" "}
+            <code>id = auth.users.id</code>.
           </li>
-          <li>Server-side guards in Next.js layouts</li>
+
+          <li>
+            Server-side autorisatie binnen de Next.js layouts voordat pagina's
+            worden gerenderd.
+          </li>
         </ul>
 
         <p>
-          Autorisatie vindt primair plaats op layout-niveau, niet op
-          component-niveau. Hierdoor:
+          Hierdoor wordt ongeautoriseerde inhoud nooit opgebouwd voordat de
+          toegangscontrole heeft plaatsgevonden.
         </p>
-
-        <ul>
-          <li>worden ongeautoriseerde pagina’s nooit gerenderd</li>
-          <li>blijft client-side code eenvoudiger</li>
-          <li>ontstaat er één centrale toegangslogica</li>
-        </ul>
       </section>
 
       <section>
         <h2>Rollenmodel</h2>
 
         <p>
-          FitLifeTool hanteert een beperkt maar expliciet rollenmodel:
+          FitLifeTool gebruikt rollen om onderdelen van de applicatie af te
+          schermen en beheerfunctionaliteit beschikbaar te maken.
         </p>
 
         <div className="table-scroll">
@@ -121,46 +125,46 @@ export default function DocL30002() {
             <tbody>
               <tr>
                 <td>owner</td>
-                <td>Volledige toegang</td>
+                <td>Volledige toegang tot alle functionaliteit.</td>
               </tr>
               <tr>
                 <td>admin</td>
-                <td>Beheer en moderatie</td>
+                <td>Beheerfunctionaliteit binnen de applicatie.</td>
               </tr>
               <tr>
                 <td>developer</td>
-                <td>Technische inzage</td>
+                <td>Toegang tot ontwikkelaarsfunctionaliteit zoals het Developer Handbook.</td>
               </tr>
               <tr>
                 <td>user</td>
-                <td>Reguliere eindgebruiker</td>
+                <td>Standaard eindgebruiker.</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <p>
-          Rollen zijn bedoeld voor <em>autorisatie</em>, niet voor
-          monetisatie of feature-ontsluiting.
+          Rollen zijn uitsluitend bedoeld voor autorisatie en staan los van
+          gebruikersgegevens of toekomstige abonnementsvormen.
         </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Belangrijke ontwerpprincipes</h2>
 
         <ul>
-          <li>Rollen worden server-side afgedwongen</li>
-          <li>UI veronderstelt nooit impliciet toegangsrechten</li>
-          <li>Profieldata is altijd leidend boven auth-metadata</li>
-          <li>Autorisatie gebeurt zo vroeg mogelijk in de render-keten</li>
+          <li>Authenticatie en applicatiedata zijn strikt gescheiden.</li>
+          <li>Profieldata vormt de centrale identiteit binnen de applicatie.</li>
+          <li>Autorisatie wordt server-side afgedwongen.</li>
+          <li>UI-componenten vertrouwen nooit uitsluitend op client-side controles.</li>
+          <li>Referentiedata en gebruikersdata blijven volledig gescheiden.</li>
         </ul>
 
         <p>
-          Dit voorkomt security-lekken, conditionele spaghetti en
-          onvoorspelbaar gedrag bij uitbreiding van het systeem.
+          Door deze architectuur blijven identiteit, toegangscontrole en
+          gebruikersgegevens overzichtelijk, veilig en eenvoudig uitbreidbaar.
         </p>
       </section>
-
     </DocumentLayout>
   );
 }

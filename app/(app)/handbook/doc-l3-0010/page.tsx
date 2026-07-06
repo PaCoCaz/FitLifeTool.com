@@ -1,26 +1,36 @@
-// app/handbook/doc-l3-0010/page.tsx
+// app/(app)/handbook/doc-l3-0010/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30010() {
   return (
     <DocumentLayout>
-
       <header>
-        <h1>4.1 UI-architectuur - Overzicht</h1>
+        <h1>4.1 UI-architectuur</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Dit hoofdstuk beschrijft de globale architectuur van de UI-laag
-          van FitLifeTool. Het doel is inzicht geven in hoe layout,
-          navigatie en content samenkomen tot één consistent systeem.
+          De gebruikersinterface van FitLifeTool is opgebouwd als een
+          componentgebaseerd systeem waarin presentatie, navigatie en
+          businesslogica bewust van elkaar zijn gescheiden. Hierdoor blijft
+          de interface consistent, onderhoudbaar en eenvoudig uitbreidbaar,
+          ook wanneer de applicatie groeit.
         </p>
 
         <p>
-          De UI is niet opgebouwd als een verzameling losse pagina's,
-          maar als een hiërarchisch en herbruikbaar layout-systeem
-          dat schaalbaar is naarmate de applicatie groeit.
+          Pagina's vormen slechts het startpunt van de renderboom. De
+          daadwerkelijke functionaliteit bevindt zich in herbruikbare layouts,
+          providers en UI-componenten die gezamenlijk één consistente
+          gebruikerservaring vormen.
+        </p>
+
+        <p>
+          Dit hoofdstuk beschrijft de architectuur van deze UI-laag en de
+          ontwerpkeuzes die zorgen voor een uniforme structuur binnen de
+          gehele applicatie.
         </p>
       </section>
 
@@ -28,75 +38,142 @@ export default function DocL30010() {
         <h2>Conceptueel model</h2>
 
         <p>
-          De UI-architectuur van FitLifeTool is gebaseerd op een <strong>shell + content</strong>-model.
-          Hierbij vormt een vaste buitenlaag (shell) het kader waarbinnen alle pagina's worden weergegeven.
+          De UI-architectuur van FitLifeTool bestaat uit meerdere duidelijk
+          gescheiden lagen, waarbij iedere laag één specifieke
+          verantwoordelijkheid heeft.
         </p>
 
-        <ul>
-          <li>De shell bepaalt globale structuur en navigatie</li>
-          <li>Contentpagina's bevatten uitsluitend domeinlogica</li>
-          <li>Context (waar ben ik?) is altijd zichtbaar</li>
-        </ul>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Laag</th>
+                <th>Verantwoordelijkheid</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>AppShell</td>
+                <td>Globale structuur, header en navigatie.</td>
+              </tr>
+
+              <tr>
+                <td>Layouts</td>
+                <td>Pagina-opbouw en context per sectie.</td>
+              </tr>
+
+              <tr>
+                <td>Providers</td>
+                <td>Beschikbaar maken van gedeelde applicatiestatus.</td>
+              </tr>
+
+              <tr>
+                <td>Dashboard Cards</td>
+                <td>Presenteren van één afgebakend domein.</td>
+              </tr>
+
+              <tr>
+                <td>UI Components</td>
+                <td>Herbruikbare bouwstenen zonder domeinspecifieke logica.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
-          Dit voorkomt dat individuele pagina's zelf verantwoordelijk
-          worden voor layoutbeslissingen en zorgt voor visuele en
-          structurele consistentie.
+          Deze hiërarchie voorkomt dat pagina's zelf verantwoordelijk worden
+          voor layout, globale state of navigatie.
         </p>
       </section>
 
       <section>
-        <h2>Implementatie</h2>
+        <h2>Opbouw van de interface</h2>
 
         <p>
-          Technisch is de UI-architectuur gerealiseerd via een centrale <code>AppShell</code>-component, die op layout-niveau wordt toegepast.
+          Iedere pagina wordt opgebouwd vanuit dezelfde vaste structuur:
         </p>
 
-        <ul>
-          <li>Header en topnavigatie zijn fixed gepositioneerd</li>
-          <li>Breadcrumb-gebied is een vaste zone onder de navigatie</li>
-          <li>Scrollende content wordt hier expliciet onder geplaatst</li>
-        </ul>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
+          <pre className="whitespace-pre-wrap text-sm leading-7">
+{`AppShell
+      ↓
+Section Layout
+      ↓
+Providers
+      ↓
+Pagina
+      ↓
+Cards
+      ↓
+UI Components`}
+          </pre>
+        </div>
 
         <p>
-          Binnen de shell renderen pagina's uitsluitend hun eigen
-          inhoud. Ze hebben geen kennis van globale offsets,
-          vaste hoogtes of navigatie-elementen.
-        </p>
-
-        <p>
-          Hierdoor kan de UI-structuur worden aangepast zonder
-          individuele pagina's te wijzigen.
+          Iedere laag kent uitsluitend zijn eigen verantwoordelijkheid en
+          communiceert uitsluitend met de direct omliggende lagen.
         </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Ontwerpprincipes</h2>
+
+        <p>
+          De UI volgt een aantal vaste architectuurprincipes.
+        </p>
+
+        <ul>
+          <li>Presentatie en businesslogica blijven strikt gescheiden.</li>
+
+          <li>Componenten zijn herbruikbaar en composable.</li>
+
+          <li>Layouts bepalen de structuur, niet de pagina's.</li>
+
+          <li>Globale state wordt uitsluitend via providers gedeeld.</li>
+
+          <li>Dezelfde interactie gebruikt overal dezelfde component.</li>
+        </ul>
+
+        <p>
+          Hierdoor ontstaat een interface die voorspelbaar blijft voor zowel
+          gebruikers als ontwikkelaars.
+        </p>
+      </section>
+
+      <section>
+        <h2>Belangrijke ontwerpbeslissingen</h2>
 
         <ul>
           <li>
-            <strong>Single AppShell</strong><br />
-            Voorkomt layout-duplicatie en versnippering.
+            <strong>Eén AppShell</strong><br />
+            Alle applicatiesecties delen dezelfde basisstructuur en navigatie.
           </li>
 
           <li>
-            <strong>Fixed navigatiezones</strong><br />
-            Houden context altijd zichtbaar, ook bij lange pagina's.
+            <strong>Component-first</strong><br />
+            Nieuwe functionaliteit wordt opgebouwd uit bestaande componenten
+            voordat nieuwe varianten worden geïntroduceerd.
           </li>
 
           <li>
-            <strong>Content als “domme” laag</strong><br />
-            Pagina's focussen uitsluitend op logica en data.
+            <strong>Layouts boven pagina's</strong><br />
+            Pagina's bevatten uitsluitend domeinspecifieke inhoud en geen
+            globale layoutlogica.
           </li>
 
           <li>
-            <strong>Vooruitdenken</strong><br />
-            Deze structuur ondersteunt toekomstige uitbreidingen
-            zoals extra navigatieniveaus, modals en contextuele UI.
+            <strong>Consistente interactie</strong><br />
+            Identieke UI-elementen gedragen zich overal hetzelfde.
           </li>
         </ul>
-      </section>
 
+        <p>
+          Door deze architectuur blijft de gebruikersinterface overzichtelijk,
+          schaalbaar en eenvoudig te onderhouden, terwijl nieuwe functionaliteit
+          zonder grote structurele wijzigingen kan worden toegevoegd.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

@@ -1,104 +1,169 @@
-// app/handbook/doc-l3-0009/page.tsx
+// app/(app)/handbook/doc-l3-0009/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30009() {
   return (
     <DocumentLayout>
-
       <header>
         <h1>3.5 Controle & Betrouwbaarheid</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Dit hoofdstuk beschrijft hoe FitLifeTool individuele
-          domeinscores samenvoegt tot één consistente dagstatus,
-          en hoe randgevallen gecontroleerd worden afgehandeld.
+          De waarde van een gezondheidsscore wordt niet bepaald door de hoogte
+          van het getal, maar door het vertrouwen dat gebruikers in die score
+          kunnen hebben. Daarom is de FitLifeScore ontworpen als een volledig
+          reproduceerbare en controleerbare afgeleide van geregistreerde
+          gebruikersgegevens.
         </p>
 
         <p>
-          De focus ligt op betrouwbaarheid, voorspelbaarheid en
-          het voorkomen van misleidende scores.
+          Iedere score, statuskleur en voortgangsindicator moet altijd
+          verklaarbaar zijn vanuit de onderliggende loggegevens. Er bestaan geen
+          verborgen correcties, handmatige aanpassingen of niet-herleidbare
+          berekeningen.
+        </p>
+
+        <p>
+          Dit hoofdstuk beschrijft de ontwerpkeuzes die ervoor zorgen dat de
+          feedback van FitLifeTool betrouwbaar, voorspelbaar en consistent
+          blijft.
         </p>
       </section>
 
       <section>
-        <h2>Conceptueel model</h2>
+        <h2>Bron van waarheid</h2>
 
         <p>
-          FitLifeTool beschouwt de FitLifeScore als een <strong>samengestelde indicator</strong> die nooit beter kan zijn dan zijn zwakste onderdeel.
+          Alle berekeningen binnen FitLifeTool zijn uiteindelijk terug te voeren
+          op dezelfde brongegevens.
         </p>
 
         <ul>
-          <li>Elke domeinscore blijft afzonderlijk leidend</li>
-          <li>Aggregatie mag geen onrealistisch totaal opleveren</li>
-          <li>Statuskleuren zijn belangrijker dan het getal zelf</li>
-          <li>Randgevallen moeten expliciet afgevangen worden</li>
+          <li>Gebruikersregistraties vormen de enige bron van waarheid.</li>
+
+          <li>Dagdoelen worden afgeleid uit het gebruikersprofiel.</li>
+
+          <li>Voortgang wordt telkens opnieuw berekend.</li>
+
+          <li>De FitLifeScore is volledig afgeleid van de drie leefstijlpijlers.</li>
         </ul>
 
-        <p className="muted">
-          Hierdoor ontstaat een systeem dat eerlijk blijft,
-          zelfs wanneer data onvolledig of vertraagd is.
+        <p>
+          Hierdoor kan iedere getoonde waarde opnieuw worden opgebouwd zonder
+          afhankelijk te zijn van opgeslagen tussenresultaten.
         </p>
       </section>
 
       <section>
-        <h2>Implementatie</h2>
+        <h2>Consistente feedback</h2>
 
         <p>
-          De FitLifeScore wordt berekend via een <strong>gewogen aggregatie</strong> van hydratie, activiteit en voeding.
+          FitLifeTool zorgt ervoor dat gebruikers overal binnen de applicatie
+          dezelfde interpretatie van hun voortgang zien.
         </p>
 
-        <div className="info-box">
-          <p>
-            <strong>Implementatieprincipes</strong>
-          </p>
+        <ul>
+          <li>Dezelfde status heeft overal dezelfde betekenis.</li>
 
-          <ul>
-            <li>Elke domeinscore wordt eerst individueel afgerond</li>
-            <li>De totaalscore wordt naar beneden afgerond</li>
-            <li>Statuskleur wordt afgeleid van domeinstatussen</li>
-            <li>Niet-groene domeinen blokkeren perfecte scores</li>
-          </ul>
+          <li>Dezelfde kleur heeft overal dezelfde interpretatie.</li>
+
+          <li>Nieuwe registraties worden direct verwerkt.</li>
+
+          <li>Alle kaarten gebruiken dezelfde actuele gegevens.</li>
+        </ul>
+
+        <p>
+          Hierdoor ontstaat één consistent beeld van de voortgang, ongeacht
+          waar de informatie binnen de applicatie wordt weergegeven.
+        </p>
+      </section>
+
+      <section>
+        <h2>Realtime controle</h2>
+
+        <p>
+          Iedere relevante wijziging leidt automatisch tot een nieuwe
+          berekening van de betrokken leefstijlpijlers en uiteindelijk van de
+          FitLifeScore.
+        </p>
+
+        <p>
+          Daardoor ziet de gebruiker onmiddellijk welk effect een nieuwe
+          registratie heeft op de actuele voortgang en de totale dagscore.
+        </p>
+
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-4">
+          <pre className="whitespace-pre-wrap text-sm leading-7">
+{`Nieuwe registratie
+        ↓
+DashboardStore
+        ↓
+Herberekening leefstijlpijler
+        ↓
+Nieuwe status
+        ↓
+Nieuwe FitLifeScore
+        ↓
+Dashboard`}
+          </pre>
         </div>
+      </section>
 
-        <p className="muted">
-          Hierdoor kan een gebruiker nooit een perfecte dagstatus
-          behalen zolang één domein achterblijft.
+      <section>
+        <h2>Voorkomen van misleidende feedback</h2>
+
+        <p>
+          Binnen FitLifeTool zijn verschillende ontwerpkeuzes gemaakt om te
+          voorkomen dat gebruikers een onrealistisch beeld van hun voortgang
+          krijgen.
+        </p>
+
+        <ul>
+          <li>Een perfecte dagscore vereist dat alle pijlers groen zijn.</li>
+
+          <li>De live-status wordt bepaald door de minst gunstige pijler.</li>
+
+          <li>De FitLifeScore wordt nooit handmatig aangepast.</li>
+
+          <li>Historische gegevens worden nooit gewijzigd om een betere score te tonen.</li>
+
+          <li>Nieuwe activiteit beïnvloedt direct het beschikbare voedingsbudget en daarmee ook de NutritionScore.</li>
+        </ul>
+
+        <p>
+          Hierdoor blijft de feedback altijd in overeenstemming met het
+          daadwerkelijke gedrag van de gebruiker.
         </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Belangrijke ontwerpprincipes</h2>
 
         <ul>
-          <li>
-            <strong>Geen afronding omhoog</strong><br />
-            Scores worden altijd conservatief berekend.
-          </li>
+          <li>Alle feedback is reproduceerbaar.</li>
 
-          <li>
-            <strong>Status boven numeriek resultaat</strong><br />
-            De kleur vertelt het echte verhaal, niet het percentage.
-          </li>
+          <li>Brongegevens zijn altijd leidend.</li>
 
-          <li>
-            <strong>Blokkade bij onvolledigheid</strong><br />
-            Perfecte scores vereisen volledige dekking.
-          </li>
+          <li>Realtime herberekening heeft voorrang boven opgeslagen resultaten.</li>
 
-          <li>
-            <strong>Expliciete edge-case afhandeling</strong><br />
-            Geen impliciete aannames bij ontbrekende data.
-          </li>
+          <li>Status en score vertellen samen het volledige verhaal.</li>
+
+          <li>Gebruikers moeten iedere score kunnen begrijpen en herleiden.</li>
+
+          <li>Het systeem ondersteunt vertrouwen door volledige transparantie van de berekeningen.</li>
         </ul>
 
-        <p className="muted">
-          Deze keuzes voorkomen score-inflatie en versterken het vertrouwen van gebruikers in de feedback.
+        <p>
+          Door alle feedback op dezelfde reproduceerbare manier op te bouwen,
+          ontstaat een systeem dat gebruikers niet alleen informeert, maar ook
+          vertrouwen geeft dat iedere score een eerlijke weergave is van hun
+          actuele leefstijl.
         </p>
       </section>
-
     </DocumentLayout>
   );
 }

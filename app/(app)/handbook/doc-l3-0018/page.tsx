@@ -1,26 +1,32 @@
-// app/handbook/doc-l3-0018/page.tsx
+// app/(app)/handbook/doc-l3-0018/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30018() {
   return (
     <DocumentLayout>
-
       <header>
         <h1>5.4 Beheer van technische schuld</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
           Dit hoofdstuk beschrijft hoe FitLifeTool omgaat met technische schuld
-          (technical debt) en waarom deze expliciet wordt beheerd in plaats van
-          vermeden.
+          en hoe wordt voorkomen dat tijdelijke oplossingen permanente
+          beperkingen worden.
         </p>
 
         <p>
-          Technische schuld is onvermijdelijk in een iteratief product,
-          maar onbeheerd leidt zij tot vertraging, fragiliteit en verlies
-          van ontwikkelsnelheid.
+          Technische schuld ontstaat niet alleen door codekwaliteit, maar ook
+          wanneer nieuwe functionaliteit afwijkt van bestaande
+          architectuurprincipes.
+        </p>
+
+        <p>
+          Het doel is niet om iedere vorm van technische schuld te voorkomen,
+          maar om deze zichtbaar, bewust en beheersbaar te houden.
         </p>
       </section>
 
@@ -28,13 +34,13 @@ export default function DocL30018() {
         <h2>Conceptueel model</h2>
 
         <p>
-          Binnen FitLifeTool wordt technische schuld gezien als een bewuste
-          ruil tussen snelheid en perfectie.
+          Binnen FitLifeTool wordt technische schuld gezien als een afwijking
+          tussen de huidige implementatie en de gewenste architectuur.
         </p>
 
         <p>
-          Er wordt onderscheid gemaakt tussen de volgende vormen van
-          technische schuld:
+          Niet iedere afwijking is direct een probleem. Belangrijk is dat de
+          reden, impact en toekomstige oplossing duidelijk zijn.
         </p>
 
         <div className="table-scroll">
@@ -45,83 +51,121 @@ export default function DocL30018() {
                 <th>Betekenis</th>
               </tr>
             </thead>
+
             <tbody>
               <tr>
-                <td>Geaccepteerd</td>
-                <td>Tijdelijk en bewust gekozen schuld</td>
+                <td>Bewust</td>
+                <td>
+                  Tijdelijke keuze met bekende oorzaak en oplossing.
+                </td>
               </tr>
+
               <tr>
                 <td>Verborgen</td>
-                <td>Onbedoelde schuld met verhoogd risico</td>
+                <td>
+                  Onbekende complexiteit die toekomstige wijzigingen
+                  bemoeilijkt.
+                </td>
               </tr>
+
               <tr>
-                <td>Verouderd</td>
-                <td>Schuld die niet langer gerechtvaardigd is</td>
+                <td>Structureel</td>
+                <td>
+                  Een oplossing die tegen de architectuurprincipes ingaat.
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <p>
-          Alleen geaccepteerde schuld is toegestaan; de overige vormen
-          moeten actief worden opgespoord en afgebouwd.
+          Alleen bewuste technische schuld is acceptabel. Verborgen of
+          structurele schuld moet worden opgelost voordat hier nieuwe
+          functionaliteit bovenop wordt gebouwd.
         </p>
       </section>
 
       <section>
-        <h2>Implementatie</h2>
+        <h2>Architectuurbewaking</h2>
 
         <p>
-          Technische schuld wordt in FitLifeTool beheerd via:
+          De belangrijkste vorm van schuldpreventie is het blijven volgen van
+          bestaande patronen.
+        </p>
+
+        <p>
+          Binnen FitLifeTool betekent dit:
         </p>
 
         <ul>
-          <li>duidelijke modulegrenzen</li>
-          <li>expliciete TODO's met context</li>
-          <li>refactor-momenten gekoppeld aan feature-ontwikkeling</li>
+          <li>brondata blijft gescheiden van berekende data</li>
+
+          <li>businesslogica blijft buiten presentatiecomponenten</li>
+
+          <li>scoremodellen worden niet gedupliceerd</li>
+
+          <li>gebruikersdata wordt nooit aangepast om UI-problemen op te lossen</li>
+
+          <li>nieuwe domeinen volgen bestaande datastromen</li>
         </ul>
 
         <p>
-          Schuld wordt nooit “later wel eens” opgelost,
-          maar gekoppeld aan concrete triggers, zoals:
-        </p>
-
-        <ul>
-          <li>toenemende complexiteit in een module</li>
-          <li>herhaald werk of workarounds</li>
-          <li>onduidelijke of fragiele logica</li>
-        </ul>
-
-        <p>
-          Hierdoor blijft schuld zichtbaar en beheersbaar.
+          Afwijken van deze principes wordt behandeld als technische schuld,
+          ook wanneer de functionaliteit op dat moment correct werkt.
         </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Onderhoud en refactoring</h2>
+
+        <p>
+          Refactoring is geen aparte fase na ontwikkeling, maar onderdeel van
+          het normale ontwikkelproces.
+        </p>
+
+        <p>
+          Herziening wordt uitgevoerd wanneer:
+        </p>
 
         <ul>
-          <li>
-            <strong>Technische schuld is toegestaan:</strong> mits bewust gekozen en gedocumenteerd.
-          </li>
-          <li>
-            <strong>Geen verborgen schuld:</strong> onduidelijke code wordt beschouwd als een bug.
-          </li>
-          <li>
-            <strong>Refactoring is onderdeel van bouwen:</strong> niet een aparte fase.
-          </li>
-          <li>
-            <strong>Architectuur boven optimalisatie:</strong> leesbaarheid en stabiliteit hebben prioriteit.
-          </li>
+          <li>dezelfde logica meerdere keren ontstaat</li>
+
+          <li>een component meerdere verantwoordelijkheden krijgt</li>
+
+          <li>uitbreiding moeilijker wordt dan verwacht</li>
+
+          <li>nieuwe features bestaande patronen onder druk zetten</li>
         </ul>
 
         <p>
-          Door technische schuld actief te managen,
-          blijft FitLifeTool schaalbaar zonder
-          ontwikkelsnelheid te verliezen.
+          Het doel van refactoring is niet verandering, maar het herstellen van
+          eenvoud en voorspelbaarheid.
         </p>
       </section>
 
+      <section>
+        <h2>Belangrijke ontwerpprincipes</h2>
+
+        <ul>
+          <li>Werkende code is niet automatisch gezonde code.</li>
+
+          <li>Architectuurafwijkingen worden expliciet gemaakt.</li>
+
+          <li>Herbruikbare patronen hebben voorkeur boven snelle oplossingen.</li>
+
+          <li>Refactoring hoort bij ontwikkeling.</li>
+
+          <li>Gebruikersdata heeft prioriteit boven implementatiegemak.</li>
+
+          <li>Eenvoud is een actief onderhoudsdoel.</li>
+        </ul>
+
+        <p>
+          Door technische schuld zichtbaar te houden kan FitLifeTool blijven
+          groeien zonder dat complexiteit, uitzonderingen of verborgen
+          afhankelijkheden de verdere ontwikkeling vertragen.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

@@ -1,27 +1,34 @@
-// app/handbook/doc-l3-0011/page.tsx
+// app/(app)/handbook/doc-l3-0011/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30011() {
   return (
     <DocumentLayout>
-
       <header>
         <h1>4.2 Kaartsysteem & Compositie</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Dit hoofdstuk beschrijft het card-systeem van FitLifeTool:
-          hoe informatieblokken zijn opgebouwd, hergebruikt en
-          consistent gepresenteerd binnen de UI.
+          Dashboardkaarten vormen de primaire gebruikersinterface van
+          FitLifeTool. Iedere kaart vertegenwoordigt één afgebakend
+          leefstijldomein en presenteert de actuele voortgang, status en
+          relevante acties binnen dat domein.
         </p>
 
         <p>
-          Cards vormen de primaire bouwsteen van het dashboard
-          en andere overzichtspagina's. Ze zijn ontworpen om
-          zelfstandige, begrijpelijke eenheden te zijn met
-          een duidelijke verantwoordelijkheid.
+          Het kaartsysteem is ontworpen als een verzameling herbruikbare
+          bouwstenen met een vaste structuur. Hierdoor blijven alle kaarten
+          herkenbaar, terwijl iedere kaart zijn eigen domeinspecifieke
+          functionaliteit kan bevatten.
+        </p>
+
+        <p>
+          Dit hoofdstuk beschrijft de architectuur van het kaartsysteem en de
+          ontwerpkeuzes die zorgen voor een consistente gebruikerservaring.
         </p>
       </section>
 
@@ -29,82 +36,173 @@ export default function DocL30011() {
         <h2>Conceptueel model</h2>
 
         <p>
-          Het card-systeem is gebaseerd op het principe van <strong>compositie boven variatie</strong>.
-          In plaats van veel verschillende card-types is er
-          één generiek card-frame waarin specifieke inhoud
-          wordt geplaatst.
+          Iedere dashboardkaart vertegenwoordigt precies één
+          verantwoordelijkheidsgebied binnen FitLifeTool.
         </p>
 
-        <ul>
-          <li>Elke card vertegenwoordigt één domeinconcept</li>
-          <li>Cards zijn visueel consistent maar inhoudelijk vrij</li>
-          <li>Acties en statusinformatie zijn optioneel</li>
-        </ul>
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Kaart</th>
+                <th>Verantwoordelijkheid</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Hydration</td>
+                <td>Hydratatie en vochtbalans.</td>
+              </tr>
+
+              <tr>
+                <td>Nutrition</td>
+                <td>Voeding, caloriebudget en voedingsstatus.</td>
+              </tr>
+
+              <tr>
+                <td>Activity</td>
+                <td>Lichamelijke activiteit en energieverbruik.</td>
+              </tr>
+
+              <tr>
+                <td>Weight</td>
+                <td>Gewicht en lichaamsontwikkeling.</td>
+              </tr>
+
+              <tr>
+                <td>FitLifeScore</td>
+                <td>Gecombineerde dagstatus van alle leefstijldomeinen.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p>
-          Hierdoor blijft het systeem uitbreidbaar zonder dat
-          de UI fragmenteert in uitzonderingen.
+          Iedere kaart is zelfstandig verantwoordelijk voor zijn eigen data,
+          berekeningen en presentatie.
         </p>
       </section>
 
       <section>
-        <h2>Implementatie</h2>
+        <h2>Opbouw van een kaart</h2>
 
         <p>
-          Technisch is het card-systeem geïmplementeerd als een
-          herbruikbare React-component: <code>Card</code>.
+          Alle dashboardkaarten volgen dezelfde anatomie.
         </p>
 
-        <p>
-          Deze component accepteert vaste structurele props
-          (zoals titel en actiegebied) en rendert daarna
-          willekeurige children als inhoud.
-        </p>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
+          <pre className="whitespace-pre-wrap text-sm leading-7">
+{`Card
+ ├── CardHeader
+ │      ├── Icoon
+ │      ├── Titel
+ │      └── FitLifeScore
+ │
+ └── Card Content
+        ├── Hoofdwaarde
+        ├── Doelwaarde
+        ├── Progressbar
+        ├── Statusbericht
+        └── Acties`}
+          </pre>
+        </div>
 
-        <ul>
-          <li>Header-sectie met titel en optionele acties</li>
-          <li>Inhoudssectie voor grafieken, formulieren of tekst</li>
-          <li>Visuele scheiding via padding en achtergrond</li>
-        </ul>
-
         <p>
-          Domeinspecifieke cards (zoals Gewicht, Hydratatie,
-          Activiteit) zijn dunne wrappers rondom deze basiskaart
-          en bevatten uitsluitend logica en data.
+          Door deze vaste structuur herkennen gebruikers iedere kaart direct,
+          ongeacht het onderliggende leefstijldomein.
         </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Compositie</h2>
+
+        <p>
+          Het kaartsysteem is gebaseerd op compositie in plaats van
+          overerving of afzonderlijke kaarttypen.
+        </p>
 
         <ul>
-          <li>
-            <strong>Eén card-component</strong><br />
-            Voorkomt visuele inconsistentie en code-duplicatie.
-          </li>
+          <li>De component <code>Card</code> verzorgt de basislayout.</li>
 
           <li>
-            <strong>Compositie via children</strong><br />
-            Maakt cards flexibel zonder extra configuratie-opties.
+            <code>CardHeader</code> verzorgt titel, pictogram en
+            FitLifeScore.
           </li>
 
-          <li>
-            <strong>Dunne domein-cards</strong><br />
-            Houden businesslogica los van layoutcode.
-          </li>
+          <li>De inhoud wordt als children samengesteld.</li>
 
           <li>
-            <strong>Dashboard als grid van cards</strong><br />
-            Ondersteunt herschikking en toekomstige personalisatie.
+            Domeinspecifieke componenten voegen uitsluitend hun eigen logica
+            toe.
           </li>
         </ul>
 
-        <p className="muted">
-          Deze keuzes zorgen ervoor dat het UI-systeem schaalbaar
-          blijft naarmate het aantal features en datapunten groeit.
+        <p>
+          Hierdoor blijft de layout volledig uniform terwijl de inhoud per
+          kaart kan verschillen.
         </p>
       </section>
 
+      <section>
+        <h2>Verantwoordelijkheden</h2>
+
+        <p>
+          Iedere kaart is verantwoordelijk voor zijn eigen domein en kent een
+          vaste gegevensstroom.
+        </p>
+
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
+          <pre className="whitespace-pre-wrap text-sm leading-7">
+{`DashboardStore
+      ↓
+Domeinscore
+      ↓
+Status
+      ↓
+Card
+      ↓
+Gebruiker`}
+          </pre>
+        </div>
+
+        <p>
+          Kaarten voeren geen berekeningen uit voor andere domeinen. Alleen de
+          FitLifeScore combineert informatie uit meerdere kaarten.
+        </p>
+      </section>
+
+      <section>
+        <h2>Belangrijke ontwerpprincipes</h2>
+
+        <ul>
+          <li>
+            Iedere kaart vertegenwoordigt precies één leefstijldomein.
+          </li>
+
+          <li>
+            Alle kaarten gebruiken dezelfde visuele basisstructuur.
+          </li>
+
+          <li>
+            Businesslogica blijft gescheiden van presentatie.
+          </li>
+
+          <li>
+            Nieuwe kaarten worden opgebouwd uit bestaande componenten.
+          </li>
+
+          <li>
+            Consistentie gaat vóór individuele optimalisaties.
+          </li>
+        </ul>
+
+        <p>
+          Door deze architectuur blijft het dashboard overzichtelijk en
+          uitbreidbaar. Nieuwe domeinen kunnen worden toegevoegd zonder dat de
+          bestaande gebruikerservaring verandert.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

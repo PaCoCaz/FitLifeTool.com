@@ -1,135 +1,202 @@
-// app/handbook/doc-l3-0006/page.tsx
+// app/(app)/handbook/doc-l3-0006/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30006() {
   return (
     <DocumentLayout>
-
       <header>
-        <h1>3.2 Status &amp; Kleuren</h1>
+        <h1>3.2 Status & Kleuren</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Naast numerieke scores gebruikt FitLifeTool kleurcodes om voortgang en status intuïtief zichtbaar te maken.<br/>
-          Kleuren zijn geen decoratie, maar onderdeel van de logica.
-          Ze fungeren als snelle feedbacklaag bovenop cijfers.
+          Naast numerieke scores gebruikt FitLifeTool een semantisch
+          statussysteem om de actuele voortgang zichtbaar te maken.
+          Kleuren zijn geen decoratief onderdeel van de interface, maar de
+          visuele representatie van de actuele situatie ten opzichte van het
+          dagschema.
+        </p>
+
+        <p>
+          Daarbij maakt FitLifeTool bewust onderscheid tussen de
+          <strong> verwachte voortgang</strong> en de
+          <strong> actuele status</strong>. Dit onderscheid vormt de basis van
+          alle feedback binnen het dashboard.
+        </p>
+
+        <p>
+          Dit hoofdstuk beschrijft hoe statussen worden bepaald, hoe zij worden
+          vertaald naar kleuren en hoe deze informatie wordt gebruikt binnen de
+          FitLifeScore.
         </p>
       </section>
 
       <section>
-        <h2>Status per card</h2>
+        <h2>Conceptueel model</h2>
 
         <p>
-          Elke card (Hydration, Activity, Nutrition) publiceert een
-          eigen status op basis van de voortgang ten opzichte van
-          het dagdoel.
-        </p>
-
-        <p>
-          De status is altijd één van de volgende waarden:
+          Iedere leefstijlpijler vergelijkt de actuele situatie met de
+          verwachte voortgang volgens het dagschema.
         </p>
 
         <div className="table-scroll">
           <table className="label-column">
             <thead>
               <tr>
-                <th>Status</th>
+                <th>Onderdeel</th>
+                <th>Omschrijving</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Verwachte voortgang</td>
+                <td>Waar de gebruiker volgens het dagschema zou moeten staan.</td>
+              </tr>
+
+              <tr>
+                <td>Actuele voortgang</td>
+                <td>De werkelijke voortgang op basis van geregistreerde gegevens.</td>
+              </tr>
+
+              <tr>
+                <td>Status</td>
+                <td>De interpretatie van het verschil tussen beide.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          De status vormt de betekenislaag; de numerieke score geeft de exacte
+          voortgang weer.
+        </p>
+      </section>
+
+      <section>
+        <h2>Statuskleuren</h2>
+
+        <p>
+          Iedere kaart vertaalt zijn status naar een vaste kleur die binnen de
+          gehele applicatie consequent wordt toegepast.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Kleur</th>
                 <th>Betekenis</th>
               </tr>
             </thead>
+
             <tbody>
               <tr>
-                <td>behind</td>
-                <td>Gebruiker loopt achter op schema</td>
-              </tr>
-              <tr>
-                <td>onTrack</td>
-                <td>Gebruiker ligt op schema</td>
-              </tr>
-              <tr>
-                <td>completed</td>
-                <td>Dagdoel is behaald</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <h2>Kleurmapping</h2>
-
-        <p>
-          Elke status correspondeert met een vaste kleur:
-        </p>
-
-        <div className="table-scroll">
-          <table className="label-column">
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th>Kleur</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>behind</td>
-                <td>Rood / oranje tint</td>
-              </tr>
-              <tr>
-                <td>onTrack</td>
-                <td>Blauw (neutraal positief)</td>
-              </tr>
-              <tr>
-                <td>completed</td>
                 <td>Groen</td>
+                <td>De gebruiker ligt op schema of heeft het dagdoel bereikt.</td>
+              </tr>
+
+              <tr>
+                <td>Oranje</td>
+                <td>Er is een beperkte achterstand die nog eenvoudig kan worden ingehaald.</td>
+              </tr>
+
+              <tr>
+                <td>Rood</td>
+                <td>Er is een duidelijke afwijking waarvoor actie nodig is.</td>
+              </tr>
+
+              <tr>
+                <td>Grijs</td>
+                <td>Er is nog onvoldoende informatie beschikbaar of er is geen doel ingesteld.</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <p>
-          Deze mapping is overal identiek: cards, progress bars,
-          iconen en de FitLifeScore zelf.
+          De exacte interpretatie van een status verschilt per leefstijlpijler,
+          maar de betekenis van de kleuren blijft overal gelijk.
         </p>
       </section>
 
       <section>
-        <h2>Aggregatie naar FitLifeScore</h2>
+        <h2>Blauw vertegenwoordigt het dagschema</h2>
 
         <p>
-          De FitLifeScore bepaalt zijn kleur niet op basis van
-          het numerieke eindresultaat, maar op basis van de
-          gecombineerde card-statussen.
+          Blauw is binnen FitLifeTool geen statuskleur.
         </p>
 
         <p>
-          De aggregatieregel is expliciet conservatief:
+          De blauwe voortgangsbalk geeft uitsluitend weer waar de gebruiker
+          volgens het dagschema zou moeten staan. De actuele voortgang wordt
+          daar overheen weergegeven in de bijbehorende statuskleur.
+        </p>
+
+        <p>
+          Hierdoor ziet de gebruiker in één oogopslag of hij vóór, op of achter
+          het verwachte dagschema ligt.
+        </p>
+      </section>
+
+      <section>
+        <h2>Status per leefstijlpijler</h2>
+
+        <p>
+          Iedere pijler bepaalt zijn status zelfstandig op basis van een eigen
+          scoremodel.
         </p>
 
         <ul>
           <li>
-            Als <strong>alle</strong> cards <em>completed</em> zijn →
-            scorekleur = groen
+            <strong>Hydration</strong> vergelijkt de actuele vochtinname met de
+            verwachte vochtinname volgens het dagschema.
           </li>
+
           <li>
-            Als één of meerdere cards <em>behind</em> zijn →
-            scorekleur = rood / waarschuwing
+            <strong>Activity</strong> vergelijkt de verbrande calorieën met de
+            verwachte activiteit voor dat moment van de dag.
           </li>
+
           <li>
-            In alle andere gevallen →
-            scorekleur = blauw
+            <strong>Nutrition</strong> gebruikt een eigen interpretatie waarbij,
+            afhankelijk van het gekozen doel (afvallen, onderhouden of
+            aankomen), zowel een tekort als een overschrijding tot een andere
+            status kan leiden.
           </li>
         </ul>
+
+        <p>
+          Hoewel de onderliggende berekeningen verschillen, presenteren alle
+          pijlers hun resultaat via hetzelfde statussysteem.
+        </p>
       </section>
 
       <section>
-        <h2>Geen numerieke shortcuts</h2>
+        <h2>Statusaggregatie</h2>
 
         <p>
-          Een hoge FitLifeScore (bijvoorbeeld 90+) kan nog steeds een waarschuwingskleur tonen als één card achterloopt.<br/>
-          Dit voorkomt dat gebruikers een “goed getal” zien terwijl er feitelijk onbalans bestaat.
+          De live-status van de FitLifeScore wordt niet bepaald door de
+          numerieke eindscore, maar door de gecombineerde status van de drie
+          leefstijlpijlers.
+        </p>
+
+        <ul>
+          <li>Bevat één van de pijlers een rode status, dan wordt de FitLifeScore rood.</li>
+
+          <li>Is er geen rode status maar wel minimaal één oranje status, dan wordt de FitLifeScore oranje.</li>
+
+          <li>Alleen wanneer alle pijlers groen zijn, krijgt de FitLifeScore een groene status.</li>
+
+          <li>Zolang nog niet alle gegevens beschikbaar zijn, wordt een neutrale grijze status gebruikt.</li>
+        </ul>
+
+        <p>
+          Hierdoor weerspiegelt de kleur altijd de minst gunstige actuele
+          leefstijlpijler.
         </p>
       </section>
 
@@ -137,33 +204,53 @@ export default function DocL30006() {
         <h2>Implementatie</h2>
 
         <p>
-          Cards exposen hun status via props of context.
-          De ScoreCard luistert hierop en bepaalt de eindkleur.
+          Iedere kaart berekent zelfstandig zijn eigen status en publiceert deze
+          naar de centrale ScoreContext.
+        </p>
+
+        <p>
+          De FitLifeScore gebruikt uitsluitend deze gepubliceerde statuskleuren
+          om de live-status te bepalen. De onderliggende businesslogica wordt
+          daarbij niet opnieuw uitgevoerd.
         </p>
 
         <ul>
-          <li>Geen herberekening in de ScoreCard</li>
-          <li>Geen duplicatie van card-logica</li>
-          <li>Status is leidend, niet score</li>
+          <li>Iedere kaart berekent zijn eigen status.</li>
+
+          <li>Iedere kaart publiceert één statuskleur.</li>
+
+          <li>De FitLifeScore aggregeert uitsluitend deze statuskleuren.</li>
+
+          <li>Businesslogica wordt nergens gedupliceerd.</li>
         </ul>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Belangrijke ontwerpprincipes</h2>
 
         <ul>
-          <li>Kleuren zijn semantisch, niet cosmetisch</li>
-          <li>Aggregatie is conservatief</li>
-          <li>Status gaat boven getal</li>
-          <li>Consistente mapping door de hele applicatie</li>
+          <li>Status en numerieke score zijn bewust van elkaar gescheiden.</li>
+
+          <li>Blauw vertegenwoordigt uitsluitend de verwachte voortgang.</li>
+
+          <li>Groen betekent dat de gebruiker op schema ligt of het dagdoel heeft bereikt.</li>
+
+          <li>Oranje geeft een beperkte afwijking aan die nog kan worden gecorrigeerd.</li>
+
+          <li>Rood vraagt om directe aandacht.</li>
+
+          <li>De FitLifeScore gebruikt uitsluitend de statuskleuren van de afzonderlijke pijlers voor de live-status.</li>
+
+          <li>Dezelfde kleur heeft overal binnen de applicatie dezelfde betekenis.</li>
         </ul>
 
         <p>
-          Hierdoor blijft de visuele feedback betrouwbaar en
-          voorspelbaar, ook bij uitbreiding van het systeem.
+          Door status, voortgang en presentatie van elkaar te scheiden ontstaat
+          een consistent feedbacksysteem waarmee gebruikers in één oogopslag
+          begrijpen hoe zij ervoor staan én hoeveel ruimte er nog is om hun dag
+          bij te sturen.
         </p>
       </section>
-
     </DocumentLayout>
   );
 }

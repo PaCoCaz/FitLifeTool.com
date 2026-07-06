@@ -1,7 +1,0 @@
-- check supabase client files (duplicate?)
-- check drinks.ts (old?)
-- check useDayNowTest (unused?)
-- check useTomorrowGoals (unused?)
-- check ScoreContext (needed?)
-- check app/data/foods.ts
-- check app/types/food.ts

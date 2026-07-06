@@ -1,185 +1,207 @@
-// app/handbook/doc-l3-0007/page.tsx
+// app/(app)/handbook/doc-l3-0007/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30007() {
   return (
     <DocumentLayout>
-
       <header>
-        <h1>3.3 Verwacht vs Actueel</h1>
+        <h1>3.3 Verwachte vs Actuele Voortgang</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          In FitLifeTool wordt voortgang nooit los gezien van tijd.
-          Een gebruiker die om 09:00 “achterloopt” kan om 21:00 volledig op schema zijn.
-          Daarom maakt het systeem expliciet onderscheid tussen verwachte voortgang en daadwerkelijk gedrag.
+          Een van de belangrijkste ontwerpprincipes van FitLifeTool is dat
+          voortgang altijd in relatie tot de tijd wordt beoordeeld. Dezelfde
+          hoeveelheid water, voeding of activiteit kan op verschillende
+          momenten van de dag tot een andere status leiden.
+        </p>
+
+        <p>
+          Daarom vergelijkt FitLifeTool voortdurend de
+          <strong> verwachte voortgang</strong> met de
+          <strong> actuele voortgang</strong>. De uitkomst van die vergelijking
+          bepaalt de live-status van iedere leefstijlpijler.
+        </p>
+
+        <p>
+          Dit systeem is bedoeld om gebruikers continu inzicht te geven in hun
+          dagverloop, zodat zij gedurende de dag bewust kunnen bijsturen.
         </p>
       </section>
 
       <section>
-        <h2>Expected en actual progress</h2>
+        <h2>Conceptueel model</h2>
 
         <p>
-          FitLifeTool onderscheidt twee vormen van voortgang:
+          Iedere leefstijlpijler bestaat uit twee onafhankelijke grootheden.
         </p>
 
         <div className="table-scroll">
           <table className="label-column">
             <thead>
               <tr>
-                <th>Type</th>
+                <th>Onderdeel</th>
                 <th>Omschrijving</th>
               </tr>
             </thead>
+
             <tbody>
               <tr>
-                <td>Expected progress</td>
-                <td>Waar een gebruiker theoretisch zou moeten staan op basis van tijd</td>
+                <td>Verwachte voortgang</td>
+                <td>Waar de gebruiker volgens het dagschema zou moeten staan.</td>
               </tr>
+
               <tr>
-                <td>Actual progress</td>
-                <td>Wat daadwerkelijk is gelogd door de gebruiker</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <h2>Expected progress</h2>
-
-        <p>
-          Expected progress is een theoretische voortgangslijn die
-          afhangt van het tijdstip binnen de dag.
-        </p>
-
-        <p>
-          De berekening volgt het principe:
-        </p>
-
-        <ul>
-          <li>Startpunt = begin van de dag</li>
-          <li>Eindpunt = dagdoel om 23:59</li>
-          <li>Voortgang neemt lineair toe met de tijd</li>
-        </ul>
-
-        <p>
-          Expected progress is geen advies, maar een referentiepunt.
-        </p>
-      </section>
-
-      <section>
-        <h2>Actual progress</h2>
-
-        <p>
-          Actual progress is de daadwerkelijk gelogde waarde: water gedronken, stappen gezet, voeding geregistreerd.<br/>
-          Deze waarde is objectief en tijdsonafhankelijk - het systeem past hier geen correcties op toe.
-        </p>
-      </section>
-
-      <section>
-        <h2>Status en vergelijking</h2>
-
-        <p>
-          De status van een card ontstaat uit de vergelijking tussen expected en actual progress.
-        </p>
-
-        <div className="table-scroll">
-          <table className="label-column">
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th>Vergelijking</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>behind</td>
-                <td>Actual &lt; Expected</td>
-              </tr>
-              <tr>
-                <td>onTrack</td>
-                <td>Actual ≈ Expected</td>
-              </tr>
-              <tr>
-                <td>completed</td>
-                <td>Actual ≥ dagdoel</td>
+                <td>Actuele voortgang</td>
+                <td>De werkelijk geregistreerde voortgang.</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <p>
-          “Behind” betekent hier niet fout, maar:
-          <em>op dit moment lager dan verwacht</em>.
+          De actuele status ontstaat uitsluitend uit de vergelijking tussen
+          beide waarden.
         </p>
       </section>
 
       <section>
-        <h2>Bewust ontwerp: tijdelijk achterlopen</h2>
+        <h2>Verwachte voortgang</h2>
 
         <p>
-          Het systeem is expliciet ontworpen om tijdelijk
-          achterlopen zichtbaar te maken.
+          De verwachte voortgang is een dynamische referentielijn die gedurende
+          de dag geleidelijk oploopt richting het dagdoel.
         </p>
 
         <p>
-          Dit voorkomt twee veelvoorkomende problemen:
+          Iedere leefstijlpijler gebruikt hiervoor een eigen dagschema. Zo
+          volgen hydratatie, voeding en activiteit elk een eigen patroon dat
+          aansluit bij normaal dagelijks gedrag.
+        </p>
+
+        <p>
+          De verwachte voortgang is geen verplichting of advies, maar een
+          objectief referentiepunt waarmee de actuele situatie kan worden
+          vergeleken.
+        </p>
+      </section>
+
+      <section>
+        <h2>Actuele voortgang</h2>
+
+        <p>
+          De actuele voortgang bestaat uitsluitend uit geregistreerde
+          gebruikersacties, zoals gegeten voeding, gedronken water of uitgevoerde
+          activiteiten.
+        </p>
+
+        <p>
+          Deze gegevens worden rechtstreeks uit de logtabellen opgebouwd en
+          vormen altijd de enige bron van waarheid.
+        </p>
+      </section>
+
+      <section>
+        <h2>Bewust afwijken van het dagschema</h2>
+
+        <p>
+          FitLifeTool gaat er nadrukkelijk niet vanuit dat een gebruiker het
+          dagschema op ieder moment exact volgt.
+        </p>
+
+        <p>
+          Een gebruiker kan er bewust voor kiezen om tijdelijk achter te lopen
+          of juist vooruit te werken. Het systeem veroordeelt deze keuzes niet,
+          maar maakt ze zichtbaar zodat de gebruiker de gevolgen begrijpt.
+        </p>
+
+        <p>
+          Zo kan iemand gedurende de dag bewust minder calorieën gebruiken in
+          afwachting van een diner of feest later op de avond. Omgekeerd kan een
+          gebruiker tijdelijk boven het voedingsbudget uitkomen en dit later op
+          de dag compenseren door extra lichamelijke activiteit uit te voeren.
+        </p>
+
+        <p>
+          Het dashboard ondersteunt deze manier van plannen doordat alle
+          voortgang direct opnieuw wordt berekend zodra nieuwe activiteiten of
+          voedingsregistraties worden toegevoegd.
+        </p>
+      </section>
+
+      <section>
+        <h2>Realtime herberekening</h2>
+
+        <p>
+          Iedere nieuwe registratie kan de actuele situatie direct veranderen.
         </p>
 
         <ul>
-          <li>Valse geruststelling vroeg op de dag</li>
-          <li>Plotselinge stress aan het einde van de dag</li>
+          <li>Nieuwe drinkmomenten verhogen de HydrationScore.</li>
+
+          <li>Nieuwe activiteiten verhogen de ActivityScore.</li>
+
+          <li>
+            Uitgevoerde activiteiten verhogen bovendien het beschikbare
+            voedingsbudget, waardoor ook de NutritionScore onmiddellijk opnieuw
+            wordt berekend.
+          </li>
+
+          <li>
+            De FitLifeScore wordt vervolgens automatisch opnieuw samengesteld.
+          </li>
         </ul>
 
         <p>
-          Door eerder feedback te geven, wordt gedrag gestuurd
-          zonder te forceren.
+          Hierdoor geeft het dashboard voortdurend de actuele stand van zaken
+          weer, zonder dat historische gegevens worden aangepast.
         </p>
       </section>
 
       <section>
-        <h2>Geen voorspellingen of aannames</h2>
+        <h2>Geen voorspellingen</h2>
 
         <p>
-          FitLifeTool doet geen voorspellingen over toekomstig gedrag.
+          FitLifeTool voorspelt nooit toekomstig gedrag. Het systeem gaat er
+          niet vanuit dat een gebruiker later op de dag nog zal eten, drinken
+          of bewegen.
         </p>
 
         <p>
-          Er wordt niet aangenomen dat een gebruiker “later wel bijhaalt”.
-          Alleen actuele data telt.
+          Alle feedback is uitsluitend gebaseerd op de gegevens die op dat
+          moment daadwerkelijk zijn geregistreerd.
         </p>
       </section>
 
       <section>
-        <h2>Implementatie</h2>
+        <h2>Belangrijke ontwerpprincipes</h2>
 
         <ul>
-          <li>Expected progress wordt berekend op basis van tijd</li>
-          <li>Actual progress komt uit logs</li>
-          <li>Statuslogica is uniform per card</li>
-          <li>Geen cross-card correcties</li>
-        </ul>
-      </section>
+          <li>Voortgang wordt altijd beoordeeld in relatie tot de tijd.</li>
 
-      <section>
-        <h2>Belangrijke beslissingen</h2>
+          <li>Verwachte voortgang is een referentie, geen verplichting.</li>
 
-        <ul>
-          <li>Expected ≠ target</li>
-          <li>Behind ≠ falen</li>
-          <li>Tijd is een first-class parameter</li>
-          <li>Status is momentopname</li>
+          <li>Gebruikers mogen bewust afwijken van het dagschema.</li>
+
+          <li>Nieuwe registraties leiden direct tot een herberekening.</li>
+
+          <li>Activiteit verhoogt het beschikbare voedingsbudget.</li>
+
+          <li>Alle feedback is gebaseerd op actuele geregistreerde gegevens.</li>
+
+          <li>Historische gegevens worden nooit aangepast.</li>
         </ul>
 
         <p>
-          Deze keuzes maken het systeem eerlijk, voorspelbaar
-          en uitbreidbaar.
+          Door verwachte en actuele voortgang voortdurend met elkaar te
+          vergelijken ontstaat een systeem dat gebruikers niet beoordeelt op één
+          moment, maar hen gedurende de hele dag ondersteunt bij het maken van
+          bewuste keuzes.
         </p>
       </section>
-
     </DocumentLayout>
   );
 }

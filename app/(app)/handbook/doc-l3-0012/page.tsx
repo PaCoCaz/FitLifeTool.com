@@ -1,27 +1,33 @@
-// app/handbook/doc-l3-0012/page.tsx
+// app/(app)/handbook/doc-l3-0012/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30012() {
   return (
     <DocumentLayout>
-
       <header>
         <h1>4.3 Layout & Responsiviteit</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Dit hoofdstuk beschrijft hoe de layout van FitLifeTool
-          is opgebouwd met grid-systemen en hoe de UI zich
-          responsief aanpast aan verschillende schermgroottes.
+          FitLifeTool is ontworpen volgens een <strong>mobile-first</strong> ontwerpstrategie.
+          De meeste gebruikers registreren voeding, hydratatie, activiteiten en gewicht gedurende de dag via een smartphone.
+          De gebruikersinterface is daarom primair geoptimaliseerd voor kleine schermen.
         </p>
 
         <p>
-          Het doel van deze aanpak is om een stabiele,
-          voorspelbare structuur te bieden, waarbij cards,
-          navigatie en content logisch herschikken zonder
-          visuele breuken of onverwacht gedrag.
+          Tablet- en desktopweergaven vormen uitbreidingen van dezelfde
+          interface. Zij bieden meer ruimte voor presentatie, maar veranderen
+          niets aan de functionaliteit of de onderliggende businesslogica.
+        </p>
+
+        <p>
+          Dit hoofdstuk beschrijft hoe layouts worden opgebouwd, hoe
+          responsiviteit wordt toegepast en welke ontwerpprincipes zorgen voor
+          een consistente gebruikerservaring op alle apparaten.
         </p>
       </section>
 
@@ -29,20 +35,72 @@ export default function DocL30012() {
         <h2>Conceptueel model</h2>
 
         <p>
-          De layout is gebaseerd op een
-          <strong> tweedimensionaal gridmodel</strong>,
-          waarin rijen en kolommen expliciet worden gedefinieerd.
-          Cards zijn grid-items die zich aanpassen aan beschikbare ruimte.
+          Iedere applicatiesectie gebruikt een gespecialiseerde
+          layoutcomponent die is afgestemd op het doel van die sectie.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Layoutcomponent</th>
+                <th>Verantwoordelijkheid</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>DashboardGrid</td>
+                <td>Positioneert de dashboardkaarten.</td>
+              </tr>
+
+              <tr>
+                <td>SettingsGrid</td>
+                <td>Structureert de instellingenpagina.</td>
+              </tr>
+
+              <tr>
+                <td>CategoryGrid</td>
+                <td>Toont productcategorieën en lijsten.</td>
+              </tr>
+
+              <tr>
+                <td>HandbookLayout</td>
+                <td>Structureert documentatie en navigatie.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Iedere layout bepaalt uitsluitend de positionering van componenten.
+          De onderliggende functionaliteit blijft volledig onafhankelijk van de
+          gekozen presentatie.
+        </p>
+      </section>
+
+      <section>
+        <h2>Responsief gedrag</h2>
+
+        <p>
+          FitLifeTool gebruikt één gebruikersinterface voor alle apparaten.
+          Componenten worden automatisch herschikt op basis van de beschikbare
+          schermruimte.
         </p>
 
         <ul>
-          <li>Desktop: meerdere kolommen naast elkaar</li>
-          <li>Tablet: herverdeling naar minder kolommen</li>
-          <li>Mobiel: lineaire stacking van cards</li>
+          <li>Mobiel vormt het uitgangspunt van het ontwerp.</li>
+
+          <li>Tablet benut extra ruimte zonder functionaliteit te wijzigen.</li>
+
+          <li>Desktop toont meerdere componenten gelijktijdig wanneer dat de leesbaarheid verbetert.</li>
+
+          <li>Interacties blijven op ieder apparaat identiek.</li>
         </ul>
 
         <p>
-          Responsiveness wordt gezien als een <strong>layout-eigenschap</strong>, niet als een aparte mobiele variant van de applicatie.
+          Hierdoor leert een gebruiker slechts één interface kennen,
+          ongeacht het apparaat waarop FitLifeTool wordt gebruikt.
         </p>
       </section>
 
@@ -50,60 +108,57 @@ export default function DocL30012() {
         <h2>Implementatie</h2>
 
         <p>
-          Technisch is het grid gerealiseerd met CSS Grid
-          via utility classes. Het dashboard gebruikt een
-          vaste kolomstructuur die per breakpoint verandert.
+          Layoutcomponenten zijn uitsluitend verantwoordelijk voor de
+          positionering van componenten. Businesslogica, dataverwerking en
+          statusberekeningen bevinden zich altijd binnen de betreffende
+          domeincomponenten.
         </p>
 
-        <p>
-          Een typisch patroon is:
-        </p>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
+          <pre className="whitespace-pre-wrap text-sm leading-7">
+{`AppShell
+      ↓
+Section Layout
+      ↓
+Responsive Grid
+      ↓
+Cards & Components
+      ↓
+Gebruiker`}
+          </pre>
+        </div>
 
-        <ul>
-          <li><code>grid-cols-12</code> als basis</li>
-          <li>Cards bepalen hun span via <code>col-span-x</code></li>
-          <li>Breakpoints sturen herverdeling (<code>md:</code>, <code>lg:</code>)</li>
-        </ul>
-
         <p>
-          De containerbreedte is bewust begrensd om
-          leesbaarheid te behouden, terwijl de interne grid
-          volledige vrijheid heeft om content te positioneren.
+          Hierdoor kan dezelfde component op verschillende schermformaten een
+          andere positie krijgen, terwijl gedrag, berekeningen en interacties
+          volledig identiek blijven.
         </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Belangrijke ontwerpprincipes</h2>
 
         <ul>
-          <li>
-            <strong>Grid boven flex</strong><br />
-            Grids geven expliciete controle over zowel rijen als kolommen.
-          </li>
+          <li>Mobile-first vormt het uitgangspunt van iedere nieuwe interface.</li>
 
-          <li>
-            <strong>12-koloms systeem</strong><br />
-            Sluit aan bij gangbare ontwerpprincipes en is intuïtief uitbreidbaar.
-          </li>
+          <li>Responsiviteit verandert uitsluitend de presentatie.</li>
 
-          <li>
-            <strong>Responsiveness via breakpoints</strong><br />
-            Voorkomt complexe runtime-logica.
-          </li>
+          <li>Layouts bepalen de structuur; componenten bepalen het gedrag.</li>
 
-          <li>
-            <strong>Geen aparte mobiele layouts</strong><br />
-            Reduceert onderhoud en inconsistenties.
-          </li>
+          <li>Businesslogica is volledig onafhankelijk van schermgrootte.</li>
+
+          <li>Nieuwe layouts volgen dezelfde responsieve architectuur.</li>
+
+          <li>Gebruikers ervaren op ieder apparaat dezelfde functionaliteit.</li>
         </ul>
 
-        <p className="muted">
-          Deze aanpak zorgt ervoor dat nieuwe cards of pagina's
-          automatisch passen binnen het bestaande layout-systeem
-          zonder extra ontwerpbeslissingen.
+        <p>
+          Door presentatie, layout en businesslogica strikt van elkaar te
+          scheiden blijft FitLifeTool overzichtelijk, onderhoudbaar en
+          schaalbaar. Nieuwe schermen en toekomstige apparaten kunnen hierdoor
+          worden ondersteund zonder de functionele architectuur aan te passen.
         </p>
       </section>
-
     </DocumentLayout>
   );
 }

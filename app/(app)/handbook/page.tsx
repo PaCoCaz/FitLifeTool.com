@@ -12,13 +12,17 @@ export default function HandbookIndexPage() {
       {/* ───────────────── Header ───────────────── */}
       <header>
         <h1 className="text-2xl font-semibold text-[#191970]">
-          Handboek FitLifeTool
+          FitLifeTool Developer Handbook
         </h1>
 
         <p className="mt-2 text-gray-600 max-w-3xl">
-          Dit handboek beschrijft de architectuur, logica en ontwerpkeuzes van
-          FitLifeTool. Het fungeert als canonieke bron voor ontwikkeling,
-          onderhoud en toekomstige uitbreidingen.
+          Dit handboek vormt de centrale kennisbron voor de ontwikkeling van FitLifeTool.
+          Het beschrijft de architectuur, database, scoremodellen, ontwerpkeuzes en ontwikkelrichtlijnen van het project. Nieuwe functionaliteit en architectuurwijzigingen worden vanuit dit handboek gedocumenteerd.
+        </p>
+
+        <p className="mt-2 text-gray-600 max-w-3xl">
+          Nieuwe ontwikkelaar? Begin met hoofdstuk 1 en werk de hoofdstukken in volgorde door.
+          De hoofdstukken zijn bewust opgebouwd van architectuur naar implementatie.
         </p>
       </header>
 

@@ -1,26 +1,32 @@
-// app/handbook/doc-l3-0013/page.tsx
+// app/(app)/handbook/doc-l3-0013/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30013() {
   return (
     <DocumentLayout>
-
       <header>
         <h1>4.4 Navigatie & Contextbewustzijn</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Dit hoofdstuk beschrijft hoe navigatie binnen FitLifeTool
-          is ontworpen om contextbewust te zijn, zonder de gebruiker
-          te overweldigen of te desoriënteren.
+          Navigatie binnen FitLifeTool is ontworpen om gebruikers altijd
+          duidelijk te maken waar zij zich bevinden, welke acties beschikbaar
+          zijn en welke informatie relevant is binnen de huidige context.
         </p>
 
         <p>
-          Navigatie is geen losstaand UI-element, maar een
-          essentieel onderdeel van gebruikersoriëntatie,
-          taakfocus en informatiehiërarchie.
+          Navigatie is geen verzameling losse links, maar onderdeel van de
+          applicatiestructuur. De beschikbare navigatie volgt uit de huidige
+          route, gebruikersstatus en applicatiesectie.
+        </p>
+
+        <p>
+          Dit hoofdstuk beschrijft hoe FitLifeTool navigatie centraal beheert
+          en hoe context behouden blijft op verschillende schermformaten.
         </p>
       </section>
 
@@ -28,130 +34,146 @@ export default function DocL30013() {
         <h2>Conceptueel model</h2>
 
         <p>
-          FitLifeTool hanteert het principe van
-          <strong> gelaagde navigatie</strong>,
-          waarbij elke laag een duidelijk doel heeft.
+          FitLifeTool gebruikt een gelaagde navigatiestructuur waarbij iedere
+          laag een eigen verantwoordelijkheid heeft.
         </p>
 
         <div className="table-scroll">
           <table className="label-column">
             <thead>
               <tr>
-                <th>Laag</th>
-                <th>Doel</th>
+                <th>Niveau</th>
+                <th>Verantwoordelijkheid</th>
               </tr>
             </thead>
+
             <tbody>
               <tr>
-                <td>Globaal</td>
-                <td>Waar ben ik in de applicatie</td>
+                <td>AppShell</td>
+                <td>Globale applicatiestructuur en hoofdcontext.</td>
               </tr>
+
               <tr>
-                <td>Contextueel</td>
-                <td>Wat kan ik hier doen</td>
+                <td>Hoofdnavigatie</td>
+                <td>Navigeren tussen primaire applicatiegebieden.</td>
               </tr>
+
               <tr>
-                <td>Breadcrumbs</td>
-                <td>Hoe ben ik hier gekomen</td>
+                <td>Contextnavigatie</td>
+                <td>Navigeren binnen een specifiek domein.</td>
+              </tr>
+
+              <tr>
+                <td>Breadcrumb</td>
+                <td>Weergeven van de huidige positie binnen de hiërarchie.</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <p>
-          Contextbewustzijn betekent dat navigatie-elementen
-          zich aanpassen aan:
+          Iedere laag voegt context toe zonder verantwoordelijkheden van een
+          andere laag over te nemen.
+        </p>
+      </section>
+
+      <section>
+        <h2>Mobile-first navigatie</h2>
+
+        <p>
+          Omdat FitLifeTool primair mobiel wordt gebruikt, wordt navigatie
+          ontworpen vanuit beperkte schermruimte.
         </p>
 
         <ul>
-          <li>de huidige pagina</li>
-          <li>de rol van de gebruiker</li>
-          <li>het actieve domein (dashboard, handbook, detailpagina)</li>
+          <li>
+            Mobiele schermen tonen alleen de direct relevante navigatie.
+          </li>
+
+          <li>
+            Uitgebreidere navigatiestructuren worden pas zichtbaar wanneer
+            extra ruimte beschikbaar is.
+          </li>
+
+          <li>
+            De navigatiestructuur blijft inhoudelijk gelijk op ieder apparaat.
+          </li>
         </ul>
+
+        <p>
+          Desktopweergaven voegen overzicht toe, maar introduceren geen
+          afzonderlijke navigatielogica.
+        </p>
       </section>
 
       <section>
         <h2>Implementatie</h2>
 
         <p>
-          De navigatiestructuur is opgesplitst in herbruikbare
-          componenten, elk met een duidelijk afgebakende
-          verantwoordelijkheid.
+          Navigatie wordt centraal opgebouwd via layouts en gedeelde
+          componenten. Pagina's bepalen niet zelf hoe zij binnen de applicatie
+          bereikbaar zijn.
         </p>
 
-        <div className="table-scroll">
-          <table className="label-column">
-            <thead>
-              <tr>
-                <th>Component</th>
-                <th>Verantwoordelijkheid</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Header</td>
-                <td>Applicatie-identiteit en primaire acties</td>
-              </tr>
-              <tr>
-                <td>TopNavigation</td>
-                <td>Hoofdsecties binnen de applicatie</td>
-              </tr>
-              <tr>
-                <td>Sidebar</td>
-                <td>Verdieping binnen een domein</td>
-              </tr>
-              <tr>
-                <td>Breadcrumb</td>
-                <td>Positionering binnen de hiërarchie</td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
+          <pre className="whitespace-pre-wrap text-sm leading-7">
+{`Route
+      ↓
+Layout
+      ↓
+Navigatiecontext
+      ↓
+Breadcrumb / Menu
+      ↓
+Gebruiker`}
+          </pre>
         </div>
 
         <p>
-          Context wordt afgeleid uit routing (URL-segmenten)
-          en expliciet doorgegeven via layout-componenten,
-          bijvoorbeeld bij het opbouwen van breadcrumbs.
-        </p>
-
-        <p>
-          Actieve navigatie-items worden uitsluitend visueel
-          onderscheiden (kleur of gewicht), zonder extra UI-ruis
-          zoals iconen of animaties.
+          Hierdoor blijft navigatie voorspelbaar en kan een volledige sectie
+          worden uitgebreid zonder individuele pagina's aan te passen.
         </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Autorisatie en zichtbaarheid</h2>
 
-        <ul>
-          <li>
-            <strong>Geen overmatige navigatie</strong><br />
-            Alleen tonen wat relevant is voor de huidige context.
-          </li>
+        <p>
+          Navigatie volgt altijd de toegangsregels van de applicatie.
+          Beschikbare onderdelen worden bepaald door gebruikersstatus,
+          rol en applicatiecontext.
+        </p>
 
-          <li>
-            <strong>Breadcrumb als oriëntatie, niet als menu</strong><br />
-            Ondersteunt begrip zonder extra cognitieve last.
-          </li>
-
-          <li>
-            <strong>Visuele subtiliteit</strong><br />
-            Actieve status via kleur in plaats van decoratieve elementen.
-          </li>
-
-          <li>
-            <strong>Layouts bepalen navigatie</strong><br />
-            Context wordt centraal geregeld in layouts, niet per losse pagina.
-          </li>
-        </ul>
-
-        <p className="muted">
-          Deze keuzes zorgen voor een consistente, schaalbare navigatie
-          die meegroeit met de applicatie zonder structurele herzieningen.
+        <p>
+          Navigatie verleent zelf geen rechten. Autorisatie wordt server-side
+          gecontroleerd; navigatie toont uitsluitend wat binnen die context
+          relevant is.
         </p>
       </section>
 
+      <section>
+        <h2>Belangrijke ontwerpprincipes</h2>
+
+        <ul>
+          <li>Navigatie wordt centraal door layouts beheerd.</li>
+
+          <li>Pagina's bevatten geen eigen navigatiestructuur.</li>
+
+          <li>Mobile-first bepaalt de informatiedichtheid.</li>
+
+          <li>Breadcrumbs ondersteunen oriëntatie, niet primaire navigatie.</li>
+
+          <li>Autorisatie en navigatie blijven gescheiden verantwoordelijkheden.</li>
+
+          <li>Nieuwe secties volgen dezelfde navigatiearchitectuur.</li>
+        </ul>
+
+        <p>
+          Door navigatie als onderdeel van de applicatiearchitectuur te
+          behandelen blijft FitLifeTool overzichtelijk en schaalbaar, terwijl
+          gebruikers altijd hun positie en beschikbare acties begrijpen.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

@@ -1,26 +1,31 @@
-// app/handbook/doc-l3-0016/page.tsx
+// app/(app)/handbook/doc-l3-0016/page.tsx
 
 import DocumentLayout from "../documentLayout";
+import HandbookMeta from "../HandbookMeta";
 
 export default function DocL30016() {
   return (
     <DocumentLayout>
-
       <header>
-        <h1>5.2 Feature flags & Uitrol</h1>
+        <h1>5.2 Feature Flags & Gecontroleerde Uitrol</h1>
+        <HandbookMeta />
       </header>
 
       <section>
         <p>
-          Dit hoofdstuk beschrijft hoe nieuwe functionaliteit
-          binnen FitLifeTool gecontroleerd wordt uitgerold
-          met behulp van feature flags.
+          Dit hoofdstuk beschrijft hoe nieuwe functionaliteit binnen
+          FitLifeTool gecontroleerd wordt ontwikkeld, getest en beschikbaar
+          gemaakt zonder bestaande gebruikerservaringen of data te beïnvloeden.
         </p>
 
         <p>
-          Het doel is risico beperken, regressies voorkomen
-          en nieuwe features veilig testen in productie,
-          zonder impact op bestaande gebruikers.
+          Feature flags maken het mogelijk om nieuwe onderdelen veilig toe te
+          voegen aan het systeem terwijl de bestaande applicatie stabiel blijft.
+        </p>
+
+        <p>
+          Een feature flag is een tijdelijk technisch controlemechanisme en
+          geen onderdeel van het permanente productmodel.
         </p>
       </section>
 
@@ -28,23 +33,81 @@ export default function DocL30016() {
         <h2>Conceptueel model</h2>
 
         <p>
-          Feature flags worden gezien als <strong>tijdelijke controlemechanismen</strong>, niet als permanente configuratie.
+          Nieuwe functionaliteit wordt binnen FitLifeTool toegevoegd zonder
+          direct beschikbaar te worden voor iedere gebruiker.
         </p>
 
         <p>
-          Een feature doorloopt meerdere fasen:
+          Een feature doorloopt normaal meerdere fasen:
         </p>
 
         <ul>
-          <li>ontwikkeling (uitgeschakeld)</li>
-          <li>interne test (beperkte toegang)</li>
-          <li>gradual rollout (subset van gebruikers)</li>
-          <li>volledige activatie</li>
-          <li>verwijderen van de flag</li>
+          <li>ontwikkeling binnen bestaande architectuur</li>
+
+          <li>interne activatie voor testen</li>
+
+          <li>beperkte beschikbaarheid voor geselecteerde gebruikers</li>
+
+          <li>volledige uitrol</li>
+
+          <li>verwijderen van de tijdelijke feature flag</li>
         </ul>
 
         <p>
-          Flags zijn expliciet <em>tijdelijk</em> en maken geen onderdeel uit van het definitieve systeemontwerp.
+          Na volledige uitrol verdwijnt de flag en wordt de functionaliteit
+          onderdeel van het normale systeemgedrag.
+        </p>
+      </section>
+
+      <section>
+        <h2>Afbakening</h2>
+
+        <p>
+          Feature flags hebben één duidelijke verantwoordelijkheid:
+          gecontroleerde technische uitrol.
+        </p>
+
+        <p>
+          Ze worden bewust gescheiden van andere vormen van toegang.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Mechanisme</th>
+                <th>Doel</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Feature flag</td>
+                <td>
+                  Tijdelijk activeren of verbergen van nieuwe functionaliteit.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Rollen</td>
+                <td>
+                  Autorisatie en beheertoegang.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Abonnementen</td>
+                <td>
+                  Producttoegang en feature-gating.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Hierdoor blijven technische uitrol, rechten en commerciële keuzes
+          volledig gescheiden.
         </p>
       </section>
 
@@ -52,77 +115,84 @@ export default function DocL30016() {
         <h2>Implementatie</h2>
 
         <p>
-          Binnen FitLifeTool worden feature flags toegepast op duidelijke grenzen:
-        </p>
-
-        <div className="table-scroll">
-          <table className="label-column">
-            <thead>
-              <tr>
-                <th>Domein</th>
-                <th>Toepassing</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>UI</td>
-                <td>Cards, acties en visualisaties</td>
-              </tr>
-              <tr>
-                <td>Logica</td>
-                <td>Nieuwe score- en berekeningsvarianten</td>
-              </tr>
-              <tr>
-                <td>Workflow</td>
-                <td>Processtappen zoals nieuwe onboarding</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p>
-          Flags worden centraal beheerd en via
-          context of providers beschikbaar gesteld,
-          zodat conditionele logica niet verspreid raakt.
-        </p>
-
-        <p>
-          Gradual rollout kan plaatsvinden op basis van:
+          Feature flags worden toegepast op duidelijke grenzen binnen de
+          applicatie.
         </p>
 
         <ul>
-          <li>gebruikersrol (admin, developer, testgroep)</li>
-          <li>account-leeftijd</li>
-          <li>feature-specifieke criteria</li>
+          <li>nieuwe dashboardkaarten</li>
+
+          <li>nieuwe gezondheidsdomeinen</li>
+
+          <li>nieuwe scoremodellen</li>
+
+          <li>nieuwe workflows</li>
+
+          <li>experimentele visualisaties</li>
         </ul>
+
+        <p>
+          Nieuwe functionaliteit moet naast bestaande functionaliteit kunnen
+          bestaan. Een flag mag bestaande data of bestaande berekeningen nooit
+          ongeldig maken.
+        </p>
+
+        <p>
+          Bijvoorbeeld: een nieuw scoremodel kan parallel worden getest,
+          terwijl de bestaande FitLifeScore actief blijft.
+        </p>
       </section>
 
       <section>
-        <h2>Belangrijke beslissingen</h2>
+        <h2>Data-integriteit</h2>
+
+        <p>
+          Feature flags beïnvloeden nooit de betekenis van opgeslagen data.
+        </p>
+
+        <p>
+          Brondata blijft onafhankelijk van actieve features:
+        </p>
 
         <ul>
-          <li>
-            <strong>Flags zijn tijdelijk:</strong> langdurige flags leiden tot verborgen complexiteit.
-          </li>
-          <li>
-            <strong>Geen flags diep in businesslogica:</strong> voorkomt onvoorspelbaar gedrag.
-          </li>
-          <li>
-            <strong>Expliciete rollout-fases:</strong> elke feature volgt dezelfde levenscyclus.
-          </li>
-          <li>
-            <strong>Opruimen is verplicht:</strong> een feature zonder flag is het einddoel.
-          </li>
+          <li>logs blijven geldig</li>
+
+          <li>historische berekeningen blijven reproduceerbaar</li>
+
+          <li>nieuwe features gebruiken bestaande patronen</li>
+
+          <li>uitschakelen van een flag veroorzaakt geen dataverlies</li>
         </ul>
 
         <p>
-          Door feature flags bewust en beperkt in te zetten,
-          blijft FitLifeTool stabiel terwijl het
-          gecontroleerd kan evolueren.
+          Hierdoor kunnen experimenten veilig plaatsvinden zonder risico voor
+          de betrouwbaarheid van het platform.
         </p>
       </section>
 
+      <section>
+        <h2>Belangrijke ontwerpprincipes</h2>
+
+        <ul>
+          <li>Feature flags zijn tijdelijk.</li>
+
+          <li>Flags bepalen geen gebruikersrechten.</li>
+
+          <li>Nieuwe functionaliteit mag verborgen bestaan.</li>
+
+          <li>Bestaande functionaliteit blijft leidend tijdens uitrol.</li>
+
+          <li>Een verwijderde flag laat geen technische schuld achter.</li>
+
+          <li>Data blijft onafhankelijk van actieve features.</li>
+        </ul>
+
+        <p>
+          Door gecontroleerde uitrol als onderdeel van de architectuur te
+          behandelen kan FitLifeTool blijven vernieuwen zonder stabiliteit,
+          vertrouwen of dataconsistentie op te offeren.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }
-
