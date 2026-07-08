@@ -140,6 +140,42 @@ export const handbookDocuments: HandbookDocument[] = [
     updated: "2026-07-02",
   },
 
+  {
+    id: "doc-l3-0022",
+    level: "l3",
+    hoofdstuk: "H2",
+    nummer: "2.5",
+    titel: "Product Intelligence Engine",
+    path: "/handbook/doc-l3-0022",
+
+    status: "current",
+    updated: "2026-07-07",
+  },
+
+  {
+    id: "doc-l3-0023",
+    level: "l3",
+    hoofdstuk: "H2",
+    nummer: "2.6",
+    titel: "Product Expansion Workflow",
+    path: "/handbook/doc-l3-0023",
+
+    status: "current",
+    updated: "2026-07-07",
+  },
+
+  {
+    id: "doc-l3-0024",
+    level: "l3",
+    hoofdstuk: "H2",
+    nummer: "2.7",
+    titel: "Data Import & Database Synchronisatie",
+    path: "/handbook/doc-l3-0024",
+
+    status: "current",
+    updated: "2026-07-07",
+  },
+
   /* ─────────────── H3 ─────────────── */
 
   {
