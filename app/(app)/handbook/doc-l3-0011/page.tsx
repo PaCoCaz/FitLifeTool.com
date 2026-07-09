@@ -6,203 +6,321 @@ import HandbookMeta from "../HandbookMeta";
 export default function DocL30011() {
   return (
     <DocumentLayout>
+
       <header>
         <h1>4.2 Kaartsysteem & Compositie</h1>
         <HandbookMeta />
       </header>
 
+
       <section>
         <p>
           Dashboardkaarten vormen de primaire gebruikersinterface van
-          FitLifeTool. Iedere kaart vertegenwoordigt één afgebakend
-          leefstijldomein en presenteert de actuele voortgang, status en
-          relevante acties binnen dat domein.
+          FitLifeTool. Iedere kaart vertegenwoordigt een duidelijk afgebakend
+          onderdeel van de applicatie en presenteert actuele informatie,
+          voortgang of persoonlijke gegevens.
         </p>
 
         <p>
-          Het kaartsysteem is ontworpen als een verzameling herbruikbare
-          bouwstenen met een vaste structuur. Hierdoor blijven alle kaarten
-          herkenbaar, terwijl iedere kaart zijn eigen domeinspecifieke
-          functionaliteit kan bevatten.
+          Het kaartsysteem is opgebouwd uit herbruikbare componenten. De
+          visuele structuur is overal gelijk, terwijl iedere kaart alleen de
+          logica bevat die hoort bij zijn eigen verantwoordelijkheid.
         </p>
 
         <p>
-          Dit hoofdstuk beschrijft de architectuur van het kaartsysteem en de
-          ontwerpkeuzes die zorgen voor een consistente gebruikerservaring.
+          Dit hoofdstuk beschrijft de rolverdeling tussen kaarten,
+          DashboardStore, profieldata en ScoreContext.
         </p>
       </section>
+
 
       <section>
         <h2>Conceptueel model</h2>
 
         <p>
-          Iedere dashboardkaart vertegenwoordigt precies één
-          verantwoordelijkheidsgebied binnen FitLifeTool.
+          Niet iedere dashboardkaart gebruikt dezelfde databron. FitLifeTool
+          maakt onderscheid tussen daggerichte kaarten en profielgerichte
+          kaarten.
         </p>
+
 
         <div className="table-scroll">
+
           <table className="label-column">
+
             <thead>
+
               <tr>
                 <th>Kaart</th>
+                <th>Databron</th>
                 <th>Verantwoordelijkheid</th>
               </tr>
+
             </thead>
 
+
             <tbody>
+
+
               <tr>
+
                 <td>Hydration</td>
-                <td>Hydratatie en vochtbalans.</td>
+
+                <td>
+                  DashboardStore
+                </td>
+
+                <td>
+                  Actuele hydratatievoortgang binnen de actieve dag.
+                </td>
+
               </tr>
 
+
               <tr>
+
                 <td>Nutrition</td>
-                <td>Voeding, caloriebudget en voedingsstatus.</td>
+
+                <td>
+                  DashboardStore
+                </td>
+
+                <td>
+                  Energie-inname, voedingsbudget en dagstatus.
+                </td>
+
               </tr>
 
+
               <tr>
+
                 <td>Activity</td>
-                <td>Lichamelijke activiteit en energieverbruik.</td>
+
+                <td>
+                  DashboardStore
+                </td>
+
+                <td>
+                  Activiteiten en voortgang richting bewegingsdoel.
+                </td>
+
               </tr>
 
+
               <tr>
+
                 <td>Weight</td>
-                <td>Gewicht en lichaamsontwikkeling.</td>
+
+                <td>
+                  Profielgegevens
+                </td>
+
+                <td>
+                  Gewicht, lichaamsontwikkeling en persoonlijke waarden.
+                </td>
+
               </tr>
 
+
               <tr>
+
                 <td>FitLifeScore</td>
-                <td>Gecombineerde dagstatus van alle leefstijldomeinen.</td>
+
+                <td>
+                  ScoreContext
+                </td>
+
+                <td>
+                  Gecombineerde interpretatie van de actuele leefstijlstatus.
+                </td>
+
               </tr>
+
+
             </tbody>
+
           </table>
+
         </div>
 
+
         <p>
-          Iedere kaart is zelfstandig verantwoordelijk voor zijn eigen data,
-          berekeningen en presentatie.
+          DashboardStore beheert uitsluitend dagelijkse voortgangsgegevens.
+          Profielinformatie zoals gewicht of persoonlijke instellingen valt
+          buiten deze verantwoordelijkheid.
         </p>
+
       </section>
 
+
+
       <section>
+
         <h2>Opbouw van een kaart</h2>
 
+
         <p>
-          Alle dashboardkaarten volgen dezelfde anatomie.
+          Alle kaarten gebruiken dezelfde visuele basisstructuur.
         </p>
 
+
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
+
           <pre className="whitespace-pre-wrap text-sm leading-7">
 {`Card
  ├── CardHeader
  │      ├── Icoon
  │      ├── Titel
- │      └── FitLifeScore
+ │      └── Status / Score
  │
  └── Card Content
         ├── Hoofdwaarde
         ├── Doelwaarde
         ├── Progressbar
-        ├── Statusbericht
-        └── Acties`}
+        └── Domeininformatie`}
           </pre>
+
         </div>
 
+
         <p>
-          Door deze vaste structuur herkennen gebruikers iedere kaart direct,
-          ongeacht het onderliggende leefstijldomein.
+          Card en CardHeader bevatten alleen presentatie en geen
+          domeinspecifieke berekeningen.
         </p>
+
       </section>
 
+
+
       <section>
+
         <h2>Compositie</h2>
 
+
         <p>
-          Het kaartsysteem is gebaseerd op compositie in plaats van
-          overerving of afzonderlijke kaarttypen.
+          Het kaartsysteem gebruikt compositie. Algemene UI wordt gedeeld,
+          terwijl domeinen hun eigen gedrag toevoegen.
         </p>
+
 
         <ul>
-          <li>De component <code>Card</code> verzorgt de basislayout.</li>
 
           <li>
-            <code>CardHeader</code> verzorgt titel, pictogram en
-            FitLifeScore.
+            <code>Card</code> verzorgt de basislayout.
           </li>
-
-          <li>De inhoud wordt als children samengesteld.</li>
 
           <li>
-            Domeinspecifieke componenten voegen uitsluitend hun eigen logica
-            toe.
+            <code>CardHeader</code> verzorgt de uniforme kop.
           </li>
+
+          <li>
+            Dashboardkaarten bepalen hun eigen inhoud.
+          </li>
+
+          <li>
+            Gemeenschappelijke logica wordt gedeeld via stores en contexts.
+          </li>
+
         </ul>
 
+
         <p>
-          Hierdoor blijft de layout volledig uniform terwijl de inhoud per
-          kaart kan verschillen.
+          Hierdoor blijft de interface consistent zonder afhankelijkheden
+          tussen losse kaarten.
         </p>
+
       </section>
 
+
+
       <section>
-        <h2>Verantwoordelijkheden</h2>
+
+        <h2>Gegevensstroom</h2>
+
 
         <p>
-          Iedere kaart is verantwoordelijk voor zijn eigen domein en kent een
-          vaste gegevensstroom.
+          Daggerichte dashboardkaarten volgen dezelfde centrale gegevensstroom.
         </p>
+
 
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
+
           <pre className="whitespace-pre-wrap text-sm leading-7">
-{`DashboardStore
+{`Supabase
       ↓
-Domeinscore
+dashboard_day_summary (RPC)
       ↓
-Status
+DashboardStore
       ↓
-Card
+Nutrition / Hydration / Activity
       ↓
-Gebruiker`}
+ScoreContext
+      ↓
+FitLifeScoreCard`}
           </pre>
+
         </div>
 
+
         <p>
-          Kaarten voeren geen berekeningen uit voor andere domeinen. Alleen de
-          FitLifeScore combineert informatie uit meerdere kaarten.
+          ScoreContext bevat geen brongegevens. Het deelt alleen tijdelijke
+          scores en statusinformatie tussen de domeinkaarten en de
+          FitLifeScoreCard.
         </p>
+
+
+        <p>
+          Profielgerichte kaarten gebruiken de daarvoor bedoelde
+          profielgegevens en hoeven niet via DashboardStore te lopen.
+        </p>
+
       </section>
+
+
 
       <section>
+
         <h2>Belangrijke ontwerpprincipes</h2>
 
+
         <ul>
+
           <li>
-            Iedere kaart vertegenwoordigt precies één leefstijldomein.
+            Iedere kaart heeft één duidelijke verantwoordelijkheid.
           </li>
 
           <li>
-            Alle kaarten gebruiken dezelfde visuele basisstructuur.
+            Daggerichte data loopt via DashboardStore.
           </li>
 
           <li>
-            Businesslogica blijft gescheiden van presentatie.
+            Profieldata blijft gescheiden van dagvoortgang.
           </li>
 
           <li>
-            Nieuwe kaarten worden opgebouwd uit bestaande componenten.
+            ScoreContext bevat alleen tijdelijke UI-status.
           </li>
 
           <li>
-            Consistentie gaat vóór individuele optimalisaties.
+            Kaarten berekenen geen resultaten voor andere domeinen.
           </li>
+
+          <li>
+            Nieuwe kaarten gebruiken bestaande UI-componenten.
+          </li>
+
         </ul>
 
+
         <p>
-          Door deze architectuur blijft het dashboard overzichtelijk en
-          uitbreidbaar. Nieuwe domeinen kunnen worden toegevoegd zonder dat de
-          bestaande gebruikerservaring verandert.
+          Door deze scheiding blijft het dashboard uitbreidbaar zonder dat
+          DashboardStore verandert in een algemene opslagplaats voor alle
+          applicatiedata.
         </p>
+
       </section>
+
+
     </DocumentLayout>
   );
 }

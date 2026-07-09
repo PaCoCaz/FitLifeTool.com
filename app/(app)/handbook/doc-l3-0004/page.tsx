@@ -6,219 +6,349 @@ import HandbookMeta from "../HandbookMeta";
 export default function DocL30004() {
   return (
     <DocumentLayout>
+
       <header>
         <h1>2.3 Brondata, Afgeleide data & Herberekening</h1>
         <HandbookMeta />
       </header>
 
+
       <section>
         <p>
-          Vrijwel alle informatie die FitLifeTool aan de gebruiker toont is
-          afgeleide data. Alleen gebruikersacties en profielgegevens worden
-          permanent opgeslagen; voortgang, statussen, scores en daglimieten
-          worden steeds opnieuw berekend.
+          FitLifeTool maakt een strikt onderscheid tussen opgeslagen
+          brongegevens en realtime berekende waarden.
         </p>
 
         <p>
-          Hierdoor blijft de applicatie altijd synchroon met de actuele
-          situatie en kunnen verbeteringen in de rekenlogica direct worden
-          toegepast zonder historische gegevens aan te passen.
+          Gebruikersinstellingen, persoonlijke doelen en registraties worden
+          opgeslagen. Dagelijkse voortgang, statussen en scores worden hieruit
+          dynamisch berekend.
         </p>
 
         <p>
-          Dit hoofdstuk beschrijft welke gegevens als bron dienen, welke
-          informatie wordt afgeleid en waarom FitLifeTool vrijwel nooit
-          berekende waarden opslaat.
+          Hierdoor blijft de applicatie flexibel: wijzigingen in berekeningen
+          kunnen worden toegepast zonder historische gebruikersdata aan te
+          passen.
         </p>
       </section>
+
 
       <section>
         <h2>Conceptueel model</h2>
 
         <p>
-          Binnen FitLifeTool bestaat een duidelijk onderscheid tussen
-          brongegevens en afgeleide informatie.
+          Binnen FitLifeTool bestaan drie soorten gegevens:
         </p>
+
 
         <div className="table-scroll">
           <table className="label-column">
+
             <thead>
               <tr>
-                <th>Onderdeel</th>
+                <th>Type</th>
                 <th>Omschrijving</th>
               </tr>
             </thead>
 
+
             <tbody>
-              <tr>
-                <td>Dagdoel</td>
-                <td>Referentiewaarde voor de betreffende dag.</td>
-              </tr>
 
               <tr>
-                <td>Voortgang</td>
-                <td>Actuele situatie op basis van loggegevens.</td>
+                <td>Brondata</td>
+
+                <td>
+                  Permanente gegevens zoals gebruikersinstellingen,
+                  producten en logs.
+                </td>
               </tr>
 
-              <tr>
-                <td>Status</td>
-                <td>Realtime interpretatie van de voortgang ten opzichte van het dagschema.</td>
-              </tr>
 
               <tr>
-                <td>Score</td>
-                <td>Numerieke afgeleide van de actuele situatie.</td>
+                <td>Profielwaarden</td>
+
+                <td>
+                  Opgeslagen persoonlijke instellingen zoals doelen,
+                  voorkeuren en berekende doelwaarden.
+                </td>
               </tr>
+
+
+              <tr>
+                <td>Afgeleide dagdata</td>
+
+                <td>
+                  Tijdelijke waarden zoals voortgang, status en scores.
+                </td>
+              </tr>
+
             </tbody>
+
           </table>
         </div>
 
+
         <p>
-          Alleen brongegevens worden opgeslagen. Alle overige informatie wordt
-          op ieder moment opnieuw berekend.
+          Alleen waarden die nodig zijn als stabiele gebruikersconfiguratie
+          worden opgeslagen. Dagresultaten worden opnieuw berekend.
         </p>
       </section>
+
 
       <section>
         <h2>Brongegevens</h2>
 
         <p>
-          De berekeningen zijn gebaseerd op twee soorten brongegevens:
+          De berekeningen binnen FitLifeTool gebruiken meerdere soorten
+          brongegevens.
         </p>
+
 
         <ul>
-          <li>gebruikersprofiel en persoonlijke instellingen</li>
-          <li>gebruikerslogs, zoals voeding, hydratatie, activiteiten en gewicht</li>
+
+          <li>
+            gebruikersprofiel en persoonlijke instellingen;
+          </li>
+
+          <li>
+            productgegevens en voedingswaarden;
+          </li>
+
+          <li>
+            voedingsregistraties via <code>nutrition_logs</code>;
+          </li>
+
+          <li>
+            activiteiten via <code>activity_logs</code>;
+          </li>
+
+          <li>
+            gewichtsregistraties via <code>weight_logs</code>.
+          </li>
+
         </ul>
 
+
         <p>
-          Deze gegevens vormen samen de enige bron van waarheid binnen de
-          applicatie.
+          Hydratatie gebruikt geen aparte daglog. De hydratiewaarde wordt
+          opgebouwd vanuit geregistreerde consumpties, producten en
+          hydratatiefactoren.
         </p>
+
+
+        <p>
+          Deze gegevens vormen samen de reproduceerbare basis van alle
+          berekeningen.
+        </p>
+
       </section>
+
 
       <section>
         <h2>Dynamische afgeleide data</h2>
 
-        <p>
-          Niet alle afgeleide waarden blijven gedurende de dag gelijk. Nieuwe
-          gebeurtenissen kunnen de context veranderen zonder dat bestaande
-          loggegevens worden aangepast.
-        </p>
 
         <p>
-          Het duidelijkste voorbeeld hiervan is de relatie tussen activiteit en
+          Nieuwe gebeurtenissen kunnen de actuele dagstatus veranderen zonder
+          bestaande brongegevens te wijzigen.
+        </p>
+
+
+        <p>
+          Een belangrijk voorbeeld hiervan is de relatie tussen activiteit en
           voeding.
         </p>
 
+
         <ul>
-          <li>Elke activiteit wordt als afzonderlijke log opgeslagen.</li>
 
           <li>
-            De verbruikte energie verhoogt automatisch het beschikbare
-            voedingsbudget van die dag.
+            Een activiteit wordt opgeslagen als bronregistratie.
           </li>
 
           <li>
-            Hierdoor verschuift de actuele voedingslimiet zonder dat eerdere
-            voedingsregistraties worden aangepast.
+            De verbrande energie verhoogt het beschikbare voedingsbudget van
+            dezelfde dag.
           </li>
 
           <li>
-            De NutritionScore, voortgangsbalk en status worden vervolgens
-            onmiddellijk opnieuw berekend.
+            De oorspronkelijke voedingsregistraties blijven ongewijzigd.
           </li>
+
+          <li>
+            NutritionScore, status en voortgang worden opnieuw berekend.
+          </li>
+
         </ul>
 
+
         <p>
-          Hierdoor ondersteunt FitLifeTool gebruikers bij het herstellen van
-          hun energiebalans gedurende de dag. Een gebruiker die tijdelijk voor
-          loopt op zijn calorie-inname kan door extra activiteit later alsnog
-          volledig op schema komen.
+          Hierdoor blijft de volledige dag opnieuw te reconstrueren vanuit de
+          oorspronkelijke gegevens.
         </p>
+
       </section>
+
 
       <section>
         <h2>Realtime herberekening</h2>
 
-        <p>
-          Iedere nieuwe registratie leidt automatisch tot een nieuwe
-          berekening van alle relevante afgeleide gegevens.
-        </p>
 
         <p>
-          De applicatie gebruikt hiervoor steeds dezelfde gegevensstroom:
+          Iedere wijziging volgt dezelfde centrale gegevensstroom.
         </p>
+
 
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
+
           <pre className="whitespace-pre-wrap text-sm leading-7">
-{`Nieuwe log
+{`Nieuwe registratie
       ↓
-DashboardStore
+Supabase
       ↓
 dashboard_day_summary (RPC)
       ↓
-Afgeleide data
+DashboardStore
       ↓
-FitLifeScore
+Dashboard Cards
       ↓
-Dashboard`}
+ScoreContext
+      ↓
+FitLifeScoreCard`}
           </pre>
+
         </div>
 
+
         <p>
-          De gebruikersinterface toont uitsluitend het resultaat van deze
-          berekeningen en bevat zelf geen bedrijfslogica.
+          DashboardStore beheert de actuele daggegevens. De afzonderlijke
+          dashboardkaarten gebruiken deze centrale bron en halen geen eigen
+          dagdata rechtstreeks uit de database.
         </p>
+
+
+        <p>
+          ScoreContext bewaart uitsluitend tijdelijke scores en
+          statusinformatie voor de huidige gebruikersinterface.
+        </p>
+
       </section>
+
+
+      <section>
+        <h2>Profieldata versus dagdata</h2>
+
+
+        <p>
+          Niet alle opgeslagen waarden zijn historische logs. Sommige waarden
+          worden bewust opgeslagen als actuele gebruikersconfiguratie.
+        </p>
+
+
+        <ul>
+
+          <li>
+            caloriebehoefte;
+          </li>
+
+          <li>
+            waterdoel;
+          </li>
+
+          <li>
+            activiteitsdoel;
+          </li>
+
+          <li>
+            persoonlijke instellingen.
+          </li>
+
+        </ul>
+
+
+        <p>
+          Deze waarden vormen de basis waarmee dagelijkse voortgang wordt
+          berekend. Ze zijn geen opgeslagen dagscores.
+        </p>
+
+      </section>
+
 
       <section>
         <h2>Waarom herberekening?</h2>
 
+
         <p>
-          Afgeleide data wordt bewust niet opgeslagen. Hierdoor blijft iedere
-          berekening altijd gebaseerd op dezelfde brongegevens.
+          Afgeleide dagwaarden worden niet opgeslagen omdat ze altijd opnieuw
+          uit dezelfde brongegevens kunnen worden opgebouwd.
         </p>
 
+
         <ul>
-          <li>Nieuwe logs worden direct verwerkt.</li>
 
-          <li>Gewijzigde profielinstellingen werken onmiddellijk door.</li>
+          <li>
+            Nieuwe logs worden direct meegenomen.
+          </li>
 
-          <li>Verbeteringen in rekenregels gelden ook voor historische dagen.</li>
+          <li>
+            Gewijzigde doelen werken onmiddellijk door.
+          </li>
 
-          <li>De database bevat uitsluitend brongegevens.</li>
+          <li>
+            Berekeningen blijven reproduceerbaar.
+          </li>
 
-          <li>Voortgang, status en scores blijven altijd reproduceerbaar.</li>
+          <li>
+            Scores hoeven niet gemigreerd te worden.
+          </li>
+
         </ul>
+
       </section>
+
 
       <section>
         <h2>Belangrijke ontwerpprincipes</h2>
 
+
         <ul>
-          <li>Brongegevens vormen altijd de enige waarheid.</li>
 
-          <li>Voortgang is altijd een berekende waarde.</li>
+          <li>
+            Brondata vormt altijd de waarheid.
+          </li>
 
-          <li>Status wordt realtime bepaald.</li>
+          <li>
+            Profielwaarden zijn opgeslagen configuratie.
+          </li>
 
-          <li>Scores worden nooit opgeslagen.</li>
+          <li>
+            Dagstatus en scores zijn afgeleid.
+          </li>
 
-          <li>Historische loggegevens worden nooit aangepast.</li>
+          <li>
+            DashboardStore beheert dagelijkse voortgang.
+          </li>
 
-          <li>Dashboardgegevens worden telkens opnieuw opgebouwd.</li>
+          <li>
+            ScoreContext bevat alleen tijdelijke UI-status.
+          </li>
 
-          <li>De gebruikersinterface presenteert uitsluitend afgeleide resultaten.</li>
+          <li>
+            Historische data blijft reproduceerbaar.
+          </li>
+
         </ul>
 
+
         <div className="info-box">
-          Binnen FitLifeTool worden uitsluitend brongegevens opgeslagen.
-          Dagdoelen, voortgang, statussen, voedingslimieten en scores zijn
-          afgeleide waarden die op ieder moment opnieuw uit dezelfde gegevens
-          kunnen worden berekend.
+          FitLifeTool bewaart de gegevens die nodig zijn om een situatie opnieuw
+          te berekenen, maar bewaart niet het resultaat van die berekening.
+          Hierdoor blijven scores en inzichten altijd actueel.
         </div>
+
       </section>
+
+
     </DocumentLayout>
   );
 }

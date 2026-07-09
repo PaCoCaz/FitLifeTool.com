@@ -113,7 +113,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0003",
 
     status: "current",
-    updated: "2026-07-02",
+    updated: "2026-07-08",
   },
 
   {
@@ -125,7 +125,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0004",
 
     status: "current",
-    updated: "2026-07-02",
+    updated: "2026-07-08",
   },
 
   {
@@ -188,7 +188,7 @@ export const handbookDocuments: HandbookDocument[] = [
 
     isStart: true,
     status: "current",
-    updated: "2026-07-02",
+    updated: "2026-07-08",
   },
 
   {
@@ -263,7 +263,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0011",
 
     status: "current",
-    updated: "2026-07-02",
+    updated: "2026-07-08",
   },
 
   {
