@@ -55,7 +55,7 @@ export async function POST() {
           customer.stripe_customer_id,
 
         return_url:
-          `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+          `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?stripe_return=portal`,
       }
     );
 

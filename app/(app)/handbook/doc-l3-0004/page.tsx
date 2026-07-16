@@ -145,6 +145,76 @@ export default function DocL30004() {
 
 
       <section>
+        <h2>Favorieten</h2>
+
+        <p>
+          Favoriete voedingsmiddelen en dranken zijn opgeslagen
+          gebruikersvoorkeuren. De favoriet zelf blijft brondata; de vraag of
+          een favoriet actief of gelockt is, wordt afgeleid uit het actuele
+          abonnement en de positie binnen de lijst.
+        </p>
+
+        <p>
+          Favorieten worden uitsluitend via de server-side favorieten-API
+          geladen, toegevoegd en verwijderd. Deze API haalt de actuele limieten
+          op via de canonical entitlementbron en dwingt de limiet server-side
+          af.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+
+            <thead>
+              <tr>
+                <th>Onderdeel</th>
+                <th>Regel</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Volgorde</td>
+                <td>
+                  <code>created_at</code> oplopend bepaalt de stabiele volgorde.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Locked</td>
+                <td>
+                  Wordt afgeleid uit limiet en positie en wordt niet opgeslagen.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Downgrade</td>
+                <td>
+                  Verwijdert geen favorieten; items boven de limiet worden
+                  gelockt.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Upgrade</td>
+                <td>
+                  Ontgrendelt eerder gelockte favorieten automatisch wanneer
+                  de limiet stijgt.
+                </td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+
+        <p>
+          Nieuwe favorieten kunnen niet worden toegevoegd wanneer de actuele
+          limiet is bereikt. Gelockte favorieten blijven zichtbaar en mogen
+          worden verwijderd.
+        </p>
+      </section>
+
+
+      <section>
         <h2>Dynamische afgeleide data</h2>
 
 

@@ -2,6 +2,7 @@
 
 import { stripe } from "./stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import type Stripe from "stripe";
 
 import { handleProduct } from "./handlers/handleProduct";
 import { handlePrice } from "./handlers/handlePrice";
@@ -42,22 +43,22 @@ export function verifyStripeEvent(
 // Idempotency check
 // =========================
 
-async function ensureEventNotProcessed(
+async function hasEventBeenProcessed(
   eventId: string
 ) {
   const supabase = createSupabaseServer();
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("stripe_events")
     .select("id")
     .eq("id", eventId)
     .maybeSingle();
 
-  if (data) {
-    throw new Error(
-      "Stripe event already processed"
-    );
+  if (error) {
+    throw error;
   }
+
+  return Boolean(data);
 }
 
 
@@ -68,12 +69,16 @@ async function saveEvent(
 ) {
   const supabase = createSupabaseServer();
 
-  await supabase
+  const { error } = await supabase
     .from("stripe_events")
     .insert({
       id: eventId,
       type,
     });
+
+  if (error && error.code !== "23505") {
+    throw error;
+  }
 }
 
 
@@ -83,12 +88,14 @@ async function saveEvent(
 // =========================
 
 export async function handleStripeEvent(
-  event: any
+  event: Stripe.Event
 ) {
 
   console.log("STRIPE EVENT:", event.type);
 
-  await ensureEventNotProcessed(event.id);
+  if (await hasEventBeenProcessed(event.id)) {
+    return;
+  }
 
   try {
 
@@ -128,7 +135,11 @@ export async function handleStripeEvent(
 
       case "checkout.session.completed":
         await handleCheckoutSession(event);
-        await handleSubscription(event);
+        /*
+         * A Checkout Session is not a Subscription. The customer
+         * link is stored here; subscription state is synced from
+         * customer.subscription.created/updated events.
+         */
         break;
 
       default:

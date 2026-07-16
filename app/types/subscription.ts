@@ -2,6 +2,7 @@
 
 export type PlanFeatures = {
   has_ai_coach: boolean
+  has_advanced_search_filters: boolean
   has_advanced_stats: boolean
   has_custom_goals: boolean
   has_health_sync: boolean

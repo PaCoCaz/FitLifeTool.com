@@ -3,9 +3,8 @@
 "use client";
 
 import Card from "@/components/ui/Card";
-import Link from "next/link";
 import Image from "next/image";
-import "@/styles/category.css";
+import Link from "next/link";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
@@ -21,28 +20,23 @@ function ActionButton({
     <Link
       href={href}
       className=" 
-        category-card-link
+        app-action-button
+        app-action-button--active
         flex-1
         h-[40px]
         text-xs
         !justify-between
-        items-center
         rounded-[var(--radius)]
         px-3 py-2
-        transition
-        border-[#191970]
-        bg-[#191970]
-        text-white
-        hover:border-[#0095D3]
-        hover:bg-[#0095D3]
-        hover:text-white
       "
     >
       {label}
-      <img
+      <Image
         src="/plus_sign_circle.svg"
         alt=""
-        className="category-card-icon"
+        width={20}
+        height={20}
+        className="h-5 w-5 shrink-0"
       />
     </Link>
   );

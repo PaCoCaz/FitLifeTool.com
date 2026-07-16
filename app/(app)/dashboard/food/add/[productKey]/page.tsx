@@ -16,7 +16,6 @@ import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
 import { useMemo } from "react";
 import Image from "next/image";
-import "@/styles/category.css";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
@@ -31,22 +30,9 @@ type ProductTranslationRow = {
   name: string;
 };
 
-type PreparationKeyRow = {
-  preparation_key: string;
-  nutrition_preparations?: {
-    sort_order: number;
-  };
-};
-
 type PreparationTranslationRow = {
   preparation_key: string;
   name: string;
-};
-
-type PortionRow = {
-  unit_key: string;
-  grams: number | null;
-  ml: number | null;
 };
 
 type UnitTranslationRow = {
@@ -84,30 +70,8 @@ type NutritionRow = {
 };
 
 type FavoriteRow = {
-  id: string;
+  isFavorite: boolean;
 };
-
-function getNutritionScoreColor(grade: string | null) {
-  switch (grade) {
-    case "A":
-      return "bg-green-600 text-white";
-
-    case "B":
-      return "bg-green-200 text-green-800";
-
-    case "C":
-      return "bg-yellow-300 text-[#191970]";
-
-    case "D":
-      return "bg-orange-500 text-white";
-
-    case "E":
-      return "bg-[#C80000] text-white";
-
-    default:
-      return "bg-gray-400 text-white";
-  }
-}
 
 /* ───────── COMPONENT ───────── */
 
@@ -140,56 +104,32 @@ export default function AddFoodPage() {
   const [nutrition, setNutrition] = useState<NutritionRow | null>(null);
 
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const [favoriteId, setFavoriteId] = useState<string | null>(null);
-  const [favoriteCount, setFavoriteCount] = useState<number>(0);
 
   /* ───────── FAVORITE CHECK ───────── */
 
   useEffect(() => {
     if (!user) return;
-    const userId = user.id;
 
     async function checkFavorite() {
-      const { data } = await supabase
-        .from("nutrition_favorites")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("product_key", productKey)
-        .maybeSingle<FavoriteRow>();
+      const res = await fetch(
+        `/api/favorites/access?type=food&productKey=${encodeURIComponent(productKey)}`,
+        {
+          cache: "no-store",
+        }
+      );
 
-      if (data) {
-        setIsFavorite(true);
-        setFavoriteId(data.id);
-      } else {
-        setIsFavorite(false);
-        setFavoriteId(null);
+      if (!res.ok) {
+        return;
       }
+
+      const data =
+        (await res.json()) as FavoriteRow;
+
+      setIsFavorite(data.isFavorite);
     }
 
     checkFavorite();
   }, [user, productKey]);
-
-  /* ───────── FAVORITE COUNT ───────── */
-
-  useEffect(() => {
-    if (!user) return;
-    const userId = user.id;
-
-    async function loadCount() {
-      const { count } = await supabase
-        .from("nutrition_favorites")
-        .select("nutrition_products!inner(is_drink)", {
-          count: "exact",
-          head: true,
-        })
-        .eq("user_id", userId)
-        .eq("nutrition_products.is_drink", false);
-
-      setFavoriteCount(count ?? 0);
-    }
-
-    loadCount();
-  }, [user, isFavorite]);
 
   /* ───────── PRODUCT NAME ───────── */
 
@@ -416,44 +356,51 @@ export default function AddFoodPage() {
   async function toggleFavorite() {
     if (!user) return;
 
-    const userId = user.id;
+    const method = isFavorite ? "DELETE" : "POST";
 
-    if (isFavorite && favoriteId) {
-      await supabase
-        .from("nutrition_favorites")
-        .delete()
-        .eq("id", favoriteId);
+    const res = await fetch("/api/favorites", {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "food",
+        productKey,
+      }),
+    });
 
-      setIsFavorite(false);
-      setFavoriteId(null);
-      return;
-    }
+    if (!res.ok) {
+      const error = await res.json().catch(() => null) as {
+        code?: string;
+      } | null;
 
-    if (
-      limits.max_favorite_foods !== null &&
-      favoriteCount >= limits.max_favorite_foods
-    ) {
-      alert(
-        t.common.favoriteLimitUpgrade.replace(
-          "{{limit}}",
-          String(limits.max_favorite_foods)
-        )
+      if (error?.code === "FAVORITE_LIMIT_REACHED") {
+        alert(
+          t.common.favoriteLimitUpgrade.replace(
+            "{{limit}}",
+            String(limits.max_favorite_foods ?? "")
+          )
+        );
+        return;
+      }
+
+      throw new Error(
+        `Favorite update failed: ${res.status}`
       );
-      return;
     }
 
-    const { data } = await supabase
-      .from("nutrition_favorites")
-      .insert({
-        user_id: userId,
-        product_key: productKey,
-      })
-      .select("id")
-      .single();
+    const access = await fetch(
+      `/api/favorites/access?type=food&productKey=${encodeURIComponent(productKey)}`,
+      {
+        cache: "no-store",
+      }
+    );
 
-    if (data) {
-      setIsFavorite(true);
-      setFavoriteId(data.id);
+    if (access.ok) {
+      const data =
+        (await access.json()) as FavoriteRow;
+
+      setIsFavorite(data.isFavorite);
     }
   }
 
@@ -476,8 +423,6 @@ export default function AddFoodPage() {
         : totalMl !== null
         ? totalMl / 100
         : 0;
-
-    const sodium = (nutrition.sodium_per_100g ?? 0) * factor;
 
     return {
       kcal:
@@ -572,8 +517,8 @@ export default function AddFoodPage() {
   /* ───────── UI ───────── */
 
   return (
-  <div className="category-grid">
-    <div className="category-span-full space-y-3">
+    <div className="grid grid-cols-12 gap-4 items-stretch auto-rows-fr">
+      <div className="col-span-12 space-y-3">
 
       {/* CARD 1 — PRODUCT */}
       <Card

@@ -1,23 +1,51 @@
-/* styles/category.css */
+/* app/styles/public-content.css */
 
-/* Chrome, Safari, Edge */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+/* =========================================================
+  PUBLIC CONTENT — SCOPED TYPOGRAPHY
+========================================================= */
+
+.public-content h1 {
+  margin-bottom: 1rem;
+  font-size: 1.40rem;
+  font-weight: 600;
+  color: #191970;
 }
 
-/* Firefox */
-input[type="number"] {
-  -moz-appearance: textfield;
+.public-content h2 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.20rem;
+  font-weight: 600;
+  color: #191970;
+}
+
+.public-content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #191970;
+}
+
+@media (max-width: 400px) {
+  .public-content h1 {
+    font-size: 1.1rem;
+  }
+
+  .public-content h2 {
+    font-size: 1.05rem;
+  }
+
+  .public-content h3 {
+    font-size: 1.0rem;
+  }
 }
 
 /* =========================================================
-  CATEGORY — GRID & CARDS (DASHBOARD-MODEL)
+ PUBLIC CATEGORY — GRID & CARDS
 ========================================================= */
 
-/* Grid: identiek aan DashboardGrid */
-.category-grid {
+.public-content .category-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 1rem;
@@ -25,17 +53,83 @@ input[type="number"] {
   grid-auto-rows: 1fr;
 }
 
-/* Volledige breedte (12 kolommen) */
-.category-span-full {
+.public-content .category-span-full {
   grid-column: 1 / -1;
 }
 
-/* Basis card */
-.category-card {
+.public-content .category-card {
   background: #ffffff;
   border-radius: var(--radius);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   padding: 1.0rem;
+}
+
+.public-content .category-card-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 40px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ffffff;
+  background-color: #191970;
+  border-radius: 6px;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease;
+  align-self: flex-start;
+}
+
+.public-content .category-card-link:hover {
+  background-color: #0BA4E0;
+}
+
+.public-content .category-card-link img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.public-content .category-card h2 {
+  margin-top: 0.0rem;
+  color: #191970;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.public-content .category-card p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.public-content .category-card p:last-of-type {
+  margin-bottom: 0;
+}
+
+.public-content .category-card-button {
+  margin-top: 1rem;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #191970;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.public-content .category-card-button:hover {
+  background-color: #0BA4E0;
 }
 
 /* =========================================================
@@ -62,48 +156,6 @@ input[type="number"] {
   line-height: 1.7;
   font-size: 1rem;
   max-width: 100%;
-}
-
-/* Koppen */
-h1 {
-  margin-bottom: 1rem;
-  font-size: 1.40rem;
-  font-weight: 600;
-  color: #191970;
-}
-
-h2 {
-  margin-top: 1.25rem;
-  margin-bottom: 0.75rem;
-  font-size: 1.20rem;
-  font-weight: 600;
-  color: #191970;
-}
-
-h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #191970;
-}
-
-/* =========================================================
-  HANDBOEK — TYPOGRAFISCHE SCHAALCORRECTIE (ZEER KLEIN)
-======================================================== */
-
-@media (max-width: 400px) {
-  h1 {
-    font-size: 1.1rem;
-  }
-
-  h2 {
-    font-size: 1.05rem;
-  }
-
-  h3 {
-    font-size: 1.0rem;
-  }
 }
 
 /* =========================================================
@@ -139,53 +191,10 @@ h3 {
 }
 
 /* =========================================================
- CATEGORY CARD — CTA BUTTON (STABIEL)
- ========================================================= */
-
- .category-card-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-
-  width: 100%;
-  height: 40px;
-
-  font-size: 0.875rem;
-  font-weight: 500;
-
-  color: #ffffff;
-  background-color: #191970;
-
-  border-radius: 6px;
-  text-decoration: none;
-
-  box-sizing: border-box;
-  transition: background-color 0.15s ease;
-
-  align-self: flex-start;
-}
-
-.category-card-link:hover {
-  background-color: #0BA4E0;
-}
-
-/* =========================================================
- CATEGORY CARD — CTA ICON
- ========================================================= */
-
- .category-card-link img {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  display: block;
-}
-
-/* =========================================================
  CATEGORY CARD — TEKSTKOLOM MET ONDERLIJNDE CTA
- ========================================================= */
+========================================================= */
 
- .category-card-text {
+.category-card-text {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -199,35 +208,13 @@ h3 {
   .category-card-text .category-card-link {
     margin-top: 1rem;
   }
-}  
-
-/* =========================================================
- CATEGORY — TYPOGRAFIE BINNEN CARDS
- ========================================================= */
-
-.category-card h2 {
-  margin-top: 0.0rem;
-  color: #191970;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-.category-card p {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 0.75rem;
-}
-
-.category-card p:last-of-type {
-  margin-bottom: 0;
 }
 
 /* =========================================================
  CATEGORY — DETAIL ARTIKEL (DOCUMENTSTRUCTUUR)
- ========================================================= */
+========================================================= */
 
- .category-article {
+.category-article {
   padding-top: 0rem;
 }
 
@@ -269,11 +256,7 @@ h3 {
   margin-bottom: 0.25rem;
 }
 
-/* =========================================================
- CATEGORY — DETAIL ARTIKEL (MOBIEL TYPOGRAFIE)
- ========================================================= */
-
- @media (max-width: 480px) {
+@media (max-width: 480px) {
   .category-article h1 {
     font-size: 1.25rem;
     line-height: 1.3;
@@ -282,7 +265,7 @@ h3 {
 
 /* =========================================================
  HOMEPAGE — PREVIEW CARDS LAYOUT
- ========================================================= */
+========================================================= */
 
 .home-grid-2col {
   grid-column: 1 / -1;
@@ -322,7 +305,7 @@ h3 {
 
 /* =========================================================
  HERO CTA BUTTONS (HOMEPAGE)
- ========================================================= */
+========================================================= */
 
 .hero-cta {
   display: flex;
@@ -385,24 +368,24 @@ h3 {
 
 /* =========================================================
  HERO H1 — MOBIEL SCHAALBAAR
- ========================================================= */
+========================================================= */
 
 @media (max-width: 850px) {
   .category-intro-card h1 {
     font-size: 1.5rem;
-    line-height: 1.3; 
+    line-height: 1.3;
   }
 }
 
 @media (max-width: 640px) {
   .category-intro-card h1 {
-    font-size: 1.4rem;  
+    font-size: 1.4rem;
   }
 }
 
 @media (max-width: 400px) {
   .category-intro-card h1 {
-    font-size: 1.1rem;  
+    font-size: 1.1rem;
   }
 
   .hero-primary-btn {
@@ -412,7 +395,7 @@ h3 {
 
 /* =========================================================
  HOMEPAGE PREVIEW GRID
- ========================================================= */
+========================================================= */
 
 .home-preview-card {
   grid-column: span 12;
@@ -431,119 +414,71 @@ h3 {
 }
 
 /* =========================================================
-   HOMEPAGE — PREVIEW CARD TITELS
-   ========================================================= */
-
-   .home-preview-card h2 {
-      font-size: 1.1rem;
-      line-height: 1.3;
-      margin-bottom: 0.75rem;
-    }
-  
-  @media (max-width: 800px) {
-    .home-preview-card h2 {
-      font-size: 1.05rem;
-    }
-  }
-
-  @media (max-width: 400px) {
-    .home-preview-card h2 {
-      font-size: 0.95rem;
-    }
-  }
-  
-/* =========================================================
-   PREVIEW TITEL MET ICON (HOMEPAGE)
-   ========================================================= */
-
-   .title-icon {
-    height: 1em;              /* schaalt exact mee met tekstgrootte */
-    width: auto;
-    vertical-align: -0.15em;  /* duwt icoon optisch naar de baseline */
-    margin-right: 0.5rem;
-    display: inline-block;    /* voorkomt rare line breaks */
-  }
-
-/* =========================================================
-   CATEGORY CARDS — BUTTON ONDER AFBEELDING
-   ========================================================= */
-
-   .category-card-button {
-    margin-top: 1rem;
-    align-self: flex-start;
-  
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-  
-    height: 38px;
-    padding: 0.75rem 1rem;
-  
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-decoration: none;
-  
-    color: #ffffff;
-    background-color: #191970;
-    border-radius: 6px;
-  
-    transition: background-color 0.15s ease;
-  }
-  
-  .category-card-button:hover {
-    background-color: #0BA4E0;
-  }
-
-/* =========================================================
-  INTRO CARD — INLINE LINKS (SEO HERO)
+ HOMEPAGE — PREVIEW CARD TITELS
 ========================================================= */
 
-   .category-article-intro-card a {
-    color: #0BA4E0;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.15s ease;
+.home-preview-card h2 {
+  font-size: 1.1rem;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 800px) {
+  .home-preview-card h2 {
+    font-size: 1.05rem;
   }
-  
-  .category-article-intro-card a:hover {
-    color: #C80000;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }  
+}
+
+@media (max-width: 400px) {
+  .home-preview-card h2 {
+    font-size: 0.95rem;
+  }
+}
 
 /* =========================================================
-  SEO ARTIKEL — LINK STYLING (ALLEEN CONTENT)
+ INTRO CARD — INLINE LINKS (SEO HERO)
 ========================================================= */
 
-  .category-article a {
-    color: #0BA4E0;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.15s ease;
-  }
-  
-  .category-article a:hover {
-    color: #C80000;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }  
-  
+.category-article-intro-card a {
+  color: #0BA4E0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.category-article-intro-card a:hover {
+  color: #C80000;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* =========================================================
+ SEO ARTIKEL — LINK STYLING (ALLEEN CONTENT)
+========================================================= */
+
+.category-article a {
+  color: #0BA4E0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.category-article a:hover {
+  color: #C80000;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* ==============================================
-   SEO PAGE — EERSTE RIJ GELIJKE HOOGTE CARDS
-   ============================================== */
+ SEO PAGE — EERSTE RIJ GELIJKE HOOGTE CARDS
+============================================== */
 
-   .category-equal-card {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-  
-  /* Zorg dat de grid-rij rekt */
-  .category-grid {
-    align-items: stretch;
-  }
+.category-equal-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 
-  /* Afbeelding vult volledige cardhoogte */
 .category-image-fill {
   flex: 1;
   display: flex;
@@ -557,10 +492,9 @@ h3 {
 }
 
 /* ===============================
-   SEO PAGE — INTRO LAYOUT FIX
+ SEO PAGE — INTRO LAYOUT FIX
 ================================ */
 
-/* Standaard (desktop) */
 .seo-intro-text {
   grid-column: span 8;
 }
@@ -569,60 +503,55 @@ h3 {
   grid-column: span 4;
 }
 
-/* 🔥 Mobiel: onder elkaar */
 @media (max-width: 850px) {
   .seo-intro-text,
   .seo-intro-image {
-    grid-column: 1 / -1; /* full width */
+    grid-column: 1 / -1;
   }
 }
 
 /* =========================================================
-  TABELVARIANTEN
+ TABELVARIANTEN
 ========================================================= */
-  
-  .table.label-column {
-    table-layout: auto;
-  }
-    
-  .table.key-column {
-    table-layout: fixed;
-  }
-    
-/* =========================================================
-   ✅ CANONIEKE RESPONSIVE TABEL-OPLOSSING
-========================================================= */
-    
-  /* Wrapper rond tabellen */
-  .table-scroll {
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-    
-  /* Tabel blijft tabel */
-  .table-scroll > table {
-    min-width: 520px; /* werkt perfect tot 360px */
-  }
-    
-  /* Mobiel: voorkom afbreken van cellen */
-  @media (max-width: 480px) {
-    th,
-    td {
-      white-space: nowrap;
-    }
-  }
 
-  /* Lijsten */
-  ul {
-    list-style-type: disc;
-    list-style-position: outside;
-    margin: 0.75rem 0 1rem 0;
-    padding-left: 1.25rem;
+.table.label-column {
+  table-layout: auto;
+}
+
+.table.key-column {
+  table-layout: fixed;
+}
+
+/* =========================================================
+ CANONIEKE RESPONSIVE TABEL-OPLOSSING
+========================================================= */
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll > table {
+  min-width: 520px;
+}
+
+@media (max-width: 480px) {
+  .public-content th,
+  .public-content td {
+    white-space: nowrap;
   }
-  
+}
+
+.public-content ul {
+  list-style-type: disc;
+  list-style-position: outside;
+  margin: 0.75rem 0 1rem 0;
+  padding-left: 1.25rem;
+}
+
 /* =========================================
-   FAQ ACCORDION (SEO PAGINA'S)
+ FAQ ACCORDION (SEO PAGINA'S)
 ========================================= */
 
 .faq-accordion {

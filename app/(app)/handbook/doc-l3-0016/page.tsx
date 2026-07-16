@@ -112,6 +112,134 @@ export default function DocL30016() {
       </section>
 
       <section>
+        <h2>Abonnementen en rechten</h2>
+
+        <p>
+          Abonnementen bepalen welke productfeatures beschikbaar zijn voor een
+          gebruiker. De canonical bron voor deze rechten is
+          <code> get_user_plan_features()</code>.
+        </p>
+
+        <p>
+          Deze functie vertaalt de actuele subscriptionstatus naar één
+          feature- en limitobject. Clientcomponenten lezen geen Stripe-status
+          en voeren geen eigen planvergelijkingen uit.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Onderdeel</th>
+                <th>Rol</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>get_user_plan_features()</td>
+                <td>
+                  Enige canonical bron voor features en limieten.
+                </td>
+              </tr>
+
+              <tr>
+                <td>DashboardStore</td>
+                <td>
+                  Leest uitsluitend deze RPC voor client-side entitlements.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Server-side API&apos;s</td>
+                <td>
+                  Controleren limieten opnieuw via dezelfde canonical bron.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Planrechten worden nooit afgeleid uit hardcoded plannamen in
+          componenten. Componenten reageren alleen op ontvangen features en
+          limieten.
+        </p>
+      </section>
+
+      <section>
+        <h2>Feature-gating</h2>
+
+        <p>
+          Feature-gating gebruikt expliciete featurevelden. Een voorbeeld is
+          <code> has_advanced_search_filters</code>, waarmee geavanceerde
+          zoekfilters worden vrijgegeven.
+        </p>
+
+        <ul>
+          <li>
+            Free-gebruikers zien een gelockte filterknop.
+          </li>
+
+          <li>
+            Premium-, Pro- en Coach-gebruikers kunnen filters gebruiken.
+          </li>
+
+          <li>
+            UI-componenten controleren featurevelden en geen planlabels.
+          </li>
+
+          <li>
+            Server-side routes blijven verantwoordelijk voor harde limieten.
+          </li>
+        </ul>
+
+        <p>
+          Hierdoor kan het productmodel wijzigen zonder dat clientcomponenten
+          opnieuw moeten worden ingericht.
+        </p>
+      </section>
+
+      <section>
+        <h2>Browser return refresh</h2>
+
+        <p>
+          Na terugkeer uit Stripe Checkout of Customer Portal wordt de
+          client-side entitlementstate automatisch opnieuw opgehaald.
+        </p>
+
+        <p>
+          DashboardStore gebruikt hiervoor de gedeelde browser-return helper.
+          SubscriptionCard gebruikt dezelfde helper om de zichtbare
+          abonnementsdetails te verversen.
+        </p>
+
+        <ul>
+          <li>
+            Er wordt geen polling gebruikt.
+          </li>
+
+          <li>
+            Componenten voegen geen eigen losse browserlisteners toe.
+          </li>
+
+          <li>
+            Terugkeer via Stripe-markers, pageshow, visibilitychange en focus
+            wordt centraal afgehandeld.
+          </li>
+
+          <li>
+            Gelijktijdige events worden gededupliceerd.
+          </li>
+        </ul>
+
+        <p>
+          Hierdoor worden feature-gated onderdelen direct bijgewerkt zonder
+          volledige browserrefresh.
+        </p>
+      </section>
+
+      <section>
         <h2>Implementatie</h2>
 
         <p>
@@ -185,6 +313,8 @@ export default function DocL30016() {
           <li>Een verwijderde flag laat geen technische schuld achter.</li>
 
           <li>Data blijft onafhankelijk van actieve features.</li>
+
+          <li>Abonnementsrechten komen uit één canonical entitlementbron.</li>
         </ul>
 
         <p>

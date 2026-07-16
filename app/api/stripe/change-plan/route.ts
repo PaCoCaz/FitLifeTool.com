@@ -3,6 +3,7 @@
 import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
+import { isAllowedStripePriceId } from "@/lib/stripe/planLookup";
 
 export async function POST(req: Request) {
 
@@ -32,6 +33,18 @@ export async function POST(req: Request) {
 
   const supabaseAdmin =
     createSupabaseServer();
+
+  if (
+    !(await isAllowedStripePriceId(
+      supabaseAdmin,
+      priceId
+    ))
+  ) {
+    return new Response(
+      JSON.stringify({ error: "Invalid price" }),
+      { status: 400 }
+    );
+  }
 
   // -------------------------
   // customer

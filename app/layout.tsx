@@ -1,7 +1,9 @@
 // app/layout.tsx
 
 import type { Metadata } from "next";
-import "./styles/globals.css";
+import "@/styles/globals.css";
+import "@/styles/components.css";
+import "@/styles/public-content.css";
 
 import { AuthProvider } from "./lib/AuthProvider";
 import { TimeProvider } from "./lib/TimeProvider";

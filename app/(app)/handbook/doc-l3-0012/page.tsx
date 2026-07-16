@@ -136,6 +136,56 @@ Gebruiker`}
       </section>
 
       <section>
+        <h2>CSS-structuur</h2>
+
+        <p>
+          De globale styling is verdeeld over een klein aantal duidelijke
+          stylesheets. Iedere stylesheet heeft een eigen verantwoordelijkheid.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Bestand</th>
+                <th>Verantwoordelijkheid</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>globals.css</td>
+                <td>
+                  Globale basisregels en browsernormalisatie.
+                </td>
+              </tr>
+
+              <tr>
+                <td>components.css</td>
+                <td>
+                  Herbruikbare UI-componentklassen zoals centrale
+                  buttonstijlen.
+                </td>
+              </tr>
+
+              <tr>
+                <td>public-content.css</td>
+                <td>
+                  Homepage, publieke categoriepagina&apos;s, SEO-content en FAQ.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          <code>category.css</code> bestaat niet meer. Publieke pagina&apos;s
+          renderen binnen <code>.public-content</code>, zodat publieke
+          contentstijlen gescheiden blijven van dashboard- en applicatiestijlen.
+        </p>
+      </section>
+
+      <section>
         <h2>Belangrijke ontwerpprincipes</h2>
 
         <ul>
@@ -148,6 +198,8 @@ Gebruiker`}
           <li>Businesslogica is volledig onafhankelijk van schermgrootte.</li>
 
           <li>Nieuwe layouts volgen dezelfde responsieve architectuur.</li>
+
+          <li>Publieke content gebruikt public-content.css binnen de publieke scope.</li>
 
           <li>Gebruikers ervaren op ieder apparaat dezelfde functionaliteit.</li>
         </ul>

@@ -2,16 +2,32 @@
 
 import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import type Stripe from "stripe";
+import { syncCustomerEntitlements } from "../entitlementSync";
+import { persistStripeSubscription } from "../subscriptionPersistence";
+
+type InvoiceWithSubscription = Stripe.Invoice & {
+  subscription?: string | Stripe.Subscription | null;
+};
+
+function getStripeId(
+  value: string | { id?: string } | null | undefined
+) {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  return value.id ?? null;
+}
 
 export async function handleInvoice(
-  event: any
+  event: Stripe.Event
 ) {
   const supabase = createSupabaseServer();
 
-  const invoice = event.data.object;
+  const invoice =
+    event.data.object as InvoiceWithSubscription;
 
   const subscriptionId =
-    invoice.subscription;
+    getStripeId(invoice.subscription);
 
   if (!subscriptionId) {
     return;
@@ -28,11 +44,11 @@ export async function handleInvoice(
       {
         expand: ["items.data.price"],
       }
-    )) as any;
+    )) as Stripe.Subscription;
 
 
   const stripeCustomerId =
-    subscription.customer;
+    getStripeId(subscription.customer);
 
   if (!stripeCustomerId) {
     return;
@@ -43,7 +59,7 @@ export async function handleInvoice(
   // customer zoeken
   // -------------------------
 
-  const { data: customer } =
+  const { data: customer, error: customerError } =
     await supabase
       .from("customers")
       .select("id, user_id")
@@ -51,20 +67,15 @@ export async function handleInvoice(
         "stripe_customer_id",
         stripeCustomerId
       )
-      .single();
+      .maybeSingle();
+
+  if (customerError) {
+    throw customerError;
+  }
 
   if (!customer) {
     return;
   }
-
-
-  function toDate(
-    value: number | null | undefined
-  ) {
-    if (!value) return null;
-    return new Date(value * 1000);
-  }
-
 
   // -------------------------
   // status bepalen
@@ -88,26 +99,15 @@ export async function handleInvoice(
   // subscription upsert
   // -------------------------
 
-  await supabase
-    .from("subscriptions")
-    .upsert({
-      id: subscription.id,
+  await persistStripeSubscription(
+    supabase,
+    subscription,
+    customer.id,
+    {
+      status: status ?? subscription.status,
+    }
+  );
 
-      customer_id:
-        customer.id,
-
-      status:
-        status ?? subscription.status,
-
-      current_period_start:
-        toDate(
-          subscription.current_period_start
-        ),
-
-      current_period_end:
-        toDate(
-          subscription.current_period_end
-        ),
-    });
+  await syncCustomerEntitlements(stripeCustomerId);
 
 }

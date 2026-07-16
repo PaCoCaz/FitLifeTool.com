@@ -72,7 +72,7 @@ export async function POST() {
           customer.stripe_customer_id,
 
         return_url:
-          `${process.env.NEXT_PUBLIC_SITE_URL}/settings`,
+          `${process.env.NEXT_PUBLIC_SITE_URL}/settings?stripe_return=portal_update`,
 
         flow_data: {
           type: "subscription_update",

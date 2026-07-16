@@ -4,78 +4,69 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
-  useState,
   useRef,
+  useState,
 } from "react";
 
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useDayNow } from "@/lib/useDayNow";
 import { getLocalDayKey } from "@/lib/dayKey";
-
+import { useBrowserReturnRefresh } from "@/lib/useBrowserReturnRefresh";
 
 /* ───────────────── Types ───────────────── */
 
-type UserGoal =
-  | "LOSE"
-  | "MAINTAIN"
-  | "GAIN";
+type UserGoal = "LOSE" | "MAINTAIN" | "GAIN";
 
+type PlanFeatures = {
+  has_full_food_database: boolean;
+  has_ai_coach: boolean;
+  has_advanced_search_filters: boolean;
+};
+
+type PlanLimits = {
+  max_favorite_foods: number | null;
+  max_favorite_drinks: number | null;
+};
 
 type DashboardState = {
-
   features: PlanFeatures;
   limits: PlanLimits;
-
 
   hydrationMl: number;
   hydrationDrinkMl: number;
   hydrationFoodMl: number;
   hydrationGoalMl: number | null;
 
-
   nutritionKcal: number;
   calorieGoal: number | null;
   goal: UserGoal | null;
 
-
   activityCalories: number;
   activityGoal: number | null;
 
-
   abonnement: string;
-
 
   refreshDashboard: () => Promise<void>;
 
-
   ready: boolean;
-
 };
 
-
-type PlanFeatures = {
-
-  has_full_food_database: boolean;
-  has_ai_coach: boolean;
-
+const DEFAULT_FEATURES: PlanFeatures = {
+  has_full_food_database: false,
+  has_ai_coach: false,
+  has_advanced_search_filters: false,
 };
 
-
-type PlanLimits = {
-
-  max_favorite_foods: number | null;
-  max_favorite_drinks: number | null;
-
+const DEFAULT_LIMITS: PlanLimits = {
+  max_favorite_foods: 3,
+  max_favorite_drinks: 3,
 };
 
-
-const DashboardContext =
-  createContext<DashboardState | null>(null);
-
-
+const DashboardContext = createContext<DashboardState | null>(null);
 
 /* ───────────────── Provider ───────────────── */
 
@@ -84,465 +75,322 @@ export function DashboardProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { user } = useUser();
 
-
-  const { user } =
-    useUser();
-
-
-  const dayNow =
-    useDayNow();
-
-
-  const dayKey =
-    getLocalDayKey(dayNow);
-
-
+  const dayNow = useDayNow();
+  const dayKey = getLocalDayKey(dayNow);
 
   /* ───────────────── State ───────────────── */
 
-
-  const [hydrationMl, setHydrationMl] =
-    useState(0);
-
-
-  const [hydrationDrinkMl, setHydrationDrinkMl] =
-    useState(0);
-
-
-  const [hydrationFoodMl, setHydrationFoodMl] =
-    useState(0);
-
-
+  const [hydrationMl, setHydrationMl] = useState(0);
+  const [hydrationDrinkMl, setHydrationDrinkMl] = useState(0);
+  const [hydrationFoodMl, setHydrationFoodMl] = useState(0);
   const [hydrationGoalMl, setHydrationGoalMl] =
     useState<number | null>(null);
 
-
-
-  const [nutritionKcal, setNutritionKcal] =
-    useState(0);
-
-
+  const [nutritionKcal, setNutritionKcal] = useState(0);
   const [calorieGoal, setCalorieGoal] =
     useState<number | null>(null);
 
+  const [goal, setGoal] = useState<UserGoal | null>(null);
 
-  const [goal, setGoal] =
-    useState<UserGoal | null>(null);
-
-
-
-  const [activityCalories, setActivityCalories] =
-    useState(0);
-
-
+  const [activityCalories, setActivityCalories] = useState(0);
   const [activityGoal, setActivityGoal] =
     useState<number | null>(null);
 
-
-
-  const [abonnement, setAbonnement] =
-    useState("free");
-
-
+  const [abonnement, setAbonnement] = useState("free");
 
   const [features, setFeatures] =
-    useState<PlanFeatures>({
-
-      has_full_food_database: false,
-      has_ai_coach: false,
-
-    });
-
-
+    useState<PlanFeatures>(DEFAULT_FEATURES);
 
   const [limits, setLimits] =
-    useState<PlanLimits>({
+    useState<PlanLimits>(DEFAULT_LIMITS);
 
-      max_favorite_foods: 3,
-      max_favorite_drinks: 3,
+  const [ready, setReady] = useState(false);
 
-    });
-
-
-
-  const [ready, setReady] =
-    useState(false);
-
-
-
-  const refreshingRef =
-    useRef(false);
-
-
-  const mountedRef =
-    useRef(true);
-
-
+  const refreshingRef = useRef(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-
-
     mountedRef.current = true;
 
-
     return () => {
-
       mountedRef.current = false;
-
     };
-
-
   }, []);
-
-
 
   /* ───────────────── Refresh ───────────────── */
 
-
-  async function refreshDashboard(
+  const refreshDashboard = useCallback(async (
     dayKeyOverride?: string
-  ) {
+  ): Promise<void> => {
+    if (!user?.id) {
+      return;
+    }
 
-
-    if (!user?.id) return;
-
-
-    if (refreshingRef.current) return;
-
+    if (refreshingRef.current) {
+      return;
+    }
 
     refreshingRef.current = true;
 
-
     if (mountedRef.current) {
-
       setReady(false);
-
     }
 
+    try {
+      const freshDayKey =
+        dayKeyOverride ?? getLocalDayKey(new Date());
 
-
-    const freshDayKey =
-      dayKeyOverride ??
-      getLocalDayKey(new Date());
-
-
-
-    const [
-
-      rpcResult,
-      profileResult,
-      planResult,
-
-    ] = await Promise.all([
-
-
-
-      supabase.rpc(
-        "dashboard_day_summary",
-        {
+      /*
+       * De basisprofielgegevens en goal worden bewust
+       * apart opgehaald.
+       *
+       * Daardoor kan een fout bij de kolom "goal"
+       * niet meer de query voor "abonnement" laten mislukken.
+       */
+      const [
+        rpcResult,
+        profileResult,
+        goalResult,
+        planResult,
+      ] = await Promise.all([
+        supabase.rpc("dashboard_day_summary", {
           p_user_id: user.id,
           p_day: freshDayKey,
-        }
-      ),
+        }),
 
+        supabase
+          .from("profiles")
+          .select(
+            `
+            water_goal_ml,
+            calorie_goal,
+            activity_goal_kcal,
+            abonnement
+            `
+          )
+          .eq("id", user.id)
+          .single(),
 
+        supabase
+          .from("profiles")
+          .select("goal")
+          .eq("id", user.id)
+          .single(),
 
-      supabase
-
-        .from("profiles")
-
-        .select(
-          `
-          water_goal_ml,
-          calorie_goal,
-          activity_goal_kcal,
-          goal,
-          abonnement
-          `
-        )
-
-        .eq(
-          "id",
-          user.id
-        )
-
-        .single(),
-
-
-
-      supabase.rpc(
-        "get_user_plan_features",
-        {
+        supabase.rpc("get_user_plan_features", {
           p_user_id: user.id,
+        }),
+      ]);
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      /* ───────────── Error logging ───────────── */
+
+      if (rpcResult.error) {
+        console.error(
+          "Dashboard summary error:",
+          rpcResult.error
+        );
+      }
+
+      if (profileResult.error) {
+        console.error(
+          "Dashboard profile error:",
+          profileResult.error
+        );
+      }
+
+      if (goalResult.error) {
+        console.error(
+          "Dashboard goal error:",
+          goalResult.error
+        );
+      }
+
+      if (planResult.error) {
+        console.error(
+          "Dashboard plan error:",
+          planResult.error
+        );
+      }
+
+      /* ───────────── Daily summary ───────────── */
+
+      const rows = rpcResult.data;
+      const row = Array.isArray(rows) ? rows[0] : null;
+
+      if (row) {
+        const drinkMl = Number(row.drink_ml ?? 0);
+        const foodMl = Number(row.food_water_ml ?? 0);
+
+        setNutritionKcal(
+          Number(row.kcal ?? 0)
+        );
+
+        setHydrationDrinkMl(drinkMl);
+        setHydrationFoodMl(foodMl);
+        setHydrationMl(drinkMl + foodMl);
+
+        setActivityCalories(
+          Number(row.activity_kcal ?? 0)
+        );
+      } else if (!rpcResult.error) {
+        setNutritionKcal(0);
+
+        setHydrationMl(0);
+        setHydrationDrinkMl(0);
+        setHydrationFoodMl(0);
+
+        setActivityCalories(0);
+      }
+
+      /* ───────────── Profile ───────────── */
+
+      if (!profileResult.error && profileResult.data) {
+        const profile = profileResult.data;
+
+        setHydrationGoalMl(
+          profile.water_goal_ml ?? null
+        );
+
+        setCalorieGoal(
+          profile.calorie_goal ?? null
+        );
+
+        setActivityGoal(
+          profile.activity_goal_kcal ?? null
+        );
+
+        /*
+         * Alleen aanpassen wanneer de profielquery echt
+         * gelukt is. Een queryfout zet Premium dus niet
+         * meer automatisch om naar Free.
+         */
+        setAbonnement(
+          profile.abonnement ?? "free"
+        );
+      }
+
+      /* ───────────── Goal ───────────── */
+
+      if (!goalResult.error && goalResult.data) {
+        const profileGoal = goalResult.data.goal;
+
+        if (
+          profileGoal === "LOSE" ||
+          profileGoal === "MAINTAIN" ||
+          profileGoal === "GAIN"
+        ) {
+          setGoal(profileGoal);
+        } else {
+          setGoal(null);
         }
-      ),
+      }
 
+      /* ───────────── Plan features ───────────── */
 
-    ]);
-
-
-
-    if (!mountedRef.current) {
-
-      refreshingRef.current = false;
-
-      return;
-
-    }
-
-
-
-    const rows =
-      rpcResult.data;
-
-
-    const profile =
-      profileResult.data;
-
-
-
-    const row =
-      rows?.[0];
-
-
-
-    if (row) {
-
-
-      setNutritionKcal(
-        row.kcal ?? 0
-      );
-
-
-      const drinkMl =
-        row.drink_ml ?? 0;
-
-
-      const foodMl =
-        row.food_water_ml ?? 0;
-
-
-
-      setHydrationDrinkMl(
-        drinkMl
-      );
-
-
-      setHydrationFoodMl(
-        foodMl
-      );
-
-
-      setHydrationMl(
-        drinkMl + foodMl
-      );
-
-
-
-      setActivityCalories(
-        row.activity_kcal ?? 0
-      );
-
-
-    } else {
-
-
-      setNutritionKcal(0);
-
-
-      setHydrationMl(0);
-      setHydrationDrinkMl(0);
-      setHydrationFoodMl(0);
-
-
-      setActivityCalories(0);
-
-    }
-
-
-
-    setHydrationGoalMl(
-      profile?.water_goal_ml ?? null
-    );
-
-
-    setCalorieGoal(
-      profile?.calorie_goal ?? null
-    );
-
-
-    setGoal(
-      profile?.goal ?? null
-    );
-
-
-    setActivityGoal(
-      profile?.activity_goal_kcal ?? null
-    );
-
-
-    setAbonnement(
-      profile?.abonnement ?? "free"
-    );
-
-
-
-    const plan =
-      Array.isArray(planResult.data)
-
+      const plan = Array.isArray(planResult.data)
         ? planResult.data[0]
-
         : planResult.data;
 
+      if (!planResult.error && plan) {
+        setFeatures({
+          has_full_food_database:
+            plan.features?.has_full_food_database ?? false,
 
+          has_ai_coach:
+            plan.features?.has_ai_coach ?? false,
 
-    if (plan) {
+          has_advanced_search_filters:
+            plan.features?.has_advanced_search_filters ?? false,
+        });
 
+        setLimits({
+          max_favorite_foods:
+            plan.limits?.max_favorite_foods ?? null,
 
-      setFeatures(
-        plan.features
+          max_favorite_drinks:
+            plan.limits?.max_favorite_drinks ?? null,
+        });
+      } else if (!planResult.error) {
+        setFeatures(DEFAULT_FEATURES);
+        setLimits(DEFAULT_LIMITS);
+      }
+    } catch (error) {
+      console.error(
+        "Unexpected dashboard refresh error:",
+        error
       );
+    } finally {
+      refreshingRef.current = false;
 
-
-      setLimits(
-        plan.limits
-      );
-
-
-    } else {
-
-
-      setFeatures({
-
-        has_full_food_database: false,
-        has_ai_coach: false,
-
-      });
-
-
-      setLimits({
-
-        max_favorite_foods: 3,
-        max_favorite_drinks: 3,
-
-      });
-
-
+      if (mountedRef.current) {
+        setReady(true);
+      }
     }
-
-
-
-    setReady(true);
-
-
-    refreshingRef.current = false;
-
-
-  }
-
-
+  }, [user?.id]);
 
   /* ───────────────── Load ───────────────── */
 
-
   useEffect(() => {
-
-
     if (!user?.id) {
-
-
       setReady(false);
-
-
       return;
-
-
     }
 
+    void refreshDashboard(dayKey);
+  }, [user?.id, dayKey, refreshDashboard]);
 
-    refreshDashboard(
-      dayKey
-    );
-
-
-  }, [
-    user?.id,
-    dayKey,
-  ]);
-
-
+  useBrowserReturnRefresh(
+    () => refreshDashboard(),
+    {
+      enabled: Boolean(user?.id),
+    }
+  );
 
   /* ───────────────── Context ───────────────── */
 
-
   return (
-
     <DashboardContext.Provider
-
       value={{
-
-
         features,
         limits,
-
 
         hydrationMl,
         hydrationDrinkMl,
         hydrationFoodMl,
         hydrationGoalMl,
 
-
         nutritionKcal,
         calorieGoal,
         goal,
 
-
         activityCalories,
         activityGoal,
 
-
         abonnement,
-
 
         refreshDashboard,
         ready,
-
-
       }}
-
     >
-
       {children}
-
     </DashboardContext.Provider>
-
   );
-
 }
-
-
 
 /* ───────────────── Hook ───────────────── */
 
 export function useDashboard() {
-
-
-  const ctx =
-    useContext(
-      DashboardContext
-    );
-
+  const ctx = useContext(DashboardContext);
 
   if (!ctx) {
-
-    throw new Error(
-      "DashboardProvider missing"
-    );
-
+    throw new Error("DashboardProvider missing");
   }
 
-
   return ctx;
-
 }

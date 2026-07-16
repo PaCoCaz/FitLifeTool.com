@@ -16,7 +16,6 @@ import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
 import { useMemo } from "react";
 import Image from "next/image";
-import "@/styles/category.css";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
@@ -33,6 +32,9 @@ type ProductTranslationRow = {
 
 type PreparationKeyRow = {
   preparation_key: string;
+  nutrition_preparations?: {
+    sort_order: number | null;
+  };
 };
 
 type PreparationTranslationRow = {
@@ -78,30 +80,8 @@ type NutritionRow = {
 };
 
 type FavoriteRow = {
-  id: string;
+  isFavorite: boolean;
 };
-
-function getNutritionScoreColor(grade: string | null) {
-  switch (grade) {
-    case "A":
-      return "bg-green-600 text-white";
-
-    case "B":
-      return "bg-green-200 text-green-800";
-
-    case "C":
-      return "bg-yellow-300 text-[#191970]";
-
-    case "D":
-      return "bg-orange-500 text-white";
-
-    case "E":
-      return "bg-[#C80000] text-white";
-
-    default:
-      return "bg-gray-400 text-white";
-  }
-}
 
 /* ───────────────── Component ───────────────── */
 
@@ -134,58 +114,32 @@ export default function AddFoodPage() {
   const [nutrition, setNutrition] = useState<NutritionRow | null>(null);
   
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const [favoriteId, setFavoriteId] = useState<string | null>(null);
-  const [favoriteCount, setFavoriteCount] = useState<number>(0);
 
   /* ⭐ CHECK FAVORITE */
 
   useEffect(() => {
     if (!user || !productKey) return;
 
-    const userId = user.id;
-
     async function checkFavorite() {
-      const { data } = await supabase
-        .from("nutrition_favorites")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("product_key", productKey)
-        .maybeSingle<FavoriteRow>();
+      const res = await fetch(
+        `/api/favorites/access?type=drink&productKey=${encodeURIComponent(productKey)}`,
+        {
+          cache: "no-store",
+        }
+      );
 
-      if (data) {
-        setIsFavorite(true);
-        setFavoriteId(data.id);
-      } else {
-        setIsFavorite(false);
-        setFavoriteId(null);
+      if (!res.ok) {
+        return;
       }
+
+      const data =
+        (await res.json()) as FavoriteRow;
+
+      setIsFavorite(data.isFavorite);
     }
 
     checkFavorite();
   }, [user, productKey]);
-
-  /* ⭐ LOAD FAVORITE COUNT */
-
-  useEffect(() => {
-    if (!user) return;
-
-    const userId = user.id;
-
-    async function loadFavoriteCount() {
-      const { count } = await supabase
-        .from("nutrition_favorites")
-        .select("nutrition_products!inner(is_drink)", {
-          count: "exact",
-          head: true,
-        })
-        .eq("user_id", userId)
-        .eq("nutrition_products.is_drink", true);
-
-      setFavoriteCount(count ?? 0);
-    }
-
-    loadFavoriteCount();
-  }, [user, isFavorite]);
 
   /* ───────────────── PRODUCT NAME ───────────────── */
 
@@ -269,8 +223,8 @@ export default function AddFoodPage() {
 
       if (!data) return;
 
-      const sortedKeys = [...(data ?? [])]
-        .sort((a: any, b: any) => {
+      const sortedKeys = [...((data ?? []) as PreparationKeyRow[])]
+        .sort((a, b) => {
           const aOrder =
             a.nutrition_preparations?.sort_order ?? 999;
 
@@ -279,7 +233,7 @@ export default function AddFoodPage() {
 
           return aOrder - bOrder;
         })
-        .map((d: any) => d.preparation_key);
+        .map((d) => d.preparation_key);
 
       const uniqueKeys = Array.from(new Set(sortedKeys));
 
@@ -402,55 +356,53 @@ export default function AddFoodPage() {
   async function toggleFavorite(productKeyInput: string) {
     if (!user) return;
 
-    const { data: existing } = await supabase
-      .from("nutrition_favorites")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("product_key", productKeyInput)
-      .maybeSingle();
+    const method = isFavorite ? "DELETE" : "POST";
 
-    if (existing) {
-      await supabase
-        .from("nutrition_favorites")
-        .delete()
-        .eq("id", existing.id);
+    const res = await fetch("/api/favorites", {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "drink",
+        productKey: productKeyInput,
+      }),
+    });
 
-      // 🔥 DIRECT UI FIX
-      setIsFavorite(false);
-      setFavoriteId(null);
+    if (!res.ok) {
+      const error = await res.json().catch(() => null) as {
+        code?: string;
+      } | null;
 
-    } else {
-      if (
-        limits.max_favorite_drinks !== null &&
-        favoriteCount >= limits.max_favorite_drinks
-      ) {
+      if (error?.code === "FAVORITE_LIMIT_REACHED") {
         alert(
           t.common.favoriteLimitUpgrade.replace(
             "{{limit}}",
-            String(limits.max_favorite_drinks)
+            String(limits.max_favorite_drinks ?? "")
           )
         );
         return;
       }
 
-      const { data } = await supabase
-        .from("nutrition_favorites")
-        .insert({
-          user_id: user.id,
-          product_key: productKeyInput,
-        })
-        .select("id")
-        .single();
-
-      if (data) {
-        // 🔥 DIRECT UI FIX
-        setIsFavorite(true);
-        setFavoriteId(data.id);
-        setFavoriteCount((prev) => prev + 1);
-      }
+      throw new Error(
+        `Favorite update failed: ${res.status}`
+      );
     }
 
-    // optioneel (voor globale sync)
+    const access = await fetch(
+      `/api/favorites/access?type=drink&productKey=${encodeURIComponent(productKeyInput)}`,
+      {
+        cache: "no-store",
+      }
+    );
+
+    if (access.ok) {
+      const data =
+        (await access.json()) as FavoriteRow;
+
+      setIsFavorite(data.isFavorite);
+    }
+
     await refreshDashboard();
   }
 
@@ -475,8 +427,6 @@ export default function AddFoodPage() {
         : totalMl !== null
         ? totalMl / 100
         : 0;
-
-    const sodium = (nutrition.sodium_per_100g ?? 0) * factor;
 
     return {
       kcal:
@@ -571,8 +521,8 @@ export default function AddFoodPage() {
   /* ───────── UI ───────── */
   
     return (
-    <div className="category-grid">
-      <div className="category-span-full space-y-3">
+      <div className="grid grid-cols-12 gap-4 items-stretch auto-rows-fr">
+        <div className="col-span-12 space-y-3">
   
         {/* CARD 1 — PRODUCT */}
         <Card

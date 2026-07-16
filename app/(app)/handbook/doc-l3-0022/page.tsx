@@ -201,6 +201,103 @@ Supabase export`}
 
 
       <section>
+        <h2>Productzoekfunctie</h2>
+
+        <p>
+          De productzoekfunctie gebruikt productnamen, vertalingen,
+          productgroepen, bereidingen en doelafhankelijke scores om gebruikers
+          snel naar het juiste product te leiden.
+        </p>
+
+        <p>
+          Zoekresultaten worden client-side gerangschikt nadat de bestaande
+          productquery de kandidaten heeft opgehaald.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Rang</th>
+                <th>Regel</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Exacte naamovereenkomst.</td>
+              </tr>
+
+              <tr>
+                <td>2</td>
+                <td>Productnaam begint met de zoektekst.</td>
+              </tr>
+
+              <tr>
+                <td>3</td>
+                <td>Productnaam bevat de zoektekst.</td>
+              </tr>
+
+              <tr>
+                <td>4</td>
+                <td>Alfabetische sortering binnen dezelfde groep.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          De getoonde grade is gebaseerd op de eerste beschikbare bereiding
+          van het product. De gebruikte <code>score_grade</code> hoort bij het
+          actuele gebruikersdoel: afvallen, behouden of aankomen.
+        </p>
+
+        <p>
+          Grades worden altijd weergegeven met <code>GradeBadge</code>.
+          Losse grade-cirkels of eigen badgevarianten worden niet gebruikt.
+          Voor gelockte producten wordt geen GradeBadge getoond; daar blijft
+          uitsluitend het slot zichtbaar.
+        </p>
+      </section>
+
+
+      <section>
+        <h2>Zoekfilters</h2>
+
+        <p>
+          Geavanceerde zoekfilters zijn onderdeel van de productzoekfunctie
+          en worden aangestuurd via entitlementfeatures.
+        </p>
+
+        <ul>
+          <li>
+            Gradefilter ondersteunt meerdere geselecteerde grades.
+          </li>
+
+          <li>
+            Categoriefilter ondersteunt meerdere productgroepen.
+          </li>
+
+          <li>
+            Filters worden toegepast voordat de resultaatlimiet wordt
+            afgekapt.
+          </li>
+
+          <li>
+            De feature <code>has_advanced_search_filters</code> bepaalt of de
+            filters actief mogen zijn.
+          </li>
+        </ul>
+
+        <p>
+          Free-gebruikers zien een gelockte filterknop. Premium-, Pro- en
+          Coach-gebruikers kunnen grade- en categoriefilters gebruiken.
+        </p>
+      </section>
+
+
+      <section>
         <h2>Score-opbouw</h2>
 
         <p>
@@ -250,6 +347,10 @@ Supabase export`}
 
           <li>
             Automatische uitbreiding mag bestaande scorelogica niet wijzigen.
+          </li>
+
+          <li>
+            Zoekresultaten gebruiken bestaande score- en gradegegevens.
           </li>
         </ul>
 

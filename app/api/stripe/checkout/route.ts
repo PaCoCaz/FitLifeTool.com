@@ -2,6 +2,8 @@
 
 import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
+import { isAllowedStripePriceId } from "@/lib/stripe/planLookup";
 
 export async function POST(req: Request) {
   const supabase = createSupabaseServer();
@@ -9,14 +11,39 @@ export async function POST(req: Request) {
   try {
     const body = await req.json() as {
       priceId: string;
-      userId: string;
     };
 
-    const { priceId, userId } = body;
+    const { priceId } = body;
 
-    if (!priceId || !userId) {
+    if (!priceId) {
       return new Response(
         JSON.stringify({ error: "Missing data" }),
+        { status: 400 }
+      );
+    }
+
+    const supabaseUser = await createSupabaseServerUser();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseUser.auth.getUser();
+
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: "No user" }),
+        { status: 401 }
+      );
+    }
+
+    if (
+      !(await isAllowedStripePriceId(
+        supabase,
+        priceId
+      ))
+    ) {
+      return new Response(
+        JSON.stringify({ error: "Invalid price" }),
         { status: 400 }
       );
     }
@@ -24,20 +51,20 @@ export async function POST(req: Request) {
     const { data: customer } = await supabase
       .from("customers")
       .select("stripe_customer_id")
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .maybeSingle();
 
     let stripeCustomerId = customer?.stripe_customer_id ?? null;
 
     if (!stripeCustomerId) {
       const newCustomer = await stripe.customers.create({
-        metadata: { user_id: userId },
+        metadata: { user_id: user.id },
       });
 
       stripeCustomerId = newCustomer.id;
 
       await supabase.from("customers").insert({
-        user_id: userId,
+        user_id: user.id,
         stripe_customer_id: stripeCustomerId,
       });
     }
@@ -53,10 +80,10 @@ export async function POST(req: Request) {
         },
       ],
 
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?success=1`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?canceled=1`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?success=1&stripe_return=checkout`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?canceled=1&stripe_return=checkout_cancel`,
 
-      client_reference_id: userId,
+      client_reference_id: user.id,
     });
 
     return new Response(JSON.stringify({ url: session.url }));
