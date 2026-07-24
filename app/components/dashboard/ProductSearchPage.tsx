@@ -5,6 +5,7 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { supabase } from "@/lib/supabaseClient";
@@ -122,10 +123,16 @@ export default function ProductSearchPage({ type }: Props) {
   const t = uiText[langCode];
 
   const router = useRouter();
-  const { user } = useUser();
-  const { lang } = useLangContext();
+  const { user, loading: authLoading } = useUser();
+  const {
+    lang,
+    isLoading: langLoading,
+  } = useLangContext();
   const { features, limits } = useDashboard();
-  const { goal } = useGoalContext();
+  const {
+    goal,
+    isLoading: goalLoading,
+  } = useGoalContext();
 
   const isDrink = type === "drink";
   const hasAdvancedSearchFilters =
@@ -146,6 +153,7 @@ export default function ProductSearchPage({ type }: Props) {
   ] = useState<string[]>([]);
   const [categoryOptions, setCategoryOptions] =
     useState<CategoryOption[]>([]);
+  const favoritesRequestSequenceRef = useRef(0);
 
   const activeFilterCount = hasAdvancedSearchFilters
     ? selectedGrades.length + selectedCategoryKeys.length
@@ -334,55 +342,124 @@ export default function ProductSearchPage({ type }: Props) {
 
   /* ───────────────── LOAD FAVORITES ───────────────── */
 
-  async function loadFavorites() {
-    if (!user?.id) return;
+  const loadFavorites = useCallback(
+    async (signal?: AbortSignal) => {
+      if (
+        authLoading ||
+        langLoading ||
+        goalLoading ||
+        !user?.id
+      ) {
+        return;
+      }
 
-    const params = new URLSearchParams({
+      const requestSequence =
+        ++favoritesRequestSequenceRef.current;
+
+      const params = new URLSearchParams({
+        type,
+        lang,
+      });
+
+      if (goal) {
+        params.set("goal", goal);
+      }
+
+      try {
+        const res = await fetch(
+          `/api/favorites?${params.toString()}`,
+          {
+            cache: "no-store",
+            signal,
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(
+            `Favorites request failed: ${res.status}`
+          );
+        }
+
+        const payload =
+          (await res.json()) as FavoritesApiResponse;
+
+        if (
+          signal?.aborted ||
+          requestSequence !==
+            favoritesRequestSequenceRef.current
+        ) {
+          return;
+        }
+
+        setFavoriteLimit(payload.limit);
+        setFavorites(
+          payload.favorites.map((favorite) => ({
+            product_key: favorite.product_key,
+            name: favorite.display_name,
+            is_drink: isDrink,
+            is_basic: favorite.is_basic,
+            grade: favorite.grade,
+            category_key: favorite.group_display_key,
+            created_at: favorite.created_at,
+            position: favorite.position,
+            locked: favorite.locked,
+          }))
+        );
+      } catch (error) {
+        if (
+          signal?.aborted ||
+          (
+            error instanceof Error &&
+            error.name === "AbortError"
+          )
+        ) {
+          return;
+        }
+
+        throw error;
+      }
+    },
+    [
+      authLoading,
+      langLoading,
+      goalLoading,
+      user?.id,
       type,
       lang,
-    });
-
-    if (goal) {
-      params.set("goal", goal);
-    }
-
-    const res = await fetch(
-      `/api/favorites?${params.toString()}`,
-      {
-        cache: "no-store",
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error(
-        `Favorites request failed: ${res.status}`
-      );
-    }
-
-    const payload =
-      (await res.json()) as FavoritesApiResponse;
-
-    setFavoriteLimit(payload.limit);
-    setFavorites(
-      payload.favorites.map((favorite) => ({
-        product_key: favorite.product_key,
-        name: favorite.display_name,
-        is_drink: isDrink,
-        is_basic: favorite.is_basic,
-        grade: favorite.grade,
-        category_key: favorite.group_display_key,
-        created_at: favorite.created_at,
-        position: favorite.position,
-        locked: favorite.locked,
-      }))
-    );
-  }
+      goal,
+      isDrink,
+    ]
+  );
 
   useEffect(() => {
-    void loadFavorites();
-    // loadFavorites wordt bewust niet als dependency toegevoegd.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, lang, goal]);
+    if (
+      authLoading ||
+      langLoading ||
+      goalLoading ||
+      !user?.id
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const startRequest = window.setTimeout(() => {
+      void loadFavorites(controller.signal).catch((error) => {
+        console.error("Favorites load failed:", error);
+      });
+    }, 0);
+
+    return () => {
+      window.clearTimeout(startRequest);
+      controller.abort();
+      favoritesRequestSequenceRef.current += 1;
+    };
+  }, [
+    authLoading,
+    langLoading,
+    goalLoading,
+    user?.id,
+    loadFavorites,
+  ]);
 
   /* ───────────────── TOGGLE FAVORITE ───────────────── */
 
