@@ -16,6 +16,7 @@ export type Lang = "en" | "nl" | "fr" | "de" | "pl";
 
 type LangContextType = {
   lang: Lang;
+  isLoading: boolean;
   setUserLanguage: (newLang: Lang) => Promise<void>;
 };
 
@@ -23,15 +24,19 @@ const LangContext = createContext<LangContextType | null>(null);
 
 export function LangProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
+  const userId = user?.id ?? null;
   const [lang, setLang] = useState<Lang>("en");
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [loadedUserId, setLoadedUserId] =
+    useState<string | null>(null);
+  const isLoading =
+    userId !== null && loadedUserId !== userId;
 
   /* ───────────────── LOAD LANGUAGE FROM DB ───────────────── */
 
   useEffect(() => {
-    if (!user) return;
+    let cancelled = false;
 
-    const userId = user.id;
+    if (!userId) return;
 
     async function loadLanguage() {
       const { data, error } = await supabase
@@ -40,8 +45,11 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
         .eq("id", userId)
         .maybeSingle();
 
+      if (cancelled) return;
+
       if (error) {
         console.error("Language load error:", error);
+        setLoadedUserId(userId);
         return;
       }
 
@@ -49,11 +57,15 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
         setLang(data.language as Lang);
       }
 
-      setHasLoaded(true);
+      setLoadedUserId(userId);
     }
 
-    loadLanguage();
-  }, [user]);
+    void loadLanguage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   /* ───────────────── CHANGE LANGUAGE ───────────────── */
 
@@ -93,7 +105,13 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   /* ───────────────── PROVIDER ───────────────── */
 
   return (
-    <LangContext.Provider value={{ lang, setUserLanguage }}>
+    <LangContext.Provider
+      value={{
+        lang,
+        isLoading,
+        setUserLanguage,
+      }}
+    >
       {children}
     </LangContext.Provider>
   );
