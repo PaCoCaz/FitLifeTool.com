@@ -5,6 +5,7 @@ import test from "node:test";
 
 import {
   applyFavoriteLimit,
+  buildFavoriteDetails,
   sortFavoriteRows,
 } from "./favoriteRules.ts";
 
@@ -115,4 +116,198 @@ test("a locked favorite can still represent a normally accessible product", () =
 
   assert.equal(lockedFavorite?.locked, true);
   assert.equal(lockedFavorite?.product_key, "B");
+});
+
+const favoriteStates = applyFavoriteLimit(rows, 1);
+
+const products = [
+  {
+    product_key: "A",
+    is_basic: true,
+    group_display_key: "FRUITS",
+  },
+  {
+    product_key: "B",
+    is_basic: false,
+    group_display_key: "VEGETABLES",
+  },
+  {
+    product_key: "C",
+    is_basic: true,
+    group_display_key: null,
+  },
+];
+
+const translationsNl = [
+  {
+    product_key: "A",
+    name: "Appel",
+  },
+  {
+    product_key: "B",
+    name: "Banaan",
+  },
+];
+
+const translationsEn = [
+  {
+    product_key: "A",
+    name: "Apple",
+  },
+  {
+    product_key: "B",
+    name: "Banana",
+  },
+];
+
+const preparations = [
+  {
+    product_key: "A",
+    preparation_key: "BOILED",
+    sort_order: 2,
+  },
+  {
+    product_key: "A",
+    preparation_key: "RAW",
+    sort_order: 1,
+  },
+  {
+    product_key: "B",
+    preparation_key: "RAW",
+    sort_order: 1,
+  },
+];
+
+const loseScores = [
+  {
+    product_key: "A",
+    preparation_key: "RAW",
+    score_grade: "A",
+  },
+  {
+    product_key: "A",
+    preparation_key: "BOILED",
+    score_grade: "E",
+  },
+  {
+    product_key: "B",
+    preparation_key: "RAW",
+    score_grade: "C",
+  },
+];
+
+const gainScores = [
+  {
+    product_key: "A",
+    preparation_key: "RAW",
+    score_grade: "D",
+  },
+  {
+    product_key: "B",
+    preparation_key: "RAW",
+    score_grade: "B",
+  },
+];
+
+test("favorite details include complete API response fields", () => {
+  const result = buildFavoriteDetails(
+    favoriteStates,
+    products,
+    translationsNl,
+    preparations,
+    loseScores
+  );
+
+  assert.deepEqual(result[0], {
+    id: "a",
+    product_key: "A",
+    created_at: "2026-07-14T09:00:00.000Z",
+    position: 1,
+    locked: false,
+    display_name: "Appel",
+    group_display_key: "FRUITS",
+    is_basic: true,
+    grade: "A",
+  });
+});
+
+test("favorite details use the requested language translations", () => {
+  const result = buildFavoriteDetails(
+    favoriteStates,
+    products,
+    translationsEn,
+    preparations,
+    loseScores
+  );
+
+  assert.equal(result[0].display_name, "Apple");
+  assert.equal(result[1].display_name, "Banana");
+});
+
+test("favorite details use goal dependent grades", () => {
+  const lose = buildFavoriteDetails(
+    favoriteStates,
+    products,
+    translationsNl,
+    preparations,
+    loseScores
+  );
+
+  const gain = buildFavoriteDetails(
+    favoriteStates,
+    products,
+    translationsNl,
+    preparations,
+    gainScores
+  );
+
+  assert.equal(lose[0].grade, "A");
+  assert.equal(gain[0].grade, "D");
+});
+
+test("favorite details preserve locked status and stable order", () => {
+  const result = buildFavoriteDetails(
+    favoriteStates,
+    products,
+    translationsNl,
+    preparations,
+    loseScores
+  );
+
+  assert.deepEqual(
+    result.map((favorite) => favorite.product_key),
+    ["A", "B", "C"]
+  );
+
+  assert.deepEqual(
+    result.map((favorite) => favorite.locked),
+    [false, true, true]
+  );
+});
+
+test("favorite details return null grade when preparation or score is missing", () => {
+  const result = buildFavoriteDetails(
+    favoriteStates,
+    products,
+    translationsNl,
+    preparations,
+    loseScores
+  );
+
+  assert.equal(result[2].product_key, "C");
+  assert.equal(result[2].display_name, "C");
+  assert.equal(result[2].grade, null);
+});
+
+test("favorite details keep an empty favorites list empty", () => {
+  assert.deepEqual(
+    buildFavoriteDetails(
+      [],
+      products,
+      translationsNl,
+      preparations,
+      loseScores
+    ),
+    []
+  );
 });

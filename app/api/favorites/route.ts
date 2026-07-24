@@ -4,9 +4,10 @@ import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
 import {
   addFavorite,
+  favoriteDetailResponse,
   favoriteResponse,
   FavoriteLimitError,
-  listFavorites,
+  listFavoriteDetails,
   removeFavorite,
 } from "@/lib/favorites/favoritesServer";
 import { parseFavoriteType } from "@/lib/favorites/favoriteRules";
@@ -51,6 +52,20 @@ function serverError(error: unknown) {
   );
 }
 
+function parseLang(value: string | null) {
+  if (
+    value === "en" ||
+    value === "nl" ||
+    value === "fr" ||
+    value === "de" ||
+    value === "pl"
+  ) {
+    return value;
+  }
+
+  return "en";
+}
+
 export async function GET(req: Request) {
   const user = await getRequestUser();
 
@@ -69,6 +84,11 @@ export async function GET(req: Request) {
   const type = parseFavoriteType(
     url.searchParams.get("type")
   );
+  const lang = parseLang(
+    url.searchParams.get("lang")
+  );
+  const goal =
+    url.searchParams.get("goal");
 
   if (!type) {
     return badRequest("Invalid favorite type");
@@ -76,16 +96,18 @@ export async function GET(req: Request) {
 
   try {
     const supabase = createSupabaseServer();
-    const result = await listFavorites(
+    const result = await listFavoriteDetails(
       supabase,
       user.id,
-      type
+      type,
+      lang,
+      goal
     );
 
     return Response.json({
       limit: result.limit,
       favorites: result.favorites.map(
-        favoriteResponse
+        favoriteDetailResponse
       ),
     });
   } catch (error) {

@@ -40,6 +40,10 @@ type Product = {
 
 type FavoriteApiItem = {
   product_key: string;
+  display_name: string;
+  group_display_key: string | null;
+  is_basic: boolean;
+  grade: Grade | null;
   created_at: string;
   position: number;
   locked: boolean;
@@ -55,11 +59,6 @@ type ProductLookupRow = {
   is_drink: boolean;
   is_basic?: boolean | null;
   group_display_key?: string | null;
-};
-
-type ProductTranslationRow = {
-  product_key: string;
-  name: string;
 };
 
 type ProductSearchRow = Product;
@@ -338,8 +337,17 @@ export default function ProductSearchPage({ type }: Props) {
   async function loadFavorites() {
     if (!user?.id) return;
 
+    const params = new URLSearchParams({
+      type,
+      lang,
+    });
+
+    if (goal) {
+      params.set("goal", goal);
+    }
+
     const res = await fetch(
-      `/api/favorites?type=${type}`,
+      `/api/favorites?${params.toString()}`,
       {
         cache: "no-store",
       }
@@ -355,77 +363,19 @@ export default function ProductSearchPage({ type }: Props) {
       (await res.json()) as FavoritesApiResponse;
 
     setFavoriteLimit(payload.limit);
-
-    if (payload.favorites.length === 0) {
-      setFavorites([]);
-      return;
-    }
-
-    const productKeys = payload.favorites.map(
-      (favorite) => favorite.product_key
-    );
-
-    const { data: products } = await supabase
-      .from("nutrition_products")
-      .select("product_key, is_drink, is_basic, group_display_key")
-      .in("product_key", productKeys);
-
-    const { data: translations } = await supabase
-      .from("nutrition_product_translations")
-      .select("product_key, name")
-      .in("product_key", productKeys)
-      .eq("lang", lang);
-
-    const gradeMap = await loadGradeMap(productKeys);
-
-    const translationRows =
-      (translations ?? []) as ProductTranslationRow[];
-
-    const nameMap = new Map(
-      translationRows.map((translation) => [
-        translation.product_key,
-        translation.name,
-      ])
-    );
-
-    const productRows =
-      (products ?? []) as ProductLookupRow[];
-
-    const productMap = new Map(
-      productRows.map((product) => [
-        product.product_key,
-        product,
-      ])
-    );
-
-    const mapped: Product[] = [];
-
-    for (const favorite of payload.favorites) {
-      const product = productMap.get(
-        favorite.product_key
-      );
-
-      if (!product) {
-        continue;
-      }
-
-      mapped.push({
-        product_key: product.product_key,
-        name:
-          nameMap.get(product.product_key) ??
-          product.product_key,
-        is_drink: Boolean(product.is_drink),
-        is_basic: Boolean(product.is_basic),
-        grade:
-          gradeMap.get(product.product_key) ?? null,
-        category_key: product.group_display_key ?? null,
+    setFavorites(
+      payload.favorites.map((favorite) => ({
+        product_key: favorite.product_key,
+        name: favorite.display_name,
+        is_drink: isDrink,
+        is_basic: favorite.is_basic,
+        grade: favorite.grade,
+        category_key: favorite.group_display_key,
         created_at: favorite.created_at,
         position: favorite.position,
         locked: favorite.locked,
-      });
-    }
-
-    setFavorites(mapped.filter((p) => p.is_drink === isDrink));
+      }))
+    );
   }
 
   useEffect(() => {

@@ -5,7 +5,13 @@ import "server-only";
 import type { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import {
   applyFavoriteLimit,
+  buildFavoriteDetails,
   isDrinkType,
+  type FavoriteDetail,
+  type FavoriteProductMetadata,
+  type FavoriteProductPreparation,
+  type FavoriteProductScore,
+  type FavoriteProductTranslation,
   type FavoriteState,
   type FavoriteType,
 } from "./favoriteRules";
@@ -18,6 +24,18 @@ type FavoriteDbRow = {
   id: string;
   product_key: string;
   created_at: string;
+};
+
+type FavoriteProductRow = FavoriteProductMetadata & {
+  is_drink?: boolean | null;
+};
+
+type FavoritePreparationRow = {
+  product_key: string;
+  preparation_key: string;
+  nutrition_preparations?: {
+    sort_order: number | null;
+  } | null;
 };
 
 type PlanFeatureResult = {
@@ -134,6 +152,129 @@ export async function listFavorites(
   return {
     limit,
     favorites: applyFavoriteLimit(rows, limit),
+  };
+}
+
+function isSupportedGoal(
+  value: string | null | undefined
+): value is "LOSE" | "MAINTAIN" | "GAIN" {
+  return (
+    value === "LOSE" ||
+    value === "MAINTAIN" ||
+    value === "GAIN"
+  );
+}
+
+export async function listFavoriteDetails(
+  supabase: SupabaseClientLike,
+  userId: string,
+  type: FavoriteType,
+  lang: string,
+  goal: string | null
+): Promise<{
+  limit: number | null;
+  favorites: FavoriteDetail[];
+}> {
+  const { limit, favorites } = await listFavorites(
+    supabase,
+    userId,
+    type
+  );
+
+  if (favorites.length === 0) {
+    return {
+      limit,
+      favorites: [],
+    };
+  }
+
+  const productKeys = favorites.map(
+    (favorite) => favorite.product_key
+  );
+
+  const [
+    productsResult,
+    translationsResult,
+    preparationsResult,
+    scoresResult,
+  ] = await Promise.all([
+    supabase
+      .from("nutrition_products")
+      .select("product_key, is_drink, is_basic, group_display_key")
+      .in("product_key", productKeys),
+
+    supabase
+      .from("nutrition_product_translations")
+      .select("product_key, name")
+      .in("product_key", productKeys)
+      .eq("lang", lang),
+
+    supabase
+      .from("nutrition_product_preparations")
+      .select(`
+        product_key,
+        preparation_key,
+        nutrition_preparations (
+          sort_order
+        )
+      `)
+      .in("product_key", productKeys),
+
+    isSupportedGoal(goal)
+      ? supabase
+          .from("nutrition_product_scores")
+          .select("product_key, preparation_key, score_grade")
+          .in("product_key", productKeys)
+          .eq("goal_key", goal)
+      : Promise.resolve({
+          data: [],
+          error: null,
+        }),
+  ]);
+
+  if (productsResult.error) {
+    throw productsResult.error;
+  }
+
+  if (translationsResult.error) {
+    throw translationsResult.error;
+  }
+
+  if (preparationsResult.error) {
+    throw preparationsResult.error;
+  }
+
+  if (scoresResult.error) {
+    throw scoresResult.error;
+  }
+
+  const products =
+    ((productsResult.data ?? []) as FavoriteProductRow[])
+      .filter(
+        (product) =>
+          Boolean(product.is_drink) === isDrinkType(type)
+      );
+
+  const preparations =
+    ((preparationsResult.data ?? []) as FavoritePreparationRow[])
+      .map((preparation) => ({
+        product_key: preparation.product_key,
+        preparation_key: preparation.preparation_key,
+        sort_order:
+          preparation.nutrition_preparations?.sort_order ??
+          null,
+      })) satisfies FavoriteProductPreparation[];
+
+  return {
+    limit,
+    favorites: buildFavoriteDetails(
+      favorites,
+      products,
+      (translationsResult.data ??
+        []) as FavoriteProductTranslation[],
+      preparations,
+      (scoresResult.data ?? []) as FavoriteProductScore[]
+    ),
   };
 }
 
@@ -264,5 +405,20 @@ export function favoriteResponse(
     created_at: favorite.created_at,
     position: favorite.position,
     locked: favorite.locked,
+  };
+}
+
+export function favoriteDetailResponse(
+  favorite: FavoriteDetail
+) {
+  return {
+    product_key: favorite.product_key,
+    display_name: favorite.display_name,
+    group_display_key: favorite.group_display_key,
+    is_basic: favorite.is_basic,
+    locked: favorite.locked,
+    grade: favorite.grade,
+    created_at: favorite.created_at,
+    position: favorite.position,
   };
 }
