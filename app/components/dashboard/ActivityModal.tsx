@@ -13,6 +13,10 @@ import {
   ActivityType,
   calculateActivityCalories,
 } from "@/lib/activityScore";
+import {
+  groupActivityRows,
+  type ActivityRow,
+} from "@/lib/activityLogs";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
@@ -21,12 +25,6 @@ import { formatNumber } from "@/lib/formatNumber";
 type Props = {
   onClose: () => void;
   onAdd: (type: ActivityType, minutes: number) => void;
-};
-
-type ActivityRow = {
-  activity_type: ActivityType;
-  duration_minutes: number;
-  calories: number;
 };
 
 const QUICK_DURATIONS = [5, 10, 15, 20, 25, 30, 45, 60];
@@ -69,34 +67,42 @@ export default function ActivityModal({ onClose, onAdd }: Props) {
   useEffect(() => {
     if (!user) return;
 
-    supabase
-      .from("activity_logs")
-      .select("activity_type, duration_minutes, calories")
-      .eq("user_id", user.id)
-      .eq("log_date", dayKey)
-      .then(({ data }: { data: ActivityRow[] | null }) => {
-        const rows = data ?? [];
+    let cancelled = false;
+    const userId = user.id;
 
-        const grouped: Record<ActivityType, { minutes: number; calories: number }> = {} as any;
+    async function loadTodayActivities() {
+      const { data, error } = await supabase
+        .from("activity_logs")
+        .select(
+          "activity_type, duration_minutes, calories"
+        )
+        .eq("user_id", userId)
+        .eq("log_date", dayKey);
 
-        for (const row of rows) {
-          if (!grouped[row.activity_type]) {
-            grouped[row.activity_type] = { minutes: 0, calories: 0 };
-          }
-          grouped[row.activity_type].minutes += row.duration_minutes;
-          grouped[row.activity_type].calories += row.calories;
-        }
+      if (cancelled) {
+        return;
+      }
 
-        const merged = Object.entries(grouped).map(([type, values]) => ({
-          activity_type: type as ActivityType,
-          duration_minutes: Math.round(values.minutes),
-          calories: Math.round(values.calories),
-        }));
+      if (error) {
+        console.error(
+          "Activity modal load failed:",
+          error
+        );
+        return;
+      }
 
-        merged.sort((a, b) => b.calories - a.calories);
+      setTodayActivities(
+        groupActivityRows(
+          (data ?? []) as ActivityRow[]
+        )
+      );
+    }
 
-        setTodayActivities(merged);
-      });
+    void loadTodayActivities();
+
+    return () => {
+      cancelled = true;
+    };
   }, [user, dayKey]);
 
   const previewCalories =

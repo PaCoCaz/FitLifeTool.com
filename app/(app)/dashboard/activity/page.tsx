@@ -2,34 +2,44 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import { supabase } from "@/lib/supabaseClient";
-import { useUser } from "@/lib/AuthProvider";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 
-import { useDayNow } from "@/lib/useDayNow";
-import { getLocalDayKey } from "@/lib/dayKey";
-
+import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
 import {
   ACTIVITY_TYPES,
-  ActivityType,
   calculateActivityCalories,
+  type ActivityType,
 } from "@/lib/activityScore";
-
-import { useLang } from "@/lib/useLang";
-import { uiText } from "@/lib/uiText";
-import { formatNumber } from "@/lib/formatNumber";
-
+import {
+  groupActivityRows,
+  type ActivityRow,
+} from "@/lib/activityLogs";
+import { useUser } from "@/lib/AuthProvider";
 import { useDashboard } from "@/lib/DashboardStore";
+import { getLocalDayKey } from "@/lib/dayKey";
+import { formatNumber } from "@/lib/formatNumber";
+import { supabase } from "@/lib/supabaseClient";
+import { uiText } from "@/lib/uiText";
+import { useDayNow } from "@/lib/useDayNow";
+import { useLang } from "@/lib/useLang";
 
-type ActivityRow = {
-  activity_type: ActivityType;
-  duration_minutes: number;
-  calories: number;
-};
-
-const QUICK_DURATIONS = [5, 10, 15, 20, 25, 30, 45, 60];
+const QUICK_DURATIONS = [
+  5,
+  10,
+  15,
+  20,
+  25,
+  30,
+  45,
+  60,
+] as const;
 
 export default function ActivityPage() {
   const { user } = useUser();
@@ -41,433 +51,564 @@ export default function ActivityPage() {
 
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
-
   const weightKg = user?.user_metadata?.weight_kg ?? 75;
 
   const [selectedType, setSelectedType] =
     useState<ActivityType | null>(null);
-
   const [minutes, setMinutes] =
     useState<number | null>(null);
-
   const [customMinutes, setCustomMinutes] =
     useState("");
-
   const [todayActivities, setTodayActivities] =
     useState<ActivityRow[]>([]);
+  const [isInitialLoading, setIsInitialLoading] =
+    useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasLoadError, setHasLoadError] =
+    useState(false);
+  const [hasSaveError, setHasSaveError] =
+    useState(false);
+  const savingRef = useRef(false);
 
-  /* totals */
+  const customMinutesValue =
+    customMinutes === ""
+      ? null
+      : Number(customMinutes);
+  const finalMinutes =
+    customMinutesValue ?? minutes;
+  const validMinutes =
+    finalMinutes !== null &&
+    Number.isInteger(finalMinutes) &&
+    finalMinutes > 0
+      ? finalMinutes
+      : null;
+  const canSave =
+    Boolean(
+      user &&
+      selectedType &&
+      validMinutes !== null
+    ) &&
+    !isSaving;
 
   const totals = todayActivities.reduce(
-    (acc, a) => {
-      acc.minutes += a.duration_minutes;
-      acc.calories += a.calories;
-      return acc;
-    },
-    { minutes: 0, calories: 0 }
+    (accumulator, activity) => ({
+      minutes:
+        accumulator.minutes +
+        activity.duration_minutes,
+      calories:
+        accumulator.calories +
+        activity.calories,
+    }),
+    {
+      minutes: 0,
+      calories: 0,
+    }
   );
 
-  const finalMinutes =
-    customMinutes.trim() !== ""
-      ? Number(customMinutes)
-      : minutes;
-
-  /* load today */
-
-  useEffect(() => {
-    if (!user) return;
-
-    supabase
-      .from("activity_logs")
-      .select("activity_type, duration_minutes, calories")
-      .eq("user_id", user.id)
-      .eq("log_date", dayKey)
-      .then(({ data }: { data: ActivityRow[] | null }) => {
-
-        const rows = (data ?? []) as ActivityRow[];
-
-        const grouped: Partial<
-          Record<
-            ActivityType,
-            { minutes: number; calories: number }
-          >
-        > = {};
-
-        for (const row of rows) {
-
-          const type = row.activity_type as ActivityType;
-
-          if (!grouped[type]) {
-            grouped[type] = {
-              minutes: 0,
-              calories: 0,
-            };
-          }
-
-          grouped[type]!.minutes +=
-            row.duration_minutes;
-
-          grouped[type]!.calories +=
-            row.calories;
-        }
-
-        const merged = Object.entries(grouped).map(
-          ([type, values]) => ({
-            activity_type: type as ActivityType,
-            duration_minutes: Math.round(
-              values!.minutes
-            ),
-            calories: Math.round(
-              values!.calories
-            ),
-          })
-        );
-
-        merged.sort(
-          (a, b) => b.calories - a.calories
-        );
-
-        setTodayActivities(merged);
-      });
-
-  }, [user, dayKey]);
-
-  /* preview */
-
   const previewCalories =
-    selectedType &&
-    finalMinutes &&
-    finalMinutes > 0
+    selectedType && validMinutes !== null
       ? calculateActivityCalories(
           ACTIVITY_TYPES[selectedType].met,
           weightKg,
-          finalMinutes
+          validMinutes
         )
       : 0;
 
-  /* save */
-
-  async function addActivity() {
-
-    if (
-      !user ||
-      !selectedType ||
-      !finalMinutes ||
-      finalMinutes <= 0
-    )
-      return;
-
-    const calories =
-      calculateActivityCalories(
-        ACTIVITY_TYPES[selectedType].met,
-        weightKg,
-        finalMinutes
-      );
-
-    await supabase.from("activity_logs").insert({
-      user_id: user.id,
-      activity_type: selectedType,
-      duration_minutes: finalMinutes,
-      calories,
-      log_date: dayKey,
-    });
-
-    const { data } = await supabase
-      .from("activity_logs")
-      .select("activity_type, duration_minutes, calories")
-      .eq("user_id", user.id)
-      .eq("log_date", dayKey);
-
-    const rows = (data ?? []) as ActivityRow[];
-
-    const grouped: Partial<
-      Record<
-        ActivityType,
-        { minutes: number; calories: number }
-      >
-    > = {};
-
-    for (const row of rows) {
-
-      const type = row.activity_type as ActivityType;
-
-      if (!grouped[type]) {
-        grouped[type] = {
-          minutes: 0,
-          calories: 0,
-        };
+  const fetchTodayActivities = useCallback(
+    async () => {
+      if (!user?.id) {
+        return [];
       }
 
-      grouped[type]!.minutes +=
-        row.duration_minutes;
+      const { data, error } = await supabase
+        .from("activity_logs")
+        .select(
+          "activity_type, duration_minutes, calories"
+        )
+        .eq("user_id", user.id)
+        .eq("log_date", dayKey);
 
-      grouped[type]!.calories +=
-        row.calories;
+      if (error) {
+        throw error;
+      }
+
+      return groupActivityRows(
+        (data ?? []) as ActivityRow[]
+      );
+    },
+    [user?.id, dayKey]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!user?.id) {
+      setTodayActivities([]);
+      setIsInitialLoading(false);
+      return;
     }
 
-    const merged = Object.entries(grouped).map(
-      ([type, values]) => ({
-        activity_type: type as ActivityType,
-        duration_minutes: Math.round(
-          values!.minutes
-        ),
-        calories: Math.round(
-          values!.calories
-        ),
+    setIsInitialLoading(true);
+    setHasLoadError(false);
+
+    void fetchTodayActivities()
+      .then((activities) => {
+        if (cancelled) {
+          return;
+        }
+
+        setTodayActivities(activities);
       })
-    );
+      .catch((error: unknown) => {
+        if (cancelled) {
+          return;
+        }
 
-    merged.sort(
-      (a, b) => b.calories - a.calories
-    );
+        console.error(
+          "Activity load failed:",
+          error
+        );
+        setTodayActivities([]);
+        setHasLoadError(true);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsInitialLoading(false);
+        }
+      });
 
-    setTodayActivities(merged);
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, fetchTodayActivities]);
 
-    await refreshDashboard();
+  async function retryLoad() {
+    setIsInitialLoading(true);
+    setHasLoadError(false);
 
-    router.push("/dashboard");
+    try {
+      const activities =
+        await fetchTodayActivities();
+      setTodayActivities(activities);
+    } catch (error) {
+      console.error(
+        "Activity retry failed:",
+        error
+      );
+      setTodayActivities([]);
+      setHasLoadError(true);
+    } finally {
+      setIsInitialLoading(false);
+    }
+  }
+
+  function handleCustomMinutesChange(value: string) {
+    if (!/^\d*$/.test(value)) {
+      return;
+    }
+
+    setCustomMinutes(value);
+    setMinutes(null);
+  }
+
+  async function addActivity() {
+    if (
+      savingRef.current ||
+      !user ||
+      !selectedType ||
+      validMinutes === null
+    ) {
+      return;
+    }
+
+    savingRef.current = true;
+    setIsSaving(true);
+    setHasSaveError(false);
+
+    try {
+      const calories =
+        calculateActivityCalories(
+          ACTIVITY_TYPES[selectedType].met,
+          weightKg,
+          validMinutes
+        );
+
+      const { error: insertError } = await supabase
+        .from("activity_logs")
+        .insert({
+          user_id: user.id,
+          activity_type: selectedType,
+          duration_minutes: validMinutes,
+          calories,
+          log_date: dayKey,
+        });
+
+      if (insertError) {
+        console.error(
+          "Activity insert failed:",
+          insertError
+        );
+        setHasSaveError(true);
+        return;
+      }
+
+      setSelectedType(null);
+      setMinutes(null);
+      setCustomMinutes("");
+
+      let activities: ActivityRow[];
+
+      try {
+        activities =
+          await fetchTodayActivities();
+      } catch (loadError) {
+        console.error(
+          "Activity refresh failed:",
+          loadError
+        );
+        setTodayActivities([]);
+        setHasLoadError(true);
+        return;
+      }
+
+      setTodayActivities(activities);
+      setHasLoadError(false);
+
+      await refreshDashboard();
+      router.push("/dashboard");
+    } catch (error) {
+      console.error(
+        "Activity save failed:",
+        error
+      );
+      setHasSaveError(true);
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
   }
 
   return (
-
     <div className="grid grid-cols-12 gap-6">
-
-      <div className="col-span-12">
-
-        <div className="bg-white rounded-[var(--radius)] shadow-sm border">
-
-          <div className="px-6 py-4 border-b">
-
-            <h1 className="flex items-center gap-2 text-lg font-semibold text-[#191970]">
-
-              <Image
-                src="/activity.svg"
-                alt=""
-                width={18}
-                height={18}
-              />
-
-              {t.activity.addActivity}
-
-            </h1>
-
+      <div className="col-span-12 space-y-6">
+        <Card
+          header={
+            <CardHeader
+              icon="/activity.svg"
+              title={t.activity.addActivity}
+              as="h1"
+            />
+          }
+        >
+          <div className="mb-3 text-sm font-semibold text-[#64748B]">
+            {t.activity.whichActivity}
           </div>
 
-          <div className="px-6 py-6 space-y-6">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {(
+              Object.keys(
+                ACTIVITY_TYPES
+              ) as ActivityType[]
+            ).map((type) => {
+              const isSelected =
+                selectedType === type;
 
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() =>
+                    setSelectedType(type)
+                  }
+                  className={`
+                    app-action-button
+                    min-w-0
+                    w-full
+                    px-3
+                    text-sm
+                    ${
+                      isSelected
+                        ? "app-action-button--active"
+                        : ""
+                    }
+                  `}
+                >
+                  <span className="truncate">
+                    {t.activity.labels[type]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </Card>
 
-            {/* type */}
+        <Card
+          header={
+            <CardHeader
+              title={t.activity.howLong}
+              as="h2"
+            />
+          }
+        >
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+            {QUICK_DURATIONS.map((duration) => {
+              const isSelected =
+                minutes === duration &&
+                customMinutes === "";
 
-            <div>
-
-              <div className="text-xs font-medium text-gray-500 mb-2">
-                {t.activity.whichActivity}
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-
-                {(Object.keys(
-                  ACTIVITY_TYPES
-                ) as ActivityType[]).map((type) => {
-
-                  const isActive =
-                    selectedType === type;
-
-                  return (
-
-                    <button
-                      key={type}
-                      onClick={() =>
-                        setSelectedType(type)
-                      }
-                      className={`rounded-[var(--radius)] border px-3 py-2 text-xs font-medium transition ${
-                        isActive
-                          ? "bg-[#0095D3] text-white border-[#0095D3]"
-                          : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
-                      }`}
-                    >
-
-                      {t.activity.labels[type]}
-
-                    </button>
-
-                  );
-
-                })}
-
-              </div>
-
-            </div>
-
-
-            {/* duration */}
-
-            <div>
-
-              <div className="text-xs font-medium text-gray-500 mb-2">
-                {t.activity.howLong}
-              </div>
-
-              <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-
-                {QUICK_DURATIONS.map((d) => (
-
-                  <button
-                    key={d}
-                    onClick={() => {
-                      setMinutes(d);
-                      setCustomMinutes("");
-                    }}
-                    className={`rounded-[var(--radius)] border py-2 text-xs font-medium transition ${
-                      minutes === d
-                        ? "bg-[#0095D3] text-white border-[#0095D3]"
-                        : "border-[#0095D3] text-[#0095D3] hover:bg-[#0095D3] hover:text-white"
-                    }`}
-                  >
-                    {d} {t.activity.minutes}
-                  </button>
-
-                ))}
-
-              </div>
-
-
-              <div className="mt-3">
-
-                <div className="text-xs font-medium text-gray-500 mb-1">
-                  Of vul zelf minuten in
-                </div>
-
-                <input
-                  type="number"
-                  min={1}
-                  value={customMinutes}
-                  onChange={(e) => {
-                    setCustomMinutes(e.target.value);
-                    setMinutes(null);
+              return (
+                <button
+                  key={duration}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => {
+                    setMinutes(duration);
+                    setCustomMinutes("");
                   }}
-                  className="w-full rounded-[var(--radius)] border border-[#0095D3] px-3 py-2 text-sm"
-                />
+                  className={`
+                    app-action-button
+                    w-full
+                    min-w-0
+                    px-2
+                    text-xs
+                    ${
+                      isSelected
+                        ? "app-action-button--active"
+                        : ""
+                    }
+                  `}
+                >
+                  {duration} {t.activity.minutes}
+                </button>
+              );
+            })}
+          </div>
 
+          <div className="mt-4">
+            <label
+              htmlFor="custom-activity-minutes"
+              className="mb-2 block text-sm font-semibold text-[#64748B]"
+            >
+              {t.activity.customMinutesLabel}
+            </label>
+
+            <div className="-mx-4">
+              <input
+                id="custom-activity-minutes"
+                type="number"
+                min={1}
+                step={1}
+                inputMode="numeric"
+                value={customMinutes}
+                aria-invalid={
+                  customMinutes !== "" &&
+                  validMinutes === null
+                }
+                onChange={(event) =>
+                  handleCustomMinutesChange(
+                    event.target.value
+                  )
+                }
+                className="
+                  w-full
+                  border-y
+                  border-[#DBE4F0]
+                  px-4
+                  py-2
+                  text-[#191970]
+                  focus:border-[#0BA4E0]
+                  focus:outline-none
+                  focus:ring-0
+                "
+              />
+            </div>
+          </div>
+        </Card>
+
+        {selectedType && validMinutes !== null && (
+          <Card
+            header={
+              <CardHeader
+                title={t.activity.summary}
+                as="h2"
+              />
+            }
+          >
+            <dl className="-mx-4">
+              <div className="flex items-center justify-between gap-4 border-b border-[#DBE4F0] px-4 py-2">
+                <dt className="text-sm text-[#64748B]">
+                  {t.activity.activityLabel}
+                </dt>
+                <dd className="text-right text-sm font-semibold text-[#191970]">
+                  {t.activity.labels[selectedType]}
+                </dd>
               </div>
 
-            </div>
+              <div className="flex items-center justify-between gap-4 border-b border-[#DBE4F0] px-4 py-2">
+                <dt className="text-sm text-[#64748B]">
+                  {t.activity.duration}
+                </dt>
+                <dd className="text-right text-sm font-semibold text-[#191970]">
+                  {formatNumber(
+                    validMinutes,
+                    lang
+                  )}{" "}
+                  {t.activity.minutes}
+                </dd>
+              </div>
 
-
-            {/* preview */}
-
-            {previewCalories > 0 && (
-
-              <div className="text-sm text-gray-600">
-
-                {t.activity.burnPreview}{" "}
-
-                <span className="font-semibold text-[#191970]">
+              <div className="flex items-center justify-between gap-4 px-4 py-2">
+                <dt className="text-sm text-[#64748B]">
+                  {t.activity.calories}
+                </dt>
+                <dd className="text-right text-sm font-semibold text-[#191970]">
                   {formatNumber(
                     previewCalories,
                     lang
-                  )} kcal
-                </span>
+                  )}{" "}
+                  kcal
+                </dd>
+              </div>
+            </dl>
+          </Card>
+        )}
 
+        <Card>
+          <button
+            type="button"
+            disabled={!canSave}
+            onClick={addActivity}
+            className={`
+              app-action-button
+              w-full
+              ${
+                canSave
+                  ? "app-action-button--active"
+                  : "app-action-button--locked cursor-not-allowed opacity-70"
+              }
+            `}
+          >
+            {isSaving
+              ? t.common.saving
+              : t.activity.addActivity}
+          </button>
+
+          {hasSaveError && (
+            <div
+              role="alert"
+              className="mt-3 rounded-[var(--radius)] border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+            >
+              {t.activity.saveError}
+            </div>
+          )}
+        </Card>
+
+        <Card
+          header={
+            <CardHeader
+              icon="/activity.svg"
+              title={t.activity.todayOverview}
+              as="h2"
+            />
+          }
+        >
+          {isInitialLoading ? (
+            <div
+              className="-mx-4"
+              aria-label={t.activity.loading}
+            >
+              {[0, 1, 2].map((row) => (
+                <div
+                  key={row}
+                  className="grid grid-cols-3 gap-3 border-b border-[#DBE4F0] px-4 py-3"
+                >
+                  <div className="h-4 animate-pulse rounded bg-[#DBE4F0]" />
+                  <div className="ml-auto h-4 w-14 animate-pulse rounded bg-[#DBE4F0]" />
+                  <div className="ml-auto h-4 w-16 animate-pulse rounded bg-[#DBE4F0]" />
+                </div>
+              ))}
+            </div>
+          ) : hasLoadError ? (
+            <div
+              role="alert"
+              className="rounded-[var(--radius)] border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700"
+            >
+              <p>{t.activity.loadError}</p>
+              <button
+                type="button"
+                onClick={retryLoad}
+                className="app-action-button mt-3 h-9 min-h-9 px-3 text-sm"
+              >
+                {t.activity.retry}
+              </button>
+            </div>
+          ) : todayActivities.length === 0 ? (
+            <div className="-mx-4 px-4 py-4 text-sm text-[#64748B]">
+              {t.activity.emptyToday}
+            </div>
+          ) : (
+            <div className="-mx-4">
+              <div className="grid grid-cols-3 gap-3 border-b border-[#DBE4F0] px-4 py-2 text-xs font-semibold text-[#64748B]">
+                <div>{t.activity.activityLabel}</div>
+                <div className="text-right">
+                  {t.activity.duration}
+                </div>
+                <div className="text-right">
+                  {t.activity.calories}
+                </div>
               </div>
 
-            )}
-
-
-            <button
-              onClick={addActivity}
-              className="w-full rounded-[var(--radius)] border border-[#0095D3] px-4 py-3 text-sm font-semibold text-[#0095D3] hover:bg-[#0095D3] hover:text-white transition"
-            >
-              {t.activity.addActivity}
-            </button>
-
-
-            {/* today */}
-
-            {todayActivities.length > 0 && (
-
-              <div className="mt-8 border-t pt-6">
-
-                <div className="text-sm font-semibold text-[#191970] mb-3">
-                  {t.activity.todayOverview}
-                </div>
-
-
-                <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-gray-500 mb-2">
-
-                  <div>{t.activity.activityLabel}</div>
-
-                  <div className="text-right">
-                    {t.activity.duration}
+              {todayActivities.map((activity) => (
+                <div
+                  key={activity.activity_type}
+                  className="grid grid-cols-3 gap-3 border-b border-[#DBE4F0] px-4 py-2 text-sm text-[#191970]"
+                >
+                  <div className="min-w-0 truncate">
+                    {
+                      t.activity.labels[
+                        activity.activity_type
+                      ]
+                    }
                   </div>
-
                   <div className="text-right">
+                    {formatNumber(
+                      activity.duration_minutes,
+                      lang
+                    )}{" "}
+                    {t.activity.minutes}
+                  </div>
+                  <div className="text-right font-medium">
+                    {formatNumber(
+                      activity.calories,
+                      lang
+                    )}{" "}
                     kcal
                   </div>
-
                 </div>
+              ))}
 
-
-                <div className="space-y-2 text-sm text-[#191970]">
-
-                  {todayActivities.map((a, i) => (
-
-                    <div
-                      key={i}
-                      className="grid grid-cols-3 gap-2"
-                    >
-
-                      <div>
-                        {t.activity.labels[a.activity_type]}
-                      </div>
-
-                      <div className="text-right">
-                        {a.duration_minutes} {t.activity.minutes}
-                      </div>
-
-                      <div className="text-right font-medium">
-                        {formatNumber(
-                          a.calories,
-                          lang
-                        )} kcal
-                      </div>
-
-                    </div>
-
-                  ))}
-
-
-                  <div className="mt-4 pt-3 border-t grid grid-cols-3 gap-2 font-semibold">
-
-                    <div>{t.activity.total}</div>
-
-                    <div className="text-right">
-                      {totals.minutes} {t.activity.minutes}
-                    </div>
-
-                    <div className="text-right">
-                      {formatNumber(
-                        totals.calories,
-                        lang
-                      )} kcal
-                    </div>
-
-                  </div>
-
+              <div className="grid grid-cols-3 gap-3 border-t border-[#DBE4F0] bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-[#191970]">
+                <div>{t.activity.total}</div>
+                <div className="text-right">
+                  {formatNumber(
+                    totals.minutes,
+                    lang
+                  )}{" "}
+                  {t.activity.minutes}
                 </div>
-
+                <div className="text-right">
+                  {formatNumber(
+                    totals.calories,
+                    lang
+                  )}{" "}
+                  kcal
+                </div>
               </div>
-
-            )}
-
-          </div>
-
-        </div>
-
+            </div>
+          )}
+        </Card>
       </div>
-
     </div>
-
   );
-
 }

@@ -11,7 +11,7 @@ type Props = {
   scoreLabel?: string;
   scoreColor?: string;
   rightContent?: React.ReactNode;
-  as?: "h2" | "h3" | "div";
+  as?: "h1" | "h2" | "h3" | "div";
 };
 
 function getGradeStyles(grade: string) {

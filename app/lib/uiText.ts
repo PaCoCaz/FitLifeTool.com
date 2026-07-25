@@ -17,12 +17,19 @@ const en = {
 
     whichActivity: "Which activity?",
     howLong: "How long?",
+    customMinutesLabel: "Custom duration in minutes",
     customMinutesPlaceholder: "Or enter minutes manually",
     burnPreview: "Estimated burn:",
+    summary: "Summary",
+    calories: "Calories",
     todayOverview: "Today's activity",
     activityLabel: "Activity",
     duration: "Duration",
     total: "Total",
+    emptyToday: "No activity logged today yet.",
+    loadError: "Activity could not be loaded.",
+    saveError: "Activity could not be saved. Please try again.",
+    retry: "Try again",
 
     labels: {
       walking: "Walking",
@@ -300,12 +307,19 @@ const nl = {
 
     whichActivity: "Welke activiteit?",
     howLong: "Hoe lang?",
+    customMinutesLabel: "Aangepaste duur in minuten",
     customMinutesPlaceholder: "Of vul zelf minuten in",
     burnPreview: "Verbranding:",
+    summary: "Samenvatting",
+    calories: "Calorieën",
     todayOverview: "Vandaag bewogen",
     activityLabel: "Activiteit",
     duration: "Duur",
     total: "Totaal",
+    emptyToday: "Vandaag zijn nog geen activiteiten geregistreerd.",
+    loadError: "De activiteiten konden niet worden geladen.",
+    saveError: "De activiteit kon niet worden opgeslagen. Probeer het opnieuw.",
+    retry: "Opnieuw proberen",
 
     labels: {
       walking: "Wandelen",
@@ -584,12 +598,19 @@ const fr = {
 
     whichActivity: "Quelle activité ?",
     howLong: "Combien de temps ?",
+    customMinutesLabel: "Durée personnalisée en minutes",
     customMinutesPlaceholder: "Ou saisissez les minutes manuellement",
     burnPreview: "Calories estimées :",
+    summary: "Résumé",
+    calories: "Calories",
     todayOverview: "Activité d'aujourd'hui",
     activityLabel: "Activité",
     duration: "Durée",
     total: "Total",
+    emptyToday: "Aucune activité enregistrée aujourd'hui.",
+    loadError: "Les activités n'ont pas pu être chargées.",
+    saveError: "L'activité n'a pas pu être enregistrée. Réessayez.",
+    retry: "Réessayer",
 
     labels: {
       walking: "Marche",
@@ -868,12 +889,19 @@ const de = {
 
     whichActivity: "Welche Aktivität?",
     howLong: "Wie lange?",
+    customMinutesLabel: "Benutzerdefinierte Dauer in Minuten",
     customMinutesPlaceholder: "Oder Minuten manuell eingeben",
     burnPreview: "Geschätzter Verbrauch:",
+    summary: "Zusammenfassung",
+    calories: "Kalorien",
     todayOverview: "Heutige Aktivität",
     activityLabel: "Aktivität",
     duration: "Dauer",
     total: "Gesamt",
+    emptyToday: "Heute wurden noch keine Aktivitäten erfasst.",
+    loadError: "Die Aktivitäten konnten nicht geladen werden.",
+    saveError: "Die Aktivität konnte nicht gespeichert werden. Bitte versuche es erneut.",
+    retry: "Erneut versuchen",
 
     labels: {
       walking: "Gehen",
@@ -1152,12 +1180,19 @@ const pl = {
 
     whichActivity: "Jaką aktywność?",
     howLong: "Jak długo?",
+    customMinutesLabel: "Niestandardowy czas w minutach",
     customMinutesPlaceholder: "Lub wpisz liczbę minut ręcznie",
     burnPreview: "Szacowane spalanie:",
+    summary: "Podsumowanie",
+    calories: "Kalorie",
     todayOverview: "Dzisiejsza aktywność",
     activityLabel: "Aktywność",
     duration: "Czas trwania",
     total: "Suma",
+    emptyToday: "Dzisiaj nie zarejestrowano jeszcze żadnej aktywności.",
+    loadError: "Nie udało się załadować aktywności.",
+    saveError: "Nie udało się zapisać aktywności. Spróbuj ponownie.",
+    retry: "Spróbuj ponownie",
 
     labels: {
       walking: "Spacer",
