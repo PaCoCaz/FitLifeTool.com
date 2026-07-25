@@ -22,6 +22,48 @@ type Props = {
   onToggleFavorite: (key: string) => void;
 };
 
+export function FavoritesCardSkeleton({
+  title,
+}: {
+  title: string;
+}) {
+  return (
+    <Card
+      header={<CardHeader icon="/heart.svg" title={title} />}
+      headerSpacing="compact"
+    >
+      <div
+        className="-mx-4"
+        aria-hidden="true"
+      >
+        {[0, 1, 2].map((row) => (
+          <div
+            key={row}
+            className="
+              w-full px-4 py-2
+              flex items-center justify-between
+              border-b border-[#DBE4F0]
+              leading-tight
+            "
+          >
+            <div
+              className={`
+                h-4 rounded bg-[#DBE4F0] animate-pulse
+                ${row === 1 ? "w-2/5" : "w-3/5"}
+              `}
+            />
+
+            <div className="flex items-center gap-2">
+              <div className="h-[18px] w-[18px] rounded-full bg-[#DBE4F0] animate-pulse" />
+              <div className="h-[18px] w-[18px] rounded bg-[#DBE4F0] animate-pulse" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 export default function FavoritesCard({
   title,
   items,
