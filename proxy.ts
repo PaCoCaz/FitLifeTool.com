@@ -2,6 +2,7 @@
 
 import { NextResponse, type NextRequest } from "next/server"
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { skipsProxyAuth } from "./app/lib/auth/proxyAuthRules"
 
 type CookieToSet = {
   name: string
@@ -11,6 +12,10 @@ type CookieToSet = {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  if (skipsProxyAuth(pathname)) {
+    return NextResponse.next()
+  }
 
   // nooit auth routes blokkeren
   if (pathname.startsWith("/auth")) {
