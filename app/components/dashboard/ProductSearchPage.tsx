@@ -14,7 +14,9 @@ import { useUser } from "@/lib/AuthProvider";
 import { useLangContext } from "@/lib/LangProvider";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useGoalContext } from "@/lib/GoalProvider";
-import FavoritesCard from "@/components/dashboard/FavoritesCard";
+import FavoritesCard, {
+  FavoritesCardSkeleton,
+} from "@/components/dashboard/FavoritesCard";
 import SearchCard from "@/components/dashboard/SearchCard";
 import type { Grade } from "@/components/ui/GradeBadge";
 import {
@@ -143,6 +145,10 @@ export default function ProductSearchPage({ type }: Props) {
   const [favorites, setFavorites] = useState<Product[]>([]);
   const [favoriteLimit, setFavoriteLimit] =
     useState<number | null>(null);
+  const [
+    hasCompletedInitialFavoritesLoad,
+    setHasCompletedInitialFavoritesLoad,
+  ] = useState(false);
   const [filterPanelOpen, setFilterPanelOpen] =
     useState(false);
   const [selectedGrades, setSelectedGrades] =
@@ -405,6 +411,7 @@ export default function ProductSearchPage({ type }: Props) {
             locked: favorite.locked,
           }))
         );
+        setHasCompletedInitialFavoritesLoad(true);
       } catch (error) {
         if (
           signal?.aborted ||
@@ -414,6 +421,13 @@ export default function ProductSearchPage({ type }: Props) {
           )
         ) {
           return;
+        }
+
+        if (
+          requestSequence ===
+          favoritesRequestSequenceRef.current
+        ) {
+          setHasCompletedInitialFavoritesLoad(true);
         }
 
         throw error;
@@ -612,39 +626,45 @@ export default function ProductSearchPage({ type }: Props) {
     <div className="grid grid-cols-12 gap-6">
       <div className="col-span-12 space-y-6">
 
-        <FavoritesCard
-          title={t.common.favorites}
-          items={favorites}
-          limit={favoriteLimit}
-          lockedMessage={
-            favoriteLimit !== null &&
-            favorites.length > favoriteLimit
-              ? t.common.favoriteActiveNotice
-                  .replace(
-                    "{{total}}",
-                    String(favorites.length)
-                  )
-                  .replace(
-                    "{{limit}}",
-                    String(favoriteLimit)
-                  )
-              : null
-          }
-          onSelect={(key) =>
-            router.push(`/dashboard/${type}/add/${key}`)
-          }
-          onLockedSelect={() => {
-            const limit = favoriteLimit ?? 0;
+        {!hasCompletedInitialFavoritesLoad ? (
+          <FavoritesCardSkeleton
+            title={t.common.favorites}
+          />
+        ) : favorites.length > 0 ? (
+          <FavoritesCard
+            title={t.common.favorites}
+            items={favorites}
+            limit={favoriteLimit}
+            lockedMessage={
+              favoriteLimit !== null &&
+              favorites.length > favoriteLimit
+                ? t.common.favoriteActiveNotice
+                    .replace(
+                      "{{total}}",
+                      String(favorites.length)
+                    )
+                    .replace(
+                      "{{limit}}",
+                      String(favoriteLimit)
+                    )
+                : null
+            }
+            onSelect={(key) =>
+              router.push(`/dashboard/${type}/add/${key}`)
+            }
+            onLockedSelect={() => {
+              const limit = favoriteLimit ?? 0;
 
-            alert(
-              t.common.favoriteLimitUpgrade.replace(
-                "{{limit}}",
-                String(limit)
-              )
-            );
-          }}
-          onToggleFavorite={toggleFavorite}
-        />
+              alert(
+                t.common.favoriteLimitUpgrade.replace(
+                  "{{limit}}",
+                  String(limit)
+                )
+              );
+            }}
+            onToggleFavorite={toggleFavorite}
+          />
+        ) : null}
 
         <SearchCard
           title={t.common.search}
