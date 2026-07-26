@@ -160,8 +160,8 @@ export const handbookDocuments: HandbookDocument[] = [
     titel: "Product Expansion Workflow",
     path: "/handbook/doc-l3-0023",
 
-    status: "current",
-    updated: "2026-07-07",
+    status: "review",
+    updated: "2026-07-26",
   },
 
   {
@@ -172,8 +172,8 @@ export const handbookDocuments: HandbookDocument[] = [
     titel: "Data Import & Database Synchronisatie",
     path: "/handbook/doc-l3-0024",
 
-    status: "current",
-    updated: "2026-07-07",
+    status: "review",
+    updated: "2026-07-26",
   },
 
   /* ─────────────── H3 ─────────────── */
@@ -239,6 +239,18 @@ export const handbookDocuments: HandbookDocument[] = [
     updated: "2026-07-02",
   },
 
+  {
+    id: "doc-l3-0028",
+    level: "l3",
+    hoofdstuk: "H3",
+    nummer: "3.6",
+    titel: "Activity-registratie",
+    path: "/handbook/doc-l3-0028",
+
+    status: "review",
+    updated: "2026-07-26",
+  },
+
   /* ─────────────── H4 ─────────────── */
 
   {
@@ -250,8 +262,8 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0010",
 
     isStart: true,
-    status: "current",
-    updated: "2026-07-16",
+    status: "review",
+    updated: "2026-07-26",
   },
 
   {
@@ -275,7 +287,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0012",
 
     status: "current",
-    updated: "2026-07-16",
+    updated: "2026-07-26",
   },
 
   {
@@ -374,7 +386,43 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0020",
 
     status: "current",
-    updated: "2026-07-06",
+    updated: "2026-07-26",
+  },
+
+  {
+    id: "doc-l3-0025",
+    level: "l3",
+    hoofdstuk: "H5",
+    nummer: "5.7",
+    titel: "Development & Release Workflow",
+    path: "/handbook/doc-l3-0025",
+
+    status: "current",
+    updated: "2026-07-26",
+  },
+
+  {
+    id: "doc-l3-0026",
+    level: "l3",
+    hoofdstuk: "H5",
+    nummer: "5.8",
+    titel: "Codex Workflow & AI Runbook",
+    path: "/handbook/doc-l3-0026",
+
+    status: "current",
+    updated: "2026-07-26",
+  },
+
+  {
+    id: "doc-l3-0027",
+    level: "l3",
+    hoofdstuk: "H5",
+    nummer: "5.9",
+    titel: "Testing & Validatie",
+    path: "/handbook/doc-l3-0027",
+
+    status: "current",
+    updated: "2026-07-26",
   },
 ];
 

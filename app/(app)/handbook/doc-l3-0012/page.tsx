@@ -136,6 +136,53 @@ Gebruiker`}
       </section>
 
       <section>
+        <h2>Asynchrone UI-states</h2>
+
+        <p>
+          Pagina&apos;s die gegevens laden reserveren direct ruimte voor hun
+          uiteindelijke inhoud. Een initiële loadingstate gebruikt waar passend
+          een skeleton met ongeveer dezelfde structuur en hoogte als de
+          uiteindelijke card. Hierdoor verschuift reeds zichtbare inhoud niet
+          onnodig wanneer data arriveert.
+        </p>
+
+        <ul>
+          <li>
+            Toon een expliciete loading- of skeletonstate tijdens de eerste
+            load.
+          </li>
+          <li>
+            Toon na laden een duidelijke empty state of niets wanneer het
+            ontwerp bewust geen lege card vereist.
+          </li>
+          <li>Bied bij herstelbare fouten een fout- en retrystate.</li>
+          <li>
+            Laat bestaande inhoud tijdens een refresh waar passend zichtbaar
+            om flikkeren te voorkomen.
+          </li>
+          <li>Voorkom onnodige layout shifts.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Readiness en stale requests</h2>
+
+        <p>
+          Een gegevensrequest start pas wanneer alle context die de request
+          bepaalt gereed is. Voor Product Search betekent dit dat auth, taal en
+          goal definitief geladen moeten zijn voordat favorieten worden
+          opgehaald.
+        </p>
+
+        <p>
+          Bij een latere wijziging van context wordt opnieuw geladen. Een
+          eerdere response mag de nieuwere state niet overschrijven. Annuleer
+          daarom oude requests met <code>AbortController</code> of negeer ze
+          aantoonbaar met een request-sequence-id.
+        </p>
+      </section>
+
+      <section>
         <h2>CSS-structuur</h2>
 
         <p>
@@ -198,6 +245,10 @@ Gebruiker`}
           <li>Businesslogica is volledig onafhankelijk van schermgrootte.</li>
 
           <li>Nieuwe layouts volgen dezelfde responsieve architectuur.</li>
+
+          <li>Loadingstates reserveren waar passend de uiteindelijke ruimte.</li>
+
+          <li>Stale responses overschrijven nooit nieuwere UI-state.</li>
 
           <li>Publieke content gebruikt public-content.css binnen de publieke scope.</li>
 

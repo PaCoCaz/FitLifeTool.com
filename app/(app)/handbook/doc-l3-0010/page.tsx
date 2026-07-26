@@ -7,7 +7,7 @@ export default function DocL30010() {
   return (
     <DocumentLayout>
       <header>
-        <h1>4.1 UI-architectuur</h1>
+        <h1>4.1 UI-architectuur Overzicht</h1>
         <HandbookMeta />
       </header>
 
@@ -250,9 +250,43 @@ UI Components`}
         </div>
 
         <p>
-          Productgrades worden altijd met <code>GradeBadge</code> getoond.
-          Componenten bouwen geen losse grade-cirkels en bepalen zelf geen
-          gradekleuren.
+          <code>GradeBadge</code> is de vaste component voor productgrades in
+          Product Search en favorieten. <code>CardHeader</code> ondersteunt in
+          de huidige implementatie daarnaast een eigen gradeweergave.
+        </p>
+
+        <div className="info-box">
+          De gewenste grens tussen <code>GradeBadge</code> en de gradeweergave
+          van <code>CardHeader</code> is nog een open UI-vraag. Totdat deze
+          verantwoordelijkheid expliciet is vastgesteld, blijft dit document
+          op status <strong>review</strong> en worden geen nieuwe
+          gradevarianten toegevoegd.
+        </div>
+      </section>
+
+      <section>
+        <h2>Product Search als patroonreferentie</h2>
+
+        <p>
+          Product Search is de operationele visuele referentie voor nieuwe en
+          gemoderniseerde dashboardpagina&apos;s. Het patroon bestaat onder
+          andere uit:
+        </p>
+
+        <ul>
+          <li>een consistente page header</li>
+          <li>gedeelde cards en card headers</li>
+          <li>vaste verticale spacing</li>
+          <li>mobile-first responsive gedrag</li>
+          <li>duidelijke loading-, empty- en errorstates</li>
+          <li>consistente button- en selection states</li>
+        </ul>
+
+        <p>
+          Dit is een patroonreferentie en geen verplichting om Product Search
+          letterlijk te kopiëren. Domeinspecifieke interacties mogen afwijken
+          wanneer dat functioneel nodig is, zolang bestaande componenten en
+          visuele regels eerst worden hergebruikt.
         </p>
       </section>
 

@@ -26,9 +26,17 @@ export default function DocL30024() {
         </p>
 
         <p>
-          De volledige productdefinitie, berekeningen en controles blijven
-          beheerd binnen het centrale productbestand.
+          De volledige productdefinitie, berekeningen en controles worden
+          beheerd binnen de productwerkboeken. Welk concreet bestand de
+          formele canonieke productiebron is, moet nog expliciet worden
+          vastgesteld.
         </p>
+
+        <div className="info-box">
+          Dit document heeft status <strong>review</strong> zolang de canonieke
+          werkboekbron en volledige synchronisatieprocedure niet formeel zijn
+          vastgelegd.
+        </div>
       </section>
 
 
@@ -61,23 +69,47 @@ Applicatie`}
 
 
       <section>
-        <h2>Productbeheer als bron</h2>
+        <h2>Productbeheer en werkboekrollen</h2>
 
         <p>
-          Het productbestand bevat alle informatie die nodig is om
-          producten betrouwbaar te beheren.
-        </p>
-
-        <p>
-          Belangrijke beheerlagen zijn:
+          De lokaal aanwezige bestanden hebben verschillende rollen. Deze
+          rollen mogen niet worden verwisseld:
         </p>
 
         <ul>
+          <li>
+            Een toekomstige formele canonieke bron bevat de goedgekeurde
+            productwaarheid.
+          </li>
+          <li>
+            Een importwerkboek bevat overdraagbare importlagen en is niet
+            automatisch de productiebron.
+          </li>
+          <li>
+            Een testwerkboek ondersteunt proefbewerkingen en validatie.
+          </li>
+          <li>
+            Een back-up bewaart een eerder moment en wordt niet als actuele
+            bron gebruikt zonder expliciete herstelbeslissing.
+          </li>
+        </ul>
+
+        <p>De huidige beheer- en ondersteuningslagen omvatten:</p>
+
+        <ul>
+          <li>staging- en importlagen</li>
+          <li>productgroepen en vertalingen</li>
           <li>PRODUCTS</li>
           <li>PRODUCT_TRANSLATIONS</li>
+          <li>preparations en vertalingen</li>
           <li>PRODUCT_PREPARATIONS</li>
           <li>PRODUCT_SCORES</li>
+          <li>units en vertalingen</li>
           <li>PORTIONS</li>
+          <li>bronnen</li>
+          <li>configuratie</li>
+          <li>validatie- en dropdownlagen</li>
+          <li>bonus/malus waar aanwezig</li>
         </ul>
 
         <p>
@@ -190,6 +222,19 @@ Applicatie`}
         <p>
           Hierdoor blijven wijzigingen reproduceerbaar en controleerbaar.
         </p>
+
+        <p>
+          Werk bij iedere toekomstige wijziging de versie, wijzigingsdatum en
+          changelog bij. Valideer een import vóór synchronisatie en bepaal
+          vooraf hoe de vorige gevalideerde toestand veilig kan worden
+          hersteld.
+        </p>
+
+        <p>
+          Deze principes leggen nog geen exacte synchronisatieopdracht vast.
+          Een concrete import- of herstelprocedure wordt pas canoniek wanneer
+          zij aantoonbaar bestaat, getest is en expliciet is goedgekeurd.
+        </p>
       </section>
 
 
@@ -223,11 +268,13 @@ Applicatie`}
         <h2>Belangrijke ontwerpprincipes</h2>
 
         <ul>
-          <li>Productbeheer blijft de bron van waarheid.</li>
+          <li>
+            De formeel aangewezen productbron blijft de bron van waarheid.
+          </li>
 
           <li>Supabase bevat alleen gevalideerde runtime-data.</li>
 
-          <li>Importstromen zijn reproduceerbaar.</li>
+          <li>Importstromen moeten gevalideerd en herstelbaar zijn.</li>
 
           <li>Historische gebruikersdata blijft geldig.</li>
 

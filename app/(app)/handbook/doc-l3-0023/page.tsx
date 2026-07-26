@@ -30,6 +30,13 @@ export default function DocL30023() {
           applicatiedatabase, maar doorlopen altijd dezelfde vaste
           verwerkingsketen.
         </p>
+
+        <div className="info-box">
+          Welk concreet werkboek de formele canonieke productiebron is, moet
+          nog expliciet worden vastgesteld. Dit document blijft daarom op
+          status <strong>review</strong>. Een import-, test- of back-upbestand
+          is nooit automatisch een productiebron.
+        </div>
       </section>
 
 
@@ -175,6 +182,35 @@ Supabase`}
         </ul>
       </section>
 
+      <section>
+        <h2>Huidige werkboeklagen</h2>
+
+        <p>
+          De lokaal aanwezige productwerkboeken bevatten meer lagen dan alleen
+          de primaire product- en exporttabellen. De huidige categorieën zijn:
+        </p>
+
+        <ul>
+          <li>staging- en importlagen</li>
+          <li>producten en productvertalingen</li>
+          <li>productgroepen en groepvertalingen</li>
+          <li>preparations en preparationvertalingen</li>
+          <li>units en unitvertalingen</li>
+          <li>productscores</li>
+          <li>portions</li>
+          <li>bronregistratie</li>
+          <li>configuratie</li>
+          <li>validatie- en dropdownlagen</li>
+          <li>bonus/malus-regels waar aanwezig</li>
+        </ul>
+
+        <p>
+          Niet ieder werkboek bevat al deze lagen. De aanwezigheid van een
+          werkblad bepaalt niet zelfstandig of dat bestand geschikt of
+          goedgekeurd is als productiebron.
+        </p>
+      </section>
+
 
       <section>
         <h2>Porties</h2>
@@ -215,6 +251,22 @@ Supabase`}
         <p>
           Werkbladen met berekeningen blijven de bron en worden niet
           rechtstreeks geïmporteerd.
+        </p>
+      </section>
+
+      <section>
+        <h2>Versie- en wijzigingsbeheer</h2>
+
+        <p>
+          Bij toekomstige productwijzigingen worden versie, wijzigingsdatum en
+          changelog bijgewerkt in het daarvoor aangewezen werkboek. Een
+          productimport wordt vooraf gevalideerd en moet herstelbaar zijn.
+        </p>
+
+        <p>
+          Totdat de formele productiebron en synchronisatieprocedure zijn
+          vastgesteld, wordt geen lokaal werkboek uitsluitend op basis van
+          bestandsnaam, inhoud of actualiteitsdatum als canoniek behandeld.
         </p>
       </section>
 

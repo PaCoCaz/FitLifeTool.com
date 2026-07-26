@@ -227,6 +227,43 @@ export default function DocL30020() {
           geldende architectuur en vormt de referentie voor toekomstige
           wijzigingen.
         </p>
+
+        <p>
+          Gebruik <strong>review</strong> wanneer een bekende afwijking, open
+          architectuurvraag of onvolledig reproduceerbare implementatie de
+          betrouwbaarheid van het document beïnvloedt. Gebruik
+          <strong> current</strong> alleen wanneer de inhoud aansluit op de
+          actuele code en geldende afspraken.
+        </p>
+      </section>
+
+      <section>
+        <h2>Registry en wijzigingsdatum</h2>
+
+        <p>
+          <code>handbookRegistry.ts</code> is de canonieke bron voor
+          document-id, route, titel, status en de datum
+          <em> Laatst bijgewerkt</em>.
+        </p>
+
+        <ul>
+          <li>
+            Werk de <code>updated</code>-datum bij wanneer een document
+            inhoudelijk verandert.
+          </li>
+          <li>
+            Wijzig de datum niet bij documenten die inhoudelijk ongewijzigd
+            blijven.
+          </li>
+          <li>
+            Beoordeel de status per document; pas niet automatisch alle
+            statussen aan.
+          </li>
+          <li>
+            Houd registry-id, route, titel, paginakop, status en datum
+            onderling consistent.
+          </li>
+        </ul>
       </section>
 
       <section>

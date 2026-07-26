@@ -65,6 +65,9 @@ Relevant sections:
 ## Maintainability
 
 - 5.x Extension Principles
+- 5.7 Development & Release Workflow
+- 5.8 Codex Workflow & AI Runbook
+- 5.9 Testing & Validation
 
 ---
 
@@ -80,15 +83,21 @@ Never commit directly to:
 
 main
 
-Workflow:
+The canonical Git, validation, deployment and rollback rules are documented in
+Developer Handbook sections 5.7 through 5.9.
 
-develop
-↓
-Vercel Preview
-↓
-main
+In summary:
 
-Production only receives tested changes.
+- start read-only and define scope before implementing
+- work on a clean, current `develop`
+- validate locally and review changed and staged files
+- push development only to `origin/develop`
+- request explicit permission for release checkout, merge, push, deployment
+  and rollback
+- update `main` with fast-forward operations only
+- stop if fast-forward is not possible
+- never use rebase or force push as a release workaround
+- verify Vercel deployment metadata and the relevant production flow
 
 ---
 
@@ -153,7 +162,7 @@ changing existing meaning
 
 # Product Database Rules
 
-Product data follows this pipeline:
+Product data follows this conceptual pipeline:
 
 External source
 ↓
@@ -168,7 +177,9 @@ Export tables
 Supabase
 
 
-The product management file is the source of truth.
+The formal canonical production workbook has not yet been designated. Import,
+test and backup workbooks must not be treated as the production source without
+an explicit decision.
 
 Supabase is runtime storage.
 
@@ -283,6 +294,17 @@ Codex must NOT:
 - remove existing workflows
 
 without explicit approval.
+
+Codex must also:
+
+- avoid exposing secrets, tokens, cookies or passwords
+- use temporary directories for temporary scripts where possible
+- remove temporary measurement and debug code after use
+- report the current branch, commit and worktree after risky Git or deployment
+  steps
+- avoid changing production data for tests unless explicitly permitted
+- restore test data through existing safe functionality where possible
+- avoid direct database repair of test data without explicit permission
 
 ---
 

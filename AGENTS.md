@@ -65,15 +65,20 @@ User actions are stored as logs.
 Examples:
 
 - nutrition_logs
-- hydration_logs
 - activity_logs
 - weight_logs
 
 Principles:
 
 - logs are source data
-- logs are append-only
 - derived values are recalculated
+
+Nutrition and activity are event logs and are appended as new user actions.
+Hydration is derived from nutrition logs and product water data; the current
+implementation has no separate `hydration_logs` table.
+
+`weight_logs` represents a daily weight snapshot. The current implementation
+may upsert the snapshot for the same user and calendar date.
 
 Do not store calculated progress or scores.
 
@@ -293,6 +298,8 @@ Rules:
 - never commit directly to main
 - keep changes small
 - maintain backwards compatibility
+- follow Handbook sections 5.7 through 5.9 for validation, fast-forward-only
+  releases, Codex approval gates and production verification
 
 ---
 

@@ -58,10 +58,17 @@ The project uses two primary branches.
 
 ### Development process
 
-1. Create or modify features on the `develop` branch.
-2. Test all changes.
-3. Merge into `main` only after verification.
-4. Vercel automatically deploys `main` to production.
+1. Start from a clean, up-to-date `develop` branch.
+2. Implement and validate changes locally.
+3. Review the changed and staged files before committing.
+4. Push development only to `origin/develop`.
+5. Release to `main` only after explicit approval and with a fast-forward merge.
+6. Do not create a merge commit, rebase or force push as an alternative.
+7. Vercel automatically deploys `main` to production.
+8. Verify the deployment metadata and the affected production flow.
+
+The canonical release and rollback procedure is documented in Developer
+Handbook section **5.7 Development & Release Workflow**.
 
 ---
 
@@ -101,8 +108,9 @@ The Developer Handbook should always be considered the primary source of project
 
 ```text
 app/
-components/
-lib/
+├── components/
+├── lib/
+└── (app)/handbook/
 public/
 supabase/
 types/
@@ -114,10 +122,10 @@ README.md
 | Path | Description |
 |------|-------------|
 | `app/` | Next.js App Router pages |
-| `components/` | Reusable UI components |
-| `lib/` | Shared utilities, hooks and providers |
+| `app/components/` | Reusable UI components |
+| `app/lib/` | Shared utilities, hooks and providers |
 | `public/` | Static assets |
-| `supabase/` | Database migrations, SQL and configuration |
+| `supabase/` | The migrations currently tracked in this repository; this is not yet a complete reproducible schema history |
 | `types/` | Shared TypeScript types |
 | `app/(app)/handbook/` | Internal Developer Handbook |
 
@@ -143,6 +151,11 @@ Production deployments are handled automatically by **Vercel**.
 
 - `develop` → Preview Deployment
 - `main` → Production Deployment
+
+A production release requires explicit approval, a fast-forward-only update of
+`main`, deployment status `Ready`, verification of the live Git SHA,
+deployment ID, production alias, Function Region and a limited functional
+smoke test.
 
 ---
 
