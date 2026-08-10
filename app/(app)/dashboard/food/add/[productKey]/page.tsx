@@ -19,6 +19,10 @@ import Image from "next/image";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
+import {
+  selectDefaultPortion,
+  sortPortionsForDisplay,
+} from "@/lib/nutrition/portionSelection";
 
 /* ───────── TYPES ───────── */
 
@@ -275,6 +279,8 @@ export default function AddFoodPage() {
   useEffect(() => {
     if (!selectedPreparation || !lang) return;
 
+    let cancelled = false;
+
     async function loadPortions() {
       const { data } = await supabase
         .from("nutrition_portions")
@@ -283,7 +289,13 @@ export default function AddFoodPage() {
         .eq("preparation_key", selectedPreparation)
         .order("sort_order", { ascending: true });
 
-      if (!data) return;
+      if (!data) {
+        if (!cancelled) {
+          setPortions([]);
+          setSelectedPortion(null);
+        }
+        return;
+      }
 
       const typed = data as {
         unit_key: string;
@@ -338,17 +350,19 @@ export default function AddFoodPage() {
         };
       });
 
-      setPortions(mapped);
+      const displayPortions = sortPortionsForDisplay(mapped);
 
-      setSelectedPortion((prev) => {
-        if (prev && mapped.some(p => p.unit_key === prev.unit_key)) {
-          return prev;
-        }
-        return mapped[0] ?? null;
-      });
+      if (cancelled) return;
+
+      setPortions(displayPortions);
+      setSelectedPortion(selectDefaultPortion(displayPortions));
     }
 
     loadPortions();
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedPreparation, productKey, lang]);
 
   /* ───────── SAVE ───────── */

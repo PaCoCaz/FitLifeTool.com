@@ -19,6 +19,10 @@ import Image from "next/image";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
+import {
+  selectDefaultPortion,
+  sortPortionsForDisplay,
+} from "@/lib/nutrition/portionSelection";
 
 /* ───────────────── Types ───────────────── */
 
@@ -47,6 +51,7 @@ type PortionRow = {
   grams: number | null;
   ml: number | null;
   sort_order: number | null;
+  is_default: boolean;
 };
 
 type Preparation = {
@@ -59,6 +64,8 @@ type Portion = {
   grams: number | null;
   ml: number | null;
   label: string;
+  sort_order: number | null;
+  is_default: boolean;
 };
 
 type UnitTranslationRow = {
@@ -277,20 +284,34 @@ export default function AddFoodPage() {
   useEffect(() => {
     if (!selectedPreparation || !lang) return;
 
+    let cancelled = false;
+
     async function loadPortions() {
 
 
       const { data: portionsRaw } = await supabase
         .from("nutrition_portions")
-        .select("unit_key, grams, ml, sort_order")
+        .select("unit_key, grams, ml, sort_order, is_default")
         .eq("product_key", productKey)
         .eq("preparation_key", selectedPreparation)
         .order("sort_order", { ascending: true });
 
-      if (!portionsRaw) return;
+      if (!portionsRaw) {
+        if (!cancelled) {
+          setPortions([]);
+          setSelectedPortion(null);
+        }
+        return;
+      }
 
       const portionsData = portionsRaw as PortionRow[];
-      if (portionsData.length === 0) return;
+      if (portionsData.length === 0) {
+        if (!cancelled) {
+          setPortions([]);
+          setSelectedPortion(null);
+        }
+        return;
+      }
 
       const unitKeys = Array.from(
         new Set(portionsData.map((p) => p.unit_key))
@@ -335,20 +356,24 @@ export default function AddFoodPage() {
           grams: row.grams,
           ml: row.ml,
           label,
+          sort_order: row.sort_order,
+          is_default: row.is_default,
         };
       });
 
-      setPortions(mapped);
+      const displayPortions = sortPortionsForDisplay(mapped);
 
-      setSelectedPortion((prev) => {
-        if (prev && mapped.some(p => p.unit_key === prev.unit_key)) {
-          return prev;
-        }
-        return mapped[0] ?? null;
-      });
+      if (cancelled) return;
+
+      setPortions(displayPortions);
+      setSelectedPortion(selectDefaultPortion(displayPortions));
     }
 
     loadPortions();
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedPreparation, productKey, lang]);
 
   /* ⭐ TOGGLE FAVORITE */
