@@ -7,6 +7,7 @@ export async function login(email: string) {
     email,
     options: {
       emailRedirectTo: window.location.origin,
+      shouldCreateUser: false,
     },
   });
 }

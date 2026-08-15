@@ -11,12 +11,18 @@ import {
 } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
+import {
+  asAppLanguage,
+  resolveInterfaceLanguage,
+  type AppLanguage,
+} from "@/lib/languagePreference";
 
-export type Lang = "en" | "nl" | "fr" | "de" | "pl";
+export type Lang = AppLanguage;
 
 type LangContextType = {
   lang: Lang;
   isLoading: boolean;
+  setInterfaceLanguage: (newLang: Lang) => void;
   setUserLanguage: (newLang: Lang) => Promise<void>;
 };
 
@@ -25,7 +31,10 @@ const LangContext = createContext<LangContextType | null>(null);
 export function LangProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
   const userId = user?.id ?? null;
-  const [lang, setLang] = useState<Lang>("en");
+  const metadataLanguage = asAppLanguage(user?.user_metadata?.language);
+  const [lang, setLang] = useState<Lang>(() =>
+    resolveInterfaceLanguage(null, user?.user_metadata?.language)
+  );
   const [loadedUserId, setLoadedUserId] =
     useState<string | null>(null);
   const isLoading =
@@ -39,6 +48,11 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     if (!userId) return;
 
     async function loadLanguage() {
+      // Signup metadata bridges the short period before profile bootstrap exists.
+      await Promise.resolve();
+      if (cancelled) return;
+      if (metadataLanguage) setLang(metadataLanguage);
+
       const { data, error } = await supabase
         .from("profiles")
         .select("language")
@@ -53,8 +67,10 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      if (data?.language) {
-        setLang(data.language as Lang);
+      const profileLanguage = asAppLanguage(data?.language);
+      if (profileLanguage) {
+        // Once present, profiles.language is the persistent source of truth.
+        setLang(profileLanguage);
       }
 
       setLoadedUserId(userId);
@@ -65,9 +81,13 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [metadataLanguage, userId]);
 
   /* ───────────────── CHANGE LANGUAGE ───────────────── */
+
+  const setInterfaceLanguage = useCallback((newLang: Lang) => {
+    setLang(newLang);
+  }, []);
 
   const setUserLanguage = useCallback(
     async (newLang: Lang) => {
@@ -109,6 +129,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
       value={{
         lang,
         isLoading,
+        setInterfaceLanguage,
         setUserLanguage,
       }}
     >

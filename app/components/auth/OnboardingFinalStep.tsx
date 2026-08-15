@@ -1,215 +1,79 @@
-// app/components/auth/OnboardingFinalStep.tsx
-
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
+import { useLang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
 
-/* ───────────────── Types ───────────────── */
+type ActivityLevel = "sedentary" | "light" | "moderate" | "active" | "very_active";
+type Goal = "LOSE" | "MAINTAIN" | "GAIN";
+type Props = { onComplete: () => void | Promise<void> };
 
-type ActivityLevel =
-  | "sedentary"
-  | "light"
-  | "moderate"
-  | "active"
-  | "very_active";
-
-type Goal =
-  | "LOSE"
-  | "MAINTAIN"
-  | "GAIN"
-  | "GAIN_MUSCLE"
-  | "HOLIDAY";
-
-/* ───────────────── Component ───────────────── */
-
-type Props = {
-  onBack: () => void;
-};
-
-export default function OnboardingFinalStep({ onBack }: Props) {
-  const router = useRouter();
+export default function OnboardingFinalStep({ onComplete }: Props) {
   const { user } = useUser();
-
-  const [activityLevel, setActivityLevel] =
-    useState<ActivityLevel | "">("");
-
+  const lang = useLang();
+  const t = uiText[lang];
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel | "">("");
   const [goal, setGoal] = useState<Goal | "">("");
-
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  /* ───────────────── Handler ───────────────── */
+  useEffect(() => {
+    if (!user) return;
+    void Promise.all([
+      supabase.from("profiles").select("activity_level, goal").eq("id", user.id).maybeSingle(),
+      supabase.from("user_goal_periods").select("goal_key").eq("user_id", user.id).is("end_at", null).order("start_at", { ascending: false }).limit(1).maybeSingle(),
+    ]).then(([profileResult, goalResult]) => {
+      if (profileResult.data?.activity_level) setActivityLevel(profileResult.data.activity_level as ActivityLevel);
+      const loadedGoal = goalResult.data?.goal_key ?? profileResult.data?.goal;
+      if (loadedGoal === "LOSE" || loadedGoal === "MAINTAIN" || loadedGoal === "GAIN") setGoal(loadedGoal);
+    });
+  }, [user]);
 
-  const handleFinish = async () => {
-    if (!activityLevel || !goal) {
-      setError("Kies je activiteitsniveau en doel");
-      return;
-    }
-
-    if (!user) {
-      setError("Geen gebruiker gevonden");
-      return;
-    }
-
+  async function handleFinish() {
+    if (!activityLevel || !goal) return setError(t.auth.requiredFields);
+    if (!user) return setError(t.auth.noUser);
     setSaving(true);
     setError(null);
 
-    // 1️⃣ Activiteitsniveau opslaan
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({
-        activity_level: activityLevel,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
+    const { error: profileError } = await supabase.from("profiles").update({
+      activity_level: activityLevel, goal, updated_at: new Date().toJSON(),
+    }).eq("id", user.id);
+    if (profileError) { setSaving(false); return setError(profileError.message); }
 
-    if (updateError) {
-      setError(updateError.message);
-      setSaving(false);
-      return;
-    }
+    const { data: activeGoal, error: activeGoalError } = await supabase
+      .from("user_goal_periods").select("id, goal_key").eq("user_id", user.id).is("end_at", null)
+      .order("start_at", { ascending: false }).limit(1).maybeSingle();
+    if (activeGoalError) { setSaving(false); return setError(activeGoalError.message); }
 
-    // 2️⃣ Eerste goal periode
-    const todayStr =
-      new Date().toISOString().split("T")[0];
+    const goalResult = activeGoal
+      ? activeGoal.goal_key === goal
+        ? { error: null }
+        : await supabase.from("user_goal_periods").update({ goal_key: goal }).eq("id", activeGoal.id)
+      : await supabase.from("user_goal_periods").insert({ user_id: user.id, goal_key: goal, start_at: new Date().toJSON(), end_at: null });
 
-    const { error: goalError } = await supabase
-      .from("user_goal_periods")
-      .insert({
-        user_id: user.id,
-        goal_key: goal,
-        start_at: todayStr,
-        end_at: null,
-      });
+    if (goalResult.error) { setSaving(false); return setError(goalResult.error.message); }
 
-    if (goalError) {
-      setError(goalError.message);
-      setSaving(false);
-      return;
-    }
-
-    // 3️⃣ Targets herberekenen
-    const { error: recalcError } =
-      await supabase.rpc(
-        "recalculate_user_targets",
-        {
-          p_user_id: user.id,
-        }
-      );
-
-    if (recalcError) {
-      setError(recalcError.message);
-      setSaving(false);
-      return;
-    }
-
-    // 4️⃣ Klaar
-    router.replace("/dashboard");
-  };
-
-  if (!user) return null;
-
-  /* ───────────────── UI ───────────────── */
+    const { error: recalcError } = await supabase.rpc("recalculate_user_targets", { p_user_id: user.id });
+    setSaving(false);
+    if (recalcError) return setError(recalcError.message);
+    await onComplete();
+  }
 
   return (
     <div className="space-y-6">
-
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          Activiteitsniveau
-        </label>
-
-        <select
-          value={activityLevel}
-          onChange={(e) =>
-            setActivityLevel(
-              e.target.value as ActivityLevel
-            )
-          }
-          className="w-full rounded border px-3 py-2"
-        >
-          <option value="">Selecteer</option>
-          <option value="sedentary">Weinig actief: Overwegend zittend werk, weinig beweging (bijv. minder dan 5000 stappen per dag).</option>
-          <option value="light">Licht actief: Zittend werk, maar regelmatig bewegen (bijv. 5000-8000 stappen of af en toe sporten).</option>
-          <option value="moderate">Gemiddeld actief: Actieve dagen met veel bewegen (bijv. 8000-12000 stappen, sport of fysiek werk).</option>
-          <option value="active">Actief: Veel dagelijkse beweging, fysiek werk of vaak sporten (meestal meer dan 12000 stappen).</option>
-          <option value="very_active">Zeer actief: Zwaar fysiek werk, intensieve training of topsport.</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          Wat is je doel?
-        </label>
-
-        <div className="space-y-2">
-
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked={goal === "LOSE"}
-              onChange={() => setGoal("LOSE")}
-            />
-            Afvallen
-          </label>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked={goal === "MAINTAIN"}
-              onChange={() => setGoal("MAINTAIN")}
-            />
-            Gewicht behouden
-          </label>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked={goal === "GAIN"}
-              onChange={() => setGoal("GAIN")}
-            />
-            Aankomen
-          </label>
-
-        </div>
-      </div>
-
-      {error && (
-        <p className="text-sm text-red-600">
-          {error}
-        </p>
-      )}
-
-      <div className="flex justify-between">
-
-        <button
-          onClick={onBack}
-          className="text-sm text-gray-500"
-        >
-          Terug
-        </button>
-
-        <button
-          onClick={handleFinish}
-          disabled={saving}
-          className="
-            rounded-[var(--radius)]
-            bg-[#191970]
-            px-4 py-2
-            text-sm
-            font-medium
-            text-white
-            hover:bg-[#0BA4E0]
-          "
-        >
-          {saving ? "Instellen…" : "Naar dashboard"}
-        </button>
-
-      </div>
-
+      <h2 className="text-lg font-semibold text-[#191970]">{t.auth.goalTitle}</h2>
+      <div><label className="mb-1 block text-sm font-medium">{t.auth.activityLevel}</label><select value={activityLevel} onChange={(event) => setActivityLevel(event.target.value as ActivityLevel)} className="w-full rounded border px-3 py-2">
+        <option value="">{t.common.select}</option><option value="sedentary">{t.auth.sedentary}</option><option value="light">{t.auth.light}</option><option value="moderate">{t.auth.moderate}</option><option value="active">{t.auth.active}</option><option value="very_active">{t.auth.veryActive}</option>
+      </select></div>
+      <fieldset><legend className="mb-2 text-sm font-medium">{t.auth.goalQuestion}</legend><div className="space-y-2">
+        <label className="flex items-center gap-2"><input type="radio" checked={goal === "LOSE"} onChange={() => setGoal("LOSE")} />{t.goals.lose}</label>
+        <label className="flex items-center gap-2"><input type="radio" checked={goal === "MAINTAIN"} onChange={() => setGoal("MAINTAIN")} />{t.goals.maintain}</label>
+        <label className="flex items-center gap-2"><input type="radio" checked={goal === "GAIN"} onChange={() => setGoal("GAIN")} />{t.goals.gain}</label>
+      </div></fieldset>
+      {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
+      <button onClick={handleFinish} disabled={saving} className="w-full rounded bg-[#191970] py-2 text-white disabled:opacity-50">{saving ? t.auth.finishing : t.auth.finish}</button>
     </div>
   );
 }

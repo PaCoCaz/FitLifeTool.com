@@ -2,7 +2,15 @@
 
 import { NextResponse, type NextRequest } from "next/server"
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
-import { skipsProxyAuth } from "./app/lib/auth/proxyAuthRules"
+import {
+  isOnboardingRoute,
+  isProtectedAppRoute,
+  skipsProxyAuth,
+} from "./app/lib/auth/proxyAuthRules"
+import {
+  getOnboardingStep,
+  ONBOARDING_PROFILE_FIELDS,
+} from "./app/lib/auth/onboardingState"
 
 type CookieToSet = {
   name: string
@@ -64,13 +72,43 @@ export async function proxy(request: NextRequest) {
 
   const isLoggedIn = !!user
 
-  const isProtected =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/settings") ||
-    pathname.startsWith("/handbook")
+  const isProtected = isProtectedAppRoute(pathname)
+  const isOnboarding = isOnboardingRoute(pathname)
 
-  if (!isLoggedIn && isProtected) {
+  if (!isLoggedIn && (isProtected || isOnboarding)) {
     return NextResponse.redirect(new URL("/", request.url))
+  }
+
+  if (isLoggedIn && user && (isProtected || isOnboarding)) {
+    const [{ data: profile, error: profileError }, { data: activeGoal, error: goalError }] =
+      await Promise.all([
+        supabase
+          .from("profiles")
+          .select(ONBOARDING_PROFILE_FIELDS)
+          .eq("id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("user_goal_periods")
+          .select("id")
+          .eq("user_id", user.id)
+          .is("end_at", null)
+          .order("start_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ])
+
+    const onboardingStep =
+      profileError || goalError
+        ? "profile"
+        : getOnboardingStep(profile, Boolean(activeGoal))
+
+    if (isOnboarding && onboardingStep === "complete") {
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
+
+    if (isProtected && onboardingStep !== "complete") {
+      return NextResponse.redirect(new URL("/onboarding", request.url))
+    }
   }
 
   // role check
@@ -103,5 +141,6 @@ export const config = {
     "/settings/:path*",
     "/handbook/:path*",
     "/auth/:path*",
+    "/onboarding/:path*",
   ],
 }

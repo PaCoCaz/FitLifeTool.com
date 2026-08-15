@@ -18,3 +18,9 @@ export function useSetUserLanguage() {
   const { setUserLanguage } = useLangContext();
   return setUserLanguage;
 }
+
+// Directe UI-taalkeuze voor pre-auth flows, zoals registratie.
+export function useSetInterfaceLanguage() {
+  const { setInterfaceLanguage } = useLangContext();
+  return setInterfaceLanguage;
+}

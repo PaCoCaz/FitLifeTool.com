@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@/lib/AuthProvider";
-
+import { supabase } from "@/lib/supabaseClient";
+import { canAccessHandbook } from "@/lib/auth/handbookAccess";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
@@ -23,13 +24,13 @@ const PUBLIC_NAV_ITEMS = [
   { label: "Leefstijl", href: "/leefstijl" },
 ];
 
-const getAuthNavItems = (t: typeof uiText.en) => [
+const getAuthNavItems = (t: typeof uiText.en, showHandbook: boolean) => [
   { label: t.nav.dashboard, href: "/dashboard" },
   { label: t.nav.hydration, href: "/dashboard/hydration" },
   { label: t.nav.nutrition, href: "/dashboard/food/search" },
   { label: t.nav.activity, href: "/dashboard/activity" },
   { label: t.nav.weight, href: "/dashboard/weight" },
-  { label: t.nav.handbook, href: "/handbook" },
+  ...(showHandbook ? [{ label: t.nav.handbook, href: "/handbook" }] : []),
 ];
 
 export default function TopNavigation() {
@@ -42,10 +43,38 @@ export default function TopNavigation() {
 
   const { user } = useUser();
   const isLoggedIn = !!user;
-  const role = undefined;
+  const userId = user?.id ?? null;
+  const [roleState, setRoleState] = useState<{
+    userId: string;
+    role: string | null;
+  } | null>(null);
+  const role = userId && roleState?.userId === userId ? roleState.role : null;
+
+  useEffect(() => {
+    if (!userId) return;
+    const activeUserId = userId;
+    let cancelled = false;
+
+    async function loadRole() {
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", activeUserId)
+        .maybeSingle();
+
+      if (!cancelled) {
+        setRoleState({ userId: activeUserId, role: data?.role ?? null });
+      }
+    }
+
+    void loadRole();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const navItems = isLoggedIn
-  ? getAuthNavItems(t)
+  ? getAuthNavItems(t, canAccessHandbook(role))
   : PUBLIC_NAV_ITEMS;
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);

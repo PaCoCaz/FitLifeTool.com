@@ -118,6 +118,7 @@ Dashboard`}
 
         <ul>
           <li>Accountgegevens</li>
+          <li>Verplichte keuze van het woonland</li>
           <li>Persoonlijke gegevens</li>
           <li>Lichaamsgegevens</li>
           <li>Doelen en berekeningen</li>
@@ -126,6 +127,14 @@ Dashboard`}
         <p>
           Iedere stap schrijft direct gegevens weg naar de database. Er bestaat
           geen tijdelijke onboarding-state buiten het profiel.
+        </p>
+
+        <p>
+          Bij registratie worden de profielgegevens eerst als bevestigingsmetadata
+          aan de auth-gebruiker gekoppeld. Na e-mailbevestiging maakt een
+          geauthenticeerde, idempotente bootstrap het profiel aan. De actuele
+          profielinhoud bepaalt daarna steeds welke onboardingstap nodig is, zodat
+          de flow na vernieuwen of opnieuw inloggen veilig kan worden hervat.
         </p>
 
         <h3>Toegangscontrole</h3>

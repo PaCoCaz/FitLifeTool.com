@@ -70,6 +70,10 @@ export default function DocL30002() {
           <li>persoonlijke doelstellingen</li>
           <li>rol en toegangsrechten</li>
           <li>taal- en gebruikersinstellingen</li>
+          <li>
+            woonland via <code>country_code</code> en de onafhankelijk wijzigbare
+            voedingsregio via <code>food_region</code>
+          </li>
         </ul>
 
         <p>
@@ -95,7 +99,7 @@ export default function DocL30002() {
           </li>
 
           <li>
-            Server-side autorisatie binnen de Next.js layouts voordat pagina's
+            Server-side autorisatie binnen de Next.js layouts voordat pagina&apos;s
             worden gerenderd.
           </li>
         </ul>
@@ -158,6 +162,10 @@ export default function DocL30002() {
           <li>Autorisatie wordt server-side afgedwongen.</li>
           <li>UI-componenten vertrouwen nooit uitsluitend op client-side controles.</li>
           <li>Referentiedata en gebruikersdata blijven volledig gescheiden.</li>
+          <li>
+            Landcodes gebruiken ISO 3166-1 alpha-2 en worden gevalideerd tegen
+            de centrale landenreferentie.
+          </li>
         </ul>
 
         <p>

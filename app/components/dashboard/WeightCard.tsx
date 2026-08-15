@@ -1,24 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
-import { useLabels } from "@/lib/useLabels";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
-import { useRouter } from "next/navigation";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
+import { calculateBMI } from "@/lib/calculations";
+import {
+  canLoadWeightProfile,
+  resolveWeightSummary,
+  type WeightSummary,
+} from "@/lib/weightSummary";
 
 /* ───────────────── Types ───────────────── */
 
 type WeightProfileResult = {
-  weight_kg: number;
-  bmi: number;
+  weight_kg: number | null;
+  bmi: number | null;
   target_weight_kg: number | null;
-  height_cm: number;
+  height_cm: number | null;
+};
+
+type SupabaseErrorDetails = {
+  message?: unknown;
+  code?: unknown;
+  details?: unknown;
+  hint?: unknown;
+};
+
+type WeightLoadState = {
+  userId: string;
+  status: "ready" | "unavailable";
+  summary: WeightSummary | null;
 };
 
 /* ───────────────── Helpers ───────────────── */
@@ -125,11 +141,7 @@ function BMIBar({ bmi }: { bmi: number }) {
 
 export default function WeightCard() {
   const { user } = useUser();
-  const router = useRouter();
-
-  const [weight, setWeight] = useState<number | null>(null);
-  const [bmi, setBmi] = useState<number | null>(null);
-  const [targetWeight, setTargetWeight] = useState<number | null>(null);
+  const [loadState, setLoadState] = useState<WeightLoadState | null>(null);
 
   const lang = useLang();
   const t = uiText[lang];
@@ -138,25 +150,66 @@ export default function WeightCard() {
 
   useEffect(() => {
     const userId = user?.id;
-    if (!userId) return;
+    let active = true;
 
-    supabase
+    if (!canLoadWeightProfile(userId)) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void supabase
       .from("profiles")
       .select("weight_kg, bmi, target_weight_kg, height_cm")
       .eq("id", userId)
-      .single()
-      .then(({ data }: { data: WeightProfileResult | null }) => {
-        if (!data) return;
+      .maybeSingle()
+      .then(({ data, error }: {
+        data: WeightProfileResult | null;
+        error: SupabaseErrorDetails | null;
+      }) => {
+        if (!active) return;
 
-        setWeight(data.weight_kg);
-        setBmi(data.bmi);
-        setTargetWeight(data.target_weight_kg);
+        if (error) {
+          console.error("Weight profile error:", {
+            message: error.message ?? null,
+            code: error.code ?? null,
+            details: error.details ?? null,
+            hint: error.hint ?? null,
+          });
+        }
+
+        const summary = resolveWeightSummary(data, error, calculateBMI);
+        setLoadState({
+          userId,
+          status: summary ? "ready" : "unavailable",
+          summary,
+        });
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        console.error("Unexpected weight profile error:", error);
+        setLoadState({
+          userId,
+          status: "unavailable",
+          summary: null,
+        });
       });
-  }, [user]);
 
-  if (weight === null || bmi === null) {
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
+  const userId = user?.id;
+  const status = !userId
+    ? "unavailable"
+    : loadState?.userId === userId
+      ? loadState.status
+      : "loading";
+
+  if (status === "loading") {
     return (
-      <Card title="Gewicht">
+      <Card title={t.weight.title}>
         <div className="text-sm text-gray-500">
           {t.weight.loading}
         </div>
@@ -164,6 +217,18 @@ export default function WeightCard() {
     );
   }
 
+  if (status === "unavailable" || !loadState?.summary) {
+    return (
+      <Card title={t.weight.title}>
+        <div className="text-sm text-gray-500">
+          {t.weight.unavailable}
+        </div>
+      </Card>
+    );
+  }
+
+  const summary = loadState.summary;
+  const { weight, bmi, targetWeight } = summary;
   const bmiCategory = getBMICategory(bmi);
 
   return (

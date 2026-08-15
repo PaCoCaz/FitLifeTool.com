@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { usePathname } from "next/navigation";
 
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
@@ -68,6 +69,22 @@ const DEFAULT_LIMITS: PlanLimits = {
 
 const DashboardContext = createContext<DashboardState | null>(null);
 
+type SupabaseErrorDetails = {
+  message?: unknown;
+  code?: unknown;
+  details?: unknown;
+  hint?: unknown;
+};
+
+function logDashboardError(label: string, error: SupabaseErrorDetails) {
+  console.error(label, {
+    message: error.message ?? null,
+    code: error.code ?? null,
+    details: error.details ?? null,
+    hint: error.hint ?? null,
+  });
+}
+
 /* ───────────────── Provider ───────────────── */
 
 export function DashboardProvider({
@@ -76,6 +93,9 @@ export function DashboardProvider({
   children: React.ReactNode;
 }) {
   const { user } = useUser();
+  const pathname = usePathname();
+  const isOnboarding =
+    pathname === "/onboarding" || pathname.startsWith("/onboarding/");
 
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
@@ -124,7 +144,7 @@ export function DashboardProvider({
   const refreshDashboard = useCallback(async (
     dayKeyOverride?: string
   ): Promise<void> => {
-    if (!user?.id) {
+    if (!user?.id || isOnboarding) {
       return;
     }
 
@@ -171,13 +191,13 @@ export function DashboardProvider({
             `
           )
           .eq("id", user.id)
-          .single(),
+          .maybeSingle(),
 
         supabase
           .from("profiles")
           .select("goal")
           .eq("id", user.id)
-          .single(),
+          .maybeSingle(),
 
         supabase.rpc("get_user_plan_features", {
           p_user_id: user.id,
@@ -191,31 +211,19 @@ export function DashboardProvider({
       /* ───────────── Error logging ───────────── */
 
       if (rpcResult.error) {
-        console.error(
-          "Dashboard summary error:",
-          rpcResult.error
-        );
+        logDashboardError("Dashboard summary error:", rpcResult.error);
       }
 
       if (profileResult.error) {
-        console.error(
-          "Dashboard profile error:",
-          profileResult.error
-        );
+        logDashboardError("Dashboard profile error:", profileResult.error);
       }
 
       if (goalResult.error) {
-        console.error(
-          "Dashboard goal error:",
-          goalResult.error
-        );
+        logDashboardError("Dashboard goal error:", goalResult.error);
       }
 
       if (planResult.error) {
-        console.error(
-          "Dashboard plan error:",
-          planResult.error
-        );
+        logDashboardError("Dashboard plan error:", planResult.error);
       }
 
       /* ───────────── Daily summary ───────────── */
@@ -332,23 +340,23 @@ export function DashboardProvider({
         setReady(true);
       }
     }
-  }, [user?.id]);
+  }, [isOnboarding, user?.id]);
 
   /* ───────────────── Load ───────────────── */
 
   useEffect(() => {
-    if (!user?.id) {
+    if (!user?.id || isOnboarding) {
       setReady(false);
       return;
     }
 
     void refreshDashboard(dayKey);
-  }, [user?.id, dayKey, refreshDashboard]);
+  }, [user?.id, dayKey, isOnboarding, refreshDashboard]);
 
   useBrowserReturnRefresh(
     () => refreshDashboard(),
     {
-      enabled: Boolean(user?.id),
+      enabled: Boolean(user?.id) && !isOnboarding,
     }
   );
 

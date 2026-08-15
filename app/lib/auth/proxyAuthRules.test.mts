@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { skipsProxyAuth } from "./proxyAuthRules.ts";
+import {
+  isOnboardingRoute,
+  isProtectedAppRoute,
+  skipsProxyAuth,
+} from "./proxyAuthRules.ts";
 
 const projectRoot = new URL("../../../", import.meta.url);
 const favoritesRouteSource = await readFile(
@@ -62,6 +66,17 @@ test("queryparameters veranderen de exacte pathname-uitsluiting niet", () => {
 
   assert.equal(url.pathname, "/api/favorites");
   assert.equal(skipsProxyAuth(url.pathname), true);
+});
+
+test("protected en onboarding routes blijven expliciet onderscheiden", () => {
+  assert.equal(isProtectedAppRoute("/dashboard"), true);
+  assert.equal(isProtectedAppRoute("/settings/profile"), true);
+  assert.equal(isProtectedAppRoute("/handbook"), true);
+  assert.equal(isProtectedAppRoute("/onboarding"), false);
+  assert.equal(isOnboardingRoute("/onboarding"), true);
+  assert.equal(isOnboardingRoute("/onboarding/step"), true);
+  assert.equal(isOnboardingRoute("/dashboard"), false);
+  assert.equal(isOnboardingRoute("/auth/confirm"), false);
 });
 
 test("GET en mutaties behouden route-level auth en 401", () => {

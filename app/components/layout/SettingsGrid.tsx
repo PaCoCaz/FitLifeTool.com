@@ -7,6 +7,7 @@ import BodyCard from "@/components/settings/BodyCard";
 import LifestyleCard from "@/components/settings/LifestyleCard";
 import GoalCard from "@/components/settings/GoalCard";
 import SubscriptionCard from "@/components/settings/SubscriptionCard";
+import RegionCard from "@/components/settings/RegionCard";
 
 export default function SettingsGrid() {
   return (
@@ -38,7 +39,9 @@ export default function SettingsGrid() {
         <SubscriptionCard />
       </div>
 
-      {/* Rij 4 */}
+      <div className="col-span-12 md:col-span-6">
+        <RegionCard />
+      </div>
 
     </section>
   );

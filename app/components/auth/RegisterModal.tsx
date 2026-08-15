@@ -1,131 +1,43 @@
-// app/components/auth/RegisterModal.tsx
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import RegisterStep from "@/components/auth/RegisterStep";
-import OnboardingPersonalStep from "@/components/auth/OnboardingPersonalStep";
-import OnboardingBodyStep from "@/components/auth/OnboardingBodyStep";
-import OnboardingFinalStep from "@/components/auth/OnboardingFinalStep";
+import type { Lang } from "@/lib/useLang";
+import { uiText } from "@/lib/uiText";
 
-type Props = {
-  open: boolean;
-  onClose: () => void;
-};
-
-const TOTAL_STEPS = 4;
+type Props = { open: boolean; onClose: () => void };
 
 export default function RegisterModal({ open, onClose }: Props) {
-  const [step, setStep] = useState(1);
+  const [selectedLanguage, setSelectedLanguage] = useState<Lang | null>(null);
+  const t = uiText[selectedLanguage ?? "en"];
 
-  /* ───────────────── Close handlers ───────────────── */
+  const closeModal = useCallback(() => {
+    setSelectedLanguage(null);
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeModal();
     };
-
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (open) setStep(1);
-  }, [open]);
+  }, [closeModal, open]);
 
   if (!open) return null;
 
-  /* ───────────────── Step titles ───────────────── */
-
-  const stepTitle =
-    step === 1
-      ? "Account aanmaken"
-      : step === 2
-      ? "Persoonlijke gegevens"
-      : step === 3
-      ? "Lichaamsgegevens"
-      : "Je doelen";
-
   return (
-    <div
-      className="
-        fixed inset-0 z-[100]
-        flex items-center justify-center
-        bg-black/40
-      "
-    >
-      <div
-        className="
-          w-full max-w-md
-          mx-4
-          sm:mx-0
-          rounded-[var(--radius)]
-          bg-white
-          shadow-xl
-          p-6
-        "
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40">
+      <div role="dialog" aria-modal="true" aria-labelledby="register-title" className="mx-4 w-full max-w-md rounded-[var(--radius)] bg-white p-6 shadow-xl sm:mx-0" onClick={(event) => event.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[#191970]">
-            {stepTitle}
-          </h2>
-
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl"
-            aria-label="Sluiten"
-          >
-            ×
-          </button>
+          <h2 id="register-title" className="text-lg font-semibold text-[#191970]">{t.auth.accountTitle}</h2>
+          <button onClick={closeModal} className="text-xl text-gray-400 hover:text-gray-600" aria-label={t.common.close}>×</button>
         </div>
-
-        {/* Progress */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-            <span>
-              Stap {step} van {TOTAL_STEPS}
-            </span>
-          </div>
-
-          <div className="h-1 w-full rounded bg-gray-100 overflow-hidden">
-            <div
-              className="h-full bg-[#191970] transition-all"
-              style={{
-                width: `${(step / TOTAL_STEPS) * 100}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="min-h-[140px]">
-          {step === 1 && (
-            <RegisterStep onSuccess={() => setStep(2)} />
-          )}
-
-          {step === 2 && (
-            <OnboardingPersonalStep
-              onNext={() => setStep(3)}
-            />
-          )}
-
-          {step === 3 && (
-            <OnboardingBodyStep
-              onNext={() => setStep(4)}
-              onBack={() => setStep(2)}
-            />
-          )}
-
-          {step === 4 && (
-            <OnboardingFinalStep
-              onBack={() => setStep(3)}
-            />
-          )}
-        </div>
+        <RegisterStep
+          selectedLanguage={selectedLanguage}
+          onLanguageSelect={setSelectedLanguage}
+        />
       </div>
     </div>
   );
