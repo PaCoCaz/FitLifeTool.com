@@ -424,6 +424,18 @@ export const handbookDocuments: HandbookDocument[] = [
     status: "current",
     updated: "2026-07-26",
   },
+
+  {
+    id: "doc-l3-0029",
+    level: "l3",
+    hoofdstuk: "H5",
+    nummer: "5.10",
+    titel: "Legal & Consumer Compliance",
+    path: "/handbook/doc-l3-0029",
+
+    status: "review",
+    updated: "2026-08-16",
+  },
 ];
 
 /* ───────────────── Helpers ───────────────── */
