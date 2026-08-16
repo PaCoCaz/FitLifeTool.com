@@ -1,5 +1,7 @@
 const REGIONAL_MARKET_CODE = /^[A-Z]{2}$/;
 
+export const GLOBAL_NUTRITION_MARKET = "GLOBAL";
+
 export type NutritionMarketRow = {
   market_code: string;
   is_active: boolean;
@@ -29,6 +31,24 @@ export function isSupportedRegionalMarket(
   supportedMarketCodes: readonly string[]
 ) {
   return supportedMarketCodes.includes(foodRegion);
+}
+
+export function resolveNutritionDiscoveryMarketCodes(
+  foodRegion: string | null | undefined,
+  markets: NutritionMarketRow[]
+) {
+  if (!foodRegion || !REGIONAL_MARKET_CODE.test(foodRegion)) {
+    return [GLOBAL_NUTRITION_MARKET];
+  }
+
+  const supportedMarketCodes =
+    buildSupportedRegionalMarketCodes(markets);
+
+  if (!isSupportedRegionalMarket(foodRegion, supportedMarketCodes)) {
+    return [GLOBAL_NUTRITION_MARKET];
+  }
+
+  return [GLOBAL_NUTRITION_MARKET, foodRegion];
 }
 
 export function formatUnsupportedRegionMessage(template: string, countryName: string) {

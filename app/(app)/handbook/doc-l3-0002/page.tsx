@@ -166,6 +166,10 @@ export default function DocL30002() {
             Landcodes gebruiken ISO 3166-1 alpha-2 en worden gevalideerd tegen
             de centrale landenreferentie.
           </li>
+          <li>
+            <code>food_region</code> is een gebruikerskeuze voor een land en
+            gebruikt nooit de technische systeemscope <code>GLOBAL</code>.
+          </li>
         </ul>
 
         <p>

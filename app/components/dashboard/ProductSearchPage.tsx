@@ -64,9 +64,9 @@ type ProductLookupRow = {
   group_display_key?: string | null;
 };
 
-type ProductSearchRow = Product;
-
-const SEARCH_FETCH_LIMIT = 100;
+type ProductSearchRow = Product & {
+  is_exact_search_match?: boolean;
+};
 
 type ProductPreparationRow = {
   product_key: string;
@@ -82,14 +82,17 @@ type ProductScoreRow = {
   score_grade: string | null;
 };
 
-type CategoryTranslationRow = {
-  group_key: string;
-  name: string;
-};
-
 type CategoryOption = {
   key: string;
   label: string;
+};
+
+type ProductSearchApiResponse = {
+  results: ProductSearchRow[];
+};
+
+type ProductCategoriesApiResponse = {
+  categories: CategoryOption[];
 };
 
 type Props = {
@@ -160,6 +163,8 @@ export default function ProductSearchPage({ type }: Props) {
   const [categoryOptions, setCategoryOptions] =
     useState<CategoryOption[]>([]);
   const favoritesRequestSequenceRef = useRef(0);
+  const categoryRequestSequenceRef = useRef(0);
+  const searchRequestSequenceRef = useRef(0);
 
   const activeFilterCount = hasAdvancedSearchFilters
     ? selectedGrades.length + selectedCategoryKeys.length
@@ -243,77 +248,80 @@ export default function ProductSearchPage({ type }: Props) {
     [goal]
   );
 
-  const loadCategoryLabelMap = useCallback(
-    async (categoryKeys: string[]) => {
-      const categoryLabelMap = new Map<string, string>();
-
-      if (categoryKeys.length === 0 || !lang) {
-        return categoryLabelMap;
-      }
-
-      const { data } = await supabase
-        .from("nutrition_product_group_translations")
-        .select("group_key, name")
-        .in("group_key", categoryKeys)
-        .eq("lang", lang);
-
-      for (const row of (data ?? []) as CategoryTranslationRow[]) {
-        categoryLabelMap.set(row.group_key, row.name);
-      }
-
-      return categoryLabelMap;
-    },
-    [lang]
-  );
-
   useEffect(() => {
-    if (!lang) return;
+    if (authLoading || !user?.id || !lang) return;
 
-    let cancelled = false;
+    const controller = new AbortController();
+    const requestSequence =
+      ++categoryRequestSequenceRef.current;
 
     async function loadCategories() {
-      const { data } = await supabase
-        .from("nutrition_products")
-        .select("group_display_key, is_drink")
-        .eq("is_drink", isDrink);
+      const params = new URLSearchParams({
+        type,
+        lang,
+        mode: "categories",
+      });
 
-      if (cancelled) return;
-
-      const categoryKeys = Array.from(
-        new Set(
-          ((data ?? []) as ProductLookupRow[])
-            .map((product) => product.group_display_key)
-            .filter((key): key is string => Boolean(key))
-        )
-      );
-
-      const labelMap = await loadCategoryLabelMap(categoryKeys);
-
-      if (cancelled) return;
-
-      const options = categoryKeys
-        .map((key) => ({
-          key,
-          label: labelMap.get(key) ?? key,
-        }))
-        .sort((a, b) =>
-          a.label.localeCompare(b.label, lang, {
-            sensitivity: "base",
-          })
+      try {
+        const response = await fetch(
+          `/api/nutrition/products/search?${params.toString()}`,
+          {
+            cache: "no-store",
+            signal: controller.signal,
+          }
         );
 
-      setCategoryOptions(options);
-      setSelectedCategoryKeys((current) =>
-        current.filter((key) => categoryKeys.includes(key))
-      );
+        if (!response.ok) {
+          throw new Error(
+            `Nutrition categories request failed: ${response.status}`
+          );
+        }
+
+        const payload =
+          (await response.json()) as ProductCategoriesApiResponse;
+
+        if (
+          controller.signal.aborted ||
+          requestSequence !== categoryRequestSequenceRef.current
+        ) {
+          return;
+        }
+
+        const categoryKeys = payload.categories.map(
+          ({ key }) => key
+        );
+
+        setCategoryOptions(payload.categories);
+        setSelectedCategoryKeys((current) =>
+          current.filter((key) => categoryKeys.includes(key))
+        );
+      } catch (error) {
+        if (
+          controller.signal.aborted ||
+          (
+            error instanceof Error &&
+            error.name === "AbortError"
+          )
+        ) {
+          return;
+        }
+
+        if (requestSequence === categoryRequestSequenceRef.current) {
+          setCategoryOptions([]);
+          setSelectedCategoryKeys([]);
+        }
+
+        console.error("Nutrition categories load failed:", error);
+      }
     }
 
     void loadCategories();
 
     return () => {
-      cancelled = true;
+      controller.abort();
+      categoryRequestSequenceRef.current += 1;
     };
-  }, [lang, isDrink, loadCategoryLabelMap]);
+  }, [authLoading, user?.id, lang, type]);
 
   const toggleGrade = useCallback(
     (grade: Grade) => {
@@ -527,92 +535,145 @@ export default function ProductSearchPage({ type }: Props) {
   /* ───────────────── SEARCH ───────────────── */
 
   useEffect(() => {
-    if (!lang) return;
+    const requestSequence =
+      ++searchRequestSequenceRef.current;
+
+    if (authLoading || !user?.id || !lang) {
+      setResults([]);
+      return;
+    }
 
     if (search.length < 1) {
       setResults([]);
       return;
     }
 
+    const controller = new AbortController();
     const timeout = setTimeout(async () => {
-      const { data } = await supabase
-        .from("nutrition_products_search")
-        .select("product_key, name, is_drink, is_basic")
-        .eq("lang", lang)
-        .eq("is_drink", isDrink)
-        .ilike("name", `%${search}%`)
-        .limit(SEARCH_FETCH_LIMIT);
-
-      if (!data) {
-        setResults([]);
-        return;
-      }
-
-      const resultRows =
-        (data ?? []) as ProductSearchRow[];
-      const resultKeys = resultRows.map(
-        (product) => product.product_key
-      );
-
-      if (resultKeys.length === 0) {
-        setResults([]);
-        return;
-      }
-
-      const [{ data: products }, gradeMap] =
-        await Promise.all([
-          supabase
-            .from("nutrition_products")
-            .select(
-              "product_key, is_drink, is_basic, group_display_key"
-            )
-            .in("product_key", resultKeys),
-          loadGradeMap(resultKeys),
-        ]);
-
-      const productMap = new Map(
-        ((products ?? []) as ProductLookupRow[]).map(
-          (product) => [product.product_key, product]
-        )
-      );
-
-      const withMetadata = resultRows.map((product) => {
-        const productMeta = productMap.get(product.product_key);
-
-        return {
-          ...product,
-          is_basic:
-            productMeta?.is_basic ?? product.is_basic,
-          category_key:
-            productMeta?.group_display_key ?? null,
-          grade:
-            gradeMap.get(product.product_key) ?? null,
-        };
+      const params = new URLSearchParams({
+        type,
+        lang,
+        q: search,
       });
 
-      const filtered = applyProductSearchFilters(
-        withMetadata,
-        {
-          enabled: hasAdvancedSearchFilters,
-          grades: selectedGrades,
-          categories: selectedCategoryKeys,
-        }
-      );
+      try {
+        const response = await fetch(
+          `/api/nutrition/products/search?${params.toString()}`,
+          {
+            cache: "no-store",
+            signal: controller.signal,
+          }
+        );
 
-      setResults(
-        rankAndLimitProductSearchResults(
-          filtered,
-          search,
-          lang
-        )
-      );
+        if (!response.ok) {
+          throw new Error(
+            `Nutrition search request failed: ${response.status}`
+          );
+        }
+
+        const payload =
+          (await response.json()) as ProductSearchApiResponse;
+        const resultRows = payload.results;
+        const resultKeys = resultRows.map(
+          (product) => product.product_key
+        );
+
+        if (
+          controller.signal.aborted ||
+          requestSequence !== searchRequestSequenceRef.current
+        ) {
+          return;
+        }
+
+        if (resultKeys.length === 0) {
+          setResults([]);
+          return;
+        }
+
+        const [{ data: products }, gradeMap] =
+          await Promise.all([
+            supabase
+              .from("nutrition_products")
+              .select(
+                "product_key, is_drink, is_basic, group_display_key"
+              )
+              .in("product_key", resultKeys),
+            loadGradeMap(resultKeys),
+          ]);
+
+        if (
+          controller.signal.aborted ||
+          requestSequence !== searchRequestSequenceRef.current
+        ) {
+          return;
+        }
+
+        const productMap = new Map(
+          ((products ?? []) as ProductLookupRow[]).map(
+            (product) => [product.product_key, product]
+          )
+        );
+
+        const withMetadata = resultRows.map((product) => {
+          const productMeta = productMap.get(product.product_key);
+
+          return {
+            ...product,
+            is_basic:
+              productMeta?.is_basic ?? product.is_basic,
+            category_key:
+              productMeta?.group_display_key ?? null,
+            grade:
+              gradeMap.get(product.product_key) ?? null,
+          };
+        });
+
+        const filtered = applyProductSearchFilters(
+          withMetadata,
+          {
+            enabled: hasAdvancedSearchFilters,
+            grades: selectedGrades,
+            categories: selectedCategoryKeys,
+          }
+        );
+
+        setResults(
+          rankAndLimitProductSearchResults(
+            filtered,
+            search,
+            lang
+          )
+        );
+      } catch (error) {
+        if (
+          controller.signal.aborted ||
+          (
+            error instanceof Error &&
+            error.name === "AbortError"
+          )
+        ) {
+          return;
+        }
+
+        if (requestSequence === searchRequestSequenceRef.current) {
+          setResults([]);
+        }
+
+        console.error("Nutrition search failed:", error);
+      }
     }, 300);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+      searchRequestSequenceRef.current += 1;
+    };
   }, [
     search,
     lang,
-    isDrink,
+    type,
+    authLoading,
+    user?.id,
     goal,
     loadGradeMap,
     hasAdvancedSearchFilters,

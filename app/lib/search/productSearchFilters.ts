@@ -5,6 +5,7 @@ import type { Grade } from "@/components/ui/GradeBadge";
 export type SearchFilterProduct = {
   product_key: string;
   name: string;
+  is_exact_search_match?: boolean;
   grade?: Grade | null;
   category_key?: string | null;
 };
@@ -76,16 +77,26 @@ export function rankAndLimitProductSearchResults<T extends SearchFilterProduct>(
   return [...products]
     .sort((a, b) => {
       const rankDiff =
-        getSearchRank(a.name, search) -
-        getSearchRank(b.name, search);
+        (a.is_exact_search_match
+          ? 0
+          : getSearchRank(a.name, search)) -
+        (b.is_exact_search_match
+          ? 0
+          : getSearchRank(b.name, search));
 
       if (rankDiff !== 0) {
         return rankDiff;
       }
 
-      return a.name.localeCompare(b.name, locale, {
+      const nameDiff = a.name.localeCompare(b.name, locale, {
         sensitivity: "base",
       });
+
+      if (nameDiff !== 0) {
+        return nameDiff;
+      }
+
+      return a.product_key.localeCompare(b.product_key);
     })
     .slice(0, SEARCH_RESULT_LIMIT);
 }

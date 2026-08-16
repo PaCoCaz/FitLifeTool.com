@@ -263,6 +263,57 @@ Supabase export`}
 
 
       <section>
+        <h2>Nutrition market discovery</h2>
+
+        <p>
+          Productmarkten bepalen uitsluitend welke producten standaard in de
+          zoek- en discoveryresultaten verschijnen. Zij vormen geen
+          autorisatiegrens en beperken geen directe toegang tot een bestaand
+          product.
+        </p>
+
+        <ul>
+          <li>
+            Een ondersteunde <code>food_region</code> gebruikt de scope
+            <code> GLOBAL + food_region</code>.
+          </li>
+          <li>
+            Een niet-ondersteunde, inactieve, ontbrekende of ongeldige regio
+            gebruikt uitsluitend <code>GLOBAL</code>.
+          </li>
+          <li>
+            <code>nutrition_markets</code> is de centrale bron voor actieve
+            regionale ondersteuning; de applicatie bevat geen hardcoded
+            marketlijst.
+          </li>
+          <li>
+            Eligibility wordt vóór ranking en vóór de kandidaatlimiet
+            toegepast. Marketlidmaatschap verandert de ranking niet.
+          </li>
+          <li>
+            Food en drink gebruiken dezelfde server-side marketresolver.
+          </li>
+          <li>
+            Favorieten, historie, bestaande logs, directe productroutes en
+            expliciete product-key-lookups blijven ongefilterd.
+          </li>
+          <li>
+            Buiten de normale market scope is alleen een volledige exacte
+            match toegestaan via <code>nutrition_product_search_names</code>.
+            Zowel een officiële naam als een expliciete alias kan de match
+            openen, maar het resultaat toont altijd de officiële naam.
+          </li>
+          <li>
+            Exacte cross-market matching gebruikt NFKC-normalisatie, trimt
+            buitenste witruimte, reduceert interne witruimte tot één spatie en
+            vergelijkt lowercase binnen de actuele zoektaal. Substring-,
+            prefix-, fuzzy-, typo- en semantische fallback zijn niet toegestaan.
+          </li>
+        </ul>
+      </section>
+
+
+      <section>
         <h2>Zoekfilters</h2>
 
         <p>

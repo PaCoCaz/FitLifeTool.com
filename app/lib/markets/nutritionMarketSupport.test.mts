@@ -5,6 +5,7 @@ import {
   buildSupportedRegionalMarketCodes,
   formatUnsupportedRegionMessage,
   isSupportedRegionalMarket,
+  resolveNutritionDiscoveryMarketCodes,
 } from "./nutritionMarketSupport.ts";
 
 const supported = buildSupportedRegionalMarketCodes([
@@ -46,6 +47,76 @@ test("changing NL to SE changes support to unsupported", () => {
 test("changing SE to NL changes support to supported", () => {
   assert.equal(isSupportedRegionalMarket("SE", supported), false);
   assert.equal(isSupportedRegionalMarket("NL", supported), true);
+});
+
+test("supported NL resolves to GLOBAL plus NL", () => {
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes("NL", [
+      { market_code: "GLOBAL", is_active: true },
+      { market_code: "NL", is_active: true },
+    ]),
+    ["GLOBAL", "NL"]
+  );
+});
+
+test("supported DE resolves to GLOBAL plus DE", () => {
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes("DE", [
+      { market_code: "GLOBAL", is_active: true },
+      { market_code: "DE", is_active: true },
+    ]),
+    ["GLOBAL", "DE"]
+  );
+});
+
+test("unsupported SE resolves to GLOBAL only", () => {
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes("SE", supported.map(
+      (market_code) => ({ market_code, is_active: true })
+    )),
+    ["GLOBAL"]
+  );
+});
+
+test("inactive regional market resolves to GLOBAL only", () => {
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes("BE", [
+      { market_code: "BE", is_active: false },
+    ]),
+    ["GLOBAL"]
+  );
+});
+
+test("missing or invalid food regions resolve to GLOBAL only", () => {
+  const markets = [
+    { market_code: "NL", is_active: true },
+  ];
+
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes(null, markets),
+    ["GLOBAL"]
+  );
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes("", markets),
+    ["GLOBAL"]
+  );
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes("NLD", markets),
+    ["GLOBAL"]
+  );
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes("nl", markets),
+    ["GLOBAL"]
+  );
+});
+
+test("GLOBAL profile value resolves to GLOBAL only", () => {
+  assert.deepEqual(
+    resolveNutritionDiscoveryMarketCodes("GLOBAL", [
+      { market_code: "GLOBAL", is_active: true },
+    ]),
+    ["GLOBAL"]
+  );
 });
 
 test("fallback country name is dynamic and can follow the active UI language", () => {

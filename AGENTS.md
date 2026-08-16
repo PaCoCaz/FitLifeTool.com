@@ -328,6 +328,27 @@ After every addition, removal, or change of product records:
 `lose_modifier_group`, `maintain_modifier_group`, and `gain_modifier_group`
 describe score behavior only and do not have to match the product group.
 
+## Nutrition Market Discovery
+
+Nutrition market filtering is discovery filtering only. It is not an
+authorization boundary.
+
+- When `profiles.food_region` matches an active regional record in
+  `nutrition_markets`, the discovery scope is `GLOBAL` plus that
+  `food_region`.
+- When the region is unsupported, inactive, missing, invalid, or unexpectedly
+  equals `GLOBAL`, the discovery scope is `GLOBAL` only.
+- `nutrition_markets` is the sole source of truth for supported nutrition
+  markets. Never hardcode the supported market list in application code.
+- Apply market eligibility before ranking and before the search candidate
+  limit. Market membership never changes relevance or ranking.
+- Food and drink discovery use the same market resolver.
+- Do not market-filter favorites, history, existing logs, direct product URLs,
+  explicit `product_key` lookups, or internal/admin functionality.
+- `GLOBAL` is a system scope and is never a valid `profiles.food_region`.
+- Cross-market exact-match or synonym fallback is not part of phase 1 and must
+  not be introduced without a separate approved design.
+
 ## Master Database
 
 **Codex mag nooit rechtstreeks wijzigingen aanbrengen in

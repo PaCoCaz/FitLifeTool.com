@@ -144,3 +144,40 @@ test("products without grade do not match selected grade", () => {
     0
   );
 });
+
+test("an exact alias entry ranks as exact while retaining its official name", () => {
+  const ranked = rankAndLimitProductSearchResults([
+    {
+      product_key: "OTHER",
+      name: "Goudse kaas spread",
+    },
+    {
+      product_key: "CHEESE_GOUDA_48",
+      name: "Kaas, 48+, Goudse",
+      is_exact_search_match: true,
+    },
+  ], "Goudse kaas 48+", "nl");
+
+  assert.equal(ranked[0]?.product_key, "CHEESE_GOUDA_48");
+  assert.equal(ranked[0]?.name, "Kaas, 48+, Goudse");
+});
+
+test("multiple exact entries with the same display name use product_key deterministically", () => {
+  const ranked = rankAndLimitProductSearchResults([
+    {
+      product_key: "PRODUCT_B",
+      name: "Shared name",
+      is_exact_search_match: true,
+    },
+    {
+      product_key: "PRODUCT_A",
+      name: "Shared name",
+      is_exact_search_match: true,
+    },
+  ], "alias", "en");
+
+  assert.deepEqual(
+    ranked.map(({ product_key }) => product_key),
+    ["PRODUCT_A", "PRODUCT_B"]
+  );
+});
