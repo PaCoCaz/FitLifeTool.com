@@ -27,15 +27,16 @@ export default function DocL30024() {
 
         <p>
           De volledige productdefinitie, berekeningen en controles worden
-          beheerd binnen de productwerkboeken. Welk concreet bestand de
-          formele canonieke productiebron is, moet nog expliciet worden
-          vastgesteld.
+          beheerd binnen de productwerkboeken. De aliasworkflow is inmiddels
+          volledig gerealiseerd en gevalideerd. Voor andere productdatastromen
+          kunnen nog afzonderlijke reviewpunten over de formele canonieke bron
+          en synchronisatieprocedure bestaan.
         </p>
 
         <div className="info-box">
-          Dit document heeft status <strong>review</strong> zolang de canonieke
-          werkboekbron en volledige synchronisatieprocedure niet formeel zijn
-          vastgelegd.
+          Dit document behoudt status <strong>review</strong> voor de bredere
+          productdatabase. De procedure voor product-searchaliases die in dit
+          document staat, is definitief, getest en operationeel gevalideerd.
         </div>
       </section>
 
@@ -101,6 +102,8 @@ Applicatie`}
           <li>productgroepen en vertalingen</li>
           <li>PRODUCTS</li>
           <li>PRODUCT_TRANSLATIONS</li>
+          <li>PRODUCT_SEARCH_ALIASES</li>
+          <li>markets en product-marketmappings</li>
           <li>preparations en vertalingen</li>
           <li>PRODUCT_PREPARATIONS</li>
           <li>PRODUCT_SCORES</li>
@@ -156,6 +159,14 @@ Applicatie`}
                 <td>PORTIONS</td>
                 <td>Beschikbare gebruikersporties.</td>
               </tr>
+
+              <tr>
+                <td>PRODUCT_SEARCH_ALIASES</td>
+                <td>
+                  Gevalideerde, taalgebonden alternatieve zoeknamen voor
+                  bestaande producten.
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -164,6 +175,129 @@ Applicatie`}
           Exporttabellen bevatten geen eigen logica.
           Ze vertegenwoordigen alleen het resultaat van de berekeningen.
         </p>
+      </section>
+
+
+      <section>
+        <h2>Definitieve product-searchaliasworkflow</h2>
+
+        <p>
+          De product-searchaliasprocedure is een gerealiseerde en gevalideerde
+          full-sync. De huidige v1 bevat <strong>175 records</strong>.
+        </p>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
+                <th>Laag</th>
+                <th>Implementatie</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Excel/import</td>
+                <td>
+                  Werkblad <code>PRODUCT_SEARCH_ALIASES_IMPORT</code> met tabel
+                  <code> tbl_product_search_aliases_import</code>.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Master</td>
+                <td>
+                  Werkblad <code>PRODUCT_SEARCH_ALIASES</code> met tabel
+                  <code> tbl_product_search_aliases</code>. De huidige v1 bevat
+                  175 gevalideerde aliases.
+                </td>
+              </tr>
+
+              <tr>
+                <td>VBA Preview</td>
+                <td>
+                  <code>PreviewProductSearchAliasImportSync</code> voert een
+                  uitsluitend read-only vergelijking en validatie uit.
+                </td>
+              </tr>
+
+              <tr>
+                <td>VBA Apply</td>
+                <td>
+                  <code>ApplyProductSearchAliasImportSync</code> voert de full
+                  sync uit met snapshot/rollback en delete plus insert/update.
+                  De natuurlijke sleutel is <code>product_key + lang +
+                  normalized(search_alias)</code>. De procedure slaat het
+                  werkboek niet automatisch op.
+                </td>
+              </tr>
+
+              <tr>
+                <td>CSV-export</td>
+                <td>
+                  <code>stg_nutrition_product_search_aliases.csv</code> gebruikt
+                  UTF-8 met BOM en een puntkomma als delimiter.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Supabase staging</td>
+                <td>
+                  <code>stg_nutrition_product_search_aliases</code> is alleen
+                  voor gecontroleerde synchronisatie en heeft geen
+                  clienttoegang.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Supabase target</td>
+                <td>
+                  <code>nutrition_product_search_aliases</code> bevat de
+                  canonieke runtime-aliasrecords en een generated
+                  <code> search_alias_normalized</code>. RLS staat alleen
+                  read-only clienttoegang toe.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Searchview</td>
+                <td>
+                  <code>nutrition_product_search_names</code> combineert
+                  <code> OFFICIAL</code>- en <code>ALIAS</code>-searchnamen. Dit
+                  is een afgeleide view en geen primaire brondata.
+                  <code> nutrition_products_search</code> blijft daarnaast de
+                  normale discoverybron.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          De Supabase-full-sync is transactioneel. Na stagingvalidatie worden
+          target-only records verwijderd en worden actuele stagingrecords
+          ingevoegd of bijgewerkt. Bij een fout blijft de vorige targettoestand
+          behouden. Staging wordt pas na geslaagde target- en
+          searchviewvalidatie in een afzonderlijke stap getruncate.
+        </p>
+
+        <h3>Vaste uitvoeringsvolgorde</h3>
+
+        <ol>
+          <li>importbestand vullen en valideren</li>
+          <li>Power Query naar de master uitvoeren</li>
+          <li>Preview uitvoeren</li>
+          <li>Apply uitvoeren</li>
+          <li>masterwerkboek expliciet opslaan</li>
+          <li>CSV exporteren</li>
+          <li>CSV naar staging laden</li>
+          <li>staging valideren</li>
+          <li>transactionele full-sync uitvoeren</li>
+          <li>target valideren</li>
+          <li>searchview valideren</li>
+          <li>staging afzonderlijk truncaten</li>
+          <li>de applicatie gebruikt de searchlaag</li>
+        </ol>
       </section>
 
 
@@ -232,8 +366,9 @@ Applicatie`}
 
         <p>
           Deze principes leggen nog geen exacte synchronisatieopdracht vast.
-          Een concrete import- of herstelprocedure wordt pas canoniek wanneer
-          zij aantoonbaar bestaat, getest is en expliciet is goedgekeurd.
+          Dit geldt voor productdatastromen die nog niet afzonderlijk zijn
+          gecodificeerd. De hierboven beschreven aliasworkflow vormt de
+          expliciete uitzondering: deze bestaat, is getest en is goedgekeurd.
         </p>
       </section>
 

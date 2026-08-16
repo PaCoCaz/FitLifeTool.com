@@ -218,6 +218,37 @@ Supabase export`}
           <table className="label-column">
             <thead>
               <tr>
+                <th>Searchlaag</th>
+                <th>Verantwoordelijkheid</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>nutrition_products_search</td>
+                <td>
+                  Bestaande bron voor normale, market-filtered discovery. Deze
+                  view blijft het primaire contract en is niet vervangen door
+                  de aliaslaag.
+                </td>
+              </tr>
+
+              <tr>
+                <td>nutrition_product_search_names</td>
+                <td>
+                  Aanvullende search-name-laag met <code>OFFICIAL</code>- en
+                  <code> ALIAS</code>-records voor strikt exacte zoekingangen.
+                  Het resultaat toont altijd de officiële displaynaam.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="table-scroll">
+          <table className="label-column">
+            <thead>
+              <tr>
                 <th>Rang</th>
                 <th>Regel</th>
               </tr>
@@ -298,16 +329,39 @@ Supabase export`}
             expliciete product-key-lookups blijven ongefilterd.
           </li>
           <li>
-            Buiten de normale market scope is alleen een volledige exacte
-            match toegestaan via <code>nutrition_product_search_names</code>.
-            Zowel een officiële naam als een expliciete alias kan de match
-            openen, maar het resultaat toont altijd de officiële naam.
+            Categorieën worden uitsluitend opgebouwd uit normale,
+            market-eligible producten. De exacte fallback breidt categorieën
+            niet uit.
           </li>
           <li>
-            Exacte cross-market matching gebruikt NFKC-normalisatie, trimt
-            buitenste witruimte, reduceert interne witruimte tot één spatie en
-            vergelijkt lowercase binnen de actuele zoektaal. Substring-,
-            prefix-, fuzzy-, typo- en semantische fallback zijn niet toegestaan.
+            Aliases erven de market eligibility van hun product en wijzigen
+            die classificatie nooit.
+          </li>
+          <li>
+            Buiten de normale market scope is alleen volledige equality
+            toegestaan via <code>nutrition_product_search_names</code>:
+            <code> search_name_normalized = normalized(query)</code>.
+            Zowel een officiële naam als een expliciete alias kan de match
+            openen, maar het resultaat toont altijd de officiële displaynaam.
+          </li>
+          <li>
+            Het gedeelde normalisatiecontract voor opslag/view en
+            applicatiequery is: Unicode NFKC, trim, Unicode en interne
+            witruimte reduceren tot één spatie, lowercase en interpunctie
+            behouden.
+          </li>
+          <li>
+            De fallback zoekt alleen binnen de actuele UI- en zoektaal.
+            <code> is_drink</code> houdt food- en drinkresultaten gescheiden.
+          </li>
+          <li>
+            Substring-, prefix-, fuzzy-, typo- en semantische cross-market
+            fallback zijn niet toegestaan.
+          </li>
+          <li>
+            Resultaten worden op <code>product_key</code> gededupliceerd.
+            Meerdere echte exacte producten worden met een vaste,
+            deterministische volgorde getoond.
           </li>
         </ul>
       </section>

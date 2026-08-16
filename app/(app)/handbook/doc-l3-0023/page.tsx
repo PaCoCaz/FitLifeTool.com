@@ -57,6 +57,8 @@ PRODUCTS
         ↓
 PRODUCT_TRANSLATIONS
         ↓
+PRODUCT_SEARCH_ALIASES
+        ↓
 PRODUCT_PREPARATIONS
         ↓
 Controle & scoring
@@ -147,6 +149,43 @@ Supabase`}
 
 
       <section>
+        <h2>PRODUCT_SEARCH_ALIASES</h2>
+
+        <p>
+          Product-searchaliases zijn aanvullende, taalgebonden zoekingangen
+          naar een bestaand product. De gerealiseerde v1-aliaslaag bevat
+          <strong> 175 gevalideerde aliases</strong>.
+        </p>
+
+        <ul>
+          <li>Een alias creëert geen nieuw product.</li>
+          <li>Een alias creëert geen officiële productvertaling.</li>
+          <li>
+            Per product en taal blijft exact één officiële displaynaam leidend.
+          </li>
+          <li>Aliases zijn taalgebonden en worden niet automatisch vertaald.</li>
+          <li>
+            Een alias erft food/drink-type, categorie, productidentiteit en
+            marketclassificatie van het gekoppelde product.
+          </li>
+          <li>Een alias krijgt nooit een eigen marketmapping.</li>
+          <li>
+            Iedere alias wordt inhoudelijk beoordeeld voordat deze wordt
+            opgenomen. Generieke, fuzzy of te brede termen worden afgewezen.
+          </li>
+        </ul>
+
+        <p>
+          Product markets en aliases behoren beide tot de
+          discovery-infrastructuur, maar hebben verschillende
+          verantwoordelijkheden. Product markets bepalen waar een product
+          standaard discovery-relevant is; aliases bepalen uitsluitend via
+          welke expliciete zoekterm hetzelfde product gevonden kan worden.
+        </p>
+      </section>
+
+
+      <section>
         <h2>PRODUCT_PREPARATIONS</h2>
 
         <p>
@@ -193,6 +232,8 @@ Supabase`}
         <ul>
           <li>staging- en importlagen</li>
           <li>producten en productvertalingen</li>
+          <li>product-searchaliases</li>
+          <li>product markets en marketmappings</li>
           <li>productgroepen en groepvertalingen</li>
           <li>preparations en preparationvertalingen</li>
           <li>units en unitvertalingen</li>
@@ -246,6 +287,7 @@ Supabase`}
           <li>DB_PRODUCT_PREPARATIONS</li>
           <li>PRODUCT_SCORES</li>
           <li>PORTIONS</li>
+          <li>PRODUCT_SEARCH_ALIASES</li>
         </ul>
 
         <p>
