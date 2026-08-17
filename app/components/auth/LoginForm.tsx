@@ -4,12 +4,16 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { uiText } from "@/lib/uiText";
+import { useLang } from "@/lib/useLang";
 
 type Props = {
   onRegister: () => void;
 };
 
 export default function LoginForm({ onRegister }: Props) {
+  const lang = useLang();
+  const t = uiText[lang].auth;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -79,8 +83,11 @@ export default function LoginForm({ onRegister }: Props) {
       </button>
 
       <div className="flex justify-between text-sm pt-2">
-        <a href="/forgot-password" className="hover:underline">
-          Wachtwoord vergeten?
+        <a
+          href={`/forgot-password?lang=${lang}`}
+          className="hover:underline"
+        >
+          {t.forgotPasswordTitle}
         </a>
 
         <button

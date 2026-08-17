@@ -24,6 +24,12 @@ const en = {
     veryActive: "Very active: Heavy physical work or intensive training.",
     loadingOnboarding: "Loading onboarding…", onboardingError: "Onboarding could not be loaded. Please try again.", retry: "Try again",
     regionTitle: "Country and food region", residenceDescription: "Your country of residence.", foodRegionDescription: "The food market you want to use.", unsupportedFoodRegion: "For this region, we currently use international product results. Regional product data for {{country}} will be added at a later stage.",
+    forgotPasswordTitle: "Forgot password?", forgotPasswordSubmit: "Send reset link", forgotPasswordSubmitting: "Sending…",
+    forgotPasswordSent: "If an account exists for this email address, you will receive password reset instructions.", backToLogin: "Back to login",
+    resetPasswordTitle: "Set a new password", newPassword: "New password", confirmPassword: "Confirm new password",
+    passwordMinimum: "Use at least 10 characters.", passwordMismatch: "The passwords do not match.", invalidRecoveryLink: "This password reset link is invalid or has expired.",
+    passwordResetSuccess: "Your password has been changed.", passwordResetFailure: "Your password could not be changed. Please try again.", passwordResetPartialSuccess: "Your password has been changed, but we could not end all active sessions. Log in again and review your account security if you did not expect this.", loginAgain: "Log in again.",
+    savingPassword: "Saving…", savePassword: "Save password",
   },
 
   activity: {
@@ -337,6 +343,12 @@ const nl = {
     veryActive: "Zeer actief: Zwaar fysiek werk of intensieve training.",
     loadingOnboarding: "Onboarding laden…", onboardingError: "Onboarding kon niet worden geladen. Probeer het opnieuw.", retry: "Opnieuw proberen",
     regionTitle: "Land en voedselregio", residenceDescription: "Het land waar je woont.", foodRegionDescription: "De voedingsmarkt die je wilt gebruiken.", unsupportedFoodRegion: "Voor deze regio gebruiken we momenteel internationale productresultaten. Regionale productdata voor {{country}} zullen in een later stadium worden toegevoegd.",
+    forgotPasswordTitle: "Wachtwoord vergeten?", forgotPasswordSubmit: "Reset-link sturen", forgotPasswordSubmitting: "Versturen…",
+    forgotPasswordSent: "Als er een account voor dit e-mailadres bestaat, ontvang je instructies om je wachtwoord te resetten.", backToLogin: "Terug naar inloggen",
+    resetPasswordTitle: "Nieuw wachtwoord instellen", newPassword: "Nieuw wachtwoord", confirmPassword: "Bevestig nieuw wachtwoord",
+    passwordMinimum: "Gebruik minimaal 10 tekens.", passwordMismatch: "De wachtwoorden komen niet overeen.", invalidRecoveryLink: "Deze reset-link is ongeldig of verlopen.",
+    passwordResetSuccess: "Je wachtwoord is gewijzigd.", passwordResetFailure: "Je wachtwoord kon niet worden gewijzigd. Probeer het opnieuw.", passwordResetPartialSuccess: "Je wachtwoord is gewijzigd, maar we konden niet alle actieve sessies beëindigen. Log opnieuw in en controleer je accountbeveiliging als je dit niet verwacht.", loginAgain: "Log opnieuw in.",
+    savingPassword: "Opslaan…", savePassword: "Wachtwoord opslaan",
   },
 
   activity: {
@@ -649,6 +661,12 @@ const fr = {
     veryActive: "Très actif : Travail physique lourd ou entraînement intensif.",
     loadingOnboarding: "Chargement de l’intégration…", onboardingError: "Impossible de charger l’intégration. Réessayez.", retry: "Réessayer",
     regionTitle: "Pays et région alimentaire", residenceDescription: "Votre pays de résidence.", foodRegionDescription: "Le marché alimentaire que vous souhaitez utiliser.", unsupportedFoodRegion: "Pour cette région, nous utilisons actuellement les résultats internationaux. Les données régionales sur les produits pour {{country}} seront ajoutées ultérieurement.",
+    forgotPasswordTitle: "Mot de passe oublié ?", forgotPasswordSubmit: "Envoyer le lien de réinitialisation", forgotPasswordSubmitting: "Envoi…",
+    forgotPasswordSent: "Si un compte existe pour cette adresse e-mail, vous recevrez des instructions pour réinitialiser votre mot de passe.", backToLogin: "Retour à la connexion",
+    resetPasswordTitle: "Définir un nouveau mot de passe", newPassword: "Nouveau mot de passe", confirmPassword: "Confirmer le nouveau mot de passe",
+    passwordMinimum: "Utilisez au moins 10 caractères.", passwordMismatch: "Les mots de passe ne correspondent pas.", invalidRecoveryLink: "Ce lien de réinitialisation est invalide ou a expiré.",
+    passwordResetSuccess: "Votre mot de passe a été modifié.", passwordResetFailure: "Votre mot de passe n’a pas pu être modifié. Veuillez réessayer.", passwordResetPartialSuccess: "Votre mot de passe a été modifié, mais nous n’avons pas pu fermer toutes les sessions actives. Reconnectez-vous et vérifiez la sécurité de votre compte si vous ne vous y attendiez pas.", loginAgain: "Reconnectez-vous.",
+    savingPassword: "Enregistrement…", savePassword: "Enregistrer le mot de passe",
   },
 
   activity: {
@@ -962,6 +980,12 @@ const de = {
     veryActive: "Sehr aktiv: Schwere körperliche Arbeit oder intensives Training.",
     loadingOnboarding: "Onboarding wird geladen…", onboardingError: "Onboarding konnte nicht geladen werden. Bitte erneut versuchen.", retry: "Erneut versuchen",
     regionTitle: "Land und Lebensmittelregion", residenceDescription: "Dein Wohnland.", foodRegionDescription: "Der Lebensmittelmarkt, den du verwenden möchtest.", unsupportedFoodRegion: "Für diese Region verwenden wir derzeit internationale Produktergebnisse. Regionale Produktdaten für {{country}} werden zu einem späteren Zeitpunkt ergänzt.",
+    forgotPasswordTitle: "Passwort vergessen?", forgotPasswordSubmit: "Link zum Zurücksetzen senden", forgotPasswordSubmitting: "Wird gesendet…",
+    forgotPasswordSent: "Wenn für diese E-Mail-Adresse ein Konto existiert, erhältst du Anweisungen zum Zurücksetzen deines Passworts.", backToLogin: "Zurück zur Anmeldung",
+    resetPasswordTitle: "Neues Passwort festlegen", newPassword: "Neues Passwort", confirmPassword: "Neues Passwort bestätigen",
+    passwordMinimum: "Verwende mindestens 10 Zeichen.", passwordMismatch: "Die Passwörter stimmen nicht überein.", invalidRecoveryLink: "Dieser Link zum Zurücksetzen ist ungültig oder abgelaufen.",
+    passwordResetSuccess: "Dein Passwort wurde geändert.", passwordResetFailure: "Dein Passwort konnte nicht geändert werden. Bitte versuche es erneut.", passwordResetPartialSuccess: "Dein Passwort wurde geändert, aber wir konnten nicht alle aktiven Sitzungen beenden. Melde dich erneut an und überprüfe deine Kontosicherheit, wenn du dies nicht erwartet hast.", loginAgain: "Melde dich erneut an.",
+    savingPassword: "Wird gespeichert…", savePassword: "Passwort speichern",
   },
 
   activity: {
@@ -1275,6 +1299,12 @@ const pl = {
     veryActive: "Bardzo aktywny: Ciężka praca fizyczna lub intensywny trening.",
     loadingOnboarding: "Ładowanie wdrażania…", onboardingError: "Nie udało się załadować wdrażania. Spróbuj ponownie.", retry: "Spróbuj ponownie",
     regionTitle: "Kraj i region żywności", residenceDescription: "Twój kraj zamieszkania.", foodRegionDescription: "Rynek żywności, którego chcesz używać.", unsupportedFoodRegion: "Dla tego regionu korzystamy obecnie z międzynarodowych wyników produktów. Regionalne dane produktów dla {{country}} zostaną dodane na późniejszym etapie.",
+    forgotPasswordTitle: "Nie pamiętasz hasła?", forgotPasswordSubmit: "Wyślij link resetujący", forgotPasswordSubmitting: "Wysyłanie…",
+    forgotPasswordSent: "Jeśli konto dla tego adresu e-mail istnieje, otrzymasz instrukcje resetowania hasła.", backToLogin: "Powrót do logowania",
+    resetPasswordTitle: "Ustaw nowe hasło", newPassword: "Nowe hasło", confirmPassword: "Potwierdź nowe hasło",
+    passwordMinimum: "Użyj co najmniej 10 znaków.", passwordMismatch: "Hasła nie są zgodne.", invalidRecoveryLink: "Ten link do resetowania hasła jest nieprawidłowy lub wygasł.",
+    passwordResetSuccess: "Twoje hasło zostało zmienione.", passwordResetFailure: "Nie udało się zmienić hasła. Spróbuj ponownie.", passwordResetPartialSuccess: "Twoje hasło zostało zmienione, ale nie udało się zakończyć wszystkich aktywnych sesji. Zaloguj się ponownie i sprawdź zabezpieczenia konta, jeśli się tego nie spodziewasz.", loginAgain: "Zaloguj się ponownie.",
+    savingPassword: "Zapisywanie…", savePassword: "Zapisz hasło",
   },
 
   activity: {
