@@ -321,6 +321,24 @@ export default function DocL30029() {
           <li>☐ Stripe Customer Portal gecontroleerd</li>
           <li>☐ juridische teksten en flows afgestemd op NL/EN/FR/DE/PL</li>
           <li>☐ professionele juridische review uitgevoerd waar nodig</li>
+          <li>
+            <strong>OPEN — Supabase Auth password minimum:</strong> live
+            ingesteld op minimaal 10 tekens. Vóór productielancering controleren
+            dat de applicatie en Supabase Auth dezelfde minimumlengte van minimaal
+            10 tekens blijven afdwingen.
+          </li>
+          <li>
+            <strong>OPEN — Supabase Auth leaked-password protection:</strong> deze
+            functie is momenteel niet beschikbaar op het gebruikte Supabase
+            Free-plan. Vóór productielancering opnieuw beoordelen en de status
+            open houden totdat deze productiecontrole daadwerkelijk is uitgevoerd.
+            Als het gekozen productieplan de functie ondersteunt, moet zij worden
+            ingeschakeld en moeten registratie, password change en password
+            recovery daarna opnieuw worden getest. Het ontbreken van deze functie
+            op het huidige Free-plan is geen reden om een eigen of custom
+            leaked-passwordmechanisme te bouwen. Dit is een technisch pre-launch
+            security- en configuratiepunt en geen juridisch oordeel.
+          </li>
           <li>☐ finale productteksten geïmplementeerd</li>
           <li>☐ relevante tests en smoke tests uitgevoerd</li>
         </ul>
