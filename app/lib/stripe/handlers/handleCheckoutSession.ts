@@ -1,19 +1,37 @@
 // app/lib/stripe/handlers/handleCheckoutSession.ts
 
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import type Stripe from "stripe";
+import {
+  ensureSupabaseCustomerMapping,
+  getCheckoutSessionUserId,
+} from "../customerMapping";
+
+function getStripeCustomerId(
+  customer: Stripe.Checkout.Session["customer"]
+) {
+  if (typeof customer === "string") {
+    return customer;
+  }
+
+  return customer?.id ?? null;
+}
 
 export async function handleCheckoutSession(
-  event: any
+  event: Stripe.Event
 ) {
   const supabase = createSupabaseServer();
 
-  const session = event.data.object;
+  const session =
+    event.data.object as Stripe.Checkout.Session;
 
   const stripeCustomerId =
-    session.customer;
+    getStripeCustomerId(session.customer);
 
-  const userId =
-    session.client_reference_id;
+  const userId = getCheckoutSessionUserId({
+    clientReferenceId: session.client_reference_id,
+    metadataUserId: session.metadata?.user_id,
+  });
 
   const email =
     session.customer_details?.email ??
@@ -26,21 +44,9 @@ export async function handleCheckoutSession(
     );
   }
 
-  if (!userId) {
-    throw new Error(
-      "Missing user id in session"
-    );
-  }
-
-  console.log("CHECKOUT SESSION:", session);
-
-  await supabase
-    .from("customers")
-    .upsert({
-      stripe_customer_id: stripeCustomerId,
-
-      user_id: userId,
-
-      email,
-    });
+  await ensureSupabaseCustomerMapping(supabase, {
+    stripeCustomerId,
+    userId,
+    email,
+  });
 }

@@ -5,6 +5,7 @@ import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import type Stripe from "stripe";
 import { syncCustomerEntitlements } from "../entitlementSync";
 import { persistStripeSubscription } from "../subscriptionPersistence";
+import { resolveLocalCustomerMapping } from "../customerMapping";
 
 type InvoiceWithSubscription = Stripe.Invoice & {
   subscription?: string | Stripe.Subscription | null;
@@ -59,23 +60,12 @@ export async function handleInvoice(
   // customer zoeken
   // -------------------------
 
-  const { data: customer, error: customerError } =
-    await supabase
-      .from("customers")
-      .select("id, user_id")
-      .eq(
-        "stripe_customer_id",
-        stripeCustomerId
-      )
-      .maybeSingle();
-
-  if (customerError) {
-    throw customerError;
-  }
-
-  if (!customer) {
-    return;
-  }
+  const customer = await resolveLocalCustomerMapping({
+    supabase,
+    stripeCustomerId,
+    retrieveStripeCustomer: async (customerId) =>
+      stripe.customers.retrieve(customerId),
+  });
 
   // -------------------------
   // status bepalen

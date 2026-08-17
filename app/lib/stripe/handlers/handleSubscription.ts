@@ -5,6 +5,7 @@ import type Stripe from "stripe";
 import { stripe } from "../stripe";
 import { syncCustomerEntitlements } from "../entitlementSync";
 import { persistStripeSubscription } from "../subscriptionPersistence";
+import { resolveLocalCustomerMapping } from "../customerMapping";
 
 function getStripeId(
   value: string | { id?: string } | null
@@ -44,46 +45,12 @@ export async function handleSubscription(
   // find customer
   // -------------------------
 
-  const { data: existingCustomer, error: customerError } =
-    await supabase
-      .from("customers")
-      .select("*")
-      .eq("stripe_customer_id", stripeCustomerId)
-      .maybeSingle();
-
-  if (customerError) {
-    throw customerError;
-  }
-
-  let customer = existingCustomer;
-
-  if (!customer) {
-    const { error: insertCustomerError } =
-      await supabase
-        .from("customers")
-        .insert({
-          stripe_customer_id: stripeCustomerId,
-        });
-
-    if (insertCustomerError) {
-      throw insertCustomerError;
-    }
-
-    const {
-      data: createdCustomer,
-      error: createdCustomerError,
-    } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("stripe_customer_id", stripeCustomerId)
-      .single();
-
-    if (createdCustomerError) {
-      throw createdCustomerError;
-    }
-
-    customer = createdCustomer;
-  }
+  const customer = await resolveLocalCustomerMapping({
+    supabase,
+    stripeCustomerId,
+    retrieveStripeCustomer: async (customerId) =>
+      stripe.customers.retrieve(customerId),
+  });
 
   await persistStripeSubscription(
     supabase,

@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
 import { isAllowedStripePriceId } from "@/lib/stripe/planLookup";
+import { ensureSupabaseCustomerMapping } from "@/lib/stripe/customerMapping";
 
 export async function POST(req: Request) {
   const supabase = createSupabaseServer();
@@ -48,11 +49,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const { data: customer } = await supabase
+    const {
+      data: customer,
+      error: customerError,
+    } = await supabase
       .from("customers")
-      .select("stripe_customer_id")
+      .select("id, stripe_customer_id")
       .eq("user_id", user.id)
       .maybeSingle();
+
+    if (customerError) {
+      throw customerError;
+    }
 
     let stripeCustomerId = customer?.stripe_customer_id ?? null;
 
@@ -63,9 +71,18 @@ export async function POST(req: Request) {
 
       stripeCustomerId = newCustomer.id;
 
-      await supabase.from("customers").insert({
-        user_id: user.id,
-        stripe_customer_id: stripeCustomerId,
+      await ensureSupabaseCustomerMapping(supabase, {
+        userId: user.id,
+        stripeCustomerId,
+      });
+    } else {
+      await ensureSupabaseCustomerMapping(supabase, {
+        userId: user.id,
+        stripeCustomerId,
+      });
+
+      await stripe.customers.update(stripeCustomerId, {
+        metadata: { user_id: user.id },
       });
     }
 
@@ -84,6 +101,9 @@ export async function POST(req: Request) {
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?canceled=1&stripe_return=checkout_cancel`,
 
       client_reference_id: user.id,
+      metadata: {
+        user_id: user.id,
+      },
     });
 
     return new Response(JSON.stringify({ url: session.url }));

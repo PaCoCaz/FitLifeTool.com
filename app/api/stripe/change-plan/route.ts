@@ -4,6 +4,10 @@ import { stripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
 import { isAllowedStripePriceId } from "@/lib/stripe/planLookup";
+import {
+  ChangePlanError,
+  changePlanForUser,
+} from "@/lib/stripe/changePlan";
 
 export async function POST(req: Request) {
 
@@ -46,96 +50,105 @@ export async function POST(req: Request) {
     );
   }
 
-  // -------------------------
-  // customer
-  // -------------------------
+  try {
+    await changePlanForUser(
+      {
+        async findCustomerByUserId(userId) {
+          const { data, error } = await supabaseAdmin
+            .from("customers")
+            .select("id, stripe_customer_id")
+            .eq("user_id", userId)
+            .maybeSingle();
 
-  const { data: customer } =
-    await supabaseAdmin
-      .from("customers")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
+          if (error) {
+            throw error;
+          }
 
-  console.log("customer", customer);
+          if (!data) {
+            return null;
+          }
 
-  if (!customer) {
-    return new Response(
-      JSON.stringify({ error: "No customer" }),
-      { status: 400 }
-    );
-  }
-
-  // -------------------------
-  // try subscription with customers.id
-  // -------------------------
-
-  let { data: subscription } =
-    await supabaseAdmin
-      .from("subscriptions")
-      .select("*")
-      .eq("customer_id", customer.id)
-      .maybeSingle();
-
-  // -------------------------
-  // try subscription with stripe id
-  // -------------------------
-
-  if (!subscription) {
-
-    const res =
-      await supabaseAdmin
-        .from("subscriptions")
-        .select("*")
-        .eq(
-          "customer_id",
-          customer.stripe_customer_id
-        )
-        .maybeSingle();
-
-    subscription = res.data;
-  }
-
-  console.log("subscription", subscription);
-
-  if (!subscription) {
-
-    return new Response(
-      JSON.stringify({
-        error: "No subscription found",
-      }),
-      { status: 400 }
-    );
-
-  }
-
-  // -------------------------
-  // stripe subscription
-  // -------------------------
-
-  const sub =
-    await stripe.subscriptions.retrieve(
-      subscription.id
-    );
-
-  const itemId =
-    sub.items.data[0].id;
-
-  await stripe.subscriptions.update(
-    subscription.id,
-    {
-      items: [
-        {
-          id: itemId,
-          price: priceId,
+          return {
+            id: data.id,
+            stripeCustomerId: data.stripe_customer_id,
+          };
         },
-      ],
-      proration_behavior:
-        "create_prorations",
-    }
-  );
 
-  return new Response(
-    JSON.stringify({ ok: true })
-  );
+        async findChangeableSubscriptionsByCustomerId(
+          localCustomerId
+        ) {
+          const { data, error } = await supabaseAdmin
+            .from("subscriptions")
+            .select("id")
+            .eq("customer_id", localCustomerId)
+            .in("status", ["active", "trialing"])
+            .limit(2);
+
+          if (error) {
+            throw error;
+          }
+
+          return data ?? [];
+        },
+
+        async retrieveStripeSubscription(subscriptionId) {
+          return stripe.subscriptions.retrieve(
+            subscriptionId
+          );
+        },
+
+        async updateStripeSubscription(
+          subscriptionId,
+          update
+        ) {
+          await stripe.subscriptions.update(
+            subscriptionId,
+            {
+              items: [
+                {
+                  id: update.itemId,
+                  price: update.priceId,
+                },
+              ],
+              proration_behavior: "create_prorations",
+            }
+          );
+        },
+      },
+      {
+        userId: user.id,
+        priceId,
+      }
+    );
+
+    return Response.json({ ok: true });
+  } catch (error) {
+    if (error instanceof ChangePlanError) {
+      const status =
+        error.code === "AMBIGUOUS_SUBSCRIPTION" ||
+        error.code === "STRIPE_CUSTOMER_MISMATCH"
+          ? 409
+          : 400;
+
+      return Response.json(
+        {
+          error: error.code,
+        },
+        {
+          status,
+        }
+      );
+    }
+
+    console.error("Change plan error", error);
+
+    return Response.json(
+      {
+        error: "CHANGE_PLAN_FAILED",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }
