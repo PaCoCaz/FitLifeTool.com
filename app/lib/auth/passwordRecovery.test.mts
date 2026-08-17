@@ -125,21 +125,42 @@ test("forgot password keeps a Supabase error generic and does not expose it publ
   assert.doesNotMatch(JSON.stringify(response), /private|provider/);
 });
 
-test("recovery redirect uses only the trusted FitLifeTool origin and an allowlisted language", () => {
+test("recovery redirect always includes an allowlisted language", () => {
+  for (const language of ["nl", "en", "fr", "de", "pl"]) {
+    assert.equal(
+      buildRecoveryRedirectUrl(
+        "https://app.fitlifetool.test",
+        language
+      ),
+      `https://app.fitlifetool.test/reset-password?lang=${language}`
+    );
+  }
+
   assert.equal(
-    buildRecoveryRedirectUrl(
-      "https://app.fitlifetool.test/untrusted?next=https://evil.test",
-      "fr"
-    ),
+    buildRecoveryRedirectUrl("https://app.fitlifetool.test", undefined),
+    "https://app.fitlifetool.test/reset-password?lang=en"
+  );
+  assert.equal(
+    buildRecoveryRedirectUrl("https://app.fitlifetool.test", "unsafe"),
+    "https://app.fitlifetool.test/reset-password?lang=en"
+  );
+});
+
+test("recovery redirect strips caller URL state and is safe to extend with template credentials", () => {
+  const redirectTo = buildRecoveryRedirectUrl(
+    "https://app.fitlifetool.test/untrusted?next=https://evil.test#fragment",
+    "fr"
+  );
+
+  assert.equal(
+    redirectTo,
     "https://app.fitlifetool.test/reset-password?lang=fr"
   );
   assert.equal(
-    buildRecoveryRedirectUrl(
-      "https://app.fitlifetool.test",
-      "unsafe"
-    ),
-    "https://app.fitlifetool.test/reset-password"
+    `${redirectTo}&token_hash=redacted&type=recovery`,
+    "https://app.fitlifetool.test/reset-password?lang=fr&token_hash=redacted&type=recovery"
   );
+  assert.equal(new URL(redirectTo).searchParams.size, 1);
   assert.throws(() =>
     buildRecoveryRedirectUrl("javascript:alert(1)", "nl")
   );

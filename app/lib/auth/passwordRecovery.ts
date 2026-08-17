@@ -10,6 +10,8 @@ const RECOVERY_LANGUAGES: readonly RecoveryLanguage[] = [
   "pl",
 ];
 
+const RECOVERY_FALLBACK_LANGUAGE: RecoveryLanguage = "en";
+
 export type RecoveryCredential = {
   kind: "token_hash";
   tokenHash: string;
@@ -101,10 +103,9 @@ export function buildRecoveryRedirectUrl(
   url.search = "";
   url.hash = "";
 
-  const safeLanguage = asRecoveryLanguage(language);
-  if (safeLanguage) {
-    url.searchParams.set("lang", safeLanguage);
-  }
+  const safeLanguage =
+    asRecoveryLanguage(language) ?? RECOVERY_FALLBACK_LANGUAGE;
+  url.searchParams.set("lang", safeLanguage);
 
   return url.toString();
 }
