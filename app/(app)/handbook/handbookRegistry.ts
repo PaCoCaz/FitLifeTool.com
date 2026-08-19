@@ -436,6 +436,18 @@ export const handbookDocuments: HandbookDocument[] = [
     status: "review",
     updated: "2026-08-16",
   },
+
+  {
+    id: "doc-l3-0030",
+    level: "l3",
+    hoofdstuk: "H5",
+    nummer: "5.11",
+    titel: "Public Web, SEO & Performance Architecture",
+    path: "/handbook/doc-l3-0030",
+
+    status: "current",
+    updated: "2026-08-19",
+  },
 ];
 
 /* ───────────────── Helpers ───────────────── */
