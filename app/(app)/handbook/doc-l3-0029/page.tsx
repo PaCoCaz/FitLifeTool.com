@@ -322,6 +322,42 @@ export default function DocL30029() {
           <li>☐ juridische teksten en flows afgestemd op NL/EN/FR/DE/PL</li>
           <li>☐ professionele juridische review uitgevoerd waar nodig</li>
           <li>
+            <strong>
+              OPEN — PRE-LAUNCH transactional Auth email readiness:
+            </strong>{" "}
+            de ingebouwde Supabase Auth-mailvoorziening is niet de beoogde
+            productie-mailarchitectuur voor FitLifeTool. Vóór productie moet een
+            schaalbare transactional-email-/SMTP-oplossing worden gekozen,
+            geconfigureerd en gevalideerd, met Auth-mail-rate-limits die geschikt
+            zijn voor productiegebruik. Het afzenderdomein en de deliverability
+            moeten worden ingericht en gevalideerd, inclusief de relevante
+            SPF-, DKIM- en DMARC-configuratie.
+            <ul>
+              <li>
+                Password-recoverymail moet locale-aware zijn voor exact EN, NL,
+                FR, DE en PL. De huidige recoverymail bevat statische Nederlandse
+                templatecontent en is daarom nog niet production-ready voor de
+                meertalige applicatie.
+              </li>
+              <li>
+                Het uiteindelijke ontwerp moet ook de overige user-facing
+                Auth-mails omvatten, waaronder registratie en e-mailbevestiging.
+              </li>
+              <li>
+                Een toekomstige mailoplossing mag de bestaande
+                recovery-securitycontracten, waaronder trusted redirects en
+                veilige token-handling, niet verzwakken.
+              </li>
+              <li>
+                De exacte technische oplossing, bijvoorbeeld custom SMTP en/of
+                een Supabase Send Email Hook, is nog niet definitief gekozen en
+                vormt daarom nog geen canonieke architectuur. Dit item blijft
+                expliciet open totdat de productieoplossing vóór lancering is
+                gekozen, ingericht en gevalideerd.
+              </li>
+            </ul>
+          </li>
+          <li>
             <strong>OPEN — Supabase Auth password minimum:</strong> live
             ingesteld op minimaal 10 tekens. Vóór productielancering controleren
             dat de applicatie en Supabase Auth dezelfde minimumlengte van minimaal

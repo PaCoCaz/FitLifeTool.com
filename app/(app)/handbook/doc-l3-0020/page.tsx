@@ -248,12 +248,21 @@ export default function DocL30020() {
 
         <ul>
           <li>
-            Werk de <code>updated</code>-datum bij wanneer een document
-            inhoudelijk verandert.
+            Bij iedere inhoudelijke of canonieke wijziging aan een bestaand
+            Handbook-document moet de zichtbare datum
+            <em> Laatst bijgewerkt</em> worden bijgewerkt naar de datum van die
+            inhoudelijke wijziging.
           </li>
           <li>
-            Wijzig de datum niet bij documenten die inhoudelijk ongewijzigd
-            blijven.
+            Bij uitsluitend cosmetische of opmaakwijzigingen zonder
+            inhoudelijke betekenis hoeft de datum niet te worden gewijzigd.
+          </li>
+          <li>
+            Wijzig <code>handbookRegistry.ts</code> alleen wanneer de bestaande
+            registryconventie of metadata dat vereist. In de huidige
+            Handbook-architectuur is de <code>updated</code>-waarde daar de bron
+            voor de zichtbare datum en moet de betreffende registry-entry dus
+            worden bijgewerkt bij een inhoudelijke documentwijziging.
           </li>
           <li>
             Beoordeel de status per document; pas niet automatisch alle
@@ -264,6 +273,12 @@ export default function DocL30020() {
             onderling consistent.
           </li>
         </ul>
+
+        <p>
+          Deze datumcontrole is een verplicht onderdeel van de Documentation
+          Impact Check voor iedere wijziging aan een bestaand
+          Handbook-document.
+        </p>
       </section>
 
       <section>

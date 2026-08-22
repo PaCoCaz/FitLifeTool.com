@@ -386,7 +386,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0020",
 
     status: "current",
-    updated: "2026-07-26",
+    updated: "2026-08-22",
   },
 
   {
@@ -434,7 +434,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0029",
 
     status: "review",
-    updated: "2026-08-16",
+    updated: "2026-08-22",
   },
 
   {
