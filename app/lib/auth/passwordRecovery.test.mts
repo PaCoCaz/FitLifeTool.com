@@ -6,8 +6,10 @@ import {
   PasswordRecoveryError,
   buildRecoveryRedirectUrl,
   clearRecoveryParameters,
+  getRecoveryPasswordFieldError,
   parseRecoveryCredential,
   requestPasswordRecovery,
+  resolveRecoveryLanguage,
   resetPasswordFromRecovery,
   verifyRecoveryCredential,
   type RecoveryAuthClient,
@@ -143,6 +145,19 @@ test("recovery redirect always includes an allowlisted language", () => {
   assert.equal(
     buildRecoveryRedirectUrl("https://app.fitlifetool.test", "unsafe"),
     "https://app.fitlifetool.test/reset-password?lang=en"
+  );
+});
+
+test("reset-password UI locale resolves every supported language and falls back safely", () => {
+  for (const language of ["en", "nl", "fr", "de", "pl"] as const) {
+    assert.equal(resolveRecoveryLanguage(language), language);
+  }
+
+  assert.equal(resolveRecoveryLanguage(undefined), "en");
+  assert.equal(resolveRecoveryLanguage("es"), "en");
+  assert.equal(
+    resolveRecoveryLanguage("en&next=https://evil.example"),
+    "en"
   );
 });
 
@@ -333,6 +348,65 @@ test("short or mismatched passwords never reach updateUser", async () => {
   assert.equal(state.calls.passwords.length, 0);
 });
 
+test("client recovery validation distinguishes minimum, mismatch and valid input", () => {
+  assert.equal(
+    getRecoveryPasswordFieldError("short", "short"),
+    "minimum"
+  );
+  assert.equal(
+    getRecoveryPasswordFieldError("long-password-a", "short"),
+    "minimum"
+  );
+  assert.equal(
+    getRecoveryPasswordFieldError("long-password-a", "long-password-b"),
+    "mismatch"
+  );
+  assert.equal(
+    getRecoveryPasswordFieldError("long-password-a", "long-password-a"),
+    null
+  );
+});
+
+test("recovery form owns visible localized validation instead of browser popups", async () => {
+  const [source, pageSource] = await Promise.all([
+    readFile(
+      new URL("app/reset-password/ResetPasswordClient.tsx", projectRoot),
+      "utf8"
+    ),
+    readFile(
+      new URL("app/reset-password/page.tsx", projectRoot),
+      "utf8"
+    ),
+  ]);
+
+  assert.match(source, /language: RecoveryLanguage/);
+  assert.match(source, /const t = uiText\[language\]\.auth/);
+  assert.doesNotMatch(source, /\buseLang\(\)/);
+  assert.match(pageSource, /resolveRecoveryLanguage\(requestedLanguage\)/);
+  assert.match(
+    pageSource,
+    /<ResetPasswordClient language=\{language\} \/>/
+  );
+  assert.match(source, /<form[^>]*onSubmit=\{handleReset\} noValidate>/);
+  assert.equal(
+    (source.match(/minLength=\{RECOVERY_PASSWORD_MIN_LENGTH\}/g) ?? []).length,
+    2
+  );
+  assert.match(source, /getRecoveryPasswordFieldError\(\s*password,\s*confirmation/);
+  assert.match(source, /setFieldError\(validationError\)/);
+  assert.match(source, /fieldError === "minimum"\s*\? t\.passwordMinimum\s*: t\.passwordMismatch/);
+  assert.match(source, /synchronizeFieldValidation\(value, confirmation\)/);
+  assert.match(source, /synchronizeFieldValidation\(password, value\)/);
+  assert.match(source, /disabled=\{loading\}/);
+  assert.doesNotMatch(source, /disabled=\{[^}]*password\.length/);
+  const submitStart = source.indexOf("const handleReset");
+  assert.equal(
+    source.indexOf("if (validationError)", submitStart) <
+      source.indexOf("resetPasswordFromRecovery(", submitStart),
+    true
+  );
+});
+
 test("normal or changed auth identity cannot use a recovery page state", async () => {
   const state = authClient({ currentUserId: USER_B });
 
@@ -465,5 +539,58 @@ test("all recovery translation keys exist exactly once in each of five languages
       5,
       `${key} must exist for NL/EN/FR/DE/PL`
     );
+  }
+
+  const localizedRecoveryCopy = {
+    en: [
+      "Set a new password",
+      "Save password",
+      "Use at least 10 characters.",
+      "The passwords do not match.",
+    ],
+    nl: [
+      "Nieuw wachtwoord instellen",
+      "Wachtwoord opslaan",
+      "Gebruik minimaal 10 tekens.",
+      "De wachtwoorden komen niet overeen.",
+    ],
+    fr: [
+      "Définir un nouveau mot de passe",
+      "Enregistrer le mot de passe",
+      "Utilisez au moins 10 caractères.",
+      "Les mots de passe ne correspondent pas.",
+    ],
+    de: [
+      "Neues Passwort festlegen",
+      "Passwort speichern",
+      "Verwende mindestens 10 Zeichen.",
+      "Die Passwörter stimmen nicht überein.",
+    ],
+    pl: [
+      "Ustaw nowe hasło",
+      "Zapisz hasło",
+      "Użyj co najmniej 10 znaków.",
+      "Hasła nie są zgodne.",
+    ],
+  } as const;
+  const languages = Object.keys(
+    localizedRecoveryCopy
+  ) as Array<keyof typeof localizedRecoveryCopy>;
+
+  for (const [index, language] of languages.entries()) {
+    const start = source.indexOf(`const ${language} = {`);
+    const nextLanguage = languages[index + 1];
+    const end = nextLanguage
+      ? source.indexOf(`const ${nextLanguage} = {`, start)
+      : source.length;
+    const localeSource = source.slice(start, end);
+
+    for (const message of localizedRecoveryCopy[language]) {
+      assert.equal(
+        localeSource.includes(JSON.stringify(message)),
+        true,
+        `${language} recovery validation must not fall back to another locale`
+      );
+    }
   }
 });

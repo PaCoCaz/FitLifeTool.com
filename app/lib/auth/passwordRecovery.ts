@@ -21,6 +21,8 @@ export type PasswordResetOutcome =
   | { status: "success" }
   | { status: "partial_success" };
 
+export type RecoveryPasswordFieldError = "minimum" | "mismatch" | null;
+
 type AuthUser = {
   id: string;
 };
@@ -85,6 +87,12 @@ export function asRecoveryLanguage(
     : null;
 }
 
+export function resolveRecoveryLanguage(
+  value: unknown
+): RecoveryLanguage {
+  return asRecoveryLanguage(value) ?? RECOVERY_FALLBACK_LANGUAGE;
+}
+
 export function buildRecoveryRedirectUrl(
   siteUrl: string,
   language: unknown
@@ -103,8 +111,7 @@ export function buildRecoveryRedirectUrl(
   url.search = "";
   url.hash = "";
 
-  const safeLanguage =
-    asRecoveryLanguage(language) ?? RECOVERY_FALLBACK_LANGUAGE;
+  const safeLanguage = resolveRecoveryLanguage(language);
   url.searchParams.set("lang", safeLanguage);
 
   return url.toString();
@@ -210,6 +217,20 @@ export function validateRecoveryPassword(
       "Password confirmation does not match"
     );
   }
+}
+
+export function getRecoveryPasswordFieldError(
+  password: string,
+  confirmation: string
+): RecoveryPasswordFieldError {
+  if (
+    password.length < RECOVERY_PASSWORD_MIN_LENGTH ||
+    confirmation.length < RECOVERY_PASSWORD_MIN_LENGTH
+  ) {
+    return "minimum";
+  }
+
+  return password === confirmation ? null : "mismatch";
 }
 
 export async function resetPasswordFromRecovery(

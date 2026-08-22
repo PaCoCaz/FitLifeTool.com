@@ -6,27 +6,31 @@ import { supabase } from "@/lib/supabaseClient";
 import { createSupabaseRecoveryClient } from "@/lib/supabaseRecoveryClient";
 import {
   PasswordRecoveryError,
-  asRecoveryLanguage,
+  RECOVERY_PASSWORD_MIN_LENGTH,
   clearRecoveryParameters,
+  getRecoveryPasswordFieldError,
   parseRecoveryCredential,
   resetPasswordFromRecovery,
+  type RecoveryLanguage,
   verifyRecoveryCredential,
 } from "@/lib/auth/passwordRecovery";
 import { uiText } from "@/lib/uiText";
 import { getPublicAuthHref } from "@/lib/publicWeb";
-import {
-  useLang,
-  useSetInterfaceLanguage,
-} from "@/lib/useLang";
+import { useSetInterfaceLanguage } from "@/lib/useLang";
 
 type FieldError = "minimum" | "mismatch" | null;
 type PageError = "invalid" | "failure" | null;
 type CompletionState = "partial_success" | null;
 
-export default function ResetPasswordClient() {
-  const lang = useLang();
+type ResetPasswordClientProps = {
+  language: RecoveryLanguage;
+};
+
+export default function ResetPasswordClient({
+  language,
+}: ResetPasswordClientProps) {
   const setInterfaceLanguage = useSetInterfaceLanguage();
-  const t = uiText[lang].auth;
+  const t = uiText[language].auth;
   const hasVerified = useRef(false);
   const recoveryClient = useRef<ReturnType<
     typeof createSupabaseRecoveryClient
@@ -44,6 +48,19 @@ export default function ResetPasswordClient() {
   const [completion, setCompletion] =
     useState<CompletionState>(null);
 
+  function synchronizeFieldValidation(
+    nextPassword: string,
+    nextConfirmation: string
+  ) {
+    if (!fieldError) return;
+    setFieldError(
+      getRecoveryPasswordFieldError(
+        nextPassword,
+        nextConfirmation
+      )
+    );
+  }
+
   useEffect(() => {
     if (hasVerified.current) return;
     hasVerified.current = true;
@@ -51,13 +68,7 @@ export default function ResetPasswordClient() {
 
     const verifyRecovery = async () => {
       const url = new URL(window.location.href);
-      const requestedLanguage = asRecoveryLanguage(
-        url.searchParams.get("lang")
-      );
-
-      if (requestedLanguage) {
-        setInterfaceLanguage(requestedLanguage);
-      }
+      setInterfaceLanguage(language);
 
       const credential = parseRecoveryCredential(
         url
@@ -137,7 +148,7 @@ export default function ResetPasswordClient() {
     return () => {
       cancelled = true;
     };
-  }, [setInterfaceLanguage]);
+  }, [language, setInterfaceLanguage]);
 
   const handleReset = async (
     event: React.FormEvent<HTMLFormElement>
@@ -147,8 +158,19 @@ export default function ResetPasswordClient() {
       return;
     }
 
-    setFieldError(null);
     setError(null);
+
+    const validationError = getRecoveryPasswordFieldError(
+      password,
+      confirmation
+    );
+
+    if (validationError) {
+      setFieldError(validationError);
+      return;
+    }
+
+    setFieldError(null);
     setLoading(true);
 
     try {
@@ -173,7 +195,7 @@ export default function ResetPasswordClient() {
       }
 
       window.location.assign(
-        `${getPublicAuthHref("login", lang)}&auth_notice=password_reset`
+        `${getPublicAuthHref("login", language)}&auth_notice=password_reset`
       );
     } catch (resetError) {
       if (resetError instanceof PasswordRecoveryError) {
@@ -209,7 +231,7 @@ export default function ResetPasswordClient() {
               {t.passwordResetPartialSuccess}
             </p>
             <Link
-              href={getPublicAuthHref("login", lang)}
+              href={getPublicAuthHref("login", language)}
               className="mt-4 inline-block text-sm text-[#191970] hover:underline"
             >
               {t.loginAgain}
@@ -221,23 +243,27 @@ export default function ResetPasswordClient() {
               {t.invalidRecoveryLink}
             </p>
             <Link
-              href={getPublicAuthHref("login", lang)}
+              href={getPublicAuthHref("login", language)}
               className="mt-4 inline-block text-sm text-[#191970] hover:underline"
             >
               {t.backToLogin}
             </Link>
           </>
         ) : (
-          <form className="space-y-4" onSubmit={handleReset}>
+          <form className="space-y-4" onSubmit={handleReset} noValidate>
             <label className="block text-sm text-gray-700">
               <span className="mb-1 block">{t.newPassword}</span>
               <input
                 type="password"
                 autoComplete="new-password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setPassword(value);
+                  synchronizeFieldValidation(value, confirmation);
+                }}
                 required
-                minLength={10}
+                minLength={RECOVERY_PASSWORD_MIN_LENGTH}
                 className="w-full rounded border px-3 py-2 text-sm"
               />
             </label>
@@ -248,11 +274,13 @@ export default function ResetPasswordClient() {
                 type="password"
                 autoComplete="new-password"
                 value={confirmation}
-                onChange={(event) =>
-                  setConfirmation(event.target.value)
-                }
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setConfirmation(value);
+                  synchronizeFieldValidation(password, value);
+                }}
                 required
-                minLength={10}
+                minLength={RECOVERY_PASSWORD_MIN_LENGTH}
                 className="w-full rounded border px-3 py-2 text-sm"
               />
             </label>
@@ -277,11 +305,7 @@ export default function ResetPasswordClient() {
 
             <button
               type="submit"
-              disabled={
-                loading ||
-                password.length < 10 ||
-                confirmation.length < 10
-              }
+              disabled={loading}
               className="w-full rounded-[var(--radius)] bg-[#191970] py-2 text-white hover:bg-[#0BA4E0] transition disabled:opacity-50"
             >
               {loading ? t.savingPassword : t.savePassword}
