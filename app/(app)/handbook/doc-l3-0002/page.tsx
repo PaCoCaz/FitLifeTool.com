@@ -154,6 +154,54 @@ export default function DocL30002() {
       </section>
 
       <section>
+        <h2>Gevoelige accountacties</h2>
+
+        <p>
+          Een ingelogde sessie is op zichzelf niet voldoende om het wachtwoord
+          te wijzigen. De password-change serverroute valideert zelfstandig de
+          actuele Supabase-gebruiker en voert direct vóór de wijziging via een
+          afzonderlijke, niet-persistente Supabase-client een nieuwe password
+          sign-in uit met de huidige, server-side vastgestelde identiteit. De
+          opnieuw geauthenticeerde user-ID moet exact overeenkomen met de
+          user-ID uit de bestaande sessie. De normale browsercookie wordt niet
+          door deze fresh-authsessie vervangen.
+        </p>
+
+        <ul>
+          <li>
+            De client levert geen <code>user_id</code>, e-mail of andere
+            ownership-identificatie aan als autorisatiegrens.
+          </li>
+          <li>
+            Een ontbrekende, mislukte of inconsistente fresh authentication
+            faalt gesloten voordat het wachtwoord wordt gewijzigd.
+          </li>
+          <li>
+            De geïsoleerde fresh-authsessie bestaat alleen binnen de serveractie
+            en wordt op alle foutpaden opgeruimd zonder de normale browsersessie
+            te wijzigen.
+          </li>
+          <li>
+            Na een geslaagde wijziging wordt globale sign-out aangevraagd en
+            moet de gebruiker normaal opnieuw inloggen.
+          </li>
+          <li>
+            Wanneer alleen de globale session cleanup mislukt, blijft de
+            password-change status geslaagd met een afzonderlijke waarschuwing;
+            de password-update wordt niet opnieuw uitgevoerd.
+          </li>
+        </ul>
+
+        <p>
+          Reeds uitgegeven access tokens zijn JWT&apos;s en kunnen na globale
+          sign-out nog geldig blijven tot hun eigen vervaltijd. Daarom wordt
+          niet geclaimd dat alle bestaande access direct onmogelijk is. De
+          proxy en server-side autorisatie blijven onafhankelijk van de
+          instellingen-UI van kracht.
+        </p>
+      </section>
+
+      <section>
         <h2>Belangrijke ontwerpprincipes</h2>
 
         <ul>

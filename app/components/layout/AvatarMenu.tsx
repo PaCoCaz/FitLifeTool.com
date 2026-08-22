@@ -5,10 +5,11 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useLang, useSetUserLanguage } from "@/lib/useLang";
+import { useLang, useSetUserLanguage, type Lang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
-import { useGoalContext } from "@/lib/GoalProvider";
+import { useGoalContext, type GoalKey } from "@/lib/GoalProvider";
 import { useDashboard } from "@/lib/DashboardStore";
+import { getPublicHomePath } from "@/lib/publicWeb";
 
 
 type Props = {
@@ -16,15 +17,14 @@ type Props = {
 };
 
 export default function AvatarMenu({ firstName }: Props) {
-  const langCode = useLang();
-  const t = uiText[langCode];
+  const lang = useLang();
+  const t = uiText[lang];
 
   const [open, setOpen] = useState(false);
   const [openSection, setOpenSection] = useState<"language" | "goal" | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
-  const lang = useLang();
   const setUserLanguage = useSetUserLanguage();
   const { goal, setUserGoal } = useGoalContext();
   const { refreshDashboard } = useDashboard();
@@ -47,16 +47,16 @@ export default function AvatarMenu({ firstName }: Props) {
       cache: "no-store",
       credentials: "include",
     });
-    window.location.assign("/");
+    window.location.assign(getPublicHomePath(lang));
   };
 
-  async function changeLanguage(newLang: any) {
+  async function changeLanguage(newLang: Lang) {
     setOpen(false);
     setOpenSection(null);
     await setUserLanguage(newLang);
   }
 
-  async function changeGoal(newGoal: any) {
+  async function changeGoal(newGoal: GoalKey) {
     setOpen(false);
     setOpenSection(null);
   
@@ -71,14 +71,14 @@ export default function AvatarMenu({ firstName }: Props) {
     { code: "de", label: "Deutsch", flag: "/images/flags/de.svg" },
     { code: "fr", label: "Français", flag: "/images/flags/fr.svg" },
     { code: "pl", label: "Polski", flag: "/images/flags/pl.svg" },
-  ];
+  ] as const;
 
   const goals = [
     { code: "LOSE", label: t.goals.lose },
     { code: "MAINTAIN", label: t.goals.maintain },
     { code: "GAIN", label: t.goals.gain },
     { code: "HOLIDAY", label: t.goals.holiday },
-  ];
+  ] as const;
 
   const activeLanguage = languages.find(l => l.code === lang);
   const activeGoal = goals.find(g => g.code === goal);
@@ -229,4 +229,4 @@ export default function AvatarMenu({ firstName }: Props) {
       )}
     </div>
   );
-} 
+}

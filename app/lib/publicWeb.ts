@@ -150,6 +150,11 @@ export function getPublicPagePath(
   return PUBLIC_PAGE_REGISTRY[pageKey].paths[locale];
 }
 
+export function getPublicHomePath(locale: unknown) {
+  const safeLocale = asPublicLocale(locale) ?? PUBLIC_DEFAULT_LOCALE;
+  return getPublicPagePath("home", safeLocale);
+}
+
 export function findPublicLocaleForPathname(pathname: string) {
   for (const locale of PUBLIC_LOCALES) {
     if (getPublicPagePath("home", locale) === pathname) return locale;

@@ -17,28 +17,32 @@ export default function LoginForm({ language, onRegister }: Props) {
   const t = uiText[language].auth;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [loginFailed, setLoginFailed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setLoginFailed(false);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    setLoading(false);
+      if (signInError) {
+        setLoginFailed(true);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-      return;
+      // 🔑 Hard redirect → voorkomt auth race conditions
+      window.location.assign("/dashboard");
+    } catch {
+      setLoginFailed(true);
+    } finally {
+      setLoading(false);
     }
-
-    // 🔑 Hard redirect → voorkomt auth race conditions
-    window.location.assign("/dashboard");
   };
 
   return (
@@ -63,8 +67,11 @@ export default function LoginForm({ language, onRegister }: Props) {
         className="w-full rounded border px-4 py-3"
       />
 
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
+      {loginFailed && (
+        <p className="text-sm text-red-600" role="alert">
+          <span className="block">{t.loginFailure.title}</span>
+          <span className="block">{t.loginFailure.guidance}</span>
+        </p>
       )}
 
       <button

@@ -9,7 +9,7 @@ const en = {
   auth: {
     accountTitle: "Create account", onboardingTitle: "Complete your profile", personalTitle: "Personal details", bodyTitle: "Body details", goalTitle: "Your goals",
     registrationLanguage: "Language", selectLanguage: "Select your language",
-    firstName: "First name", lastName: "Last name", email: "Email address", password: "Password", loginTitle: "Log in", login: "Log in", loggingIn: "Logging in…",
+    firstName: "First name", lastName: "Last name", email: "Email address", password: "Password", loginTitle: "Log in", login: "Log in", loggingIn: "Logging in…", loginFailure: { title: "Unable to log in.", guidance: "Check your details and try again." },
     residenceCountry: "Country of residence", foodRegion: "Food region", selectCountry: "Select a country",
     loadingCountries: "Loading countries…", countryLoadError: "Countries could not be loaded. Please try again.",
     requiredFields: "Complete all required fields.", next: "Next", registering: "Creating account…",
@@ -264,6 +264,18 @@ const en = {
 
   settings: {
     title: "Settings",
+    passwordChange: {
+      title: "Change password",
+      description: "Confirm your current password before choosing a new password.",
+      currentPassword: "Current password",
+      currentPasswordRequired: "Enter your current password.",
+      reauthenticationFailed: "Your current password could not be confirmed.",
+      failure: "Your password could not be changed. Please try again.",
+      success: "Your password has been changed. Log in again with your new password.",
+      unauthenticated: "Your session is no longer valid. Log in again.",
+      submit: "Change password",
+      saving: "Changing…",
+    },
   },
 
   subscription: {
@@ -328,7 +340,7 @@ const nl = {
   auth: {
     accountTitle: "Account aanmaken", onboardingTitle: "Maak je profiel compleet", personalTitle: "Persoonlijke gegevens", bodyTitle: "Lichaamsgegevens", goalTitle: "Je doelen",
     registrationLanguage: "Taal", selectLanguage: "Kies je taal",
-    firstName: "Voornaam", lastName: "Achternaam", email: "E-mailadres", password: "Wachtwoord", loginTitle: "Inloggen", login: "Inloggen", loggingIn: "Inloggen…",
+    firstName: "Voornaam", lastName: "Achternaam", email: "E-mailadres", password: "Wachtwoord", loginTitle: "Inloggen", login: "Inloggen", loggingIn: "Inloggen…", loginFailure: { title: "Inloggen is niet gelukt.", guidance: "Controleer je gegevens en probeer het opnieuw." },
     residenceCountry: "Woonland", foodRegion: "Voedselregio", selectCountry: "Selecteer een land",
     loadingCountries: "Landen laden…", countryLoadError: "Landen konden niet worden geladen. Probeer het opnieuw.",
     requiredFields: "Vul alle verplichte velden in.", next: "Volgende", registering: "Account aanmaken…",
@@ -582,6 +594,18 @@ const nl = {
 
   settings: {
     title: "Instellingen",
+    passwordChange: {
+      title: "Wachtwoord wijzigen",
+      description: "Bevestig je huidige wachtwoord voordat je een nieuw wachtwoord kiest.",
+      currentPassword: "Huidig wachtwoord",
+      currentPasswordRequired: "Vul je huidige wachtwoord in.",
+      reauthenticationFailed: "Je huidige wachtwoord kon niet worden bevestigd.",
+      failure: "Je wachtwoord kon niet worden gewijzigd. Probeer het opnieuw.",
+      success: "Je wachtwoord is gewijzigd. Log opnieuw in met je nieuwe wachtwoord.",
+      unauthenticated: "Je sessie is niet meer geldig. Log opnieuw in.",
+      submit: "Wachtwoord wijzigen",
+      saving: "Wijzigen…",
+    },
   },
 
   subscription: {
@@ -646,7 +670,7 @@ const fr = {
   auth: {
     accountTitle: "Créer un compte", onboardingTitle: "Complétez votre profil", personalTitle: "Données personnelles", bodyTitle: "Données corporelles", goalTitle: "Vos objectifs",
     registrationLanguage: "Langue", selectLanguage: "Choisissez votre langue",
-    firstName: "Prénom", lastName: "Nom", email: "Adresse e-mail", password: "Mot de passe", loginTitle: "Se connecter", login: "Se connecter", loggingIn: "Connexion…",
+    firstName: "Prénom", lastName: "Nom", email: "Adresse e-mail", password: "Mot de passe", loginTitle: "Se connecter", login: "Se connecter", loggingIn: "Connexion…", loginFailure: { title: "La connexion a échoué.", guidance: "Vérifiez vos informations et réessayez." },
     residenceCountry: "Pays de résidence", foodRegion: "Région alimentaire", selectCountry: "Sélectionnez un pays",
     loadingCountries: "Chargement des pays…", countryLoadError: "Impossible de charger les pays. Réessayez.",
     requiredFields: "Remplissez tous les champs obligatoires.", next: "Suivant", registering: "Création du compte…",
@@ -901,6 +925,18 @@ const fr = {
 
   settings: {
     title: "Paramètres",
+    passwordChange: {
+      title: "Modifier le mot de passe",
+      description: "Confirmez votre mot de passe actuel avant d'en choisir un nouveau.",
+      currentPassword: "Mot de passe actuel",
+      currentPasswordRequired: "Saisissez votre mot de passe actuel.",
+      reauthenticationFailed: "Votre mot de passe actuel n'a pas pu être confirmé.",
+      failure: "Votre mot de passe n'a pas pu être modifié. Réessayez.",
+      success: "Votre mot de passe a été modifié. Reconnectez-vous avec votre nouveau mot de passe.",
+      unauthenticated: "Votre session n'est plus valide. Reconnectez-vous.",
+      submit: "Modifier le mot de passe",
+      saving: "Modification…",
+    },
   },
 
   subscription: {
@@ -965,7 +1001,7 @@ const de = {
   auth: {
     accountTitle: "Konto erstellen", onboardingTitle: "Vervollständige dein Profil", personalTitle: "Persönliche Daten", bodyTitle: "Körperdaten", goalTitle: "Deine Ziele",
     registrationLanguage: "Sprache", selectLanguage: "Wähle deine Sprache",
-    firstName: "Vorname", lastName: "Nachname", email: "E-Mail-Adresse", password: "Passwort", loginTitle: "Anmelden", login: "Anmelden", loggingIn: "Anmeldung…",
+    firstName: "Vorname", lastName: "Nachname", email: "E-Mail-Adresse", password: "Passwort", loginTitle: "Anmelden", login: "Anmelden", loggingIn: "Anmeldung…", loginFailure: { title: "Die Anmeldung ist fehlgeschlagen.", guidance: "Überprüfe deine Angaben und versuche es erneut." },
     residenceCountry: "Wohnland", foodRegion: "Lebensmittelregion", selectCountry: "Land auswählen",
     loadingCountries: "Länder werden geladen…", countryLoadError: "Länder konnten nicht geladen werden. Bitte erneut versuchen.",
     requiredFields: "Fülle alle Pflichtfelder aus.", next: "Weiter", registering: "Konto wird erstellt…",
@@ -1220,6 +1256,18 @@ const de = {
 
   settings: {
     title: "Einstellungen",
+    passwordChange: {
+      title: "Passwort ändern",
+      description: "Bestätige dein aktuelles Passwort, bevor du ein neues Passwort wählst.",
+      currentPassword: "Aktuelles Passwort",
+      currentPasswordRequired: "Gib dein aktuelles Passwort ein.",
+      reauthenticationFailed: "Dein aktuelles Passwort konnte nicht bestätigt werden.",
+      failure: "Dein Passwort konnte nicht geändert werden. Versuche es erneut.",
+      success: "Dein Passwort wurde geändert. Melde dich mit deinem neuen Passwort erneut an.",
+      unauthenticated: "Deine Sitzung ist nicht mehr gültig. Melde dich erneut an.",
+      submit: "Passwort ändern",
+      saving: "Wird geändert…",
+    },
   },
 
   subscription: {
@@ -1284,7 +1332,7 @@ const pl = {
   auth: {
     accountTitle: "Utwórz konto", onboardingTitle: "Uzupełnij swój profil", personalTitle: "Dane osobowe", bodyTitle: "Dane ciała", goalTitle: "Twoje cele",
     registrationLanguage: "Język", selectLanguage: "Wybierz język",
-    firstName: "Imię", lastName: "Nazwisko", email: "Adres e-mail", password: "Hasło", loginTitle: "Zaloguj się", login: "Zaloguj się", loggingIn: "Logowanie…",
+    firstName: "Imię", lastName: "Nazwisko", email: "Adres e-mail", password: "Hasło", loginTitle: "Zaloguj się", login: "Zaloguj się", loggingIn: "Logowanie…", loginFailure: { title: "Logowanie nie powiodło się.", guidance: "Sprawdź swoje dane i spróbuj ponownie." },
     residenceCountry: "Kraj zamieszkania", foodRegion: "Region żywności", selectCountry: "Wybierz kraj",
     loadingCountries: "Ładowanie krajów…", countryLoadError: "Nie udało się załadować krajów. Spróbuj ponownie.",
     requiredFields: "Wypełnij wszystkie wymagane pola.", next: "Dalej", registering: "Tworzenie konta…",
@@ -1539,6 +1587,18 @@ const pl = {
 
   settings: {
     title: "Ustawienia",
+    passwordChange: {
+      title: "Zmień hasło",
+      description: "Potwierdź obecne hasło przed wybraniem nowego.",
+      currentPassword: "Obecne hasło",
+      currentPasswordRequired: "Wpisz obecne hasło.",
+      reauthenticationFailed: "Nie udało się potwierdzić obecnego hasła.",
+      failure: "Nie udało się zmienić hasła. Spróbuj ponownie.",
+      success: "Hasło zostało zmienione. Zaloguj się ponownie przy użyciu nowego hasła.",
+      unauthenticated: "Twoja sesja nie jest już ważna. Zaloguj się ponownie.",
+      submit: "Zmień hasło",
+      saving: "Zmienianie…",
+    },
   },
 
   subscription: {
