@@ -119,6 +119,19 @@ export default function DocL30026() {
           </li>
         </ul>
       </section>
+
+      <section>
+        <h2>Documentation Impact Check</h2>
+
+        <p>
+          Voer vóór afronding de Documentation Impact Check uit zoals
+          vastgelegd in Handbook 5.7. Rapporteer expliciet
+          <code> Documentation impact: None</code> of benoem per canonieke bron
+          welke update vereist is. Leg nieuwe kennis vast bij de diepste
+          eigenaar en promoveer auditbevindingen niet zelfstandig tot
+          businessregels.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

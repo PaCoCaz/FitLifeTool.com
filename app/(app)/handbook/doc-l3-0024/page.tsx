@@ -38,6 +38,13 @@ export default function DocL30024() {
           productdatabase. De procedure voor product-searchaliases die in dit
           document staat, is definitief, getest en operationeel gevalideerd.
         </div>
+
+        <p>
+          De operationele productdatamethodologie voor bronnen, porties,
+          units, provenance, displaynamen en deterministic sorting staat in
+          <code> docs/product-data/PRODUCT_DATA_GOVERNANCE.md</code>. Dit
+          hoofdstuk blijft eigenaar van export, synchronisatie en runtimeflow.
+        </p>
       </section>
 
 

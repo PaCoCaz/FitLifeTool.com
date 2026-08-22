@@ -44,6 +44,12 @@ export default function DocL30025() {
       <section>
         <h2>Lokale ontwikkeling</h2>
 
+        <p>
+          Iedere Git-push vereist vooraf expliciete toestemming. Dit geldt ook
+          voor pushes naar <code>origin/develop</code> en
+          <code> origin/main</code>.
+        </p>
+
         <ol>
           <li>Werk uitsluitend aan de goedgekeurde scope op <code>develop</code>.</li>
           <li>Valideer de wijziging lokaal vóór een commit.</li>
@@ -51,12 +57,56 @@ export default function DocL30025() {
           <li>Stage uitsluitend de bedoelde bestanden.</li>
           <li>Controleer de staged diff en staged scope expliciet.</li>
           <li>Commit uitsluitend de gevalideerde wijzigingen.</li>
-          <li>Push ontwikkeling uitsluitend naar <code>origin/develop</code>.</li>
+          <li>
+            Push na expliciete toestemming ontwikkeling uitsluitend naar
+            <code> origin/develop</code>.
+          </li>
         </ol>
 
         <p>
           Productieacties volgen pas na afzonderlijke, expliciete toestemming.
         </p>
+      </section>
+
+      <section>
+        <h2>Documentation Impact Check</h2>
+
+        <p>
+          Bepaal vóór afronding van iedere relevante wijziging of zij gevolgen
+          heeft voor canonieke FitLifeTool-documentatie of nieuwe projectkennis
+          introduceert die canoniek moet worden vastgelegd.
+        </p>
+
+        <p>Rapporteer dit in deze vorm:</p>
+
+        <pre className="whitespace-pre-wrap text-sm leading-7">
+{`Documentation impact:
+- None`}
+        </pre>
+
+        <p>Of, wanneer documentatie moet wijzigen:</p>
+
+        <pre className="whitespace-pre-wrap text-sm leading-7">
+{`Documentation impact:
+- Handbook 2.5: update required
+- PRODUCT_DATA_GOVERNANCE.md: update required
+- FITLIFETOOL_CONTEXT.md: no change
+- AGENTS.md: no change`}
+        </pre>
+
+        <ul>
+          <li>Niet iedere codewijziging vereist documentatie.</li>
+          <li>Pas de diepste canonieke bron aan die eigenaar is van de kennis.</li>
+          <li>
+            Wijzig <code>FITLIFETOOL_CONTEXT.md</code> alleen wanneer
+            kerncontext, terminologie of de documentrouter verandert.
+          </li>
+          <li>Een auditfinding wordt niet automatisch een businessregel.</li>
+          <li>
+            Nieuwe architectuur of businesslogica wordt pas canoniek na
+            expliciete goedkeuring.
+          </li>
+        </ul>
       </section>
 
       <section>

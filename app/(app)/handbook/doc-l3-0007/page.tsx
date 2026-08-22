@@ -192,7 +192,10 @@ export default function DocL30007() {
 
           <li>Alle feedback is gebaseerd op actuele geregistreerde gegevens.</li>
 
-          <li>Historische gegevens worden nooit aangepast.</li>
+          <li>
+            Herberekening past historische eventregistraties niet aan;
+            snapshotrecords volgen hun eigen vastgelegde semantiek.
+          </li>
         </ul>
 
         <p>

@@ -125,7 +125,7 @@ export default function DocL30003() {
                 </td>
 
                 <td>
-                  Historische gewichtsregistraties.
+                  Dagelijkse gewichtssnapshots.
                 </td>
               </tr>
 
@@ -145,6 +145,33 @@ export default function DocL30003() {
           Hydratatie is hiervan een voorbeeld: waterinname en vocht uit voeding
           worden gecombineerd tot één actuele hydratiewaarde.
         </p>
+      </section>
+
+
+      <section>
+        <h2>Eventregistraties en dagelijkse snapshots</h2>
+
+        <p>
+          <code>nutrition_logs</code> en <code>activity_logs</code> zijn
+          eventregistraties: nieuwe gebruikersacties worden als nieuwe events
+          toegevoegd. <code>weight_logs</code> heeft bewust een andere
+          semantiek en representeert één dagelijkse gewichtssnapshot.
+        </p>
+
+        <p>
+          De huidige implementatie gebruikt voor <code>weight_logs</code> een
+          upsert op <code>user_id</code> en <code>log_date</code>. Dezelfde
+          gebruiker/dag kan daardoor worden bijgewerkt. Dit is geen
+          append-only eventlog en spreekt de eventsemantiek van nutrition- en
+          activity-registraties niet tegen.
+        </p>
+
+        <div className="info-box">
+          Een live <code>hydration_logs</code>-tabel is als drift/open issue in
+          een audit aangetroffen. Dit is geen zelfstandig goedgekeurde
+          architectuurwijziging en wordt niet zonder afzonderlijk besluit
+          opgelost.
+        </div>
       </section>
 
 

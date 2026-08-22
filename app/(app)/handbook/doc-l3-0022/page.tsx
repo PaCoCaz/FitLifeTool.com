@@ -149,6 +149,14 @@ Supabase export`}
           Iedere productvariant bewaart zijn herkomst via broninformatie,
           zodat later altijd duidelijk blijft waar waarden vandaan komen.
         </p>
+
+        <p>
+          De operationele bron-, portie-, unit-, provenance-, naming- en
+          sortingmethodologie staat in
+          <code> docs/product-data/PRODUCT_DATA_GOVERNANCE.md</code>. Dat
+          document vult dit hoofdstuk aan en vervangt de Product Intelligence-
+          en runtimearchitectuur niet.
+        </p>
       </section>
 
 

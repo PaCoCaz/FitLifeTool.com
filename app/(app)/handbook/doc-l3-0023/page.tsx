@@ -37,6 +37,14 @@ export default function DocL30023() {
           status <strong>review</strong>. Een import-, test- of back-upbestand
           is nooit automatisch een productiebron.
         </div>
+
+        <p>
+          Raadpleeg voor de NEVO-bestandsworkflow, Portie Online,
+          unitselectie, portion provenance, afgeleide porties,
+          displaynaam-methodologie en deterministic sorting de aanvullende
+          canonieke bron
+          <code> docs/product-data/PRODUCT_DATA_GOVERNANCE.md</code>.
+        </p>
       </section>
 
 

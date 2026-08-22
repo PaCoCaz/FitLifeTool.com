@@ -14,7 +14,9 @@ export default function DocL30001() {
       <section>
         <p>
           FitLifeTool is een dag-gedreven gezondheidsplatform dat gebruikers helpt gedurende de dag gezonde keuzes te maken.
-          Voeding, hydratatie, activiteiten en gewicht worden geregistreerd als afzonderlijke gebeurtenissen die samen de actuele voortgang en energiebalans bepalen.
+          Voeding en activiteiten worden geregistreerd als gebeurtenissen;
+          gewicht wordt als dagelijkse snapshot vastgelegd. Samen vormen deze
+          bronregistraties de basis voor actuele voortgang en energiebalans.
         </p>
 
         <p>
@@ -41,7 +43,9 @@ export default function DocL30001() {
           </li>
 
           <li>
-            <strong>Logs</strong> zijn onveranderlijke registraties van gebruikersacties.
+            <strong>Logs</strong> volgen hun domeinsemantiek:
+            nutrition- en activity-registraties zijn events; een
+            weight-registratie is een bijwerkbare dagelijkse snapshot.
           </li>
 
           <li>
@@ -62,7 +66,7 @@ export default function DocL30001() {
         </ul>
 
         <p>
-          Hierdoor bestaat er geen verborgen of "magische" state. Alles wat een gebruiker ziet is uiteindelijk herleidbaar tot opgeslagen data en deterministische berekeningen.
+          Hierdoor bestaat er geen verborgen of &quot;magische&quot; state. Alles wat een gebruiker ziet is uiteindelijk herleidbaar tot opgeslagen data en deterministische berekeningen.
         </p>
       </section>
 
