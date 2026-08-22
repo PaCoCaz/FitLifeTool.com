@@ -238,6 +238,18 @@ export default function DocL30030() {
           <li>Client islands worden alleen gebruikt waar interactie dat vereist.</li>
           <li>Publieke content en H1 moeten zonder client-JavaScript in de initiële HTML staan.</li>
         </ul>
+
+        <p>
+          De Public Web Foundation gebruikt afzonderlijke App Router-rootlayouts.
+          De Engelse homepage op <code>/</code> wordt statisch gegenereerd en de
+          geprefixte homepages op <code>/nl</code>, <code>/fr</code>,
+          <code>/de</code> en <code>/pl</code> hebben ieder een expliciete statische
+          locale-rootroute. Iedere publieke rootlayout levert de juiste initiële
+          <code> html lang</code> zonder request-time headers of client-side
+          documentmutatie. Request-afhankelijke locale-overname blijft beperkt
+          tot app-, auth-, onboarding- en recoveryroutes die daarvoor dynamisch
+          mogen renderen.
+        </p>
       </section>
 
       <section>
@@ -277,7 +289,13 @@ export default function DocL30030() {
           Muterende en gevoelige API-routes blijven zelf autorisatie afdwingen.
         </p>
 
-        <p><strong>Status: OPEN implementatie-item vóór publieke release.</strong></p>
+        <p>
+          <strong>Status:</strong> de Fase 1-routegrens is geïmplementeerd:
+          gewone publieke homepages verlaten de proxy vóór de Supabase-client
+          wordt aangemaakt, terwijl beschermde routes server-side beveiligd
+          blijven. Production performance-, Lighthouse- en volledige
+          routevalidatie blijven open vóór publieke release.
+        </p>
       </section>
 
       <section>

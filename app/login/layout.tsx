@@ -1,10 +1,5 @@
-// app/(public)/layout.tsx
-
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import React from "react";
-import AppShell from "@/components/layout/AppShell";
-import AppProviders from "@/components/providers/AppProviders";
 import {
   asPublicLocale,
   PUBLIC_DEFAULT_LOCALE,
@@ -14,7 +9,6 @@ import "@/styles/globals.css";
 import "@/styles/components.css";
 import "@/styles/public-content.css";
 import "@/styles/public-web.css";
-import PublicBreadcrumb from "./publicBreadcrumb";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -26,24 +20,18 @@ export const metadata: Metadata = {
   description: "Personal health & nutrition platform",
 };
 
-type Props = {
+export default async function LoginLayout({
+  children,
+}: {
   children: React.ReactNode;
-};
-
-export default async function PublicLayout({ children }: Props) {
+}) {
   const locale =
     asPublicLocale((await headers()).get("x-interface-locale")) ??
     PUBLIC_DEFAULT_LOCALE;
 
   return (
     <html lang={PUBLIC_LOCALE_REGISTRY[locale].htmlLang}>
-      <body>
-        <AppProviders>
-          <AppShell breadcrumb={<PublicBreadcrumb />}>
-            <div className="handbook-public">{children}</div>
-          </AppShell>
-        </AppProviders>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

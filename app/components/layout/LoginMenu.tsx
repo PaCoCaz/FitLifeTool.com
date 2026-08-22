@@ -111,7 +111,7 @@ export default function LoginMenu({ onRegister }: Props) {
             </p>
           )}
 
-          <LoginForm onRegister={onRegister} />
+          <LoginForm language={lang} onRegister={onRegister} />
         </div>
       )}
     </div>

@@ -9,7 +9,7 @@ const en = {
   auth: {
     accountTitle: "Create account", onboardingTitle: "Complete your profile", personalTitle: "Personal details", bodyTitle: "Body details", goalTitle: "Your goals",
     registrationLanguage: "Language", selectLanguage: "Select your language",
-    firstName: "First name", lastName: "Last name", email: "Email address", password: "Password",
+    firstName: "First name", lastName: "Last name", email: "Email address", password: "Password", loginTitle: "Log in", login: "Log in", loggingIn: "Logging in…",
     residenceCountry: "Country of residence", foodRegion: "Food region", selectCountry: "Select a country",
     loadingCountries: "Loading countries…", countryLoadError: "Countries could not be loaded. Please try again.",
     requiredFields: "Complete all required fields.", next: "Next", registering: "Creating account…",
@@ -328,7 +328,7 @@ const nl = {
   auth: {
     accountTitle: "Account aanmaken", onboardingTitle: "Maak je profiel compleet", personalTitle: "Persoonlijke gegevens", bodyTitle: "Lichaamsgegevens", goalTitle: "Je doelen",
     registrationLanguage: "Taal", selectLanguage: "Kies je taal",
-    firstName: "Voornaam", lastName: "Achternaam", email: "E-mailadres", password: "Wachtwoord",
+    firstName: "Voornaam", lastName: "Achternaam", email: "E-mailadres", password: "Wachtwoord", loginTitle: "Inloggen", login: "Inloggen", loggingIn: "Inloggen…",
     residenceCountry: "Woonland", foodRegion: "Voedselregio", selectCountry: "Selecteer een land",
     loadingCountries: "Landen laden…", countryLoadError: "Landen konden niet worden geladen. Probeer het opnieuw.",
     requiredFields: "Vul alle verplichte velden in.", next: "Volgende", registering: "Account aanmaken…",
@@ -646,7 +646,7 @@ const fr = {
   auth: {
     accountTitle: "Créer un compte", onboardingTitle: "Complétez votre profil", personalTitle: "Données personnelles", bodyTitle: "Données corporelles", goalTitle: "Vos objectifs",
     registrationLanguage: "Langue", selectLanguage: "Choisissez votre langue",
-    firstName: "Prénom", lastName: "Nom", email: "Adresse e-mail", password: "Mot de passe",
+    firstName: "Prénom", lastName: "Nom", email: "Adresse e-mail", password: "Mot de passe", loginTitle: "Se connecter", login: "Se connecter", loggingIn: "Connexion…",
     residenceCountry: "Pays de résidence", foodRegion: "Région alimentaire", selectCountry: "Sélectionnez un pays",
     loadingCountries: "Chargement des pays…", countryLoadError: "Impossible de charger les pays. Réessayez.",
     requiredFields: "Remplissez tous les champs obligatoires.", next: "Suivant", registering: "Création du compte…",
@@ -965,7 +965,7 @@ const de = {
   auth: {
     accountTitle: "Konto erstellen", onboardingTitle: "Vervollständige dein Profil", personalTitle: "Persönliche Daten", bodyTitle: "Körperdaten", goalTitle: "Deine Ziele",
     registrationLanguage: "Sprache", selectLanguage: "Wähle deine Sprache",
-    firstName: "Vorname", lastName: "Nachname", email: "E-Mail-Adresse", password: "Passwort",
+    firstName: "Vorname", lastName: "Nachname", email: "E-Mail-Adresse", password: "Passwort", loginTitle: "Anmelden", login: "Anmelden", loggingIn: "Anmeldung…",
     residenceCountry: "Wohnland", foodRegion: "Lebensmittelregion", selectCountry: "Land auswählen",
     loadingCountries: "Länder werden geladen…", countryLoadError: "Länder konnten nicht geladen werden. Bitte erneut versuchen.",
     requiredFields: "Fülle alle Pflichtfelder aus.", next: "Weiter", registering: "Konto wird erstellt…",
@@ -1284,7 +1284,7 @@ const pl = {
   auth: {
     accountTitle: "Utwórz konto", onboardingTitle: "Uzupełnij swój profil", personalTitle: "Dane osobowe", bodyTitle: "Dane ciała", goalTitle: "Twoje cele",
     registrationLanguage: "Język", selectLanguage: "Wybierz język",
-    firstName: "Imię", lastName: "Nazwisko", email: "Adres e-mail", password: "Hasło",
+    firstName: "Imię", lastName: "Nazwisko", email: "Adres e-mail", password: "Hasło", loginTitle: "Zaloguj się", login: "Zaloguj się", loggingIn: "Logowanie…",
     residenceCountry: "Kraj zamieszkania", foodRegion: "Region żywności", selectCountry: "Wybierz kraj",
     loadingCountries: "Ładowanie krajów…", countryLoadError: "Nie udało się załadować krajów. Spróbuj ponownie.",
     requiredFields: "Wypełnij wszystkie wymagane pola.", next: "Dalej", registering: "Tworzenie konta…",

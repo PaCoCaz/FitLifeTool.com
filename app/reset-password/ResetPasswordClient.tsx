@@ -13,6 +13,7 @@ import {
   verifyRecoveryCredential,
 } from "@/lib/auth/passwordRecovery";
 import { uiText } from "@/lib/uiText";
+import { getPublicAuthHref } from "@/lib/publicWeb";
 import {
   useLang,
   useSetInterfaceLanguage,
@@ -172,7 +173,7 @@ export default function ResetPasswordClient() {
       }
 
       window.location.assign(
-        `/?auth_notice=password_reset&lang=${lang}`
+        `${getPublicAuthHref("login", lang)}&auth_notice=password_reset`
       );
     } catch (resetError) {
       if (resetError instanceof PasswordRecoveryError) {
@@ -208,7 +209,7 @@ export default function ResetPasswordClient() {
               {t.passwordResetPartialSuccess}
             </p>
             <Link
-              href={`/?lang=${lang}`}
+              href={getPublicAuthHref("login", lang)}
               className="mt-4 inline-block text-sm text-[#191970] hover:underline"
             >
               {t.loginAgain}
@@ -220,7 +221,7 @@ export default function ResetPasswordClient() {
               {t.invalidRecoveryLink}
             </p>
             <Link
-              href={`/?lang=${lang}`}
+              href={getPublicAuthHref("login", lang)}
               className="mt-4 inline-block text-sm text-[#191970] hover:underline"
             >
               {t.backToLogin}

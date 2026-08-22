@@ -5,12 +5,16 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import {
   isOnboardingRoute,
   isProtectedAppRoute,
+  isRouteWithin,
+  normalizePathnameForAuth,
+  requiresProxyAuth,
   skipsProxyAuth,
 } from "./app/lib/auth/proxyAuthRules"
 import {
   getOnboardingStep,
   ONBOARDING_PROFILE_FIELDS,
 } from "./app/lib/auth/onboardingState"
+import { asAppLanguage } from "./app/lib/languagePreference"
 
 type CookieToSet = {
   name: string
@@ -20,24 +24,31 @@ type CookieToSet = {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  if (skipsProxyAuth(pathname)) {
-    return NextResponse.next()
-  }
-
-  // nooit auth routes blokkeren
-  if (pathname.startsWith("/auth")) {
-    return NextResponse.next()
-  }
+  const authorizationPathname = normalizePathnameForAuth(pathname)
 
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-pathname", pathname)
+  requestHeaders.delete("x-interface-locale")
+  const requestedLanguage = asAppLanguage(
+    request.nextUrl.searchParams.get("lang")
+  )
+  if (requestedLanguage) {
+    requestHeaders.set("x-interface-locale", requestedLanguage)
+  }
 
   const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   })
+
+  if (
+    skipsProxyAuth(pathname) ||
+    pathname.startsWith("/auth") ||
+    !requiresProxyAuth(pathname)
+  ) {
+    return response
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -72,8 +83,8 @@ export async function proxy(request: NextRequest) {
 
   const isLoggedIn = !!user
 
-  const isProtected = isProtectedAppRoute(pathname)
-  const isOnboarding = isOnboardingRoute(pathname)
+  const isProtected = isProtectedAppRoute(authorizationPathname)
+  const isOnboarding = isOnboardingRoute(authorizationPathname)
 
   if (!isLoggedIn && (isProtected || isOnboarding)) {
     return NextResponse.redirect(new URL("/", request.url))
@@ -112,7 +123,11 @@ export async function proxy(request: NextRequest) {
   }
 
   // role check
-  if (isLoggedIn && user && pathname.startsWith("/handbook")) {
+  if (
+    isLoggedIn &&
+    user &&
+    isRouteWithin(authorizationPathname, "/handbook")
+  ) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")

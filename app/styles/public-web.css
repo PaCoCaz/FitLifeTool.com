@@ -1,0 +1,206 @@
+.public-web {
+  min-height: 100vh;
+  overflow-x: clip;
+  background: #f4f7fb;
+  color: #17213d;
+}
+
+.public-web-container {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+}
+
+.public-web-header {
+  border-bottom: 1px solid #d5deea;
+  background: #b8cae0;
+}
+
+.public-web-header-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding-block: 0.75rem;
+}
+
+.public-web-brand {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.public-web-brand img {
+  width: min(9.5rem, 100%);
+  height: auto;
+}
+
+.public-web-auth-nav,
+.public-web-language-nav,
+.public-web-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.public-web-auth-nav a,
+.public-web-language-nav a,
+.public-web-actions a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  padding: 0.65rem 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.public-web-auth-nav > a:first-child {
+  display: none;
+  color: #191970;
+}
+
+.public-web-header-cta,
+.public-web-primary-cta {
+  background: #191970;
+  color: #fff;
+}
+
+.public-web-language-nav {
+  grid-column: 1 / -1;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+}
+
+.public-web-language-nav a {
+  flex: 0 0 auto;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+.public-web-language-nav a[aria-current="page"] {
+  background: #fff;
+  color: #191970;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.public-web-main {
+  padding-block: 2rem 3rem;
+}
+
+.public-web-hero {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.public-web-hero-copy,
+.public-web-foundation-note {
+  min-width: 0;
+  border-radius: 0.75rem;
+  background: #fff;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.09);
+}
+
+.public-web-eyebrow {
+  margin-bottom: 0.5rem;
+  color: #52657c;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.public-web h1 {
+  max-width: 18ch;
+  color: #191970;
+  font-size: clamp(2rem, 9vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.public-web-lead {
+  max-width: 42rem;
+  margin-top: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.public-web-actions {
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: 1.5rem;
+}
+
+.public-web-secondary-cta {
+  border: 1px solid #191970;
+  color: #191970;
+}
+
+.public-web-forgot-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #191970;
+  text-underline-offset: 0.2rem;
+}
+
+.public-web-foundation-note {
+  align-self: start;
+  border-left: 4px solid #0ba4e0;
+  color: #52657c;
+  line-height: 1.6;
+}
+
+@media (min-width: 40rem) {
+  .public-web-header-inner {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .public-web-auth-nav {
+    grid-column: 3;
+  }
+
+  .public-web-auth-nav > a:first-child {
+    display: inline-flex;
+  }
+
+  .public-web-language-nav {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .public-web-actions {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 56rem) {
+  .public-web-header-inner {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .public-web-language-nav {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .public-web-main {
+    padding-block: 4rem;
+  }
+
+  .public-web-hero {
+    grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+    align-items: center;
+  }
+
+  .public-web-hero-copy {
+    padding: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .public-web a {
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { asRecoveryLanguage } from "@/lib/auth/passwordRecovery";
 import { uiText } from "@/lib/uiText";
+import { getPublicAuthHref } from "@/lib/publicWeb";
 import {
   useLang,
   useSetInterfaceLanguage,
@@ -91,7 +92,7 @@ export default function ForgotPasswordPage() {
 
         <div className="mt-4 text-sm">
           <Link
-            href={`/?lang=${lang}`}
+            href={getPublicAuthHref("login", lang)}
             className="text-[#191970] hover:underline"
           >
             {t.backToLogin}

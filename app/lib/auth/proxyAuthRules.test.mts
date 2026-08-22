@@ -5,6 +5,9 @@ import test from "node:test";
 import {
   isOnboardingRoute,
   isProtectedAppRoute,
+  isRouteWithin,
+  normalizePathnameForAuth,
+  requiresProxyAuth,
   skipsProxyAuth,
 } from "./proxyAuthRules.ts";
 
@@ -70,13 +73,47 @@ test("queryparameters veranderen de exacte pathname-uitsluiting niet", () => {
 
 test("protected en onboarding routes blijven expliciet onderscheiden", () => {
   assert.equal(isProtectedAppRoute("/dashboard"), true);
+  assert.equal(isProtectedAppRoute("/dashboard/"), true);
+  assert.equal(isProtectedAppRoute("/dashboard/activity"), true);
   assert.equal(isProtectedAppRoute("/settings/profile"), true);
   assert.equal(isProtectedAppRoute("/handbook"), true);
+  assert.equal(isProtectedAppRoute("/dashboard-evil"), false);
+  assert.equal(isProtectedAppRoute("/dashboardXYZ"), false);
+  assert.equal(isProtectedAppRoute("/settings-old"), false);
+  assert.equal(isProtectedAppRoute("/handbookish"), false);
+  assert.equal(isProtectedAppRoute("/%64ashboard"), false);
+  assert.equal(normalizePathnameForAuth("/%64ashboard"), "/dashboard");
+  assert.equal(
+    normalizePathnameForAuth("/%2564ashboard/activity"),
+    "/dashboard/activity"
+  );
+  assert.equal(requiresProxyAuth("/%64ashboard"), true);
+  assert.equal(requiresProxyAuth("/%2564ashboard/activity"), true);
   assert.equal(isProtectedAppRoute("/onboarding"), false);
   assert.equal(isOnboardingRoute("/onboarding"), true);
+  assert.equal(isOnboardingRoute("/onboarding/"), true);
   assert.equal(isOnboardingRoute("/onboarding/step"), true);
+  assert.equal(isOnboardingRoute("/onboarding-old"), false);
   assert.equal(isOnboardingRoute("/dashboard"), false);
   assert.equal(isOnboardingRoute("/auth/confirm"), false);
+  assert.equal(isRouteWithin("/handbook/doc-l3-0030", "/handbook"), true);
+  assert.equal(isRouteWithin("/handbook-public", "/handbook"), false);
+});
+
+test("public homepages skippen auth terwijl beschermde routes auth behouden", () => {
+  for (const pathname of ["/", "/nl", "/fr", "/de", "/pl", "/login"]) {
+    assert.equal(requiresProxyAuth(pathname), false, pathname);
+  }
+
+  for (const pathname of [
+    "/dashboard",
+    "/dashboard/activity",
+    "/settings",
+    "/handbook",
+    "/onboarding",
+  ]) {
+    assert.equal(requiresProxyAuth(pathname), true, pathname);
+  }
 });
 
 test("GET en mutaties behouden route-level auth en 401", () => {
