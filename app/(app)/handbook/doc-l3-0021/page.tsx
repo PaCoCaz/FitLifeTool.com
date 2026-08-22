@@ -71,9 +71,9 @@ export default function DocL30021() {
 
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 mb-5">
           <pre className="whitespace-pre-wrap text-sm leading-7">
-{`Homepage
+{`Publieke pagina
       ↓
-Header Login / Registratie
+Locale-aware /login of /register
       ↓
 Supabase Authentication
       ↓
@@ -103,11 +103,29 @@ Dashboard`}
         </p>
 
         <ul>
-          <li>De homepage vormt de primaire instroom.</li>
-          <li>Login en registratie verlopen via het header-menu.</li>
-          <li><code>/login</code> fungeert uitsluitend als technische fallback.</li>
-          <li><code>/register</code> bevat geen zelfstandige gebruikersflow.</li>
+          <li>Publieke pagina&apos;s vormen de primaire instroom.</li>
+          <li>
+            Zij kunnen locale-aware linken naar de publieke auth-entrypoints.
+          </li>
+          <li>
+            <code>/login</code> is een zelfstandige, locale-aware publieke
+            entrypoint voor authenticatie.
+          </li>
+          <li>
+            <code>/register</code> is een zelfstandige, locale-aware publieke
+            registratie-entrypoint die de bestaande account creation-,
+            e-mailbevestigings- en onboardingarchitectuur gebruikt.
+          </li>
         </ul>
+
+        <p>
+          Deze authroutes gebruiken ieder een geschikte layout- en
+          providergrens. Hun publieke routing en locale-aware navigatie vormen
+          geen autorisatiegrens en vervangen geen server-side validatie.
+          Toegang tot beschermde onderdelen blijft onafhankelijk daarvan
+          afgedwongen op basis van de actuele sessie, profielstatus, middleware
+          en server-side controles.
+        </p>
 
         <h3>Onboarding</h3>
 
