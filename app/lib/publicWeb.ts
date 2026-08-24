@@ -52,12 +52,42 @@ type PublicHomeContent = {
   description: string;
   primaryCta: string;
   secondaryCta: string;
-  login: string;
   forgotPassword: string;
-  languageLabel: string;
   foundationNotice: string;
   metadataTitle: string;
   metadataDescription: string;
+};
+
+type PublicHeaderMenuItem = {
+  label: string;
+  description: string;
+};
+
+type PublicHeaderKnowledgeGroup = {
+  label: string;
+  items: readonly PublicHeaderMenuItem[];
+};
+
+type PublicHeaderContent = {
+  navigationLabel: string;
+  login: string;
+  languageLabel: string;
+  headerCta: string;
+  openMenu: string;
+  closeMenu: string;
+  goals: {
+    label: string;
+    items: readonly PublicHeaderMenuItem[];
+  };
+  knowledge: {
+    label: string;
+    groups: {
+      weight: PublicHeaderKnowledgeGroup;
+      nutrition: PublicHeaderKnowledgeGroup;
+      activity: PublicHeaderKnowledgeGroup;
+      hydration: PublicHeaderKnowledgeGroup;
+    };
+  };
 };
 
 // Provisional foundation copy. Final SEO copy requires locale-specific research.
@@ -69,9 +99,7 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
       "FitLifeTool connects nutrition, activity, hydration and weight so you can understand your day and work towards sustainable progress.",
     primaryCta: "Create a free account",
     secondaryCta: "Log in",
-    login: "Log in",
     forgotPassword: "Forgot password?",
-    languageLabel: "Choose language",
     foundationNotice: "More locale-specific guidance is being prepared.",
     metadataTitle: "FitLifeTool | Daily health overview",
     metadataDescription:
@@ -84,9 +112,7 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
       "FitLifeTool verbindt voeding, beweging, hydratatie en gewicht, zodat je je dag begrijpt en gericht werkt aan duurzame vooruitgang.",
     primaryCta: "Gratis account aanmaken",
     secondaryCta: "Inloggen",
-    login: "Inloggen",
     forgotPassword: "Wachtwoord vergeten?",
-    languageLabel: "Kies taal",
     foundationNotice: "Meer locale-specifieke uitleg wordt voorbereid.",
     metadataTitle: "FitLifeTool | Dagelijks gezondheidsoverzicht",
     metadataDescription:
@@ -99,9 +125,7 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
       "FitLifeTool relie nutrition, activité, hydratation et poids pour mieux comprendre votre journée et progresser durablement.",
     primaryCta: "Créer un compte gratuit",
     secondaryCta: "Se connecter",
-    login: "Se connecter",
     forgotPassword: "Mot de passe oublié ?",
-    languageLabel: "Choisir la langue",
     foundationNotice: "Des conseils adaptés à chaque langue sont en préparation.",
     metadataTitle: "FitLifeTool | Vue quotidienne de votre santé",
     metadataDescription:
@@ -114,9 +138,7 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
       "FitLifeTool verbindet Ernährung, Aktivität, Flüssigkeit und Gewicht, damit du deinen Tag verstehst und nachhaltig vorankommst.",
     primaryCta: "Kostenloses Konto erstellen",
     secondaryCta: "Anmelden",
-    login: "Anmelden",
     forgotPassword: "Passwort vergessen?",
-    languageLabel: "Sprache wählen",
     foundationNotice: "Weitere sprachspezifische Inhalte werden vorbereitet.",
     metadataTitle: "FitLifeTool | Täglicher Gesundheitsüberblick",
     metadataDescription:
@@ -129,13 +151,259 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
       "FitLifeTool łączy odżywianie, aktywność, nawodnienie i masę ciała, aby ułatwić zrozumienie dnia i trwałe postępy.",
     primaryCta: "Utwórz bezpłatne konto",
     secondaryCta: "Zaloguj się",
-    login: "Zaloguj się",
     forgotPassword: "Nie pamiętasz hasła?",
-    languageLabel: "Wybierz język",
     foundationNotice: "Trwają prace nad treściami dopasowanymi do języka.",
     metadataTitle: "FitLifeTool | Codzienny przegląd zdrowia",
     metadataDescription:
       "Śledź odżywianie, aktywność, nawodnienie i masę ciała w jednym widoku dnia.",
+  },
+};
+
+export const PUBLIC_HEADER_CONTENT: Record<AppLanguage, PublicHeaderContent> = {
+  en: {
+    navigationLabel: "Main navigation",
+    login: "Log in",
+    languageLabel: "Choose language",
+    headerCta: "Start free",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    goals: {
+      label: "Goals",
+      items: [
+        { label: "Lose weight", description: "Lose weight in a healthy way" },
+        { label: "Maintain weight", description: "Stay balanced and feel good" },
+        { label: "Gain weight", description: "Gain weight healthily and get stronger" },
+      ],
+    },
+    knowledge: {
+      label: "Knowledge & tools",
+      groups: {
+        weight: {
+          label: "Weight & body",
+          items: [
+            { label: "Calculate BMI", description: "Calculate your BMI and BMI category" },
+            { label: "Energy needs", description: "Discover your daily needs" },
+          ],
+        },
+        nutrition: {
+          label: "Nutrition",
+          items: [
+            { label: "Nutrition", description: "Everything about healthy eating" },
+            { label: "Protein", description: "Why protein matters" },
+            { label: "Foods", description: "Information about foods" },
+          ],
+        },
+        activity: {
+          label: "Activity",
+          items: [
+            { label: "Activity guidelines", description: "How much activity do you need?" },
+            { label: "Energy expenditure", description: "Calculate expenditure by activity" },
+          ],
+        },
+        hydration: {
+          label: "Hydration",
+          items: [
+            { label: "Hydration", description: "Are you drinking enough water?" },
+          ],
+        },
+      },
+    },
+  },
+  nl: {
+    navigationLabel: "Hoofdnavigatie",
+    login: "Inloggen",
+    languageLabel: "Kies taal",
+    headerCta: "Gratis starten",
+    openMenu: "Menu openen",
+    closeMenu: "Menu sluiten",
+    goals: {
+      label: "Doelen",
+      items: [
+        { label: "Afvallen", description: "Verlies gewicht op een gezonde manier" },
+        { label: "Gewicht onderhouden", description: "Blijf in balans en voel je goed" },
+        { label: "Aankomen", description: "Kom gezond aan en word sterker" },
+      ],
+    },
+    knowledge: {
+      label: "Kennis & tools",
+      groups: {
+        weight: {
+          label: "Gewicht & lichaam",
+          items: [
+            { label: "BMI berekenen", description: "Bereken je BMI en BMI-categorie" },
+            { label: "Energiebehoefte", description: "Ontdek je dagelijkse behoefte" },
+          ],
+        },
+        nutrition: {
+          label: "Voeding",
+          items: [
+            { label: "Voeding", description: "Alles over gezonde voeding" },
+            { label: "Eiwit", description: "Waarom eiwit belangrijk is" },
+            { label: "Voedingsmiddelen", description: "Informatie over voedingsmiddelen" },
+          ],
+        },
+        activity: {
+          label: "Beweging",
+          items: [
+            { label: "Beweegrichtlijnen", description: "Hoeveel beweging heb je nodig?" },
+            { label: "Energieverbruik", description: "Verbruik berekenen per activiteit" },
+          ],
+        },
+        hydration: {
+          label: "Hydratatie",
+          items: [
+            { label: "Hydratatie", description: "Drink je genoeg water?" },
+          ],
+        },
+      },
+    },
+  },
+  fr: {
+    navigationLabel: "Navigation principale",
+    login: "Se connecter",
+    languageLabel: "Choisir la langue",
+    headerCta: "Commencer gratuitement",
+    openMenu: "Ouvrir le menu",
+    closeMenu: "Fermer le menu",
+    goals: {
+      label: "Objectifs",
+      items: [
+        { label: "Perdre du poids", description: "Perdez du poids sainement" },
+        { label: "Maintenir son poids", description: "Gardez votre équilibre et votre bien-être" },
+        { label: "Prendre du poids", description: "Prenez du poids sainement et gagnez en force" },
+      ],
+    },
+    knowledge: {
+      label: "Connaissances & outils",
+      groups: {
+        weight: {
+          label: "Poids & corps",
+          items: [
+            { label: "Calculer l’IMC", description: "Calculez votre IMC et sa catégorie" },
+            { label: "Besoins énergétiques", description: "Découvrez vos besoins quotidiens" },
+          ],
+        },
+        nutrition: {
+          label: "Nutrition",
+          items: [
+            { label: "Nutrition", description: "Tout savoir sur une alimentation saine" },
+            { label: "Protéines", description: "Pourquoi les protéines sont importantes" },
+            { label: "Aliments", description: "Informations sur les aliments" },
+          ],
+        },
+        activity: {
+          label: "Activité",
+          items: [
+            { label: "Recommandations d’activité", description: "De combien d’activité avez-vous besoin ?" },
+            { label: "Dépense énergétique", description: "Calculez la dépense par activité" },
+          ],
+        },
+        hydration: {
+          label: "Hydratation",
+          items: [
+            { label: "Hydratation", description: "Buvez-vous assez d’eau ?" },
+          ],
+        },
+      },
+    },
+  },
+  de: {
+    navigationLabel: "Hauptnavigation",
+    login: "Anmelden",
+    languageLabel: "Sprache wählen",
+    headerCta: "Kostenlos starten",
+    openMenu: "Menü öffnen",
+    closeMenu: "Menü schließen",
+    goals: {
+      label: "Ziele",
+      items: [
+        { label: "Abnehmen", description: "Gesund Gewicht verlieren" },
+        { label: "Gewicht halten", description: "Im Gleichgewicht bleiben und sich wohlfühlen" },
+        { label: "Zunehmen", description: "Gesund zunehmen und stärker werden" },
+      ],
+    },
+    knowledge: {
+      label: "Wissen & Tools",
+      groups: {
+        weight: {
+          label: "Gewicht & Körper",
+          items: [
+            { label: "BMI berechnen", description: "BMI und BMI-Kategorie berechnen" },
+            { label: "Energiebedarf", description: "Täglichen Bedarf entdecken" },
+          ],
+        },
+        nutrition: {
+          label: "Ernährung",
+          items: [
+            { label: "Ernährung", description: "Alles über gesunde Ernährung" },
+            { label: "Protein", description: "Warum Protein wichtig ist" },
+            { label: "Lebensmittel", description: "Informationen über Lebensmittel" },
+          ],
+        },
+        activity: {
+          label: "Bewegung",
+          items: [
+            { label: "Bewegungsempfehlungen", description: "Wie viel Bewegung brauchst du?" },
+            { label: "Energieverbrauch", description: "Verbrauch je Aktivität berechnen" },
+          ],
+        },
+        hydration: {
+          label: "Flüssigkeitszufuhr",
+          items: [
+            { label: "Flüssigkeitszufuhr", description: "Trinkst du genug Wasser?" },
+          ],
+        },
+      },
+    },
+  },
+  pl: {
+    navigationLabel: "Nawigacja główna",
+    login: "Zaloguj się",
+    languageLabel: "Wybierz język",
+    headerCta: "Zacznij bezpłatnie",
+    openMenu: "Otwórz menu",
+    closeMenu: "Zamknij menu",
+    goals: {
+      label: "Cele",
+      items: [
+        { label: "Schudnąć", description: "Zdrowo zmniejsz masę ciała" },
+        { label: "Utrzymać wagę", description: "Zachowaj równowagę i dobre samopoczucie" },
+        { label: "Przytyć", description: "Zdrowo zwiększ masę ciała i siłę" },
+      ],
+    },
+    knowledge: {
+      label: "Wiedza i narzędzia",
+      groups: {
+        weight: {
+          label: "Waga i ciało",
+          items: [
+            { label: "Oblicz BMI", description: "Oblicz BMI i jego kategorię" },
+            { label: "Zapotrzebowanie energetyczne", description: "Poznaj swoje dzienne zapotrzebowanie" },
+          ],
+        },
+        nutrition: {
+          label: "Odżywianie",
+          items: [
+            { label: "Odżywianie", description: "Wszystko o zdrowym odżywianiu" },
+            { label: "Białko", description: "Dlaczego białko jest ważne" },
+            { label: "Produkty spożywcze", description: "Informacje o produktach spożywczych" },
+          ],
+        },
+        activity: {
+          label: "Aktywność",
+          items: [
+            { label: "Zalecenia dotyczące ruchu", description: "Ile ruchu potrzebujesz?" },
+            { label: "Wydatek energetyczny", description: "Oblicz wydatek dla aktywności" },
+          ],
+        },
+        hydration: {
+          label: "Nawodnienie",
+          items: [
+            { label: "Nawodnienie", description: "Czy pijesz wystarczająco dużo wody?" },
+          ],
+        },
+      },
+    },
   },
 };
 

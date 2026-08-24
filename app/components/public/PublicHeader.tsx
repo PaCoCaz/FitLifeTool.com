@@ -1,63 +1,39 @@
 import Image from "next/image";
 import Link from "next/link";
+import PublicHeaderNavigation from "@/components/public/PublicHeaderNavigation";
 import type { AppLanguage } from "@/lib/languagePreference";
 import {
-  getPublicAuthHref,
   getPublicPagePath,
-  PUBLIC_HOME_CONTENT,
-  PUBLIC_LOCALE_REGISTRY,
-  PUBLIC_LOCALES,
+  type PublicPageKey,
 } from "@/lib/publicWeb";
 
-export default function PublicHeader({ locale }: { locale: AppLanguage }) {
-  const content = PUBLIC_HOME_CONTENT[locale];
-
+export default function PublicHeader({
+  locale,
+  pageKey,
+}: {
+  locale: AppLanguage;
+  pageKey: PublicPageKey;
+}) {
   return (
     <header className="public-web-header">
-      <div className="public-web-container public-web-header-inner">
-        <Link
-          href={getPublicPagePath("home", locale)}
-          className="public-web-brand"
-          aria-label="FitLifeTool"
-        >
-          <Image
-            src="/logo_fitlifetool.png"
-            alt="FitLifeTool"
-            width={250}
-            height={50}
-            sizes="(max-width: 480px) 150px, 200px"
-            priority
-          />
-        </Link>
-
-        <nav className="public-web-auth-nav" aria-label={content.login}>
-          <Link href={getPublicAuthHref("login", locale)}>
-            {content.login}
-          </Link>
+      <div className="public-web-header-top">
+        <div className="public-web-container public-web-header-inner">
           <Link
-            href={getPublicAuthHref("register", locale)}
-            className="public-web-header-cta"
+            href={getPublicPagePath("home", locale)}
+            className="public-web-brand"
+            aria-label="FitLifeTool"
           >
-            {content.primaryCta}
+            <Image
+              src="/logo_fitlifetool.png"
+              alt="FitLifeTool"
+              width={1500}
+              height={300}
+              sizes="(max-width: 1023px) 200px, 240px"
+              priority
+            />
           </Link>
-        </nav>
-
-        <nav
-          className="public-web-language-nav"
-          aria-label={content.languageLabel}
-        >
-          {PUBLIC_LOCALES.map((candidate) => (
-            <Link
-              key={candidate}
-              href={getPublicPagePath("home", candidate)}
-              hrefLang={candidate}
-              lang={candidate}
-              aria-current={candidate === locale ? "page" : undefined}
-            >
-              {PUBLIC_LOCALE_REGISTRY[candidate].label}
-            </Link>
-          ))}
-        </nav>
+          <PublicHeaderNavigation locale={locale} pageKey={pageKey} />
+        </div>
       </div>
     </header>
   );
