@@ -5,6 +5,14 @@ import test from "node:test";
 const root = new URL("../../../", import.meta.url);
 const read = (path: string) => readFile(new URL(path, root), "utf8");
 
+const registrationFailureText = {
+  en: "We couldn’t create your account. Please try again.",
+  nl: "We konden je account niet aanmaken. Probeer het opnieuw.",
+  fr: "Nous n’avons pas pu créer votre compte. Veuillez réessayer.",
+  de: "Dein Konto konnte nicht erstellt werden. Bitte versuche es erneut.",
+  pl: "Nie udało się utworzyć konta. Spróbuj ponownie.",
+} as const;
+
 test("confirmation route handles code and token safely before onboarding", async () => {
   const source = await read("app/auth/confirm/route.ts");
   assert.match(source, /exchangeCodeForSession/);
@@ -47,6 +55,58 @@ test("registration renders language selection before the remaining fields", asyn
   const source = await read("app/components/auth/RegisterStep.tsx");
   assert.ok(source.indexOf("registrationLanguage") < source.indexOf('placeholder={t.firstName}'));
   assert.match(source, /selectedLanguage && \(/);
+});
+
+test("registration provider failures use one generic localized UI error", async () => {
+  const [step, uiText] = await Promise.all([
+    read("app/components/auth/RegisterStep.tsx"),
+    read("app/lib/uiText.ts"),
+  ]);
+  const failureMessages = [
+    ...uiText.matchAll(/registrationFailure: "([^"]+)"/g),
+  ].map((match) => match[1]);
+
+  assert.deepEqual(failureMessages, Object.values(registrationFailureText));
+  assert.match(
+    step,
+    /if \(signUpError\) \{\s*setError\(t\.registrationFailure\);\s*return;/
+  );
+  assert.match(step, /catch \{\s*setError\(t\.registrationFailure\);\s*\}/);
+  assert.match(step, /finally \{\s*setLoading\(false\);\s*\}/);
+  assert.doesNotMatch(step, /signUpError\.message|console\.(?:debug|error|info|log|warn)/);
+
+  for (const message of failureMessages) {
+    assert.doesNotMatch(
+      message.toLowerCase(),
+      /already registered|already exists|confirmation|provider|rate.?limit|supabase|too many requests/
+    );
+  }
+});
+
+test("direct registration and the HP-01 modal share the hardened RegisterStep", async () => {
+  const [directRegistration, modal, publicProvider] = await Promise.all([
+    read("app/register/RegisterPageClient.tsx"),
+    read("app/components/auth/RegisterModal.tsx"),
+    read("app/components/public/PublicAuthModalProvider.tsx"),
+  ]);
+
+  assert.match(directRegistration, /import RegisterStep/);
+  assert.match(directRegistration, /<RegisterStep/);
+  assert.match(modal, /import RegisterStep/);
+  assert.match(modal, /<RegisterStep/);
+  assert.match(publicProvider, /<RegisterModal/);
+  assert.match(publicProvider, /initialLanguage=\{locale\}/);
+});
+
+test("successful registration preserves metadata, confirmation redirect and status", async () => {
+  const source = await read("app/components/auth/RegisterStep.tsx");
+
+  assert.match(source, /data: buildRegistrationMetadata\(input\)/);
+  assert.match(
+    source,
+    /emailRedirectTo: `\$\{window\.location\.origin\}\/auth\/confirm\?next=\/onboarding`/
+  );
+  assert.match(source, /setConfirmationSent\(true\)/);
 });
 
 test("registration marks explicit language separately from the provider fallback", async () => {
