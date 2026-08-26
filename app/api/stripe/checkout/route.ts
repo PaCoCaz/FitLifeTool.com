@@ -66,6 +66,7 @@ export async function POST(req: Request) {
 
     if (!stripeCustomerId) {
       const newCustomer = await stripe.customers.create({
+        ...(user.email ? { email: user.email } : {}),
         metadata: { user_id: user.id },
       });
 
@@ -82,6 +83,7 @@ export async function POST(req: Request) {
       });
 
       await stripe.customers.update(stripeCustomerId, {
+        ...(user.email ? { email: user.email } : {}),
         metadata: { user_id: user.id },
       });
     }

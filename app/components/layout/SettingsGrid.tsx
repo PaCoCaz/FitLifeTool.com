@@ -9,6 +9,7 @@ import GoalCard from "@/components/settings/GoalCard";
 import SubscriptionCard from "@/components/settings/SubscriptionCard";
 import RegionCard from "@/components/settings/RegionCard";
 import PasswordChangeCard from "@/components/settings/PasswordChangeCard";
+import EmailChangeCard from "@/components/settings/EmailChangeCard";
 import { useLang } from "@/lib/useLang";
 
 export default function SettingsGrid() {
@@ -51,6 +52,10 @@ export default function SettingsGrid() {
 
       <div className="col-span-12 md:col-span-6">
         <PasswordChangeCard language={language} />
+      </div>
+
+      <div className="col-span-12 md:col-span-6">
+        <EmailChangeCard language={language} />
       </div>
 
     </section>

@@ -167,6 +167,20 @@ test("unauthenticated requests are blocked before fresh authentication or mutati
   assert.equal(clients.calls.updateUser, 0);
 });
 
+test("unauthenticated invalid input remains an auth failure before validation", async () => {
+  const clients = authClients({ initialUserId: null });
+  await expectCode(
+    change(
+      clients,
+      input({ currentPassword: "", newPassword: "short", confirmation: "x" })
+    ),
+    "UNAUTHENTICATED"
+  );
+  assert.equal(clients.calls.getUser, 1);
+  assert.equal(clients.calls.signIn.length, 0);
+  assert.equal(clients.calls.updateUser, 0);
+});
+
 test("explicit current-password proof is required before fresh authentication", async () => {
   const clients = authClients();
   await expectCode(
@@ -300,14 +314,15 @@ test("normal browser cleanup failure after update is partial success", async () 
 });
 
 test("route wires fresh auth to a non-persistent client separate from normal auth", async () => {
-  const source = await readFile(
-    new URL("app/api/auth/change-password/route.ts", projectRoot),
-    "utf8"
-  );
+  const [source, helper] = await Promise.all([
+    readFile(new URL("app/api/auth/change-password/route.ts", projectRoot), "utf8"),
+    readFile(new URL("app/lib/auth/freshAuthentication.ts", projectRoot), "utf8"),
+  ]);
   assert.match(source, /const normalAuth = \(await createClient\(\)\)\.auth/);
-  assert.match(source, /const freshAuth = createSupabaseClient/);
-  assert.match(source, /persistSession: false/);
-  assert.match(source, /autoRefreshToken: false/);
+  assert.match(source, /const freshAuth = createIsolatedFreshAuthClient/);
+  assert.match(helper, /persistSession: false/);
+  assert.match(helper, /autoRefreshToken: false/);
+  assert.match(helper, /detectSessionInUrl: false/);
   assert.match(source, /changePasswordForAuthenticatedUser\(\s*normalAuth,\s*freshAuth/);
   assert.doesNotMatch(source, /body\.(email|userId|user_id)/);
   assert.doesNotMatch(source, /error\.message|console\.(log|error)/);

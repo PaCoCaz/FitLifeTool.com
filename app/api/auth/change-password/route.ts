@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import {
   changePasswordForAuthenticatedUser,
   PasswordChangeError,
 } from "@/lib/auth/passwordChange";
 import { createClient } from "@/lib/supabaseServer";
+import { createIsolatedFreshAuthClient } from "@/lib/auth/freshAuthentication";
 
 const RESPONSE_HEADERS = {
   "Cache-Control": "no-store",
@@ -46,13 +46,7 @@ export async function POST(request: Request) {
   }
 
   const normalAuth = (await createClient()).auth;
-  const freshAuth = createSupabaseClient(supabaseUrl, anonKey, {
-    auth: {
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-      persistSession: false,
-    },
-  }).auth;
+  const freshAuth = createIsolatedFreshAuthClient(supabaseUrl, anonKey);
 
   try {
     const outcome = await changePasswordForAuthenticatedUser(

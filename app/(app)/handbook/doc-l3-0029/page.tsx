@@ -340,6 +340,16 @@ export default function DocL30029() {
                 meertalige applicatie.
               </li>
               <li>
+                Verified email change gebruikt Supabase Secure Email Change en
+                vereist bevestiging via beide mailboxen: het oude én het nieuwe
+                adres. De change-email transactional mail moet locale-aware zijn
+                voor exact EN, NL, FR, DE en PL en het bestaande trusted
+                redirect-/callbackcontract behouden. De huidige statisch Engelse
+                Change Email-template is niet production-ready. De huidige limiet
+                van twee Auth-mails per uur maakt deze flow uitsluitend geschikt
+                voor gecontroleerd testen, niet voor productiegebruik.
+              </li>
+              <li>
                 Het uiteindelijke ontwerp moet ook de overige user-facing
                 Auth-mails omvatten, waaronder registratie en e-mailbevestiging.
               </li>
@@ -352,8 +362,9 @@ export default function DocL30029() {
                 De exacte technische oplossing, bijvoorbeeld custom SMTP en/of
                 een Supabase Send Email Hook, is nog niet definitief gekozen en
                 vormt daarom nog geen canonieke architectuur. Dit item blijft
-                expliciet open totdat de productieoplossing vóór lancering is
-                gekozen, ingericht en gevalideerd.
+                expliciet open totdat de volledige productiearchitectuur voor
+                transactional Auth email vóór lancering is gekozen, ingericht en
+                gevalideerd.
               </li>
             </ul>
           </li>

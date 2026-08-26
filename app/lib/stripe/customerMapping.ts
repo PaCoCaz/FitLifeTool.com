@@ -8,12 +8,12 @@ export type LocalCustomerMapping = {
   id: string;
   user_id: string;
   stripe_customer_id: string;
+  email?: string | null;
 };
 
 export type CustomerMappingInput = {
   userId: string;
   stripeCustomerId: string;
-  email?: string | null;
 };
 
 export type StripeCustomerIdentity = {
@@ -33,10 +33,7 @@ export type CustomerMappingStore = {
   insert(
     input: CustomerMappingInput
   ): Promise<LocalCustomerMapping>;
-  updateEmail(
-    customerId: string,
-    email: string
-  ): Promise<void>;
+  requestEmailReconciliation(userId: string): Promise<void>;
 };
 
 export class CustomerMappingError extends Error {
@@ -145,18 +142,6 @@ async function loadMatchingRows(
   };
 }
 
-async function updateEmailWhenPresent(
-  store: CustomerMappingStore,
-  customer: LocalCustomerMapping,
-  email?: string | null
-) {
-  const normalizedEmail = email?.trim();
-
-  if (normalizedEmail) {
-    await store.updateEmail(customer.id, normalizedEmail);
-  }
-}
-
 export async function ensureCustomerMapping(
   store: CustomerMappingStore,
   input: CustomerMappingInput
@@ -171,13 +156,18 @@ export async function ensureCustomerMapping(
   );
 
   if (existing) {
-    await updateEmailWhenPresent(store, existing, input.email);
+    if (!existing.email) {
+      await store.requestEmailReconciliation(input.userId);
+    }
     return existing;
   }
 
   try {
-    const created = await store.insert(input);
-    await updateEmailWhenPresent(store, created, input.email);
+    const created = await store.insert({
+      userId: input.userId,
+      stripeCustomerId: input.stripeCustomerId,
+    });
+    await store.requestEmailReconciliation(input.userId);
     return created;
   } catch (error) {
     if (!isUniqueViolation(error)) {
@@ -197,7 +187,6 @@ export async function ensureCustomerMapping(
       throw error;
     }
 
-    await updateEmailWhenPresent(store, racedMapping, input.email);
     return racedMapping;
   }
 }
@@ -227,6 +216,23 @@ export function getStripeCustomerUserId(
   });
 
   return userId;
+}
+
+export function stripeCustomerEmailNeedsReconciliation(input: {
+  customer: StripeCustomerIdentity;
+  expectedUserId: string;
+  confirmedAuthEmail: string;
+}) {
+  const metadataUserId = getStripeCustomerUserId(input.customer);
+
+  if (metadataUserId !== input.expectedUserId) {
+    throw new CustomerMappingError(
+      "CUSTOMER_MAPPING_CONFLICT",
+      "Stripe customer metadata does not match the confirmed Auth identity"
+    );
+  }
+
+  return input.customer.email !== input.confirmedAuthEmail;
 }
 
 export function getCheckoutSessionUserId(input: {
@@ -266,7 +272,7 @@ export function createSupabaseCustomerMappingStore(
   supabase: SupabaseClientLike
 ): CustomerMappingStore {
   const selectColumns =
-    "id, user_id, stripe_customer_id";
+    "id, user_id, stripe_customer_id, email";
 
   return {
     async findByStripeCustomerId(stripeCustomerId) {
@@ -303,7 +309,6 @@ export function createSupabaseCustomerMappingStore(
         .insert({
           user_id: input.userId,
           stripe_customer_id: input.stripeCustomerId,
-          email: input.email?.trim() || null,
         })
         .select(selectColumns)
         .single();
@@ -315,12 +320,11 @@ export function createSupabaseCustomerMappingStore(
       return data as LocalCustomerMapping;
     },
 
-    async updateEmail(customerId, email) {
-      const { error } = await supabase
-        .from("customers")
-        .update({ email })
-        .eq("id", customerId);
-
+    async requestEmailReconciliation(userId) {
+      const { error } = await supabase.rpc(
+        "request_auth_email_reconciliation",
+        { p_user_id: userId }
+      );
       if (error) {
         throw error;
       }
@@ -364,6 +368,5 @@ export async function resolveLocalCustomerMapping(input: {
   return ensureCustomerMapping(store, {
     userId,
     stripeCustomerId: stripeCustomer.id,
-    email: stripeCustomer.email,
   });
 }

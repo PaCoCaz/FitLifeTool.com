@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useRef, useState } from "react";
 import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
-import { PASSWORD_CHANGE_MIN_LENGTH } from "@/lib/auth/passwordChange";
+import { PASSWORD_CHANGE_MIN_LENGTH } from "@/lib/auth/passwordChangeValidation";
 import { uiText } from "@/lib/uiText";
 import type { Lang } from "@/lib/useLang";
 

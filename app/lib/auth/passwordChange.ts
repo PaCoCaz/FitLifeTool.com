@@ -1,42 +1,25 @@
-export const PASSWORD_CHANGE_MIN_LENGTH = 10;
+import {
+  authenticateFreshPasswordIdentityForUser,
+  clearIsolatedFreshAuthSession,
+  FreshAuthenticationError,
+  getNormalAuthenticatedUser,
+  type FreshAuthUser,
+  type IsolatedFreshAuthClient,
+  type NormalFreshAuthClient,
+} from "./freshAuthentication.ts";
+import { PASSWORD_CHANGE_MIN_LENGTH } from "./passwordChangeValidation.ts";
 
-type AuthUser = {
-  id: string;
-  email?: string | null;
-  phone?: string | null;
-  app_metadata?: {
-    providers?: unknown;
-  };
-};
+export { PASSWORD_CHANGE_MIN_LENGTH } from "./passwordChangeValidation.ts";
 
-type AuthSession = {
-  user: AuthUser;
-};
-
-type PasswordCredentials =
-  | { email: string; password: string }
-  | { phone: string; password: string };
-
-export type NormalPasswordChangeAuthClient = {
-  getUser(): Promise<{
-    data: { user: AuthUser | null };
-    error: unknown | null;
-  }>;
+export type NormalPasswordChangeAuthClient = NormalFreshAuthClient & {
   signOut(input: { scope: "local" }): Promise<{
     error: unknown | null;
   }>;
 };
 
-export type FreshPasswordChangeAuthClient = {
-  signInWithPassword(input: PasswordCredentials): Promise<{
-    data: {
-      user: AuthUser | null;
-      session: AuthSession | null;
-    };
-    error: unknown | null;
-  }>;
+export type FreshPasswordChangeAuthClient = IsolatedFreshAuthClient & {
   updateUser(input: { password: string }): Promise<{
-    data: { user: AuthUser | null };
+    data: { user: FreshAuthUser | null };
     error: unknown | null;
   }>;
   signOut(input: { scope: "global" | "local" }): Promise<{
@@ -94,37 +77,6 @@ export function validatePasswordChangeInput(input: {
   }
 }
 
-function getPasswordCredentials(
-  user: AuthUser,
-  currentPassword: string
-): PasswordCredentials | null {
-  const providers = Array.isArray(user.app_metadata?.providers)
-    ? user.app_metadata.providers.filter(
-        (provider): provider is string => typeof provider === "string"
-      )
-    : [];
-
-  if (user.email && providers.includes("email")) {
-    return { email: user.email, password: currentPassword };
-  }
-
-  if (user.phone && providers.includes("phone")) {
-    return { phone: user.phone, password: currentPassword };
-  }
-
-  return null;
-}
-
-async function clearFreshAuthSession(
-  freshAuth: FreshPasswordChangeAuthClient
-) {
-  try {
-    await freshAuth.signOut({ scope: "local" });
-  } catch {
-    // The isolated client has no persistent storage and ends with this request.
-  }
-}
-
 async function clearNormalBrowserSession(
   normalAuth: NormalPasswordChangeAuthClient
 ) {
@@ -145,68 +97,52 @@ export async function changePasswordForAuthenticatedUser(
     confirmation: string;
   }
 ): Promise<PasswordChangeOutcome> {
-  const { data: initialData, error: initialError } =
-    await normalAuth.getUser();
+  let normalUser;
 
-  if (!initialData.user) {
-    throw new PasswordChangeError(
-      "UNAUTHENTICATED",
-      "An authenticated user is required"
-    );
-  }
-
-  if (initialError) {
-    throw new PasswordChangeError(
-      "AUTHENTICATION_CHECK_FAILED",
-      "The authenticated user could not be verified"
-    );
+  try {
+    normalUser = await getNormalAuthenticatedUser(normalAuth);
+  } catch (error) {
+    if (error instanceof FreshAuthenticationError) {
+      throw new PasswordChangeError(error.code, error.message);
+    }
+    throw error;
   }
 
   validatePasswordChangeInput(input);
+  let authenticated;
 
-  const credentials = getPasswordCredentials(
-    initialData.user,
-    input.currentPassword
-  );
+  try {
+    authenticated = await authenticateFreshPasswordIdentityForUser(
+      normalUser,
+      freshAuth,
+      input.currentPassword
+    );
+  } catch (error) {
+    if (error instanceof FreshAuthenticationError) {
+      throw new PasswordChangeError(error.code, error.message);
+    }
+    throw error;
+  }
 
-  if (!credentials) {
+  let updateResult;
+  try {
+    updateResult = await freshAuth.updateUser({ password: input.newPassword });
+  } catch {
+    await clearIsolatedFreshAuthSession(freshAuth);
     throw new PasswordChangeError(
-      "REAUTHENTICATION_FAILED",
-      "The authenticated identity cannot use password authentication"
+      "PASSWORD_UPDATE_FAILED",
+      "Supabase rejected the password update"
     );
   }
 
-  const { data: freshData, error: freshError } =
-    await freshAuth.signInWithPassword(credentials);
-
-  if (freshError || !freshData.user || !freshData.session) {
-    await clearFreshAuthSession(freshAuth);
-    throw new PasswordChangeError(
-      "REAUTHENTICATION_FAILED",
-      "Fresh password authentication failed"
-    );
-  }
-
-  if (
-    freshData.user.id !== initialData.user.id ||
-    freshData.session.user.id !== initialData.user.id
-  ) {
-    await clearFreshAuthSession(freshAuth);
-    throw new PasswordChangeError(
-      "REAUTHENTICATION_IDENTITY_MISMATCH",
-      "Fresh authentication identity does not match the existing session"
-    );
-  }
-
-  const { data: updateData, error: updateError } =
-    await freshAuth.updateUser({ password: input.newPassword });
+  const { data: updateData, error: updateError } = updateResult;
 
   if (
     updateError ||
     !updateData.user ||
-    updateData.user.id !== initialData.user.id
+    updateData.user.id !== authenticated.normalUser.id
   ) {
-    await clearFreshAuthSession(freshAuth);
+    await clearIsolatedFreshAuthSession(freshAuth);
     throw new PasswordChangeError(
       "PASSWORD_UPDATE_FAILED",
       "Supabase rejected the password update"
@@ -226,7 +162,7 @@ export async function changePasswordForAuthenticatedUser(
   }
 
   if (!globalSignOutSucceeded) {
-    await clearFreshAuthSession(freshAuth);
+    await clearIsolatedFreshAuthSession(freshAuth);
   }
 
   const normalSessionCleared = await clearNormalBrowserSession(normalAuth);

@@ -225,6 +225,76 @@ export default function DocL30002() {
           gebruikersgegevens overzichtelijk, veilig en eenvoudig uitbreidbaar.
         </p>
       </section>
+
+      <section>
+        <h2>Geverifieerde wijziging van het e-mailadres</h2>
+
+        <p>
+          Het bevestigde <code>auth.users.email</code> van Supabase Auth is de
+          canonieke e-mailidentiteit. Een wijzigingsverzoek gebruikt dezelfde
+          geïsoleerde fresh-password-authenticatie en exacte user-ID-binding als
+          andere gevoelige accountacties. Accounts zonder bruikbare
+          password-identiteit falen in deze flow gesloten.
+        </p>
+
+        <ul>
+          <li>
+            Supabase Secure Email Change en double confirmation bepalen wanneer
+            de nieuwe waarde bevestigd is; een pending adres is nog niet
+            canoniek.
+          </li>
+          <li>
+            <code>public.customers.email</code> is uitsluitend een afgeleide
+            kopie. Stripe-webhooks, Checkout en andere billingroutes schrijven
+            deze kolom niet zelfstandig.
+          </li>
+          <li>
+            Na een bevestigde Auth-wijziging maakt een database-trigger een
+            dataminimale, generation-based synchronisatiejob. De job bewaart
+            geen e-mailadres, wachtwoord, token of providerpayload; de
+            noodzakelijke <code>user_id</code> blijft aanwezig als pseudonieme
+            accountidentifier en foutopslag blijft beperkt tot gesanitiseerde
+            foutcodes. Een service-role-only worker leest de actuele
+            Auth-identiteit opnieuw en synchroniseert eerst de lokale customer
+            en daarna de exact gekoppelde Stripe Customer.
+          </li>
+          <li>
+            De kleine <code>AFTER UPDATE</code>-trigger en de outbox-write zijn
+            synchroon onderdeel van dezelfde Auth-databasetransactie. Een
+            trigger- of outboxfout kan daardoor de Auth-update laten falen; de
+            trigger vangt fouten niet af en voert nooit downstream-, netwerk-
+            of Stripe-acties uit.
+          </li>
+          <li>
+            Jobs gebruiken leases, begrensde retries en stale-generationchecks.
+            Een inconsistente lokale of Stripe-identiteit gaat naar handmatige
+            controle en wordt nooit op basis van clientinput gerepareerd.
+          </li>
+          <li>
+            Ontbreekt een lokale customerrow, dan geldt dit alleen als een
+            legitieme no-billing no-op wanneer ook via het bestaande Stripe
+            <code> metadata.user_id</code>-contract geen orphan Customer wordt
+            gevonden. Een aanwezige of gevonden maar inconsistente koppeling
+            faalt gesloten en gaat naar handmatige controle.
+          </li>
+        </ul>
+
+        <p>
+          De e-mailtemplate-, SMTP-, rate-limit- en deliverabilityvoorwaarden
+          voor productie blijven afzonderlijke open pre-launchpunten in
+          Handbook 5.10. Deze identityarchitectuur kiest geen mailprovider.
+        </p>
+
+        <p>
+          Vóór live uitvoering van de migration is een echte, geïsoleerde
+          database-integratietest verplicht. Die test moet aantonen dat een
+          bevestigde <code>auth.users.email</code>-wijziging de outboxgeneration
+          atomair verhoogt, een oudere lease ongeldig maakt en bij een bewust
+          veroorzaakte trigger-/outboxfout volledig met de Auth-transactie
+          terugrolt. Deze pre-live test wordt niet vervangen door statische
+          migrationtests.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

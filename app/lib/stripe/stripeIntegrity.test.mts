@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -7,6 +7,7 @@ import {
   ensureCustomerMapping,
   getCheckoutSessionUserId,
   getStripeCustomerUserId,
+  stripeCustomerEmailNeedsReconciliation,
   type CustomerMappingInput,
   type CustomerMappingStore,
   type LocalCustomerMapping,
@@ -26,10 +27,7 @@ function createMappingStore(
 ) {
   const rows = [...initialRows];
   const inserted: CustomerMappingInput[] = [];
-  const updatedEmails: Array<{
-    customerId: string;
-    email: string;
-  }> = [];
+  const reconciliationRequests: string[] = [];
 
   const store: CustomerMappingStore = {
     async findByStripeCustomerId(stripeCustomerId) {
@@ -58,8 +56,8 @@ function createMappingStore(
       return row;
     },
 
-    async updateEmail(customerId, email) {
-      updatedEmails.push({ customerId, email });
+    async requestEmailReconciliation(userId) {
+      reconciliationRequests.push(userId);
     },
   };
 
@@ -67,7 +65,7 @@ function createMappingStore(
     store,
     rows,
     inserted,
-    updatedEmails,
+    reconciliationRequests,
   };
 }
 
@@ -94,6 +92,63 @@ test("valid Stripe metadata creates one unambiguous local customer mapping", asy
     "cus_validA"
   );
   assert.equal(state.inserted.length, 1);
+  assert.deepEqual(state.reconciliationRequests, [USER_A]);
+});
+
+test("mapping input discards a caller-supplied Stripe email before persistence", async () => {
+  const state = createMappingStore();
+  await ensureCustomerMapping(state.store, {
+    userId: USER_A,
+    stripeCustomerId: "cus_validA",
+    email: "stripe-owned@example.test",
+  } as CustomerMappingInput & { email: string });
+
+  assert.deepEqual(state.inserted, [
+    { userId: USER_A, stripeCustomerId: "cus_validA" },
+  ]);
+  assert.equal("email" in state.inserted[0], false);
+});
+
+test("customer email reconciliation is driven only by validated user metadata", () => {
+  assert.equal(
+    stripeCustomerEmailNeedsReconciliation({
+      customer: {
+        id: "cus_validA",
+        email: "stripe@example.test",
+        metadata: { user_id: USER_A },
+      },
+      expectedUserId: USER_A,
+      confirmedAuthEmail: "auth@example.test",
+    }),
+    true
+  );
+  assert.equal(
+    stripeCustomerEmailNeedsReconciliation({
+      customer: {
+        id: "cus_validA",
+        email: "auth@example.test",
+        metadata: { user_id: USER_A },
+      },
+      expectedUserId: USER_A,
+      confirmedAuthEmail: "auth@example.test",
+    }),
+    false
+  );
+  assert.throws(
+    () =>
+      stripeCustomerEmailNeedsReconciliation({
+        customer: {
+          id: "cus_validA",
+          email: "auth@example.test",
+          metadata: { user_id: USER_B },
+        },
+        expectedUserId: USER_A,
+        confirmedAuthEmail: "auth@example.test",
+      }),
+    (error) =>
+      error instanceof CustomerMappingError &&
+      error.code === "CUSTOMER_MAPPING_CONFLICT"
+  );
 });
 
 test("missing Stripe user metadata fails closed without inserting a customer", async () => {
@@ -119,6 +174,7 @@ test("conflicting Stripe and Supabase identities never overwrite existing billin
       id: "local-a",
       user_id: USER_A,
       stripe_customer_id: "cus_existingA",
+      email: "confirmed@example.test",
     },
   ]);
 
@@ -138,16 +194,18 @@ test("conflicting Stripe and Supabase identities never overwrite existing billin
       id: "local-a",
       user_id: USER_A,
       stripe_customer_id: "cus_existingA",
+      email: "confirmed@example.test",
     },
   ]);
 });
 
-test("an existing correct mapping is retained and email remains non-authoritative", async () => {
+test("an existing correct mapping is retained without a Stripe-owned local email write", async () => {
   const state = createMappingStore([
     {
       id: "local-a",
       user_id: USER_A,
       stripe_customer_id: "cus_existingA",
+      email: "confirmed@example.test",
     },
   ]);
 
@@ -156,18 +214,111 @@ test("an existing correct mapping is retained and email remains non-authoritativ
     {
       userId: USER_A,
       stripeCustomerId: "cus_existingA",
-      email: " billing@example.test ",
     }
   );
 
   assert.equal(customer.id, "local-a");
   assert.equal(state.inserted.length, 0);
-  assert.deepEqual(state.updatedEmails, [
+  assert.deepEqual(state.reconciliationRequests, []);
+});
+
+test("a mapping without derived email is recovered through the canonical reconciliation layer", async () => {
+  const state = createMappingStore([
     {
-      customerId: "local-a",
-      email: "billing@example.test",
+      id: "local-a",
+      user_id: USER_A,
+      stripe_customer_id: "cus_existingA",
+      email: null,
     },
   ]);
+
+  await ensureCustomerMapping(state.store, {
+    userId: USER_A,
+    stripeCustomerId: "cus_existingA",
+  });
+
+  assert.deepEqual(state.reconciliationRequests, [USER_A]);
+});
+
+test("a 23505 webhook race re-reads and safely reuses only the exact mapping", async () => {
+  const rows: LocalCustomerMapping[] = [];
+  const reads = { byStripe: 0, byUser: 0 };
+  const reconciliationRequests: string[] = [];
+  const rawUniqueViolation = {
+    code: "23505",
+    message: "raw database provider payload",
+  };
+  const store: CustomerMappingStore = {
+    async findByStripeCustomerId(stripeCustomerId) {
+      reads.byStripe += 1;
+      return rows.find((row) => row.stripe_customer_id === stripeCustomerId) ?? null;
+    },
+    async findByUserId(userId) {
+      reads.byUser += 1;
+      return rows.find((row) => row.user_id === userId) ?? null;
+    },
+    async insert(input) {
+      rows.push({
+        id: "local-race",
+        user_id: input.userId,
+        stripe_customer_id: input.stripeCustomerId,
+        email: null,
+      });
+      throw rawUniqueViolation;
+    },
+    async requestEmailReconciliation(userId) {
+      reconciliationRequests.push(userId);
+    },
+  };
+
+  const mapping = await ensureCustomerMapping(store, {
+    userId: USER_A,
+    stripeCustomerId: "cus_raceA",
+  });
+
+  assert.deepEqual(mapping, rows[0]);
+  assert.deepEqual(reads, { byStripe: 2, byUser: 2 });
+  assert.deepEqual(reconciliationRequests, []);
+  assert.equal("email" in rawUniqueViolation, false);
+});
+
+test("a 23505 webhook race with a conflicting identity fails closed", async () => {
+  const rows: LocalCustomerMapping[] = [];
+  const rawUniqueViolation = {
+    code: "23505",
+    message: "raw database provider payload",
+  };
+  const store: CustomerMappingStore = {
+    async findByStripeCustomerId(stripeCustomerId) {
+      return rows.find((row) => row.stripe_customer_id === stripeCustomerId) ?? null;
+    },
+    async findByUserId(userId) {
+      return rows.find((row) => row.user_id === userId) ?? null;
+    },
+    async insert(input) {
+      rows.push({
+        id: "local-other-user",
+        user_id: USER_B,
+        stripe_customer_id: input.stripeCustomerId,
+        email: "other@example.test",
+      });
+      throw rawUniqueViolation;
+    },
+    async requestEmailReconciliation() {
+      assert.fail("a conflicting race must not request reconciliation");
+    },
+  };
+
+  await assert.rejects(
+    ensureCustomerMapping(store, {
+      userId: USER_A,
+      stripeCustomerId: "cus_raceConflict",
+    }),
+    (error) =>
+      error instanceof CustomerMappingError &&
+      error.code === "CUSTOMER_MAPPING_CONFLICT" &&
+      !error.message.includes(rawUniqueViolation.message)
+  );
 });
 
 test("checkout rejects inconsistent server-authored user references", () => {
@@ -184,7 +335,7 @@ test("checkout rejects inconsistent server-authored user references", () => {
 });
 
 test("webhook adapters require proven user identity before customer persistence", async () => {
-  const [customerHandler, subscriptionHandler] =
+  const [customerHandler, subscriptionHandler, webhookRoute] =
     await Promise.all([
       readFile(
         new URL(
@@ -198,6 +349,10 @@ test("webhook adapters require proven user identity before customer persistence"
           "app/lib/stripe/handlers/handleSubscription.ts",
           projectRoot
         ),
+        "utf8"
+      ),
+      readFile(
+        new URL("app/api/stripe/webhook/route.ts", projectRoot),
         "utf8"
       ),
     ]);
@@ -218,6 +373,55 @@ test("webhook adapters require proven user identity before customer persistence"
     `${customerHandler}\n${subscriptionHandler}`,
     /\.insert\(\{\s*stripe_customer_id:/
   );
+  assert.doesNotMatch(
+    customerHandler,
+    /ensureSupabaseCustomerMapping\(supabase, \{[\s\S]*?email:/
+  );
+  assert.match(customerHandler, /requestAuthEmailReconciliation/);
+  assert.match(webhookRoute, /new Response\(\s*"Webhook error"/);
+  assert.doesNotMatch(webhookRoute, /new Response\(\s*err|new Response\(\s*error/);
+});
+
+test("the customer mapping layer never writes customers.email directly", async () => {
+  const source = await readFile(
+    new URL("app/lib/stripe/customerMapping.ts", projectRoot),
+    "utf8"
+  );
+  assert.doesNotMatch(source, /updateEmail/);
+  assert.doesNotMatch(source, /\.update\(\{\s*email/);
+  assert.match(source, /request_auth_email_reconciliation/);
+});
+
+test("the repository keeps the Auth-owned sync worker as the single local email writer", async () => {
+  const appFiles = await readdir(new URL("app/", projectRoot), {
+    recursive: true,
+  });
+  const writers: string[] = [];
+
+  for (const relativePath of appFiles) {
+    if (
+      typeof relativePath !== "string" ||
+      !/\.(?:ts|tsx)$/.test(relativePath) ||
+      relativePath.endsWith(".test.mts") ||
+      relativePath.includes("handbook/")
+    ) {
+      continue;
+    }
+
+    const source = await readFile(
+      new URL(`app/${relativePath}`, projectRoot),
+      "utf8"
+    );
+    if (
+      /\.from\(["']customers["']\)[\s\S]{0,300}?\.update\(\{\s*email\s*:/.test(
+        source
+      )
+    ) {
+      writers.push(relativePath);
+    }
+  }
+
+  assert.deepEqual(writers, ["lib/auth/emailSync.ts"]);
 });
 
 function createChangePlanDependencies(input?: {

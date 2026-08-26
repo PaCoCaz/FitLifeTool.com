@@ -33,11 +33,6 @@ export async function handleCheckoutSession(
     metadataUserId: session.metadata?.user_id,
   });
 
-  const email =
-    session.customer_details?.email ??
-    session.customer_email ??
-    null;
-
   if (!stripeCustomerId) {
     throw new Error(
       "Missing customer in session"
@@ -47,6 +42,5 @@ export async function handleCheckoutSession(
   await ensureSupabaseCustomerMapping(supabase, {
     stripeCustomerId,
     userId,
-    email,
   });
 }
