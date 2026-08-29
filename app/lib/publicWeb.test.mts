@@ -9,6 +9,7 @@ const read = (path: string) => readFile(new URL(path, projectRoot), "utf8");
 const [
   registrySource,
   englishRootLayoutSource,
+  englishPageSource,
   dutchRootLayoutSource,
   frenchRootLayoutSource,
   germanRootLayoutSource,
@@ -20,6 +21,7 @@ const [
   publicHomepageSource,
   publicHeaderSource,
   publicHeaderNavigationSource,
+  topNavigationSource,
   publicAuthModalProviderSource,
   registerModalSource,
   publicWebCssSource,
@@ -32,6 +34,7 @@ const [
 ] = await Promise.all([
   read("app/lib/publicWeb.ts"),
   read("app/(public-web)/layout.tsx"),
+  read("app/(public-web)/page.tsx"),
   read("app/(public-web-nl)/nl/layout.tsx"),
   read("app/(public-web-fr)/fr/layout.tsx"),
   read("app/(public-web-de)/de/layout.tsx"),
@@ -43,6 +46,7 @@ const [
   read("app/components/public/PublicHomepage.tsx"),
   read("app/components/public/PublicHeader.tsx"),
   read("app/components/public/PublicHeaderNavigation.tsx"),
+  read("app/components/layout/TopNavigation.tsx"),
   read("app/components/public/PublicAuthModalProvider.tsx"),
   read("app/components/auth/RegisterModal.tsx"),
   read("app/styles/public-web.css"),
@@ -75,8 +79,9 @@ test("homepage pageKey has one explicit unique path per locale", () => {
   assert.doesNotMatch(registrySource, /replace\([^)]*locale/);
 });
 
-test("only the four explicit prefixed locale homepages are routed", () => {
+test("all five explicit locale homepages remain routed", () => {
   for (const [locale, source] of [
+    ["en", englishPageSource],
     ["nl", dutchPageSource],
     ["fr", frenchPageSource],
     ["de", germanPageSource],
@@ -171,10 +176,19 @@ test("shared public header requires explicit page context", () => {
 test("HP-01 keeps unpublished destinations non-interactive and route-safe", () => {
   assert.doesNotMatch(
     publicHeaderNavigationSource,
-    /href=["']#|\/uitleg|\/prijzen|\/pricing|\/voeding|\/hydratatie|\/beweging/
+    /href=["']#|\/uitleg|\/prijzen|\/pricing|\/gezondheid|\/voeding|\/hydratatie|\/beweging|\/gewicht|\/herstel|\/leefstijl/
   );
   assert.match(publicHeaderNavigationSource, /className="public-web-menu-label"/);
   assert.match(publicHeaderNavigationSource, /PublicAuthTrigger/);
+});
+
+test("legacy public category navigation stays removed from the shared app shell", () => {
+  assert.doesNotMatch(topNavigationSource, /PUBLIC_NAV_ITEMS/);
+  assert.doesNotMatch(
+    topNavigationSource,
+    /\/gezondheid|\/voeding|\/beweging|\/hydratatie|\/gewicht|\/herstel|\/leefstijl/
+  );
+  assert.match(topNavigationSource, /isLoggedIn[\s\S]*?getAuthNavItems/);
 });
 
 test("HP-01K reuses one accessible auth dialog without replacing direct routes", () => {

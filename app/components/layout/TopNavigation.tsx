@@ -12,18 +12,6 @@ import { canAccessHandbook } from "@/lib/auth/handbookAccess";
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
 
-/* ───────────────── Navigatiesets ───────────────── */
-
-const PUBLIC_NAV_ITEMS = [
-  { label: "Gezondheid", href: "/gezondheid" },
-  { label: "Voeding", href: "/voeding" },
-  { label: "Beweging", href: "/beweging" },
-  { label: "Hydratatie", href: "/hydratatie" },
-  { label: "Gewicht", href: "/gewicht" },
-  { label: "Herstel", href: "/herstel" },
-  { label: "Leefstijl", href: "/leefstijl" },
-];
-
 const getAuthNavItems = (t: typeof uiText.en, showHandbook: boolean) => [
   { label: t.nav.dashboard, href: "/dashboard" },
   { label: t.nav.hydration, href: "/dashboard/hydration" },
@@ -74,8 +62,8 @@ export default function TopNavigation() {
   }, [userId]);
 
   const navItems = isLoggedIn
-  ? getAuthNavItems(t, canAccessHandbook(role))
-  : PUBLIC_NAV_ITEMS;
+    ? getAuthNavItems(t, canAccessHandbook(role))
+    : [];
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);

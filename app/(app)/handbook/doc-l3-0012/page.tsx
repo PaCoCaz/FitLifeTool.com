@@ -60,11 +60,6 @@ export default function DocL30012() {
               </tr>
 
               <tr>
-                <td>CategoryGrid</td>
-                <td>Toont productcategorieën en lijsten.</td>
-              </tr>
-
-              <tr>
                 <td>HandbookLayout</td>
                 <td>Structureert documentatie en navigatie.</td>
               </tr>
@@ -216,9 +211,9 @@ Gebruiker`}
               </tr>
 
               <tr>
-                <td>public-content.css</td>
+                <td>public-web.css</td>
                 <td>
-                  Homepage, publieke categoriepagina&apos;s, SEO-content en FAQ.
+                  De afzonderlijke, mobile-first Public Web-presentatielaag.
                 </td>
               </tr>
             </tbody>
@@ -226,9 +221,12 @@ Gebruiker`}
         </div>
 
         <p>
-          <code>category.css</code> bestaat niet meer. Publieke pagina&apos;s
-          renderen binnen <code>.public-content</code>, zodat publieke
-          contentstijlen gescheiden blijven van dashboard- en applicatiestijlen.
+          De nieuwe Public Web-laag gebruikt haar eigen rootlayouts en
+          <code> public-web.css</code>. De actuele Public Web-, SEO- en
+          performancegrens staat in Handbook 5.11. Het bestaande
+          <code> public-content.css</code> blijft voorlopig behouden voor
+          gedeelde en historische contentstijlen, maar vormt niet de basis voor
+          nieuwe publieke pagina&apos;s.
         </p>
       </section>
 
@@ -250,7 +248,7 @@ Gebruiker`}
 
           <li>Stale responses overschrijven nooit nieuwere UI-state.</li>
 
-          <li>Publieke content gebruikt public-content.css binnen de publieke scope.</li>
+          <li>Nieuwe publieke pagina&apos;s volgen de Public Web-grens uit Handbook 5.11.</li>
 
           <li>Gebruikers ervaren op ieder apparaat dezelfde functionaliteit.</li>
         </ul>
