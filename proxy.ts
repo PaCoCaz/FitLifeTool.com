@@ -15,6 +15,7 @@ import {
   ONBOARDING_PROFILE_FIELDS,
 } from "./app/lib/auth/onboardingState"
 import { asAppLanguage } from "./app/lib/languagePreference"
+import { canAccessHandbook } from "./app/lib/auth/handbookAccess"
 
 type CookieToSet = {
   name: string
@@ -134,7 +135,7 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .single()
 
-    if (!profile || !["owner", "admin", "developer"].includes(profile.role)) {
+    if (!profile || !canAccessHandbook(profile.role)) {
       return NextResponse.redirect(new URL("/", request.url))
     }
   }

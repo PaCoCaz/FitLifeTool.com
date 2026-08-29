@@ -6,6 +6,7 @@ import AppShell from "@/components/layout/AppShell";
 import HandbookBreadcrumb from "./breadcrumb";
 import HandbookNavigation from "./navigation";
 import MobileHandbookNav from "./mobileHandbookNav";
+import { canAccessHandbook } from "@/lib/auth/handbookAccess";
 
 export default async function HandbookLayout({
   children,
@@ -26,7 +27,7 @@ export default async function HandbookLayout({
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["owner", "admin", "developer"].includes(profile.role)) {
+  if (!profile || !canAccessHandbook(profile.role)) {
     redirect("/");
   }
 

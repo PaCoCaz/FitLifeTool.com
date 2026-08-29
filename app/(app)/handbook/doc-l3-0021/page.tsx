@@ -170,12 +170,31 @@ Dashboard`}
         <ul>
           <li>Niet-ingelogde gebruikers krijgen geen toegang tot protected routes.</li>
           <li>Ingelogde gebruikers worden automatisch doorgestuurd naar de juiste omgeving.</li>
-          <li>Rolgebaseerde secties, zoals het Developer Handbook, worden server-side gecontroleerd.</li>
+          <li>
+            Rolgebaseerde secties, zoals het Developer Handbook, gebruiken in
+            proxy en serverlayout dezelfde centrale, fail-closed rolehelper.
+          </li>
+          <li>
+            Die helper ontvangt uitsluitend <code>public.profiles.role</code>
+            uit de eigen profielrow. Auth-metadata, clientstate en caller-input
+            zijn geen roleauthority.
+          </li>
+          <li>
+            De navigatie mag dezelfde helper gebruiken om een item te verbergen,
+            maar blijft presentationeel; de serverlayout vormt een zelfstandige
+            autorisatiegrens.
+          </li>
+          <li>
+            Profielbootstrap accepteert alleen de expliciete onboardingvelden
+            en nooit een caller-supplied role. De standaardrol wordt door het
+            server- en databasecontract bepaald.
+          </li>
         </ul>
 
         <div className="info-box">
-          Routes zijn nooit de bron van waarheid voor autorisatie. De actuele
-          sessie en profielstatus bepalen altijd de uiteindelijke toegang.
+          Routes en UI zijn nooit de bron van waarheid voor autorisatie. De
+          actuele sessie, profielstatus en waar relevant de server-controlled
+          profielrol bepalen de uiteindelijke toegang.
         </div>
       </section>
 

@@ -129,15 +129,21 @@ export default function DocL30002() {
             <tbody>
               <tr>
                 <td>owner</td>
-                <td>Volledige toegang tot alle functionaliteit.</td>
+                <td>
+                  Huidig repositorygedrag: toegang tot het interne Developer
+                  Handbook. Bredere beheersemantiek is niet geïmplementeerd.
+                </td>
               </tr>
               <tr>
                 <td>admin</td>
-                <td>Beheerfunctionaliteit binnen de applicatie.</td>
+                <td>
+                  Huidig repositorygedrag: toegang tot het interne Developer
+                  Handbook. Bredere beheersemantiek is niet geïmplementeerd.
+                </td>
               </tr>
               <tr>
                 <td>developer</td>
-                <td>Toegang tot ontwikkelaarsfunctionaliteit zoals het Developer Handbook.</td>
+                <td>Toegang tot het interne Developer Handbook.</td>
               </tr>
               <tr>
                 <td>user</td>
@@ -151,6 +157,36 @@ export default function DocL30002() {
           Rollen zijn uitsluitend bedoeld voor autorisatie en staan los van
           gebruikersgegevens of toekomstige abonnementsvormen.
         </p>
+
+        <p>
+          De kolom <code>public.profiles.role</code> is de enige canonieke
+          FitLifeTool-bron voor deze autorisatie. De server beheert de waarde en
+          normale gebruikers kunnen hun rol niet invoegen of wijzigen. Alleen
+          <code>user</code>, <code>developer</code>, <code>admin</code> en
+          <code>owner</code> zijn geldig. Auth-metadata, JWT-claims,
+          clientstate en caller-input gelden niet als FitLifeTool-roleauthority.
+        </p>
+
+        <ul>
+          <li>
+            Server-side toegangscontroles lezen de eigen profielrow en falen
+            gesloten bij een ontbrekende, onbekende of afwijkend geschreven rol.
+          </li>
+          <li>
+            Het verbergen van navigatie of andere UI is uitsluitend
+            presentationeel en nooit een autorisatiegrens.
+          </li>
+          <li>
+            De huidige drie privileged roles hebben uitsluitend de hierboven
+            beschreven, aantoonbare Handbook-toegang; dit document kent geen
+            bredere beheerrechten toe.
+          </li>
+          <li>
+            Een toekomstige role-managementflow vereist een afzonderlijk
+            contract voor gecontroleerde mutations, audit, self-demotion en
+            bescherming van de laatste owner. RA-1 introduceert zo&apos;n flow niet.
+          </li>
+        </ul>
       </section>
 
       <section>
