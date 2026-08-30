@@ -9,10 +9,10 @@ const en = {
   auth: {
     accountTitle: "Create account", onboardingTitle: "Complete your profile", personalTitle: "Personal details", bodyTitle: "Body details", goalTitle: "Your goals",
     registrationLanguage: "Language", selectLanguage: "Select your language",
-    firstName: "First name", lastName: "Last name", email: "Email address", password: "Password",
+    firstName: "First name", lastName: "Last name", email: "Email address", password: "Password", loginTitle: "Log in", login: "Log in", loggingIn: "Logging in…", loginFailure: { title: "Unable to log in.", guidance: "Check your details and try again." },
     residenceCountry: "Country of residence", foodRegion: "Food region", selectCountry: "Select a country",
     loadingCountries: "Loading countries…", countryLoadError: "Countries could not be loaded. Please try again.",
-    requiredFields: "Complete all required fields.", next: "Next", registering: "Creating account…",
+    requiredFields: "Complete all required fields.", registrationFailure: "We couldn’t create your account. Please try again.", next: "Next", registering: "Creating account…",
     checkEmailTitle: "Check your email", checkEmailMessage: "Confirm your email address to activate your account and continue onboarding.",
     gender: "Gender", birthdate: "Date of birth", male: "Male", female: "Female", other: "Other",
     calculationNote: "In the next step, choose how health calculations should be performed.",
@@ -24,6 +24,8 @@ const en = {
     veryActive: "Very active: Heavy physical work or intensive training.",
     loadingOnboarding: "Loading onboarding…", onboardingError: "Onboarding could not be loaded. Please try again.", retry: "Try again",
     regionTitle: "Country and food region", residenceDescription: "Your country of residence.", foodRegionDescription: "The food market you want to use.", unsupportedFoodRegion: "For this region, we currently use international product results. Regional product data for {{country}} will be added at a later stage.",
+    forgotPasswordTitle: "Forgot password?", forgotPasswordSubmit: "Send reset link", forgotPasswordSubmitting: "Sending…",
+    forgotPasswordSent: "If an account exists for this email address, you will receive password reset instructions.", backToLogin: "Back to login",
   },
 
   activity: {
@@ -322,10 +324,10 @@ const nl = {
   auth: {
     accountTitle: "Account aanmaken", onboardingTitle: "Maak je profiel compleet", personalTitle: "Persoonlijke gegevens", bodyTitle: "Lichaamsgegevens", goalTitle: "Je doelen",
     registrationLanguage: "Taal", selectLanguage: "Kies je taal",
-    firstName: "Voornaam", lastName: "Achternaam", email: "E-mailadres", password: "Wachtwoord",
+    firstName: "Voornaam", lastName: "Achternaam", email: "E-mailadres", password: "Wachtwoord", loginTitle: "Inloggen", login: "Inloggen", loggingIn: "Inloggen…", loginFailure: { title: "Inloggen is niet gelukt.", guidance: "Controleer je gegevens en probeer het opnieuw." },
     residenceCountry: "Woonland", foodRegion: "Voedselregio", selectCountry: "Selecteer een land",
     loadingCountries: "Landen laden…", countryLoadError: "Landen konden niet worden geladen. Probeer het opnieuw.",
-    requiredFields: "Vul alle verplichte velden in.", next: "Volgende", registering: "Account aanmaken…",
+    requiredFields: "Vul alle verplichte velden in.", registrationFailure: "We konden je account niet aanmaken. Probeer het opnieuw.", next: "Volgende", registering: "Account aanmaken…",
     checkEmailTitle: "Controleer je e-mail", checkEmailMessage: "Bevestig je e-mailadres om je account te activeren en de onboarding te vervolgen.",
     gender: "Geslacht", birthdate: "Geboortedatum", male: "Man", female: "Vrouw", other: "Anders",
     calculationNote: "Kies in de volgende stap hoe gezondheidsberekeningen moeten worden uitgevoerd.",
@@ -337,6 +339,8 @@ const nl = {
     veryActive: "Zeer actief: Zwaar fysiek werk of intensieve training.",
     loadingOnboarding: "Onboarding laden…", onboardingError: "Onboarding kon niet worden geladen. Probeer het opnieuw.", retry: "Opnieuw proberen",
     regionTitle: "Land en voedselregio", residenceDescription: "Het land waar je woont.", foodRegionDescription: "De voedingsmarkt die je wilt gebruiken.", unsupportedFoodRegion: "Voor deze regio gebruiken we momenteel internationale productresultaten. Regionale productdata voor {{country}} zullen in een later stadium worden toegevoegd.",
+    forgotPasswordTitle: "Wachtwoord vergeten?", forgotPasswordSubmit: "Reset-link sturen", forgotPasswordSubmitting: "Versturen…",
+    forgotPasswordSent: "Als er een account voor dit e-mailadres bestaat, ontvang je instructies om je wachtwoord te resetten.", backToLogin: "Terug naar inloggen",
   },
 
   activity: {
@@ -634,10 +638,10 @@ const fr = {
   auth: {
     accountTitle: "Créer un compte", onboardingTitle: "Complétez votre profil", personalTitle: "Données personnelles", bodyTitle: "Données corporelles", goalTitle: "Vos objectifs",
     registrationLanguage: "Langue", selectLanguage: "Choisissez votre langue",
-    firstName: "Prénom", lastName: "Nom", email: "Adresse e-mail", password: "Mot de passe",
+    firstName: "Prénom", lastName: "Nom", email: "Adresse e-mail", password: "Mot de passe", loginTitle: "Se connecter", login: "Se connecter", loggingIn: "Connexion…", loginFailure: { title: "La connexion a échoué.", guidance: "Vérifiez vos informations et réessayez." },
     residenceCountry: "Pays de résidence", foodRegion: "Région alimentaire", selectCountry: "Sélectionnez un pays",
     loadingCountries: "Chargement des pays…", countryLoadError: "Impossible de charger les pays. Réessayez.",
-    requiredFields: "Remplissez tous les champs obligatoires.", next: "Suivant", registering: "Création du compte…",
+    requiredFields: "Remplissez tous les champs obligatoires.", registrationFailure: "Nous n’avons pas pu créer votre compte. Veuillez réessayer.", next: "Suivant", registering: "Création du compte…",
     checkEmailTitle: "Vérifiez votre e-mail", checkEmailMessage: "Confirmez votre adresse e-mail pour activer votre compte et poursuivre l’intégration.",
     gender: "Genre", birthdate: "Date de naissance", male: "Homme", female: "Femme", other: "Autre",
     calculationNote: "À l’étape suivante, choisissez comment effectuer les calculs de santé.",
@@ -649,6 +653,8 @@ const fr = {
     veryActive: "Très actif : Travail physique lourd ou entraînement intensif.",
     loadingOnboarding: "Chargement de l’intégration…", onboardingError: "Impossible de charger l’intégration. Réessayez.", retry: "Réessayer",
     regionTitle: "Pays et région alimentaire", residenceDescription: "Votre pays de résidence.", foodRegionDescription: "Le marché alimentaire que vous souhaitez utiliser.", unsupportedFoodRegion: "Pour cette région, nous utilisons actuellement les résultats internationaux. Les données régionales sur les produits pour {{country}} seront ajoutées ultérieurement.",
+    forgotPasswordTitle: "Mot de passe oublié ?", forgotPasswordSubmit: "Envoyer le lien de réinitialisation", forgotPasswordSubmitting: "Envoi…",
+    forgotPasswordSent: "Si un compte existe pour cette adresse e-mail, vous recevrez des instructions pour réinitialiser votre mot de passe.", backToLogin: "Retour à la connexion",
   },
 
   activity: {
@@ -947,10 +953,10 @@ const de = {
   auth: {
     accountTitle: "Konto erstellen", onboardingTitle: "Vervollständige dein Profil", personalTitle: "Persönliche Daten", bodyTitle: "Körperdaten", goalTitle: "Deine Ziele",
     registrationLanguage: "Sprache", selectLanguage: "Wähle deine Sprache",
-    firstName: "Vorname", lastName: "Nachname", email: "E-Mail-Adresse", password: "Passwort",
+    firstName: "Vorname", lastName: "Nachname", email: "E-Mail-Adresse", password: "Passwort", loginTitle: "Anmelden", login: "Anmelden", loggingIn: "Anmeldung…", loginFailure: { title: "Die Anmeldung ist fehlgeschlagen.", guidance: "Überprüfe deine Angaben und versuche es erneut." },
     residenceCountry: "Wohnland", foodRegion: "Lebensmittelregion", selectCountry: "Land auswählen",
     loadingCountries: "Länder werden geladen…", countryLoadError: "Länder konnten nicht geladen werden. Bitte erneut versuchen.",
-    requiredFields: "Fülle alle Pflichtfelder aus.", next: "Weiter", registering: "Konto wird erstellt…",
+    requiredFields: "Fülle alle Pflichtfelder aus.", registrationFailure: "Dein Konto konnte nicht erstellt werden. Bitte versuche es erneut.", next: "Weiter", registering: "Konto wird erstellt…",
     checkEmailTitle: "Prüfe deine E-Mail", checkEmailMessage: "Bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren und das Onboarding fortzusetzen.",
     gender: "Geschlecht", birthdate: "Geburtsdatum", male: "Männlich", female: "Weiblich", other: "Andere",
     calculationNote: "Wähle im nächsten Schritt, wie Gesundheitsberechnungen durchgeführt werden sollen.",
@@ -962,6 +968,8 @@ const de = {
     veryActive: "Sehr aktiv: Schwere körperliche Arbeit oder intensives Training.",
     loadingOnboarding: "Onboarding wird geladen…", onboardingError: "Onboarding konnte nicht geladen werden. Bitte erneut versuchen.", retry: "Erneut versuchen",
     regionTitle: "Land und Lebensmittelregion", residenceDescription: "Dein Wohnland.", foodRegionDescription: "Der Lebensmittelmarkt, den du verwenden möchtest.", unsupportedFoodRegion: "Für diese Region verwenden wir derzeit internationale Produktergebnisse. Regionale Produktdaten für {{country}} werden zu einem späteren Zeitpunkt ergänzt.",
+    forgotPasswordTitle: "Passwort vergessen?", forgotPasswordSubmit: "Link zum Zurücksetzen senden", forgotPasswordSubmitting: "Wird gesendet…",
+    forgotPasswordSent: "Wenn für diese E-Mail-Adresse ein Konto existiert, erhältst du Anweisungen zum Zurücksetzen deines Passworts.", backToLogin: "Zurück zur Anmeldung",
   },
 
   activity: {
@@ -1260,10 +1268,10 @@ const pl = {
   auth: {
     accountTitle: "Utwórz konto", onboardingTitle: "Uzupełnij swój profil", personalTitle: "Dane osobowe", bodyTitle: "Dane ciała", goalTitle: "Twoje cele",
     registrationLanguage: "Język", selectLanguage: "Wybierz język",
-    firstName: "Imię", lastName: "Nazwisko", email: "Adres e-mail", password: "Hasło",
+    firstName: "Imię", lastName: "Nazwisko", email: "Adres e-mail", password: "Hasło", loginTitle: "Zaloguj się", login: "Zaloguj się", loggingIn: "Logowanie…", loginFailure: { title: "Logowanie nie powiodło się.", guidance: "Sprawdź swoje dane i spróbuj ponownie." },
     residenceCountry: "Kraj zamieszkania", foodRegion: "Region żywności", selectCountry: "Wybierz kraj",
     loadingCountries: "Ładowanie krajów…", countryLoadError: "Nie udało się załadować krajów. Spróbuj ponownie.",
-    requiredFields: "Wypełnij wszystkie wymagane pola.", next: "Dalej", registering: "Tworzenie konta…",
+    requiredFields: "Wypełnij wszystkie wymagane pola.", registrationFailure: "Nie udało się utworzyć konta. Spróbuj ponownie.", next: "Dalej", registering: "Tworzenie konta…",
     checkEmailTitle: "Sprawdź pocztę", checkEmailMessage: "Potwierdź adres e-mail, aby aktywować konto i kontynuować wdrażanie.",
     gender: "Płeć", birthdate: "Data urodzenia", male: "Mężczyzna", female: "Kobieta", other: "Inna",
     calculationNote: "W następnym kroku wybierz sposób wykonywania obliczeń zdrowotnych.",
@@ -1275,6 +1283,8 @@ const pl = {
     veryActive: "Bardzo aktywny: Ciężka praca fizyczna lub intensywny trening.",
     loadingOnboarding: "Ładowanie wdrażania…", onboardingError: "Nie udało się załadować wdrażania. Spróbuj ponownie.", retry: "Spróbuj ponownie",
     regionTitle: "Kraj i region żywności", residenceDescription: "Twój kraj zamieszkania.", foodRegionDescription: "Rynek żywności, którego chcesz używać.", unsupportedFoodRegion: "Dla tego regionu korzystamy obecnie z międzynarodowych wyników produktów. Regionalne dane produktów dla {{country}} zostaną dodane na późniejszym etapie.",
+    forgotPasswordTitle: "Nie pamiętasz hasła?", forgotPasswordSubmit: "Wyślij link resetujący", forgotPasswordSubmitting: "Wysyłanie…",
+    forgotPasswordSent: "Jeśli konto dla tego adresu e-mail istnieje, otrzymasz instrukcje resetowania hasła.", backToLogin: "Powrót do logowania",
   },
 
   activity: {

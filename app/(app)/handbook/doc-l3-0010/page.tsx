@@ -188,9 +188,10 @@ UI Components`}
               </tr>
 
               <tr>
-                <td>Publieke pagina&apos;s</td>
+                <td>Public Web</td>
                 <td>
-                  <code>public-content.css</code>.
+                  De afzonderlijke Public Web-grens en
+                  <code> public-web.css</code> volgens Handbook 5.11.
                 </td>
               </tr>
 

@@ -4,12 +4,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import LoginForm from "@/components/auth/LoginForm";
+import { useLang } from "@/lib/useLang";
 
 type Props = {
   onRegister: () => void;
 };
 
 export default function LoginMenu({ onRegister }: Props) {
+  const lang = useLang();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -63,7 +65,7 @@ export default function LoginMenu({ onRegister }: Props) {
             Inloggen
           </h2>
 
-          <LoginForm onRegister={onRegister} />
+          <LoginForm language={lang} onRegister={onRegister} />
         </div>
       )}
     </div>

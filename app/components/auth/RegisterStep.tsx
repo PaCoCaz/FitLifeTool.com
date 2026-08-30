@@ -44,22 +44,27 @@ export default function RegisterStep({ selectedLanguage, onLanguageSelect }: Pro
     setError(null);
     setLoading(true);
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        data: buildRegistrationMetadata(input),
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/onboarding`,
-      },
-    });
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: buildRegistrationMetadata(input),
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/onboarding`,
+        },
+      });
 
-    setLoading(false);
-    if (signUpError) {
-      setError(signUpError.message);
-      return;
+      if (signUpError) {
+        setError(t.registrationFailure);
+        return;
+      }
+
+      setConfirmationSent(true);
+    } catch {
+      setError(t.registrationFailure);
+    } finally {
+      setLoading(false);
     }
-
-    setConfirmationSent(true);
   };
 
   if (confirmationSent) {
