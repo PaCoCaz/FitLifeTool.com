@@ -99,10 +99,65 @@ test("auth entrypoints inherit the allowlisted active locale", () => {
   );
   assert.match(publicHeaderNavigationSource, /mode="login"/);
   assert.match(publicHeaderNavigationSource, /mode="register"/);
-  assert.match(publicHomepageSource, /getPublicAuthHref/);
-  assert.match(publicHomepageSource, /"forgot-password"/);
+  assert.match(registrySource, /"forgot-password"/);
+  assert.doesNotMatch(
+    publicHomepageSource,
+    /getPublicAuthHref|"forgot-password"|public-web-forgot-link/
+  );
   assert.match(publicHomepageSource, /mode="register"/);
   assert.match(publicHomepageSource, /mode="login"/);
+});
+
+test("HP-02 uses the approved locale copy and metadata", () => {
+  for (const copy of [
+    "Daily insight into your lifestyle and goals.",
+    "Elke dag inzicht in je leefstijl en jouw doel.",
+    "Chaque jour, comprenez mieux votre mode de vie et vos objectifs.",
+    "Jeden Tag Klarheit über deinen Lebensstil und deine Ziele.",
+    "Codzienny wgląd w Twój styl życia i cele.",
+    "Bring nutrition, activity, hydration and weight together in one personal overview. See where you stand throughout the day and what fits your goals.",
+    "Breng voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht. Zo zie je op elk moment van de dag waar je staat en wat past bij jouw doel.",
+    "Réunissez alimentation, activité physique, hydratation et poids dans une vue personnalisée. Voyez où vous en êtes à tout moment de la journée et ce qui correspond à vos objectifs.",
+    "Bringe Ernährung, Bewegung, Flüssigkeitszufuhr und Gewicht in einer persönlichen Übersicht zusammen. So siehst du jederzeit, wo du stehst und was zu deinen Zielen passt.",
+    "Połącz odżywianie, aktywność, nawodnienie i masę ciała w jednym osobistym zestawieniu. W każdej chwili dnia widzisz, gdzie jesteś i co odpowiada Twoim celom.",
+    "FitLifeTool | Daily lifestyle and goal insights",
+    "FitLifeTool | Inzicht in je leefstijl en doelen",
+    "FitLifeTool | Suivez votre mode de vie et vos objectifs",
+    "FitLifeTool | Lebensstil und Ziele im Blick",
+    "FitLifeTool | Styl życia i cele pod kontrolą",
+    "Bring nutrition, activity, hydration and weight together in one personal overview. See throughout the day where you stand in relation to your goals.",
+    "Breng voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht. Zie gedurende de dag waar je staat ten opzichte van jouw doel.",
+    "Réunissez alimentation, activité physique, hydratation et poids dans une vue personnalisée. Suivez votre progression vers vos objectifs tout au long de la journée.",
+    "Bringe Ernährung, Bewegung, Flüssigkeitszufuhr und Gewicht in einer persönlichen Übersicht zusammen. Sieh jederzeit, wo du im Hinblick auf deine Ziele stehst.",
+    "Połącz odżywianie, aktywność, nawodnienie i masę ciała w jednym osobistym zestawieniu. Sprawdzaj przez cały dzień, gdzie jesteś względem swoich celów.",
+  ]) {
+    assert.ok(registrySource.includes(copy), copy);
+  }
+  assert.equal(
+    registrySource.match(/eyebrow: "FITLIFETOOL"/g)?.length,
+    APP_LANGUAGES.length
+  );
+});
+
+test("HP-02 removes the foundation placeholder and simplifies the Hero", () => {
+  assert.doesNotMatch(registrySource, /foundationNotice/);
+  assert.doesNotMatch(publicHomepageSource, /public-web-foundation-note|<aside/);
+  assert.doesNotMatch(publicWebCssSource, /public-web-foundation-note/);
+  assert.doesNotMatch(
+    publicWebCssSource,
+    /grid-template-columns: minmax\(0, 2fr\) minmax\(16rem, 1fr\)/
+  );
+  assert.match(publicWebCssSource, /border-radius: 6px/);
+  assert.match(publicWebCssSource, /padding: 16px/);
+  assert.match(publicWebCssSource, /font-size: 17\.6px/);
+  assert.match(publicWebCssSource, /font-size: 22\.4px/);
+  assert.match(publicWebCssSource, /font-size: 24px/);
+  assert.match(publicWebCssSource, /font-size: 28px/);
+  assert.match(publicWebCssSource, /font-weight: 600/);
+  assert.match(publicWebCssSource, /line-height: 42px/);
+  assert.match(publicWebCssSource, /justify-content: flex-end/);
+  assert.doesNotMatch(publicWebCssSource, /public-web-forgot-link/);
+  assert.doesNotMatch(publicWebCssSource, /overflow-wrap: anywhere/);
 });
 
 test("metadata foundation has self-canonical, reciprocal hreflang and x-default", () => {
@@ -194,7 +249,38 @@ test("legacy public category navigation stays removed from the shared app shell"
 test("HP-01K reuses one accessible auth dialog without replacing direct routes", () => {
   assert.match(publicHomepageSource, /PublicAuthModalProvider locale=\{locale\}/);
   assert.match(publicAuthModalProviderSource, /useState<AuthModalMode \| null>/);
-  assert.match(publicAuthModalProviderSource, /<LangProvider>/);
+  assert.doesNotMatch(
+    publicAuthModalProviderSource,
+    /import RegisterModal[\s\S]*?from "@\/components\/auth\/RegisterModal"/
+  );
+  assert.match(
+    publicAuthModalProviderSource,
+    /import\("@\/components\/auth\/RegisterModal"\)/
+  );
+  assert.match(
+    publicAuthModalProviderSource,
+    /authModules && mode \?[\s\S]*?<LoadedAuthModal/
+  );
+  assert.doesNotMatch(
+    publicAuthModalProviderSource,
+    /import\s+\{?[^;]*\b(?:LangProvider|useSetInterfaceLanguage|useLang)\b[^;]*from/
+  );
+  assert.doesNotMatch(
+    publicAuthModalProviderSource,
+    /from ["']@\/lib\/(?:supabase|AuthProvider)/
+  );
+  assert.match(
+    publicAuthModalProviderSource,
+    /Promise\.all\(\[[\s\S]*?import\("@\/components\/auth\/RegisterModal"\)[\s\S]*?import\("@\/lib\/LangProvider"\)[\s\S]*?\]\)/
+  );
+  assert.match(
+    publicAuthModalProviderSource,
+    /<LangProvider>[\s\S]*?<LocalizedAuthModal/
+  );
+  assert.match(
+    publicAuthModalProviderSource,
+    /setInterfaceLanguage\(locale\);[\s\S]*?setReadyLocale\(locale\);[\s\S]*?readyLocale !== locale[\s\S]*?<RegisterModal/
+  );
   assert.match(publicAuthModalProviderSource, /setAttribute\("inert", ""\)/);
   assert.match(registerModalSource, /<LoginForm/);
   assert.match(registerModalSource, /<RegisterStep/);
@@ -250,13 +336,39 @@ test("HP-01 exposes keyboard state and mobile dropdown safeguards", () => {
   assert.doesNotMatch(publicHeaderNavigationSource, /document\.body\.style\.overflow = "hidden"/);
   assert.match(
     publicWebCssSource,
-    /\.public-web-mobile-menu \{[\s\S]*?position: absolute;[\s\S]*?top: calc\(100% \+ 0\.75rem\);[\s\S]*?right: 1rem;[\s\S]*?left: 1rem;/
+    /\.public-web-mobile-menu \{[\s\S]*?position: absolute;[\s\S]*?top: calc\(100% \+ 0\.8125rem\);[\s\S]*?right: 1rem;[\s\S]*?left: 1rem;/
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-header::after \{[\s\S]*?height: 2\.75rem;[\s\S]*?background: #191970;/
+    /\.public-web-locale-selector-mobile \{[\s\S]*?height: 44px;[\s\S]*?background: #191970;/
   );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-locale-selector-mobile \.public-web-locale-panel \{[\s\S]*?top: calc\(100% \+ 0\.8125rem\);[\s\S]*?right: 1rem;/
+  );
+  assert.match(
+    publicHeaderNavigationSource,
+    /const panelId = `public-web-locale-panel-\$\{presentation\}`/
+  );
+  assert.match(
+    publicHeaderNavigationSource,
+    /type LocalePresentation = "desktop" \| "mobile"/
+  );
+  assert.match(publicHeaderNavigationSource, /localeReturnFocusRef/);
+  assert.match(publicHeaderNavigationSource, /closeMobileMenu\(false\)/);
   assert.match(publicWebCssSource, /:focus-visible/);
+});
+
+test("HP-02G.1 keeps public focus and hover contrast above WCAG thresholds", () => {
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-header button:focus-visible,[\s\S]*?\.public-web-auth-modal-dialog :is\(a, button, input, select, textarea\):focus-visible \{[\s\S]*?outline: 3px solid #191970;[\s\S]*?outline-offset: 3px;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-locale-selector-mobile \.public-web-locale-trigger:focus-visible,[\s\S]*?\.public-web-desktop-nav button:focus-visible \{[\s\S]*?outline-color: #fff;/
+  );
+  assert.equal(publicWebCssSource.match(/background: #087eae;/g)?.length, 3);
 });
 
 test("HP-01 keeps mobile knowledge domains as a one-open-at-a-time accordion", () => {
@@ -295,16 +407,22 @@ test("HP-01I aligns menu icons and hero start with the canonical live baseline",
   );
 });
 
-test("HP-01 keeps the closed mobile header limited to logo, locale, and menu", () => {
+test("PH-02 keeps the closed mobile header split across logo/menu and locale rows", () => {
   assert.match(
     publicWebCssSource,
     /\.public-web-header-actions > \.public-web-header-login \{\s*display: none;/
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-brand img \{[\s\S]*?width: min\(100%, 12\.5rem\);[\s\S]*?height: auto;[\s\S]*?aspect-ratio: 5 \/ 1;/
+    /\.public-web-header-inner \{[\s\S]*?grid-template-columns: 55% minmax\(0, 45%\);[\s\S]*?grid-template-rows: 64px 44px;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-brand img \{[\s\S]*?width: 100%;[\s\S]*?height: auto;[\s\S]*?aspect-ratio: 5 \/ 1;/
   );
   assert.match(publicHeaderNavigationSource, /className="public-web-hamburger"/);
+  assert.match(publicHeaderNavigationSource, /renderLocaleSelector\("desktop"\)/);
+  assert.match(publicHeaderNavigationSource, /renderLocaleSelector\("mobile"\)/);
   assert.doesNotMatch(publicHeaderNavigationSource, /className="public-web-mobile-menu-heading"/);
   assert.match(
     publicWebCssSource,

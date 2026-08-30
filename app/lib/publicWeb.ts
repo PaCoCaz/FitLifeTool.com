@@ -53,7 +53,6 @@ type PublicHomeContent = {
   primaryCta: string;
   secondaryCta: string;
   forgotPassword: string;
-  foundationNotice: string;
   metadataTitle: string;
   metadataDescription: string;
 };
@@ -90,72 +89,66 @@ type PublicHeaderContent = {
   };
 };
 
-// Provisional foundation copy. Final SEO copy requires locale-specific research.
 export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
   en: {
     eyebrow: "FITLIFETOOL",
-    title: "Bring your daily health habits into one clear overview.",
+    title: "Daily insight into your lifestyle and goals.",
     description:
-      "FitLifeTool connects nutrition, activity, hydration and weight so you can understand your day and work towards sustainable progress.",
+      "Bring nutrition, activity, hydration and weight together in one personal overview. See where you stand throughout the day and what fits your goals.",
     primaryCta: "Create a free account",
     secondaryCta: "Log in",
     forgotPassword: "Forgot password?",
-    foundationNotice: "More locale-specific guidance is being prepared.",
-    metadataTitle: "FitLifeTool | Daily health overview",
+    metadataTitle: "FitLifeTool | Daily lifestyle and goal insights",
     metadataDescription:
-      "Track nutrition, activity, hydration and weight in one daily health overview.",
+      "Bring nutrition, activity, hydration and weight together in one personal overview. See throughout the day where you stand in relation to your goals.",
   },
   nl: {
     eyebrow: "FITLIFETOOL",
-    title: "Breng je dagelijkse gezondheidsgewoonten samen in één helder overzicht.",
+    title: "Elke dag inzicht in je leefstijl en jouw doel.",
     description:
-      "FitLifeTool verbindt voeding, beweging, hydratatie en gewicht, zodat je je dag begrijpt en gericht werkt aan duurzame vooruitgang.",
+      "Breng voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht. Zo zie je op elk moment van de dag waar je staat en wat past bij jouw doel.",
     primaryCta: "Gratis account aanmaken",
     secondaryCta: "Inloggen",
     forgotPassword: "Wachtwoord vergeten?",
-    foundationNotice: "Meer locale-specifieke uitleg wordt voorbereid.",
-    metadataTitle: "FitLifeTool | Dagelijks gezondheidsoverzicht",
+    metadataTitle: "FitLifeTool | Inzicht in je leefstijl en doelen",
     metadataDescription:
-      "Volg voeding, beweging, hydratatie en gewicht in één dagelijks gezondheidsoverzicht.",
+      "Breng voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht. Zie gedurende de dag waar je staat ten opzichte van jouw doel.",
   },
   fr: {
     eyebrow: "FITLIFETOOL",
-    title: "Réunissez vos habitudes de santé quotidiennes dans une vue claire.",
+    title: "Chaque jour, comprenez mieux votre mode de vie et vos objectifs.",
     description:
-      "FitLifeTool relie nutrition, activité, hydratation et poids pour mieux comprendre votre journée et progresser durablement.",
+      "Réunissez alimentation, activité physique, hydratation et poids dans une vue personnalisée. Voyez où vous en êtes à tout moment de la journée et ce qui correspond à vos objectifs.",
     primaryCta: "Créer un compte gratuit",
     secondaryCta: "Se connecter",
     forgotPassword: "Mot de passe oublié ?",
-    foundationNotice: "Des conseils adaptés à chaque langue sont en préparation.",
-    metadataTitle: "FitLifeTool | Vue quotidienne de votre santé",
+    metadataTitle: "FitLifeTool | Suivez votre mode de vie et vos objectifs",
     metadataDescription:
-      "Suivez nutrition, activité, hydratation et poids dans une seule vue quotidienne.",
+      "Réunissez alimentation, activité physique, hydratation et poids dans une vue personnalisée. Suivez votre progression vers vos objectifs tout au long de la journée.",
   },
   de: {
     eyebrow: "FITLIFETOOL",
-    title: "Bringe deine täglichen Gesundheitsgewohnheiten in eine klare Übersicht.",
+    title: "Jeden Tag Klarheit über deinen Lebensstil und deine Ziele.",
     description:
-      "FitLifeTool verbindet Ernährung, Aktivität, Flüssigkeit und Gewicht, damit du deinen Tag verstehst und nachhaltig vorankommst.",
+      "Bringe Ernährung, Bewegung, Flüssigkeitszufuhr und Gewicht in einer persönlichen Übersicht zusammen. So siehst du jederzeit, wo du stehst und was zu deinen Zielen passt.",
     primaryCta: "Kostenloses Konto erstellen",
     secondaryCta: "Anmelden",
     forgotPassword: "Passwort vergessen?",
-    foundationNotice: "Weitere sprachspezifische Inhalte werden vorbereitet.",
-    metadataTitle: "FitLifeTool | Täglicher Gesundheitsüberblick",
+    metadataTitle: "FitLifeTool | Lebensstil und Ziele im Blick",
     metadataDescription:
-      "Verfolge Ernährung, Aktivität, Flüssigkeit und Gewicht in einem täglichen Überblick.",
+      "Bringe Ernährung, Bewegung, Flüssigkeitszufuhr und Gewicht in einer persönlichen Übersicht zusammen. Sieh jederzeit, wo du im Hinblick auf deine Ziele stehst.",
   },
   pl: {
     eyebrow: "FITLIFETOOL",
-    title: "Połącz codzienne nawyki zdrowotne w jednym przejrzystym widoku.",
+    title: "Codzienny wgląd w Twój styl życia i cele.",
     description:
-      "FitLifeTool łączy odżywianie, aktywność, nawodnienie i masę ciała, aby ułatwić zrozumienie dnia i trwałe postępy.",
+      "Połącz odżywianie, aktywność, nawodnienie i masę ciała w jednym osobistym zestawieniu. W każdej chwili dnia widzisz, gdzie jesteś i co odpowiada Twoim celom.",
     primaryCta: "Utwórz bezpłatne konto",
     secondaryCta: "Zaloguj się",
     forgotPassword: "Nie pamiętasz hasła?",
-    foundationNotice: "Trwają prace nad treściami dopasowanymi do języka.",
-    metadataTitle: "FitLifeTool | Codzienny przegląd zdrowia",
+    metadataTitle: "FitLifeTool | Styl życia i cele pod kontrolą",
     metadataDescription:
-      "Śledź odżywianie, aktywność, nawodnienie i masę ciała w jednym widoku dnia.",
+      "Połącz odżywianie, aktywność, nawodnienie i masę ciała w jednym osobistym zestawieniu. Sprawdzaj przez cały dzień, gdzie jesteś względem swoich celów.",
   },
 };
 

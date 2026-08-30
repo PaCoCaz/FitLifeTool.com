@@ -1,11 +1,9 @@
-import Link from "next/link";
 import type { AppLanguage } from "@/lib/languagePreference";
 import PublicAuthModalProvider, {
   PublicAuthTrigger,
 } from "@/components/public/PublicAuthModalProvider";
 import PublicHeader from "@/components/public/PublicHeader";
 import {
-  getPublicAuthHref,
   PUBLIC_HOME_CONTENT,
   PUBLIC_LOCALE_REGISTRY,
 } from "@/lib/publicWeb";
@@ -37,17 +35,7 @@ export default function PublicHomepage({ locale }: { locale: AppLanguage }) {
                   {content.secondaryCta}
                 </PublicAuthTrigger>
               </div>
-              <Link
-                href={getPublicAuthHref("forgot-password", locale)}
-                className="public-web-forgot-link"
-              >
-                {content.forgotPassword}
-              </Link>
             </div>
-
-            <aside className="public-web-foundation-note">
-              <p>{content.foundationNotice}</p>
-            </aside>
           </section>
         </main>
       </PublicAuthModalProvider>

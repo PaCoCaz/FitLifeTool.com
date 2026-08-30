@@ -20,6 +20,7 @@ import {
 
 type OpenPanel = "locale" | "goals" | "knowledge" | null;
 type MobileSection = "goals" | "knowledge";
+type LocalePresentation = "desktop" | "mobile";
 
 const KNOWLEDGE_GROUPS = [
   { key: "weight" },
@@ -59,8 +60,11 @@ export default function PublicHeaderNavigation({
     useState<KnowledgeGroupKey | null>(null);
 
   const rootRef = useRef<HTMLDivElement>(null);
-  const localeButtonRef = useRef<HTMLButtonElement>(null);
-  const localePanelRef = useRef<HTMLDivElement>(null);
+  const desktopLocaleButtonRef = useRef<HTMLButtonElement>(null);
+  const desktopLocalePanelRef = useRef<HTMLDivElement>(null);
+  const mobileLocaleButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileLocalePanelRef = useRef<HTMLDivElement>(null);
+  const localeReturnFocusRef = useRef<HTMLButtonElement | null>(null);
   const goalsButtonRef = useRef<HTMLButtonElement>(null);
   const knowledgeButtonRef = useRef<HTMLButtonElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
@@ -77,7 +81,7 @@ export default function PublicHeaderNavigation({
       if (restoreFocus) {
         const trigger =
           current === "locale"
-            ? localeButtonRef.current
+            ? localeReturnFocusRef.current
             : current === "goals"
               ? goalsButtonRef.current
               : knowledgeButtonRef.current;
@@ -138,6 +142,85 @@ export default function PublicHeaderNavigation({
     setOpenPanel((current) => (current === panel ? null : panel));
   }
 
+  function getLocaleRefs(presentation: LocalePresentation) {
+    return presentation === "desktop"
+      ? {
+          buttonRef: desktopLocaleButtonRef,
+          panelRef: desktopLocalePanelRef,
+        }
+      : {
+          buttonRef: mobileLocaleButtonRef,
+          panelRef: mobileLocalePanelRef,
+        };
+  }
+
+  function toggleLocale(presentation: LocalePresentation) {
+    const { buttonRef } = getLocaleRefs(presentation);
+    localeReturnFocusRef.current = buttonRef.current;
+    closeMobileMenu(false);
+    togglePanel("locale");
+  }
+
+  function openLocaleWithKeyboard(presentation: LocalePresentation) {
+    const { buttonRef, panelRef } = getLocaleRefs(presentation);
+    localeReturnFocusRef.current = buttonRef.current;
+    closeMobileMenu(false);
+    setOpenPanel("locale");
+    requestAnimationFrame(() =>
+      panelRef.current?.querySelector<HTMLElement>("a")?.focus()
+    );
+  }
+
+  function renderLocaleSelector(presentation: LocalePresentation) {
+    const { buttonRef, panelRef } = getLocaleRefs(presentation);
+    const panelId = `public-web-locale-panel-${presentation}`;
+
+    return (
+      <div
+        className={`public-web-locale-selector public-web-locale-selector-${presentation}`}
+      >
+        <button
+          ref={buttonRef}
+          type="button"
+          className="public-web-locale-trigger"
+          aria-label={`${content.languageLabel}: ${PUBLIC_LOCALE_REGISTRY[locale].label}`}
+          aria-controls={panelId}
+          aria-expanded={openPanel === "locale"}
+          onClick={() => toggleLocale(presentation)}
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowDown") return;
+            event.preventDefault();
+            openLocaleWithKeyboard(presentation);
+          }}
+        >
+          <Image src="/globe.svg" alt="" width={20} height={20} />
+          <span>{locale.toUpperCase()}</span>
+          <Chevron open={openPanel === "locale"} />
+        </button>
+
+        <div
+          ref={panelRef}
+          id={panelId}
+          className="public-web-locale-panel"
+          hidden={openPanel !== "locale"}
+        >
+          {PUBLIC_LOCALES.map((candidate) => (
+            <Link
+              key={candidate}
+              href={getPublicPagePath(pageKey, candidate)}
+              hrefLang={candidate}
+              lang={candidate}
+              aria-current={candidate === locale ? "page" : undefined}
+            >
+              <span>{PUBLIC_LOCALE_REGISTRY[candidate].label}</span>
+              <span aria-hidden="true">{candidate.toUpperCase()}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   function toggleMobileSection(section: MobileSection) {
     setMobileSections((current) => {
       const open = !current[section];
@@ -158,49 +241,7 @@ export default function PublicHeaderNavigation({
   return (
     <div ref={rootRef} className="public-web-header-navigation">
       <div className="public-web-header-actions">
-        <div className="public-web-locale-selector">
-          <button
-            ref={localeButtonRef}
-            type="button"
-            className="public-web-locale-trigger"
-            aria-label={`${content.languageLabel}: ${PUBLIC_LOCALE_REGISTRY[locale].label}`}
-            aria-controls="public-web-locale-panel"
-            aria-expanded={openPanel === "locale"}
-            onClick={() => togglePanel("locale")}
-            onKeyDown={(event) => {
-              if (event.key !== "ArrowDown") return;
-              event.preventDefault();
-              setOpenPanel("locale");
-              requestAnimationFrame(() =>
-                localePanelRef.current?.querySelector<HTMLElement>("a")?.focus()
-              );
-            }}
-          >
-            <Image src="/globe.svg" alt="" width={20} height={20} />
-            <span>{locale.toUpperCase()}</span>
-            <Chevron open={openPanel === "locale"} />
-          </button>
-
-          <div
-            ref={localePanelRef}
-            id="public-web-locale-panel"
-            className="public-web-locale-panel"
-            hidden={openPanel !== "locale"}
-          >
-            {PUBLIC_LOCALES.map((candidate) => (
-              <Link
-                key={candidate}
-                href={getPublicPagePath(pageKey, candidate)}
-                hrefLang={candidate}
-                lang={candidate}
-                aria-current={candidate === locale ? "page" : undefined}
-              >
-                <span>{PUBLIC_LOCALE_REGISTRY[candidate].label}</span>
-                <span aria-hidden="true">{candidate.toUpperCase()}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {renderLocaleSelector("desktop")}
 
         <span className="public-web-header-divider" aria-hidden="true" />
         <PublicAuthTrigger
@@ -234,6 +275,8 @@ export default function PublicHeaderNavigation({
           </span>
         </button>
       </div>
+
+      {renderLocaleSelector("mobile")}
 
       <nav
         className="public-web-desktop-nav"

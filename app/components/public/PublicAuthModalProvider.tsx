@@ -10,12 +10,18 @@ import {
   type ButtonHTMLAttributes,
   type ReactNode,
 } from "react";
-import RegisterModal, {
-  type AuthModalMode,
-} from "@/components/auth/RegisterModal";
-import { LangProvider } from "@/lib/LangProvider";
+import type { AuthModalMode } from "@/components/auth/RegisterModal";
 import type { AppLanguage } from "@/lib/languagePreference";
-import { useSetInterfaceLanguage } from "@/lib/useLang";
+
+type RegisterModalComponent =
+  (typeof import("@/components/auth/RegisterModal"))["default"];
+type LangProviderModule = typeof import("@/lib/LangProvider");
+
+type PublicAuthModules = {
+  RegisterModal: RegisterModalComponent;
+  LangProvider: LangProviderModule["LangProvider"];
+  useLangContext: LangProviderModule["useLangContext"];
+};
 
 type PublicAuthModalContextValue = {
   openAuthModal: (mode: AuthModalMode) => void;
@@ -24,14 +30,68 @@ type PublicAuthModalContextValue = {
 const PublicAuthModalContext =
   createContext<PublicAuthModalContextValue | null>(null);
 
-function LocaleSynchronizer({ locale }: { locale: AppLanguage }) {
-  const setInterfaceLanguage = useSetInterfaceLanguage();
+function LoadedAuthModal({
+  modules,
+  locale,
+  mode,
+  onModeChange,
+  onClose,
+}: {
+  modules: PublicAuthModules;
+  locale: AppLanguage;
+  mode: AuthModalMode;
+  onModeChange: (mode: AuthModalMode) => void;
+  onClose: () => void;
+}) {
+  const { LangProvider } = modules;
+
+  return (
+    <LangProvider>
+      <LocalizedAuthModal
+        modules={modules}
+        locale={locale}
+        mode={mode}
+        onModeChange={onModeChange}
+        onClose={onClose}
+      />
+    </LangProvider>
+  );
+}
+
+function LocalizedAuthModal({
+  modules,
+  locale,
+  mode,
+  onModeChange,
+  onClose,
+}: {
+  modules: PublicAuthModules;
+  locale: AppLanguage;
+  mode: AuthModalMode;
+  onModeChange: (mode: AuthModalMode) => void;
+  onClose: () => void;
+}) {
+  const { RegisterModal, useLangContext } = modules;
+  const { setInterfaceLanguage } = useLangContext();
+  const [readyLocale, setReadyLocale] = useState<AppLanguage | null>(null);
 
   useEffect(() => {
     setInterfaceLanguage(locale);
+    setReadyLocale(locale);
   }, [locale, setInterfaceLanguage]);
 
-  return null;
+  if (readyLocale !== locale) return null;
+
+  return (
+    <RegisterModal
+      open
+      mode={mode}
+      initialLanguage={locale}
+      publicWebLayout
+      onModeChange={onModeChange}
+      onClose={onClose}
+    />
+  );
 }
 
 function PublicAuthModalState({
@@ -42,11 +102,51 @@ function PublicAuthModalState({
   locale: AppLanguage;
 }) {
   const [mode, setMode] = useState<AuthModalMode | null>(null);
+  const [authModules, setAuthModules] = useState<PublicAuthModules | null>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
+  const modalPromiseRef = useRef<Promise<PublicAuthModules> | null>(null);
+  const requestedModeRef = useRef<AuthModalMode | null>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const openAuthModal = useCallback((nextMode: AuthModalMode) => {
-    setMode(nextMode);
-  }, []);
+    requestedModeRef.current = nextMode;
+    openerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    if (authModules) {
+      setMode(nextMode);
+      return;
+    }
+
+    if (modalPromiseRef.current) return;
+
+    const modalPromise = Promise.all([
+      import("@/components/auth/RegisterModal"),
+      import("@/lib/LangProvider"),
+    ]).then(([registerModalModule, langProviderModule]) => ({
+      RegisterModal: registerModalModule.default,
+      LangProvider: langProviderModule.LangProvider,
+      useLangContext: langProviderModule.useLangContext,
+    }));
+    modalPromiseRef.current = modalPromise;
+
+    void modalPromise.then((modules) => {
+      if (!mountedRef.current) return;
+      setAuthModules(modules);
+      openerRef.current?.focus();
+      setMode(requestedModeRef.current);
+    });
+  }, [authModules]);
 
   const closeAuthModal = useCallback(() => {
     setMode(null);
@@ -67,7 +167,6 @@ function PublicAuthModalState({
 
   return (
     <PublicAuthModalContext.Provider value={{ openAuthModal }}>
-      <LocaleSynchronizer locale={locale} />
       <div
         ref={backgroundRef}
         className="public-web-auth-background"
@@ -75,14 +174,15 @@ function PublicAuthModalState({
       >
         {children}
       </div>
-      <RegisterModal
-        open={mode !== null}
-        mode={mode ?? "register"}
-        initialLanguage={locale}
-        publicWebLayout
-        onModeChange={setMode}
-        onClose={closeAuthModal}
-      />
+      {authModules && mode ? (
+        <LoadedAuthModal
+          modules={authModules}
+          locale={locale}
+          mode={mode}
+          onModeChange={setMode}
+          onClose={closeAuthModal}
+        />
+      ) : null}
     </PublicAuthModalContext.Provider>
   );
 }
@@ -95,11 +195,7 @@ export default function PublicAuthModalProvider({
   locale: AppLanguage;
 }) {
   return (
-    <LangProvider>
-      <PublicAuthModalState locale={locale}>
-        {children}
-      </PublicAuthModalState>
-    </LangProvider>
+    <PublicAuthModalState locale={locale}>{children}</PublicAuthModalState>
   );
 }
 
