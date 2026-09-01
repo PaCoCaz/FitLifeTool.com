@@ -1,16 +1,21 @@
 import Link from "next/link";
 import LoginForm from "@/components/auth/LoginForm";
 import {
-  asPublicLocale,
   getPublicPagePath,
   PUBLIC_DEFAULT_LOCALE,
 } from "@/lib/publicWeb";
 import { uiText } from "@/lib/uiText";
+import {
+  asAuthLocale,
+  asAuthNotice,
+  getSafeProtectedReturnTo,
+} from "@/lib/auth/authRedirects";
 
 type Props = {
   searchParams: Promise<{
     auth_notice?: string | string[];
     lang?: string | string[];
+    returnTo?: string | string[];
   }>;
 };
 
@@ -18,9 +23,17 @@ export default async function LoginPage({ searchParams }: Props) {
   const parameters = await searchParams;
   const requestedLanguage = parameters.lang;
   const locale =
-    asPublicLocale(
+    asAuthLocale(
       Array.isArray(requestedLanguage) ? requestedLanguage[0] : requestedLanguage
     ) ?? PUBLIC_DEFAULT_LOCALE;
+  const requestedNotice = parameters.auth_notice;
+  const authNotice = asAuthNotice(
+    Array.isArray(requestedNotice) ? requestedNotice[0] : requestedNotice
+  );
+  const requestedReturnTo = parameters.returnTo;
+  const returnTo = getSafeProtectedReturnTo(
+    Array.isArray(requestedReturnTo) ? requestedReturnTo[0] : requestedReturnTo
+  );
   const t = uiText[locale].auth;
 
   return (
@@ -32,12 +45,12 @@ export default async function LoginPage({ searchParams }: Props) {
         <h1 className="mb-4 text-lg font-semibold text-[#191970]">
           {t.loginTitle}
         </h1>
-        {parameters.auth_notice === "password_reset" && (
+        {authNotice === "password_reset" && (
           <p className="mb-4 text-sm text-green-700" role="status">
             {t.passwordResetSuccess} {t.loginAgain}
           </p>
         )}
-        <LoginForm language={locale} />
+        <LoginForm language={locale} returnTo={returnTo} />
         <Link
           href={getPublicPagePath("home", locale)}
           className="mt-4 inline-block text-sm text-[#191970] hover:underline"

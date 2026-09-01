@@ -7,13 +7,15 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { uiText } from "@/lib/uiText";
 import type { Lang } from "@/lib/useLang";
+import { isAllowedPostLoginDestination } from "@/lib/auth/postLoginDestination";
 
 type Props = {
   language: Lang;
   onRegister?: () => void;
+  returnTo?: string | null;
 };
 
-export default function LoginForm({ language, onRegister }: Props) {
+export default function LoginForm({ language, onRegister, returnTo }: Props) {
   const t = uiText[language].auth;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,13 +35,42 @@ export default function LoginForm({ language, onRegister }: Props) {
 
       if (signInError) {
         setLoginFailed(true);
+        setLoading(false);
+        return;
+      }
+    } catch {
+      setLoginFailed(true);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/post-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(returnTo ? { returnTo } : {}),
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        window.location.reload();
         return;
       }
 
-      // 🔑 Hard redirect → voorkomt auth race conditions
-      window.location.assign("/dashboard");
+      const result: unknown = await response.json();
+      const destination =
+        result && typeof result === "object" && "destination" in result
+          ? (result as { destination: unknown }).destination
+          : null;
+
+      if (!isAllowedPostLoginDestination(destination)) {
+        window.location.reload();
+        return;
+      }
+
+      window.location.assign(destination);
     } catch {
-      setLoginFailed(true);
+      window.location.reload();
     } finally {
       setLoading(false);
     }

@@ -11,10 +11,15 @@ import {
   skipsProxyAuth,
 } from "./app/lib/auth/proxyAuthRules"
 import {
-  getOnboardingStep,
-  ONBOARDING_PROFILE_FIELDS,
-} from "./app/lib/auth/onboardingState"
-import { asAppLanguage } from "./app/lib/languagePreference"
+  applyPendingAuthCookies,
+  resolveServerAuthState,
+  type PendingAuthCookie,
+} from "./app/lib/auth/serverAuthState"
+import { resolvePostLoginDestination } from "./app/lib/auth/postLoginDestination"
+import {
+  asAuthLocale,
+  getSafeProtectedReturnTo,
+} from "./app/lib/auth/authRedirects"
 
 type CookieToSet = {
   name: string
@@ -29,26 +34,40 @@ export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-pathname", pathname)
   requestHeaders.delete("x-interface-locale")
-  const requestedLanguage = asAppLanguage(
+  const requestedLanguage = asAuthLocale(
     request.nextUrl.searchParams.get("lang")
   )
+  // asAuthLocale delegates to the canonical asAppLanguage allowlist.
   if (requestedLanguage) {
     requestHeaders.set("x-interface-locale", requestedLanguage)
   }
-
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  })
 
   if (
     skipsProxyAuth(pathname) ||
     pathname.startsWith("/auth") ||
     !requiresProxyAuth(pathname)
   ) {
-    return response
+    return NextResponse.next({ request: { headers: requestHeaders } })
   }
+
+  const pendingCookies: PendingAuthCookie[] = []
+
+  const finalize = (response: NextResponse) =>
+    applyPendingAuthCookies(response, pendingCookies)
+
+  const next = () =>
+    finalize(NextResponse.next({ request: { headers: requestHeaders } }))
+
+  const redirect = (destination: string) =>
+    finalize(NextResponse.redirect(new URL(destination, request.url)))
+
+  const unavailable = () =>
+    finalize(
+      NextResponse.json(
+        { code: "AUTH_STATE_UNAVAILABLE" },
+        { status: 503 }
+      )
+    )
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,85 +80,88 @@ export async function proxy(request: NextRequest) {
 
         setAll(cookiesToSet: CookieToSet[]) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options)
+            request.cookies.set(name, value)
+            pendingCookies.push({ name, value, options })
           })
         },
       },
     }
   )
 
-  // ✅ veilige auth check (geen refresh token error spam)
-  let user = null
-
-  try {
-    const { data, error } = await supabase.auth.getUser()
-
-    if (!error) {
-      user = data.user
-    }
-  } catch {
-    user = null
-  }
-
-  const isLoggedIn = !!user
-
   const isProtected = isProtectedAppRoute(authorizationPathname)
   const isOnboarding = isOnboardingRoute(authorizationPathname)
+  const authState = await resolveServerAuthState(supabase)
 
-  if (!isLoggedIn && (isProtected || isOnboarding)) {
-    return NextResponse.redirect(new URL("/", request.url))
+  if (authState.kind === "RESOLUTION_FAILURE") {
+    return unavailable()
   }
 
-  if (isLoggedIn && user && (isProtected || isOnboarding)) {
-    const [{ data: profile, error: profileError }, { data: activeGoal, error: goalError }] =
-      await Promise.all([
-        supabase
-          .from("profiles")
-          .select(ONBOARDING_PROFILE_FIELDS)
-          .eq("id", user.id)
-          .maybeSingle(),
-        supabase
-          .from("user_goal_periods")
-          .select("id")
-          .eq("user_id", user.id)
-          .is("end_at", null)
-          .order("start_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-      ])
+  if (authState.kind === "ANONYMOUS") {
+    if (isProtected || isOnboarding) {
+      const loginUrl = new URL("/login", request.url)
+      loginUrl.searchParams.set("lang", requestedLanguage ?? "en")
 
-    const onboardingStep =
-      profileError || goalError
-        ? "profile"
-        : getOnboardingStep(profile, Boolean(activeGoal))
+      if (isProtected) {
+        const returnTo = getSafeProtectedReturnTo(
+          `${request.nextUrl.pathname}${request.nextUrl.search}`
+        )
+        if (returnTo) loginUrl.searchParams.set("returnTo", returnTo)
+      }
 
-    if (isOnboarding && onboardingStep === "complete") {
-      return NextResponse.redirect(new URL("/dashboard", request.url))
+      return finalize(NextResponse.redirect(loginUrl))
     }
 
-    if (isProtected && onboardingStep !== "complete") {
-      return NextResponse.redirect(new URL("/onboarding", request.url))
-    }
+    return next()
+  }
+
+  requestHeaders.set("x-interface-locale", authState.interfaceLanguage)
+  const onboardingStep = authState.onboardingStep
+
+  if (isProtected && onboardingStep !== "complete") {
+    return finalize(
+      NextResponse.redirect(new URL("/onboarding", request.url))
+    )
+  }
+
+  if (isOnboarding && onboardingStep === "complete") {
+    return finalize(
+      NextResponse.redirect(new URL("/dashboard", request.url))
+    )
+  }
+
+  if (authState.kind === "AUTHENTICATED_ONBOARDING_INCOMPLETE") {
+    return isOnboarding ? next() : redirect("/onboarding")
+  }
+
+  if (isOnboarding || authorizationPathname === "/register") {
+    return redirect("/dashboard")
+  }
+
+  if (authorizationPathname === "/login") {
+    const destination = resolvePostLoginDestination(
+      authState,
+      request.nextUrl.searchParams.get("returnTo")
+    )
+    return destination.ok ? redirect(destination.destination) : unavailable()
   }
 
   // role check
   if (
-    isLoggedIn &&
-    user &&
+    isProtected &&
     isRouteWithin(authorizationPathname, "/handbook")
   ) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", user.id)
+      .eq("id", authState.userId)
       .single()
 
     if (!profile || !["owner", "admin", "developer"].includes(profile.role)) {
-      return NextResponse.redirect(new URL("/", request.url))
+      return redirect("/")
     }
   }
 
-  return response
+  return next()
 }
 
 export const config = {

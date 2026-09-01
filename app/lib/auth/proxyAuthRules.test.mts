@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  isAuthEntryRoute,
   isOnboardingRoute,
   isProtectedAppRoute,
   isRouteWithin,
@@ -100,12 +101,29 @@ test("protected en onboarding routes blijven expliciet onderscheiden", () => {
   assert.equal(isRouteWithin("/handbook-public", "/handbook"), false);
 });
 
-test("public homepages skippen auth terwijl beschermde routes auth behouden", () => {
-  for (const pathname of ["/", "/nl", "/fr", "/de", "/pl", "/login"]) {
+test("alleen exacte login- en registerroutes zijn auth entrypoints", () => {
+  assert.equal(isAuthEntryRoute("/login"), true);
+  assert.equal(isAuthEntryRoute("/register"), true);
+
+  for (const pathname of [
+    "/login/",
+    "/login-old",
+    "/register/",
+    "/register-extra",
+    "/forgot-password",
+  ]) {
+    assert.equal(isAuthEntryRoute(pathname), false, pathname);
+  }
+});
+
+test("public homepages skippen auth terwijl auth entrypoints en beschermde routes auth behouden", () => {
+  for (const pathname of ["/", "/nl", "/fr", "/de", "/pl"]) {
     assert.equal(requiresProxyAuth(pathname), false, pathname);
   }
 
   for (const pathname of [
+    "/login",
+    "/register",
     "/dashboard",
     "/dashboard/activity",
     "/settings",

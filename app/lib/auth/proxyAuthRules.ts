@@ -34,10 +34,15 @@ export function isOnboardingRoute(pathname: string) {
   return isRouteWithin(pathname, "/onboarding");
 }
 
+export function isAuthEntryRoute(pathname: string) {
+  return pathname === "/login" || pathname === "/register";
+}
+
 export function requiresProxyAuth(pathname: string) {
   const normalizedPathname = normalizePathnameForAuth(pathname);
   return (
     isProtectedAppRoute(normalizedPathname) ||
-    isOnboardingRoute(normalizedPathname)
+    isOnboardingRoute(normalizedPathname) ||
+    isAuthEntryRoute(normalizedPathname)
   );
 }
