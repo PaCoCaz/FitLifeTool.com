@@ -29,8 +29,11 @@ test("confirmation route handles code and token safely before onboarding", async
   const source = await read("app/auth/confirm/route.ts");
   assert.match(source, /exchangeCodeForSession/);
   assert.match(source, /verifyOtp/);
-  assert.match(source, /confirmation_failed/);
-  assert.match(source, /new URL\("\/onboarding"/);
+  assert.match(source, /parseEmailConfirmationRequest/);
+  assert.match(source, /resolveServerAuthState\(client\)/);
+  assert.match(source, /"\/onboarding"/);
+  assert.match(source, /"\/dashboard"/);
+  assert.doesNotMatch(source, /confirmation_failed|auth_error/);
 });
 
 test("protected routes distinguish unauthenticated, incomplete and complete users", async () => {
@@ -154,8 +157,9 @@ test("registration confirmation stays local and canonical signup data stays unch
   assert.match(signUpBlock[1], /data: buildRegistrationMetadata\(input\)/);
   assert.match(
     signUpBlock[1],
-    /emailRedirectTo: `\$\{window\.location\.origin\}\/auth\/confirm\?next=\/onboarding`/
+    /emailRedirectTo: buildEmailConfirmationRedirectUrl\(\s*window\.location\.origin,\s*selectedLanguage\s*\)/
   );
+  assert.doesNotMatch(signUpBlock[1], /next|returnTo/);
 });
 
 test("registration field errors use accessible stable associations and focus order", async () => {
@@ -265,9 +269,10 @@ test("successful registration preserves metadata, confirmation redirect and stat
   assert.match(source, /data: buildRegistrationMetadata\(input\)/);
   assert.match(
     source,
-    /emailRedirectTo: `\$\{window\.location\.origin\}\/auth\/confirm\?next=\/onboarding`/
+    /emailRedirectTo: buildEmailConfirmationRedirectUrl\(\s*window\.location\.origin,\s*selectedLanguage\s*\)/
   );
   assert.match(source, /setConfirmationSent\(true\)/);
+  assert.doesNotMatch(source, /auth\/confirm\?next|returnTo/);
 });
 
 test("registration marks explicit language separately from the provider fallback", async () => {
@@ -312,8 +317,73 @@ test("registration keeps the chosen country code while the language changes", as
 test("confirmation status continues to use live translated UI text", async () => {
   const source = await read("app/components/auth/RegisterStep.tsx");
   assert.match(source, /const t = uiText\[selectedLanguage \?\? "en"\]\.auth/);
-  assert.match(source, /t\.checkEmailTitle/);
-  assert.match(source, /t\.checkEmailMessage/);
+  assert.match(source, /<EmailConfirmationPanel/);
+  assert.match(source, /mode="registration"/);
+  assert.match(source, /email=\{email\.trim\(\)\}/);
+});
+
+test("confirmation panel provides accessible resend and recovery behavior", async () => {
+  const source = await read("app/components/auth/EmailConfirmationPanel.tsx");
+
+  assert.match(source, /fetch\("\/api\/auth\/resend-confirmation"/);
+  assert.match(source, /validateRegistrationEmail\(email\)/);
+  assert.match(source, /aria-invalid=\{Boolean\(emailError\)\}/);
+  assert.match(source, /aria-describedby=\{emailError/);
+  assert.match(source, /role=\{result === "accepted" \? "status" : "alert"\}/);
+  assert.match(source, /EMAIL_CONFIRMATION_COOLDOWN_SECONDS/);
+  assert.match(source, /disabled=\{loading \|\| cooldownSeconds > 0\}/);
+  assert.match(source, /if \(requestInFlight\.current \|\| cooldownSeconds > 0\) return/);
+  assert.match(source, /setCooldownSeconds\(EMAIL_CONFIRMATION_COOLDOWN_SECONDS\)/);
+  assert.doesNotMatch(source, /signUpError|\.message|localStorage|sessionStorage|console\./);
+});
+
+test("confirmation recovery page accepts only presentation state", async () => {
+  const source = await read("app/auth/confirmation/page.tsx");
+
+  assert.match(source, /resolveEmailConfirmationLanguage/);
+  assert.match(source, /resolveEmailConfirmationPresentationState/);
+  assert.match(source, /mode="recovery"/);
+  assert.match(source, /robots: \{ index: false, follow: false \}/);
+  assert.doesNotMatch(
+    source,
+    /token_hash|returnTo|searchParams[^\n]*(?:code|email)|searchParams[^\n]*next/
+  );
+});
+
+test("all confirmation copy has five-locale parity and required interpolation", async () => {
+  const source = await read("app/lib/uiText.ts");
+  const keys = [
+    "confirmationSpamGuidance",
+    "confirmationResend",
+    "confirmationResending",
+    "confirmationResendSuccess",
+    "confirmationResendCooldown",
+    "confirmationResendFailure",
+    "confirmationInvalidTitle",
+    "confirmationInvalidMessage",
+    "confirmationUnavailableTitle",
+    "confirmationUnavailableMessage",
+    "confirmationRecoveryGuidance",
+    "confirmationRecoverySubmit",
+    "confirmationRecoverySubmitting",
+    "confirmationRecoveryNeutralResult",
+  ];
+
+  for (const key of keys) {
+    assert.equal(
+      [...source.matchAll(new RegExp(`${key}:`, "g"))].length,
+      5,
+      key
+    );
+  }
+  assert.equal(
+    [...source.matchAll(/checkEmailMessage: "[^"]*\{\{email\}\}[^"]*"/g)].length,
+    5
+  );
+  assert.equal(
+    [...source.matchAll(/confirmationResendCooldown: "[^"]*\{\{seconds\}\}[^"]*"/g)].length,
+    5
+  );
 });
 
 test("confirmation redirects into onboarding with signup metadata available on the auth user", async () => {
@@ -321,7 +391,7 @@ test("confirmation redirects into onboarding with signup metadata available on t
     read("app/auth/confirm/route.ts"),
     read("app/lib/LangProvider.tsx"),
   ]);
-  assert.match(confirmation, /redirect\(new URL\("\/onboarding"/);
+  assert.match(confirmation, /return "\/onboarding"/);
   assert.match(provider, /user\?\.user_metadata\?\.language/);
   assert.match(provider, /resolveInterfaceLanguage\(null, user\?\.user_metadata\?\.language\)/);
 });

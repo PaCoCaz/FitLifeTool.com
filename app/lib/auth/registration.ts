@@ -67,6 +67,19 @@ export type RegistrationValidationResult =
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export type RegistrationEmailErrorCode =
+  | "REG_EMAIL_REQUIRED"
+  | "REG_EMAIL_INVALID";
+
+export function validateRegistrationEmail(
+  value: unknown
+): RegistrationEmailErrorCode | null {
+  if (typeof value !== "string" || !value.trim()) {
+    return "REG_EMAIL_REQUIRED";
+  }
+  return EMAIL_PATTERN.test(value.trim()) ? null : "REG_EMAIL_INVALID";
+}
+
 export function validateRegistrationFields(
   input: RegistrationValidationInput,
   options: RegistrationValidationOptions = {}
@@ -83,11 +96,8 @@ export function validateRegistrationFields(
   if (!input.lastName.trim()) {
     errors.lastName = "REG_LAST_NAME_REQUIRED";
   }
-  if (!email) {
-    errors.email = "REG_EMAIL_REQUIRED";
-  } else if (!EMAIL_PATTERN.test(email)) {
-    errors.email = "REG_EMAIL_INVALID";
-  }
+  const emailError = validateRegistrationEmail(email);
+  if (emailError) errors.email = emailError;
 
   const passwordResult = validatePassword(input.password);
   if (!passwordResult.valid) {

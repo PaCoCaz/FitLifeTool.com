@@ -2,10 +2,12 @@
 
 import { useId, useState } from "react";
 import CountrySelect from "@/components/auth/CountrySelect";
+import EmailConfirmationPanel from "@/components/auth/EmailConfirmationPanel";
 import { supabase } from "@/lib/supabaseClient";
 import { useSetInterfaceLanguage, type Lang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/passwordPolicy";
+import { buildEmailConfirmationRedirectUrl } from "@/lib/auth/emailConfirmation";
 import {
   buildRegistrationMetadata,
   REGISTRATION_LANGUAGES,
@@ -133,7 +135,10 @@ export default function RegisterStep({ selectedLanguage, onLanguageSelect }: Pro
         password,
         options: {
           data: buildRegistrationMetadata(input),
-          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/onboarding`,
+          emailRedirectTo: buildEmailConfirmationRedirectUrl(
+            window.location.origin,
+            selectedLanguage
+          ),
         },
       });
 
@@ -152,10 +157,11 @@ export default function RegisterStep({ selectedLanguage, onLanguageSelect }: Pro
 
   if (confirmationSent) {
     return (
-      <div className="space-y-3" role="status">
-        <h3 className="text-lg font-semibold text-[#191970]">{t.checkEmailTitle}</h3>
-        <p className="text-sm text-gray-600">{t.checkEmailMessage}</p>
-      </div>
+      <EmailConfirmationPanel
+        mode="registration"
+        language={selectedLanguage ?? "en"}
+        email={email.trim()}
+      />
     );
   }
 

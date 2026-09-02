@@ -6,6 +6,7 @@ import {
   normalizeRegistrationFailure,
   REGISTRATION_LANGUAGES,
   validateRegistration,
+  validateRegistrationEmail,
   validateRegistrationFields,
 } from "./registration.ts";
 import { PASSWORD_MIN_LENGTH } from "./passwordPolicy.ts";
@@ -23,6 +24,28 @@ test("structured registration validation accepts a complete valid input", () => 
     valid: true,
     errors: {},
   });
+});
+
+test("registration and confirmation resend share one email validation authority", async () => {
+  assert.equal(validateRegistrationEmail(""), "REG_EMAIL_REQUIRED");
+  assert.equal(validateRegistrationEmail("not-an-email"), "REG_EMAIL_INVALID");
+  assert.equal(validateRegistrationEmail(" person@example.com "), null);
+
+  const missing = validateRegistrationFields({
+    ...validStructured,
+    email: "",
+  });
+  const invalid = validateRegistrationFields({
+    ...validStructured,
+    email: "not-an-email",
+  });
+  assert.equal(missing.valid, false);
+  assert.equal(invalid.valid, false);
+  if (!missing.valid) assert.equal(missing.errors.email, "REG_EMAIL_REQUIRED");
+  if (!invalid.valid) assert.equal(invalid.errors.email, "REG_EMAIL_INVALID");
+
+  const source = await readFile(new URL("./registration.ts", import.meta.url), "utf8");
+  assert.match(source, /const emailError = validateRegistrationEmail\(email\)/);
 });
 
 test("structured registration validation returns deterministic field errors", () => {
