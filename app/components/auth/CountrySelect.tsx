@@ -5,6 +5,7 @@ import { useLang } from "@/lib/useLang";
 import type { CountryOption } from "@/lib/countries/countryReference";
 
 type Props = {
+  id?: string;
   value: string;
   onChange: (countryCode: string) => void;
   label: string;
@@ -12,9 +13,12 @@ type Props = {
   loadingLabel: string;
   errorLabel: string;
   disabled?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 };
 
 export default function CountrySelect({
+  id,
   value,
   onChange,
   label,
@@ -22,12 +26,19 @@ export default function CountrySelect({
   loadingLabel,
   errorLabel,
   disabled = false,
+  invalid = false,
+  describedBy,
 }: Props) {
-  const id = useId();
+  const generatedId = useId();
+  const selectId = id ?? generatedId;
   const lang = useLang();
   const [countries, setCountries] = useState<CountryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const internalErrorId = `${selectId}-load-error`;
+  const ariaDescribedBy =
+    [describedBy, error ? internalErrorId : null].filter(Boolean).join(" ") ||
+    undefined;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -57,15 +68,16 @@ export default function CountrySelect({
 
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium">
+      <label htmlFor={selectId} className="mb-1 block text-sm font-medium">
         {label}
       </label>
       <select
-        id={id}
+        id={selectId}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         disabled={disabled || loading || error}
-        aria-describedby={error ? `${id}-error` : undefined}
+        aria-invalid={invalid || error}
+        aria-describedby={ariaDescribedBy}
         className="w-full rounded border px-3 py-2 text-base disabled:bg-gray-100"
       >
         <option value="">{loading ? loadingLabel : placeholder}</option>
@@ -76,7 +88,7 @@ export default function CountrySelect({
         ))}
       </select>
       {error && (
-        <p id={`${id}-error`} className="mt-1 text-sm text-red-600" role="alert">
+        <p id={internalErrorId} className="mt-1 text-sm text-red-600" role="alert">
           {errorLabel}
         </p>
       )}

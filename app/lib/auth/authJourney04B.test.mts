@@ -315,5 +315,5 @@ test("registration and the public auth modal remain unchanged integration consum
   assert.match(modal, /<LoginForm/);
   assert.match(modal, /<RegisterStep/);
   assert.match(publicProvider, /<RegisterModal/);
-  assert.match(registration, /className="mt-1 w-full rounded border/);
+  assert.match(registration, /className="mt-2 w-full rounded border/);
 });

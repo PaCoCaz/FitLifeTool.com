@@ -9,7 +9,8 @@ const en = {
   auth: {
     accountTitle: "Create account", onboardingTitle: "Complete your profile", personalTitle: "Personal details", bodyTitle: "Body details", goalTitle: "Your goals",
     registrationLanguage: "Language", selectLanguage: "Select your language",
-    firstName: "First name", lastName: "Last name", email: "Email address", password: "Password", loginTitle: "Log in", login: "Log in", loggingIn: "Logging in…", loginFailure: { title: "Unable to log in.", guidance: "Check your details and try again." },
+    firstName: "First name", lastName: "Last name", email: "Email address", password: "Password", confirmPassword: "Confirm password", passwordMinimum: "Use at least {{minimum}} characters.", loginTitle: "Log in", login: "Log in", loggingIn: "Logging in…", loginFailure: { title: "Unable to log in.", guidance: "Check your details and try again." },
+    registrationErrors: { languageInvalid: "Select a language.", firstNameRequired: "Enter your first name.", lastNameRequired: "Enter your last name.", emailRequired: "Enter your email address.", emailInvalid: "Enter a valid email address.", passwordRequired: "Enter a password.", passwordTooShort: "Use at least {{minimum}} characters.", confirmationRequired: "Confirm your password.", passwordMismatch: "The passwords do not match.", countryInvalid: "Select a valid country." },
     residenceCountry: "Country of residence", foodRegion: "Food region", selectCountry: "Select a country",
     loadingCountries: "Loading countries…", countryLoadError: "Countries could not be loaded. Please try again.",
     requiredFields: "Complete all required fields.", registrationFailure: "We couldn’t create your account. Please try again.", next: "Next", registering: "Creating account…",
@@ -324,7 +325,8 @@ const nl = {
   auth: {
     accountTitle: "Account aanmaken", onboardingTitle: "Maak je profiel compleet", personalTitle: "Persoonlijke gegevens", bodyTitle: "Lichaamsgegevens", goalTitle: "Je doelen",
     registrationLanguage: "Taal", selectLanguage: "Kies je taal",
-    firstName: "Voornaam", lastName: "Achternaam", email: "E-mailadres", password: "Wachtwoord", loginTitle: "Inloggen", login: "Inloggen", loggingIn: "Inloggen…", loginFailure: { title: "Inloggen is niet gelukt.", guidance: "Controleer je gegevens en probeer het opnieuw." },
+    firstName: "Voornaam", lastName: "Achternaam", email: "E-mailadres", password: "Wachtwoord", confirmPassword: "Bevestig wachtwoord", passwordMinimum: "Gebruik minimaal {{minimum}} tekens.", loginTitle: "Inloggen", login: "Inloggen", loggingIn: "Inloggen…", loginFailure: { title: "Inloggen is niet gelukt.", guidance: "Controleer je gegevens en probeer het opnieuw." },
+    registrationErrors: { languageInvalid: "Kies een taal.", firstNameRequired: "Vul je voornaam in.", lastNameRequired: "Vul je achternaam in.", emailRequired: "Vul je e-mailadres in.", emailInvalid: "Vul een geldig e-mailadres in.", passwordRequired: "Vul een wachtwoord in.", passwordTooShort: "Gebruik minimaal {{minimum}} tekens.", confirmationRequired: "Bevestig je wachtwoord.", passwordMismatch: "De wachtwoorden komen niet overeen.", countryInvalid: "Kies een geldig land." },
     residenceCountry: "Woonland", foodRegion: "Voedselregio", selectCountry: "Selecteer een land",
     loadingCountries: "Landen laden…", countryLoadError: "Landen konden niet worden geladen. Probeer het opnieuw.",
     requiredFields: "Vul alle verplichte velden in.", registrationFailure: "We konden je account niet aanmaken. Probeer het opnieuw.", next: "Volgende", registering: "Account aanmaken…",
@@ -638,7 +640,8 @@ const fr = {
   auth: {
     accountTitle: "Créer un compte", onboardingTitle: "Complétez votre profil", personalTitle: "Données personnelles", bodyTitle: "Données corporelles", goalTitle: "Vos objectifs",
     registrationLanguage: "Langue", selectLanguage: "Choisissez votre langue",
-    firstName: "Prénom", lastName: "Nom", email: "Adresse e-mail", password: "Mot de passe", loginTitle: "Se connecter", login: "Se connecter", loggingIn: "Connexion…", loginFailure: { title: "La connexion a échoué.", guidance: "Vérifiez vos informations et réessayez." },
+    firstName: "Prénom", lastName: "Nom", email: "Adresse e-mail", password: "Mot de passe", confirmPassword: "Confirmer le mot de passe", passwordMinimum: "Utilisez au moins {{minimum}} caractères.", loginTitle: "Se connecter", login: "Se connecter", loggingIn: "Connexion…", loginFailure: { title: "La connexion a échoué.", guidance: "Vérifiez vos informations et réessayez." },
+    registrationErrors: { languageInvalid: "Sélectionnez une langue.", firstNameRequired: "Saisissez votre prénom.", lastNameRequired: "Saisissez votre nom.", emailRequired: "Saisissez votre adresse e-mail.", emailInvalid: "Saisissez une adresse e-mail valide.", passwordRequired: "Saisissez un mot de passe.", passwordTooShort: "Utilisez au moins {{minimum}} caractères.", confirmationRequired: "Confirmez votre mot de passe.", passwordMismatch: "Les mots de passe ne correspondent pas.", countryInvalid: "Sélectionnez un pays valide." },
     residenceCountry: "Pays de résidence", foodRegion: "Région alimentaire", selectCountry: "Sélectionnez un pays",
     loadingCountries: "Chargement des pays…", countryLoadError: "Impossible de charger les pays. Réessayez.",
     requiredFields: "Remplissez tous les champs obligatoires.", registrationFailure: "Nous n’avons pas pu créer votre compte. Veuillez réessayer.", next: "Suivant", registering: "Création du compte…",
@@ -953,7 +956,8 @@ const de = {
   auth: {
     accountTitle: "Konto erstellen", onboardingTitle: "Vervollständige dein Profil", personalTitle: "Persönliche Daten", bodyTitle: "Körperdaten", goalTitle: "Deine Ziele",
     registrationLanguage: "Sprache", selectLanguage: "Wähle deine Sprache",
-    firstName: "Vorname", lastName: "Nachname", email: "E-Mail-Adresse", password: "Passwort", loginTitle: "Anmelden", login: "Anmelden", loggingIn: "Anmeldung…", loginFailure: { title: "Die Anmeldung ist fehlgeschlagen.", guidance: "Überprüfe deine Angaben und versuche es erneut." },
+    firstName: "Vorname", lastName: "Nachname", email: "E-Mail-Adresse", password: "Passwort", confirmPassword: "Passwort bestätigen", passwordMinimum: "Verwende mindestens {{minimum}} Zeichen.", loginTitle: "Anmelden", login: "Anmelden", loggingIn: "Anmeldung…", loginFailure: { title: "Die Anmeldung ist fehlgeschlagen.", guidance: "Überprüfe deine Angaben und versuche es erneut." },
+    registrationErrors: { languageInvalid: "Wähle eine Sprache aus.", firstNameRequired: "Gib deinen Vornamen ein.", lastNameRequired: "Gib deinen Nachnamen ein.", emailRequired: "Gib deine E-Mail-Adresse ein.", emailInvalid: "Gib eine gültige E-Mail-Adresse ein.", passwordRequired: "Gib ein Passwort ein.", passwordTooShort: "Verwende mindestens {{minimum}} Zeichen.", confirmationRequired: "Bestätige dein Passwort.", passwordMismatch: "Die Passwörter stimmen nicht überein.", countryInvalid: "Wähle ein gültiges Land aus." },
     residenceCountry: "Wohnland", foodRegion: "Lebensmittelregion", selectCountry: "Land auswählen",
     loadingCountries: "Länder werden geladen…", countryLoadError: "Länder konnten nicht geladen werden. Bitte erneut versuchen.",
     requiredFields: "Fülle alle Pflichtfelder aus.", registrationFailure: "Dein Konto konnte nicht erstellt werden. Bitte versuche es erneut.", next: "Weiter", registering: "Konto wird erstellt…",
@@ -1268,7 +1272,8 @@ const pl = {
   auth: {
     accountTitle: "Utwórz konto", onboardingTitle: "Uzupełnij swój profil", personalTitle: "Dane osobowe", bodyTitle: "Dane ciała", goalTitle: "Twoje cele",
     registrationLanguage: "Język", selectLanguage: "Wybierz język",
-    firstName: "Imię", lastName: "Nazwisko", email: "Adres e-mail", password: "Hasło", loginTitle: "Zaloguj się", login: "Zaloguj się", loggingIn: "Logowanie…", loginFailure: { title: "Logowanie nie powiodło się.", guidance: "Sprawdź swoje dane i spróbuj ponownie." },
+    firstName: "Imię", lastName: "Nazwisko", email: "Adres e-mail", password: "Hasło", confirmPassword: "Potwierdź hasło", passwordMinimum: "Użyj co najmniej {{minimum}} znaków.", loginTitle: "Zaloguj się", login: "Zaloguj się", loggingIn: "Logowanie…", loginFailure: { title: "Logowanie nie powiodło się.", guidance: "Sprawdź swoje dane i spróbuj ponownie." },
+    registrationErrors: { languageInvalid: "Wybierz język.", firstNameRequired: "Wpisz imię.", lastNameRequired: "Wpisz nazwisko.", emailRequired: "Wpisz adres e-mail.", emailInvalid: "Wpisz prawidłowy adres e-mail.", passwordRequired: "Wpisz hasło.", passwordTooShort: "Użyj co najmniej {{minimum}} znaków.", confirmationRequired: "Potwierdź hasło.", passwordMismatch: "Hasła nie są zgodne.", countryInvalid: "Wybierz prawidłowy kraj." },
     residenceCountry: "Kraj zamieszkania", foodRegion: "Region żywności", selectCountry: "Wybierz kraj",
     loadingCountries: "Ładowanie krajów…", countryLoadError: "Nie udało się załadować krajów. Spróbuj ponownie.",
     requiredFields: "Wypełnij wszystkie wymagane pola.", registrationFailure: "Nie udało się utworzyć konta. Spróbuj ponownie.", next: "Dalej", registering: "Tworzenie konta…",

@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { PASSWORD_MIN_LENGTH } from "./passwordPolicy.ts";
+import { validateRegistrationFields } from "./registration.ts";
 
 const root = new URL("../../../", import.meta.url);
 const read = (path: string) => readFile(new URL(path, root), "utf8");
@@ -12,6 +14,16 @@ const registrationFailureText = {
   de: "Dein Konto konnte nicht erstellt werden. Bitte versuche es erneut.",
   pl: "Nie udało się utworzyć konta. Spróbuj ponownie.",
 } as const;
+
+const validRegistration = {
+  firstName: "Alex",
+  lastName: "Example",
+  email: "alex@example.com",
+  password: "correct-horse-battery-staple",
+  confirmPassword: "correct-horse-battery-staple",
+  countryCode: "NL",
+  language: "en" as const,
+};
 
 test("confirmation route handles code and token safely before onboarding", async () => {
   const source = await read("app/auth/confirm/route.ts");
@@ -55,6 +67,155 @@ test("registration renders language selection before the remaining fields", asyn
   const source = await read("app/components/auth/RegisterStep.tsx");
   assert.ok(source.indexOf("registrationLanguage") < source.indexOf('placeholder={t.firstName}'));
   assert.match(source, /selectedLanguage && \(/);
+});
+
+test("shared registration validation blocks password and confirmation failures", () => {
+  const shortPassword = validateRegistrationFields({
+    ...validRegistration,
+    password: "x".repeat(PASSWORD_MIN_LENGTH - 1),
+    confirmPassword: "x".repeat(PASSWORD_MIN_LENGTH - 1),
+  });
+  assert.equal(shortPassword.valid, false);
+  if (!shortPassword.valid) {
+    assert.equal(shortPassword.errors.password, "REG_PASSWORD_TOO_SHORT");
+  }
+
+  const missingConfirmation = validateRegistrationFields({
+    ...validRegistration,
+    confirmPassword: "",
+  });
+  assert.equal(missingConfirmation.valid, false);
+  if (!missingConfirmation.valid) {
+    assert.equal(
+      missingConfirmation.errors.confirmPassword,
+      "REG_CONFIRMATION_REQUIRED"
+    );
+  }
+
+  const mismatch = validateRegistrationFields({
+    ...validRegistration,
+    confirmPassword: "different-password",
+  });
+  assert.equal(mismatch.valid, false);
+  if (!mismatch.valid) {
+    assert.equal(
+      mismatch.errors.confirmPassword,
+      "REG_PASSWORD_MISMATCH"
+    );
+  }
+
+  assert.deepEqual(validateRegistrationFields(validRegistration), {
+    valid: true,
+    errors: {},
+  });
+});
+
+test("RegisterStep validates before signup and maps every shared field error", async () => {
+  const source = await read("app/components/auth/RegisterStep.tsx");
+  const validationCall = source.indexOf("validateRegistrationFields({");
+  const invalidBranch = source.indexOf("if (!validation.valid)");
+  const signupCall = source.indexOf("supabase.auth.signUp");
+
+  assert.ok(validationCall >= 0 && invalidBranch > validationCall);
+  assert.ok(signupCall > invalidBranch);
+  assert.match(source, /if \(!validation\.valid\) \{[\s\S]*?return;[\s\S]*?\}/);
+  assert.match(source, /\.\.\.input,\s*confirmPassword/);
+
+  const mappings = {
+    REG_LANGUAGE_INVALID: "t.registrationErrors.languageInvalid",
+    REG_FIRST_NAME_REQUIRED: "t.registrationErrors.firstNameRequired",
+    REG_LAST_NAME_REQUIRED: "t.registrationErrors.lastNameRequired",
+    REG_EMAIL_REQUIRED: "t.registrationErrors.emailRequired",
+    REG_EMAIL_INVALID: "t.registrationErrors.emailInvalid",
+    REG_PASSWORD_REQUIRED: "t.registrationErrors.passwordRequired",
+    REG_PASSWORD_TOO_SHORT: "t.registrationErrors.passwordTooShort",
+    REG_CONFIRMATION_REQUIRED: "t.registrationErrors.confirmationRequired",
+    REG_PASSWORD_MISMATCH: "t.registrationErrors.passwordMismatch",
+    REG_COUNTRY_INVALID: "t.registrationErrors.countryInvalid",
+  } as const;
+
+  for (const [code, textKey] of Object.entries(mappings)) {
+    assert.match(
+      source,
+      new RegExp(`${code}: [^\\n]*${textKey.replaceAll(".", "\\.")}`)
+    );
+  }
+});
+
+test("registration confirmation stays local and canonical signup data stays unchanged", async () => {
+  const source = await read("app/components/auth/RegisterStep.tsx");
+  const inputBlock = source.match(/const input = \{([\s\S]*?)\n    \};/);
+  const signUpBlock = source.match(/supabase\.auth\.signUp\(\{([\s\S]*?)\n      \}\);/);
+
+  assert.ok(inputBlock);
+  assert.doesNotMatch(inputBlock[1], /confirmPassword/);
+  assert.ok(signUpBlock);
+  assert.doesNotMatch(signUpBlock[1], /confirmPassword/);
+  assert.match(signUpBlock[1], /data: buildRegistrationMetadata\(input\)/);
+  assert.match(
+    signUpBlock[1],
+    /emailRedirectTo: `\$\{window\.location\.origin\}\/auth\/confirm\?next=\/onboarding`/
+  );
+});
+
+test("registration field errors use accessible stable associations and focus order", async () => {
+  const [step, country] = await Promise.all([
+    read("app/components/auth/RegisterStep.tsx"),
+    read("app/components/auth/CountrySelect.tsx"),
+  ]);
+
+  assert.match(step, /const formId = useId\(\)/);
+  assert.match(step, /<form[^>]*noValidate/);
+  assert.match(step, /<label htmlFor=\{fieldIds\.(?:language|firstName|lastName|email|password|confirmPassword)\}/g);
+  assert.match(step, /aria-invalid=\{Boolean\(/);
+  assert.match(step, /aria-describedby=/);
+  assert.match(step, /\[passwordHelperId, passwordError/);
+  assert.match(
+    step,
+    /const FIELD_ORDER:[\s\S]*?"language",[\s\S]*?"firstName",[\s\S]*?"lastName",[\s\S]*?"email",[\s\S]*?"password",[\s\S]*?"confirmPassword",[\s\S]*?"countryCode"/
+  );
+  assert.match(step, /FIELD_ORDER\.find\(\(field\) => errors\[field\]\)/);
+  assert.match(step, /document\.getElementById\(fieldIds\[firstInvalidField\]\)\?\.focus\(\)/);
+  assert.match(step, /role="alert"/);
+
+  assert.match(country, /id\?: string/);
+  assert.match(country, /invalid\?: boolean/);
+  assert.match(country, /describedBy\?: string/);
+  assert.match(country, /\[describedBy, error \? internalErrorId : null\]/);
+});
+
+test("all registration validation copy is present in every supported locale", async () => {
+  const source = await read("app/lib/uiText.ts");
+  const expectedKeys = [
+    "confirmPassword",
+    "passwordMinimum",
+    "languageInvalid",
+    "firstNameRequired",
+    "lastNameRequired",
+    "emailRequired",
+    "emailInvalid",
+    "passwordRequired",
+    "passwordTooShort",
+    "confirmationRequired",
+    "passwordMismatch",
+    "countryInvalid",
+  ];
+
+  for (const key of expectedKeys) {
+    assert.equal(
+      [...source.matchAll(new RegExp(`${key}:`, "g"))].length,
+      5,
+      `${key} must exist in EN, NL, FR, DE and PL`
+    );
+  }
+  assert.equal(
+    [...source.matchAll(/passwordMinimum: "[^"]*\{\{minimum\}\}[^"]*"/g)].length,
+    5
+  );
+  assert.equal(
+    [...source.matchAll(/passwordTooShort: "[^"]*\{\{minimum\}\}[^"]*"/g)].length,
+    5
+  );
 });
 
 test("registration provider failures use one generic localized UI error", async () => {
@@ -144,7 +305,7 @@ test("registration language selection immediately updates the shared LangProvide
 test("registration keeps the chosen country code while the language changes", async () => {
   const source = await read("app/components/auth/RegisterStep.tsx");
   assert.match(source, /value=\{countryCode\}/);
-  assert.match(source, /onChange=\{setCountryCode\}/);
+  assert.match(source, /onChange=\{\(nextCountryCode\) => \{ setCountryCode\(nextCountryCode\);/);
   assert.doesNotMatch(source, /setCountryCode\([^)]*nextLanguage/);
 });
 
