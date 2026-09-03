@@ -86,7 +86,7 @@ export const handbookDocuments: HandbookDocument[] = [
 
     isStart: true,
     status: "current",
-    updated: "2026-07-02",
+    updated: "2026-09-03",
   },
 
   /* ─────────────── H2 ─────────────── */

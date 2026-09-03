@@ -44,11 +44,17 @@ test("protected routes distinguish unauthenticated, incomplete and complete user
   assert.match(source, /new URL\("\/dashboard"/);
 });
 
-test("final onboarding retries reuse the active goal instead of inserting another", async () => {
+test("final onboarding delegates atomic completion to the server boundary", async () => {
   const source = await read("app/components/auth/OnboardingFinalStep.tsx");
-  assert.match(source, /activeGoal[\s\S]*goal_key === goal/);
-  assert.match(source, /update\(\{ goal_key: goal \}\)/);
-  assert.match(source, /: await supabase\.from\("user_goal_periods"\)\.insert/);
+  const submit = source.slice(source.indexOf("async function handleFinish"));
+
+  assert.match(submit, /fetch\("\/api\/onboarding\/complete"/);
+  assert.match(submit, /JSON\.stringify\(\{ activityLevel, goal \}\)/);
+  assert.match(submit, /result\.destination !== "\/dashboard"/);
+  assert.match(submit, /await onComplete\(\)/);
+  assert.doesNotMatch(submit, /from\("profiles"\).*update/s);
+  assert.doesNotMatch(submit, /from\("user_goal_periods"\).*(?:insert|update)/s);
+  assert.doesNotMatch(submit, /recalculate_user_targets|\.message|returnTo/);
 });
 
 test("region settings keep country and food region as separate draft fields", async () => {

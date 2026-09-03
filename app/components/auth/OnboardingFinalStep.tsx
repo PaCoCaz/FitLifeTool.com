@@ -37,28 +37,29 @@ export default function OnboardingFinalStep({ onComplete }: Props) {
     setSaving(true);
     setError(null);
 
-    const { error: profileError } = await supabase.from("profiles").update({
-      activity_level: activityLevel, goal, updated_at: new Date().toJSON(),
-    }).eq("id", user.id);
-    if (profileError) { setSaving(false); return setError(profileError.message); }
+    try {
+      const response = await fetch("/api/onboarding/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activityLevel, goal }),
+      });
+      if (!response.ok) {
+        setError(t.auth.onboardingError);
+        return;
+      }
 
-    const { data: activeGoal, error: activeGoalError } = await supabase
-      .from("user_goal_periods").select("id, goal_key").eq("user_id", user.id).is("end_at", null)
-      .order("start_at", { ascending: false }).limit(1).maybeSingle();
-    if (activeGoalError) { setSaving(false); return setError(activeGoalError.message); }
+      const result = (await response.json()) as { destination?: unknown };
+      if (result.destination !== "/dashboard") {
+        setError(t.auth.onboardingError);
+        return;
+      }
 
-    const goalResult = activeGoal
-      ? activeGoal.goal_key === goal
-        ? { error: null }
-        : await supabase.from("user_goal_periods").update({ goal_key: goal }).eq("id", activeGoal.id)
-      : await supabase.from("user_goal_periods").insert({ user_id: user.id, goal_key: goal, start_at: new Date().toJSON(), end_at: null });
-
-    if (goalResult.error) { setSaving(false); return setError(goalResult.error.message); }
-
-    const { error: recalcError } = await supabase.rpc("recalculate_user_targets", { p_user_id: user.id });
-    setSaving(false);
-    if (recalcError) return setError(recalcError.message);
-    await onComplete();
+      await onComplete();
+    } catch {
+      setError(t.auth.onboardingError);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

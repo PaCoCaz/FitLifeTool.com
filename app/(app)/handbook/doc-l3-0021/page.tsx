@@ -125,8 +125,19 @@ Dashboard`}
         </ul>
 
         <p>
-          Iedere stap schrijft direct gegevens weg naar de database. Er bestaat
-          geen tijdelijke onboarding-state buiten het profiel.
+          De tussenstappen schrijven hervatbare profielgegevens direct naar de
+          database. Er bestaat geen tijdelijke onboarding-state buiten het
+          bestaande datamodel.
+        </p>
+
+        <p>
+          De laatste onboardingstap vormt één server-owned transactionele
+          grens. De actieve doelperiode, de definitieve profielwaarden en alle
+          daarvan afgeleide doelen worden atomair vastgelegd. Pas nadat alle
+          onderdelen succesvol zijn voltooid, kan de bestaande server-side
+          onboardingstatus als compleet worden waargenomen. Een fout rolt de
+          volledige finalisatie terug en houdt de gebruiker fail-closed in de
+          onboarding.
         </p>
 
         <p>
@@ -199,7 +210,10 @@ Dashboard`}
 
           <li>Profielstatus is de enige bron van waarheid voor onboarding.</li>
 
-          <li>Onboarding schrijft direct persistente gegevens weg.</li>
+          <li>
+            Onboarding schrijft hervatbare gegevens persistent weg en rondt de
+            laatste profiel-, doel- en berekeningswijzigingen atomair af.
+          </li>
 
           <li>Middleware bepaalt de toegangsrechten.</li>
 
