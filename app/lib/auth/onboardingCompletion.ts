@@ -29,6 +29,8 @@ export type OnboardingCompletionFailureCode =
   | "INVALID_REQUEST"
   | "ONBOARDING_INPUT_INVALID"
   | "AUTHENTICATION_REQUIRED"
+  | "SESSION_EXPIRED"
+  | "AUTH_STATE_UNAVAILABLE"
   | "ONBOARDING_PREREQUISITES_INCOMPLETE"
   | "ONBOARDING_STATE_CONFLICT"
   | "ONBOARDING_COMPLETION_UNAVAILABLE";
@@ -123,6 +125,7 @@ type CreateCompletionClient = () => Promise<OnboardingCompletionClient>;
 type ResolveCompletionState = (
   client: OnboardingCompletionClient
 ) => Promise<ResolvedCompletionState>;
+type ResolveMissingSession = (error: unknown, user: unknown) => Promise<{ code: "AUTHENTICATION_REQUIRED" | "SESSION_EXPIRED" | "AUTH_STATE_UNAVAILABLE"; destination?: string }>;
 
 function failure(code: OnboardingCompletionFailureCode, status: number) {
   return Response.json({ code }, { status, headers: RESPONSE_HEADERS });
@@ -130,7 +133,8 @@ function failure(code: OnboardingCompletionFailureCode, status: number) {
 
 export function createOnboardingCompletionHandler(
   createCompletionClient: CreateCompletionClient,
-  resolveCompletionState: ResolveCompletionState
+  resolveCompletionState: ResolveCompletionState,
+  resolveMissingSession: ResolveMissingSession = async () => ({ code: "AUTHENTICATION_REQUIRED" })
 ) {
   return async function completeOnboarding(request: Request) {
     const requestOrigin = new URL(request.url).origin;
@@ -158,7 +162,8 @@ export function createOnboardingCompletionHandler(
       client = await createCompletionClient();
       const { data, error } = await client.auth.getUser();
       if (error || !data.user) {
-        return failure("AUTHENTICATION_REQUIRED", 401);
+        const missing = await resolveMissingSession(error, data.user);
+        return Response.json(missing, { status: missing.code === "AUTH_STATE_UNAVAILABLE" ? 503 : 401, headers: RESPONSE_HEADERS });
       }
     } catch {
       return failure("ONBOARDING_COMPLETION_UNAVAILABLE", 503);

@@ -1,14 +1,34 @@
 import { resolveProfileBootstrapValues } from "@/lib/auth/profileBootstrap";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
+import { cookies } from "next/headers";
+import { AUTH_CONTEXT_COOKIE, AUTH_CONTEXT_COOKIE_OPTIONS, buildSessionExpiredLoginPath, classifyIdentityResult, parseAuthContextMarker } from "@/lib/auth/sessionLifecycle";
+
+const authFailureHeaders = { "Cache-Control": "private, no-store", Vary: "Cookie" };
 
 export async function POST(request: Request) {
-  const sessionClient = await createSupabaseServerUser();
-  const { data: { user }, error: userError } = await sessionClient.auth.getUser();
-
-  if (userError || !user) {
-    return Response.json({ error: "Unauthenticated" }, { status: 401 });
+  const cookieStore = await cookies();
+  let user: { id: string; user_metadata?: Record<string, unknown> } | null = null;
+  let userError: unknown = null;
+  try {
+    const sessionClient = await createSupabaseServerUser();
+    const result = await sessionClient.auth.getUser();
+    user = result.data.user;
+    userError = result.error;
+  } catch {
+    return Response.json({ code: "AUTH_STATE_UNAVAILABLE" }, { status: 503, headers: authFailureHeaders });
   }
+
+  const identity = classifyIdentityResult(userError, user, cookieStore.get(AUTH_CONTEXT_COOKIE)?.value);
+  if (identity !== "AUTHENTICATED") {
+    if (identity === "SESSION_EXPIRED") {
+      const marker = parseAuthContextMarker(cookieStore.get(AUTH_CONTEXT_COOKIE)?.value)!;
+      cookieStore.set(AUTH_CONTEXT_COOKIE, "", { ...AUTH_CONTEXT_COOKIE_OPTIONS, maxAge: 0 });
+      return Response.json({ code: identity, destination: buildSessionExpiredLoginPath(marker) }, { status: 401, headers: authFailureHeaders });
+    }
+    return Response.json({ code: identity }, { status: identity === "AUTH_STATE_UNAVAILABLE" ? 503 : 401, headers: authFailureHeaders });
+  }
+  if (!user) return Response.json({ code: "AUTH_STATE_UNAVAILABLE" }, { status: 503, headers: authFailureHeaders });
 
   const admin = createSupabaseServer();
   const { data: existing, error: existingError } = await admin

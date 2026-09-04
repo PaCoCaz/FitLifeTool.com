@@ -5,6 +5,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { User, Session, AuthChangeEvent } from "@supabase/auth-js";
 import { supabase } from "./supabaseClient";
+import { subscribeToClientSessionEvents } from "./auth/clientSessionLifecycle";
 
 /* ───────────────── Types ───────────────── */
 
@@ -67,9 +68,21 @@ export function AuthProvider({
       }
     );
 
+    let unsubscribeLifecycle: () => void = () => undefined;
+    try {
+      unsubscribeLifecycle = subscribeToClientSessionEvents(() => {
+        if (!mounted) return;
+        setUser(null);
+        window.location.reload();
+      });
+    } catch {
+      // Cross-tab lifecycle synchronization is best effort only.
+    }
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      try { unsubscribeLifecycle(); } catch { /* best effort */ }
     };
   }, []);
 

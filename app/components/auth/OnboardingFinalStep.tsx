@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
+import { getClientAuthRecovery, notifyClientSessionEvent } from "@/lib/auth/clientSessionLifecycle";
 
 type ActivityLevel = "sedentary" | "light" | "moderate" | "active" | "very_active";
 type Goal = "LOSE" | "MAINTAIN" | "GAIN";
@@ -43,6 +44,16 @@ export default function OnboardingFinalStep({ onComplete }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ activityLevel, goal }),
       });
+      if (!response.ok) {
+        let body: unknown = null;
+        try { body = await response.clone().json(); } catch { /* fail closed */ }
+        const recovery = getClientAuthRecovery(response.status, body, lang);
+        if (recovery.kind === "navigate") {
+          if (recovery.event) notifyClientSessionEvent(recovery.event);
+          window.location.assign(recovery.destination);
+          return;
+        }
+      }
       if (!response.ok) {
         setError(t.auth.onboardingError);
         return;

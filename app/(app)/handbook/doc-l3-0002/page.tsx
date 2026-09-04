@@ -177,6 +177,22 @@ export default function DocL30002() {
           gebruikersgegevens overzichtelijk, veilig en eenvoudig uitbreidbaar.
         </p>
       </section>
+      <section>
+        <h2>Uitloggen en sessieverloop</h2>
+        <p>
+          Uitloggen is één server-owned POST-handeling die uitsluitend de huidige
+          FitLifeTool-sessie lokaal beëindigt. Een uitlogpoging geldt pas als
+          voltooid nadat de server betrouwbaar heeft vastgesteld dat geen geldige
+          identiteit meer aanwezig is; providerfouten worden nooit aan de gebruiker getoond.
+        </p>
+        <p>
+          Een begrensde, sessiegebonden <code>__Host-flt-auth-context</code>-cookie
+          bewaart alleen de laatst geverifieerde onboardingstatus en interface-locale.
+          Deze marker bevat geen identiteit of PII en is nooit authenticatie- of
+          autorisatiebewijs. Hij onderscheidt uitsluitend gewone anonimiteit,
+          betrouwbaar sessieverloop en een onbeschikbare auth-state voor veilige UX-routing.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

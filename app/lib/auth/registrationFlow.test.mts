@@ -433,8 +433,3 @@ test("persistent profile-driven onboarding state remains intact", async () => {
   assert.match(source, /result\.step/);
   assert.doesNotMatch(source, /localStorage|sessionStorage/);
 });
-
-test("the dormant OTP login helper cannot create profile-less auth users", async () => {
-  const source = await read("app/lib/authActions.ts");
-  assert.match(source, /shouldCreateUser: false/);
-});

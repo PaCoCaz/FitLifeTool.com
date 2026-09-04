@@ -186,6 +186,20 @@ test("completion endpoint authenticates before an identity-free RPC call", async
   assert.equal(anonymous.rpcCalls.length, 0);
 });
 
+test("missing-session classification distinguishes anonymous, expired and unavailable", async () => {
+  for (const [code, status] of [["AUTHENTICATION_REQUIRED", 401], ["SESSION_EXPIRED", 401], ["AUTH_STATE_UNAVAILABLE", 503]] as const) {
+    const anonymous = client({ authenticated: false });
+    const response = await createOnboardingCompletionHandler(
+      async () => anonymous.value,
+      resolveCompleteState,
+      async () => ({ code })
+    )(request());
+    assert.equal(response.status, status);
+    assert.deepEqual(await response.json(), { code });
+    assert.equal(anonymous.rpcCalls.length, 0);
+  }
+});
+
 test("known RPC outcomes map to stable responses", async () => {
   const cases = [
     ["INVALID_INPUT", 422, "ONBOARDING_INPUT_INVALID"],

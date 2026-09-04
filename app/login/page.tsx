@@ -50,6 +50,9 @@ export default async function LoginPage({ searchParams }: Props) {
             {t.passwordResetSuccess} {t.loginAgain}
           </p>
         )}
+        {authNotice === "session_expired" && (
+          <p className="mb-4 text-sm text-amber-800" role="status">{t.sessionExpired}</p>
+        )}
         <LoginForm language={locale} returnTo={returnTo} />
         <Link
           href={getPublicPagePath("home", locale)}

@@ -2,6 +2,18 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+test("session expiry and logout failure copy exists in all five locales", async () => {
+  const source = await readFile(new URL("../uiText.ts", import.meta.url), "utf8");
+  for (const text of [
+    "Your session has expired. Log in again to continue.",
+    "Je sessie is verlopen. Log opnieuw in om verder te gaan.",
+    "Votre session a expiré. Reconnectez-vous pour continuer.",
+    "Deine Sitzung ist abgelaufen. Melde dich erneut an, um fortzufahren.",
+    "Twoja sesja wygasła. Zaloguj się ponownie, aby kontynuować.",
+  ]) assert.match(source, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.equal((source.match(/logoutFailure:/g) ?? []).length, 5);
+});
+
 const projectRoot = new URL("../../../", import.meta.url);
 const providerError = "Invalid login credentials";
 

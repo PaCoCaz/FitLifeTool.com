@@ -245,6 +245,21 @@ Dashboard`}
           (Uitbreidbaarheid).
         </p>
       </section>
+      <section>
+        <h2>Sessieherstel tijdens onboarding</h2>
+        <p>
+          Onvolledige onboarding biedt een expliciete uitlogactie via dezelfde
+          server-owned logoutgrens als de rest van de applicatie. Bij betrouwbaar
+          sessieverloop volgt een locale-aware loginmelding zonder onboarding-
+          <code>returnTo</code>; na opnieuw inloggen bepaalt uitsluitend de server-owned
+          profielstatus waar de gebruiker verdergaat.
+        </p>
+        <p>
+          Alleen een eerder volledig operationele context mag een door de bestaande
+          sanitizer goedgekeurde protected <code>returnTo</code> meenemen. Succesvolle
+          onboarding blijft altijd eindigen op <code>/dashboard</code>.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

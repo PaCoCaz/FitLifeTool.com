@@ -10,6 +10,7 @@ import type { OnboardingProfile, OnboardingStep } from "@/lib/auth/onboardingSta
 import { useUser } from "@/lib/AuthProvider";
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
+import { getClientAuthRecovery, notifyClientSessionEvent } from "@/lib/auth/clientSessionLifecycle";
 
 export default function OnboardingFlow() {
   const router = useRouter();
@@ -25,13 +26,21 @@ export default function OnboardingFlow() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const handleAuthResponse = useCallback(async (response: Response) => {
+    if (response.ok) return false;
+    let body: unknown = null;
+    try { body = await response.clone().json(); } catch { /* fail closed */ }
+    const recovery = getClientAuthRecovery(response.status, body, lang);
+    if (recovery.kind !== "navigate") return false;
+    if (recovery.event) notifyClientSessionEvent(recovery.event);
+    window.location.assign(recovery.destination);
+    return true;
+  }, [lang]);
+
   const loadState = useCallback(async () => {
     setError(null);
     const response = await fetch("/api/onboarding/state", { cache: "no-store" });
-    if (response.status === 401) {
-      router.replace("/");
-      return;
-    }
+    if (await handleAuthResponse(response)) return;
     if (!response.ok) {
       setError(t.onboardingError);
       return;
@@ -47,7 +56,7 @@ export default function OnboardingFlow() {
     }
     setProfile(result.profile);
     setStep(result.step);
-  }, [router, t.onboardingError]);
+  }, [handleAuthResponse, router, t.onboardingError]);
 
   const bootstrap = useCallback(async () => {
     setError(null);
@@ -57,10 +66,7 @@ export default function OnboardingFlow() {
       body: "{}",
     });
 
-    if (response.status === 401) {
-      router.replace("/");
-      return;
-    }
+    if (await handleAuthResponse(response)) return;
     if (response.status === 422) {
       setFirstName(String(user?.user_metadata?.first_name ?? ""));
       setLastName(String(user?.user_metadata?.last_name ?? ""));
@@ -75,7 +81,7 @@ export default function OnboardingFlow() {
 
     setNeedsProfileInput(false);
     await loadState();
-  }, [loadState, router, t.onboardingError, user]);
+  }, [handleAuthResponse, loadState, t.onboardingError, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -105,6 +111,7 @@ export default function OnboardingFlow() {
     });
     setSaving(false);
 
+    if (await handleAuthResponse(response)) return;
     if (!response.ok) {
       setError(t.onboardingError);
       return;

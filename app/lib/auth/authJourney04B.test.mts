@@ -1,6 +1,24 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import test from "node:test";
+import test, { mock } from "node:test";
+import { NextRequest } from "next/server";
+import {
+  AUTH_CONTEXT_COOKIE,
+  parseAuthContextMarker,
+  serializeAuthContextMarker,
+} from "./sessionLifecycle.ts";
+
+test("Phase 06 proxy uses bounded auth context only for expiry UX", async () => {
+  const source = await read("proxy.ts");
+  assert.match(source, /__Host-flt-auth-context|AUTH_CONTEXT_COOKIE/);
+  assert.match(source, /buildSessionExpiredLoginPath/);
+  assert.match(source, /RESOLUTION_FAILURE/);
+  assert.doesNotMatch(source, /marker.*(?:userId|role|email)/i);
+  assert.match(source, /markerAction = \{ value: "", remove: true \}/);
+  const onboarding = await read("app/components/auth/OnboardingFlow.tsx");
+  assert.match(onboarding, /getClientAuthRecovery/);
+  assert.doesNotMatch(onboarding, /response\.status === 401[^]*router\.replace\("\/"\)/);
+});
 import { AuthSessionMissingError } from "@supabase/auth-js";
 import { createPostLoginHandler } from "../../api/auth/post-login/route.ts";
 import type { ServerAuthClient } from "./serverAuthState.ts";
@@ -145,6 +163,79 @@ test("all auth responses preserve queued Supabase cookie writes", async () => {
   assert.match(source, /applyPendingAuthCookies\(response, pendingCookies\)/);
   assert.match(source, /finalize\(NextResponse\.redirect/);
   assert.match(source, /finalize\(\s*NextResponse\.json/);
+});
+
+test("Phase 06 proxy behavior preserves cookies and consumes expiry context", async () => {
+  let mode: AuthClientMode = "complete";
+  const moduleMock = mock.module("@supabase/ssr", {
+    namedExports: {
+      createServerClient(_url: string, _key: string, options: {
+        cookies: { setAll(values: Array<{ name: string; value: string; options?: Record<string, unknown> }>): void };
+      }) {
+        const client = createAuthClient(mode);
+        const originalGetUser = client.auth.getUser;
+        client.auth.getUser = async () => {
+          options.cookies.setAll([{ name: "sb-refresh", value: "refreshed", options: { path: "/", httpOnly: true } }]);
+          return originalGetUser();
+        };
+        return client;
+      },
+    },
+  });
+
+  try {
+    const { proxy } = await import("../../../proxy.ts?phase06-behavior");
+    const request = (path: string, marker?: string) => new NextRequest(
+      `https://fitlifetool.test${path}`,
+      marker ? { headers: { cookie: `${AUTH_CONTEXT_COOKIE}=${marker}` } } : undefined
+    );
+
+    mode = "complete";
+    const authenticated = await proxy(request("/dashboard"));
+    assert.equal(authenticated.status, 200);
+    assert.equal(authenticated.cookies.get("sb-refresh")?.value, "refreshed");
+    assert.deepEqual(
+      parseAuthContextMarker(authenticated.cookies.get(AUTH_CONTEXT_COOKIE)?.value),
+      { version: 1, onboarding: "complete", locale: "nl" }
+    );
+
+    mode = "anonymous";
+    const completeMarker = serializeAuthContextMarker("complete", "fr");
+    const expiredComplete = await proxy(request("/settings?tab=security", completeMarker));
+    const completeLocation = new URL(expiredComplete.headers.get("location")!);
+    assert.equal(expiredComplete.status, 307);
+    assert.equal(completeLocation.pathname, "/login");
+    assert.equal(completeLocation.searchParams.get("lang"), "fr");
+    assert.equal(completeLocation.searchParams.get("auth_notice"), "session_expired");
+    assert.equal(completeLocation.searchParams.get("returnTo"), "/settings?tab=security");
+    assert.equal(expiredComplete.cookies.get("sb-refresh")?.value, "refreshed");
+    assert.equal(expiredComplete.cookies.get(AUTH_CONTEXT_COOKIE)?.value, "");
+    assert.equal(expiredComplete.cookies.get(AUTH_CONTEXT_COOKIE)?.maxAge, 0);
+
+    const afterConsumption = await proxy(request("/settings?tab=security"));
+    const ordinaryLocation = new URL(afterConsumption.headers.get("location")!);
+    assert.equal(ordinaryLocation.pathname, "/login");
+    assert.equal(ordinaryLocation.searchParams.get("auth_notice"), null);
+
+    const incompleteMarker = serializeAuthContextMarker("incomplete", "de");
+    const expiredIncomplete = await proxy(request("/onboarding", incompleteMarker));
+    const incompleteLocation = new URL(expiredIncomplete.headers.get("location")!);
+    assert.equal(incompleteLocation.searchParams.get("lang"), "de");
+    assert.equal(incompleteLocation.searchParams.get("auth_notice"), "session_expired");
+    assert.equal(incompleteLocation.searchParams.get("returnTo"), null);
+    assert.equal(expiredIncomplete.cookies.get(AUTH_CONTEXT_COOKIE)?.value, "");
+
+    const malformed = await proxy(request("/dashboard", encodeURIComponent('{"version":2,"onboarding":"complete","locale":"en"}')));
+    const malformedLocation = new URL(malformed.headers.get("location")!);
+    assert.equal(malformedLocation.searchParams.get("auth_notice"), null);
+    assert.equal(malformed.cookies.get(AUTH_CONTEXT_COOKIE)?.value, "");
+
+    const tamperedPostLogin = createPostLoginHandler(async () => createAuthClient("incomplete"));
+    const postLoginResponse = await tamperedPostLogin(endpointRequest(JSON.stringify({ returnTo: "/settings" })));
+    assert.deepEqual(await responsePayload(postLoginResponse), { destination: "/onboarding" });
+  } finally {
+    moduleMock.restore();
+  }
 });
 
 test("post-login API is same-origin, closed-input, no-store, and generic", async () => {
@@ -298,7 +389,7 @@ test("onboarding state uses authenticated RLS through the shared resolver", asyn
   const source = await read("app/api/onboarding/state/route.ts");
 
   assert.match(source, /createClient\(\)/);
-  assert.match(source, /resolveServerAuthState\(supabase\)/);
+  assert.match(source, /resolveServerAuthState\(await createClient\(\)\)/);
   assert.match(source, /state\.onboardingStep/);
   assert.match(source, /state\.profile/);
   assert.doesNotMatch(source, /createSupabaseServer|SUPABASE_SERVICE_ROLE_KEY|admin\.from/);

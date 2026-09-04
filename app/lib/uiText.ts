@@ -33,6 +33,7 @@ const en = {
     regionTitle: "Country and food region", residenceDescription: "Your country of residence.", foodRegionDescription: "The food market you want to use.", unsupportedFoodRegion: "For this region, we currently use international product results. Regional product data for {{country}} will be added at a later stage.",
     forgotPasswordTitle: "Forgot password?", forgotPasswordSubmit: "Send reset link", forgotPasswordSubmitting: "Sending…",
     forgotPasswordSent: "If an account exists for this email address, you will receive password reset instructions.", backToLogin: "Back to login",
+    sessionExpired: "Your session has expired. Log in again to continue.", logoutFailure: "We couldn’t log you out. Please try again.",
   },
 
   activity: {
@@ -355,6 +356,7 @@ const nl = {
     regionTitle: "Land en voedselregio", residenceDescription: "Het land waar je woont.", foodRegionDescription: "De voedingsmarkt die je wilt gebruiken.", unsupportedFoodRegion: "Voor deze regio gebruiken we momenteel internationale productresultaten. Regionale productdata voor {{country}} zullen in een later stadium worden toegevoegd.",
     forgotPasswordTitle: "Wachtwoord vergeten?", forgotPasswordSubmit: "Reset-link sturen", forgotPasswordSubmitting: "Versturen…",
     forgotPasswordSent: "Als er een account voor dit e-mailadres bestaat, ontvang je instructies om je wachtwoord te resetten.", backToLogin: "Terug naar inloggen",
+    sessionExpired: "Je sessie is verlopen. Log opnieuw in om verder te gaan.", logoutFailure: "We konden je niet uitloggen. Probeer het opnieuw.",
   },
 
   activity: {
@@ -676,6 +678,7 @@ const fr = {
     regionTitle: "Pays et région alimentaire", residenceDescription: "Votre pays de résidence.", foodRegionDescription: "Le marché alimentaire que vous souhaitez utiliser.", unsupportedFoodRegion: "Pour cette région, nous utilisons actuellement les résultats internationaux. Les données régionales sur les produits pour {{country}} seront ajoutées ultérieurement.",
     forgotPasswordTitle: "Mot de passe oublié ?", forgotPasswordSubmit: "Envoyer le lien de réinitialisation", forgotPasswordSubmitting: "Envoi…",
     forgotPasswordSent: "Si un compte existe pour cette adresse e-mail, vous recevrez des instructions pour réinitialiser votre mot de passe.", backToLogin: "Retour à la connexion",
+    sessionExpired: "Votre session a expiré. Reconnectez-vous pour continuer.", logoutFailure: "Nous n’avons pas pu vous déconnecter. Veuillez réessayer.",
   },
 
   activity: {
@@ -998,6 +1001,7 @@ const de = {
     regionTitle: "Land und Lebensmittelregion", residenceDescription: "Dein Wohnland.", foodRegionDescription: "Der Lebensmittelmarkt, den du verwenden möchtest.", unsupportedFoodRegion: "Für diese Region verwenden wir derzeit internationale Produktergebnisse. Regionale Produktdaten für {{country}} werden zu einem späteren Zeitpunkt ergänzt.",
     forgotPasswordTitle: "Passwort vergessen?", forgotPasswordSubmit: "Link zum Zurücksetzen senden", forgotPasswordSubmitting: "Wird gesendet…",
     forgotPasswordSent: "Wenn für diese E-Mail-Adresse ein Konto existiert, erhältst du Anweisungen zum Zurücksetzen deines Passworts.", backToLogin: "Zurück zur Anmeldung",
+    sessionExpired: "Deine Sitzung ist abgelaufen. Melde dich erneut an, um fortzufahren.", logoutFailure: "Du konntest nicht abgemeldet werden. Bitte versuche es erneut.",
   },
 
   activity: {
@@ -1320,6 +1324,7 @@ const pl = {
     regionTitle: "Kraj i region żywności", residenceDescription: "Twój kraj zamieszkania.", foodRegionDescription: "Rynek żywności, którego chcesz używać.", unsupportedFoodRegion: "Dla tego regionu korzystamy obecnie z międzynarodowych wyników produktów. Regionalne dane produktów dla {{country}} zostaną dodane na późniejszym etapie.",
     forgotPasswordTitle: "Nie pamiętasz hasła?", forgotPasswordSubmit: "Wyślij link resetujący", forgotPasswordSubmitting: "Wysyłanie…",
     forgotPasswordSent: "Jeśli konto dla tego adresu e-mail istnieje, otrzymasz instrukcje resetowania hasła.", backToLogin: "Powrót do logowania",
+    sessionExpired: "Twoja sesja wygasła. Zaloguj się ponownie, aby kontynuować.", logoutFailure: "Nie udało się wylogować. Spróbuj ponownie.",
   },
 
   activity: {

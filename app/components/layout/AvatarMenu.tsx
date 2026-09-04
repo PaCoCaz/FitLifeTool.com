@@ -5,10 +5,11 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useLang, useSetUserLanguage } from "@/lib/useLang";
+import { useLang, useSetUserLanguage, type Lang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
-import { useGoalContext } from "@/lib/GoalProvider";
+import { useGoalContext, type GoalKey } from "@/lib/GoalProvider";
 import { useDashboard } from "@/lib/DashboardStore";
+import LogoutControl from "@/components/auth/LogoutControl";
 
 
 type Props = {
@@ -40,23 +41,13 @@ export default function AvatarMenu({ firstName }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
-    setOpen(false);
-    await fetch("/auth/logout", {
-      method: "POST",
-      cache: "no-store",
-      credentials: "include",
-    });
-    window.location.assign("/");
-  };
-
-  async function changeLanguage(newLang: any) {
+  async function changeLanguage(newLang: Lang) {
     setOpen(false);
     setOpenSection(null);
     await setUserLanguage(newLang);
   }
 
-  async function changeGoal(newGoal: any) {
+  async function changeGoal(newGoal: GoalKey) {
     setOpen(false);
     setOpenSection(null);
   
@@ -65,7 +56,7 @@ export default function AvatarMenu({ firstName }: Props) {
     await refreshDashboard();
   }
   
-  const languages = [
+  const languages: Array<{ code: Lang; label: string; flag: string }> = [
     { code: "en", label: "English", flag: "/images/flags/en.svg" },
     { code: "nl", label: "Nederlands", flag: "/images/flags/nl.svg" },
     { code: "de", label: "Deutsch", flag: "/images/flags/de.svg" },
@@ -73,7 +64,7 @@ export default function AvatarMenu({ firstName }: Props) {
     { code: "pl", label: "Polski", flag: "/images/flags/pl.svg" },
   ];
 
-  const goals = [
+  const goals: Array<{ code: GoalKey; label: string }> = [
     { code: "LOSE", label: t.goals.lose },
     { code: "MAINTAIN", label: t.goals.maintain },
     { code: "GAIN", label: t.goals.gain },
@@ -218,15 +209,10 @@ export default function AvatarMenu({ firstName }: Props) {
           <div className="my-2 h-px bg-gray-100" />
 
           {/* SESSION */}
-          <button
-            onClick={handleLogout}
-            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-          >
-            {t.common.logout}
-          </button>
+          <LogoutControl language={langCode} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50" />
 
         </div>
       )}
     </div>
   );
-} 
+}

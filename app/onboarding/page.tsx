@@ -3,6 +3,7 @@
 import OnboardingFlow from "@/components/auth/OnboardingFlow";
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
+import LogoutControl from "@/components/auth/LogoutControl";
 
 export default function OnboardingPage() {
   const lang = useLang();
@@ -20,6 +21,7 @@ export default function OnboardingPage() {
           <h1 id="onboarding-title" className="text-lg font-semibold text-[#191970]">
             {t.onboardingTitle}
           </h1>
+          <LogoutControl language={lang} className="text-sm text-red-600 hover:underline disabled:opacity-50" />
         </div>
         <OnboardingFlow />
       </section>

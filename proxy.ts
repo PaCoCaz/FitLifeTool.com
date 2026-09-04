@@ -20,6 +20,13 @@ import {
   asAuthLocale,
   getSafeProtectedReturnTo,
 } from "./app/lib/auth/authRedirects"
+import {
+  AUTH_CONTEXT_COOKIE,
+  AUTH_CONTEXT_COOKIE_OPTIONS,
+  buildSessionExpiredLoginPath,
+  parseAuthContextMarker,
+  serializeAuthContextMarker,
+} from "./app/lib/auth/sessionLifecycle"
 
 type CookieToSet = {
   name: string
@@ -51,9 +58,21 @@ export async function proxy(request: NextRequest) {
   }
 
   const pendingCookies: PendingAuthCookie[] = []
+  const rawMarker = request.cookies.get(AUTH_CONTEXT_COOKIE)?.value
+  const priorMarker = parseAuthContextMarker(rawMarker)
+  let markerAction: { value: string; remove?: boolean } | null =
+    rawMarker && !priorMarker ? { value: "", remove: true } : null
 
-  const finalize = (response: NextResponse) =>
+  const finalize = (response: NextResponse) => {
     applyPendingAuthCookies(response, pendingCookies)
+    if (markerAction) {
+      response.cookies.set(AUTH_CONTEXT_COOKIE, markerAction.value, {
+        ...AUTH_CONTEXT_COOKIE_OPTIONS,
+        ...(markerAction.remove ? { maxAge: 0 } : {}),
+      })
+    }
+    return response
+  }
 
   const next = () =>
     finalize(NextResponse.next({ request: { headers: requestHeaders } }))
@@ -97,6 +116,13 @@ export async function proxy(request: NextRequest) {
   }
 
   if (authState.kind === "ANONYMOUS") {
+    if ((isProtected || isOnboarding) && priorMarker) {
+      markerAction = { value: "", remove: true }
+      const requestedPath = isProtected
+        ? `${request.nextUrl.pathname}${request.nextUrl.search}`
+        : null
+      return redirect(buildSessionExpiredLoginPath(priorMarker, requestedPath))
+    }
     if (isProtected || isOnboarding) {
       const loginUrl = new URL("/login", request.url)
       loginUrl.searchParams.set("lang", requestedLanguage ?? "en")
@@ -114,6 +140,12 @@ export async function proxy(request: NextRequest) {
     return next()
   }
 
+  markerAction = {
+    value: serializeAuthContextMarker(
+      authState.kind === "AUTHENTICATED_ONBOARDING_COMPLETE" ? "complete" : "incomplete",
+      authState.interfaceLanguage
+    ),
+  }
   requestHeaders.set("x-interface-locale", authState.interfaceLanguage)
   const onboardingStep = authState.onboardingStep
 
