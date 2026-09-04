@@ -12,7 +12,7 @@ declare
   required_goal_columns constant text[] := array[
     'id', 'user_id', 'goal_key', 'start_at', 'end_at'
   ];
-  column_name text;
+  required_column_name text;
 begin
   if pg_catalog.to_regclass('public.profiles') is null
      or pg_catalog.to_regclass('public.user_goal_periods') is null
@@ -20,25 +20,25 @@ begin
     raise exception 'AUTH_JOURNEY_04E_SCHEMA_PRECONDITION_FAILED';
   end if;
 
-  foreach column_name in array required_profile_columns loop
+  foreach required_column_name in array required_profile_columns loop
     if not exists (
       select 1
       from information_schema.columns as c
       where c.table_schema = 'public'
         and c.table_name = 'profiles'
-        and c.column_name = column_name
+        and c.column_name = required_column_name
     ) then
       raise exception 'AUTH_JOURNEY_04E_PROFILE_COLUMN_PRECONDITION_FAILED';
     end if;
   end loop;
 
-  foreach column_name in array required_goal_columns loop
+  foreach required_column_name in array required_goal_columns loop
     if not exists (
       select 1
       from information_schema.columns as c
       where c.table_schema = 'public'
         and c.table_name = 'user_goal_periods'
-        and c.column_name = column_name
+        and c.column_name = required_column_name
     ) then
       raise exception 'AUTH_JOURNEY_04E_GOAL_COLUMN_PRECONDITION_FAILED';
     end if;
@@ -66,6 +66,18 @@ begin
       and pg_catalog.pg_get_constraintdef(constraint_record.oid) ilike '%end_at%'
   ) then
     raise exception 'AUTH_JOURNEY_04E_GOAL_EXCLUSION_PRECONDITION_FAILED';
+  end if;
+
+  if (
+    select pg_catalog.count(*)
+    from pg_catalog.pg_constraint as constraint_record
+    where constraint_record.conrelid = 'public.profiles'::pg_catalog.regclass
+      and constraint_record.conname = 'activity_goal_kcal_range'
+      and constraint_record.contype = 'c'
+      and pg_catalog.pg_get_constraintdef(constraint_record.oid, true) =
+        'CHECK (activity_goal_kcal IS NULL OR activity_goal_kcal >= 200 AND activity_goal_kcal <= 800)'
+  ) <> 1 then
+    raise exception 'AUTH_JOURNEY_04E_ACTIVITY_GOAL_CONSTRAINT_PRECONDITION_FAILED';
   end if;
 
   if pg_catalog.to_regprocedure('public.recalculate_user_targets(uuid)') is null
@@ -131,6 +143,22 @@ begin
   end if;
 end
 $preconditions$;
+
+alter table public.profiles
+  drop constraint activity_goal_kcal_range;
+
+alter table public.profiles
+  add constraint activity_goal_kcal_range
+  check (
+    activity_goal_kcal is null
+    or activity_goal_kcal >= 200 and activity_goal_kcal <= 900
+  );
+
+-- Rollback contract for this invariant only (do not run as part of this migration):
+-- alter table public.profiles drop constraint activity_goal_kcal_range;
+-- alter table public.profiles add constraint activity_goal_kcal_range
+--   check (activity_goal_kcal is null
+--     or activity_goal_kcal >= 200 and activity_goal_kcal <= 800);
 
 create function public.recalculate_user_targets_internal(p_user_id uuid)
 returns void
@@ -232,7 +260,7 @@ begin
     else 1200
   end;
 
-  calculated_calorie_goal := pg_catalog.greatest(
+  calculated_calorie_goal := greatest(
     minimum_calorie_goal,
     pg_catalog.round(
       calculated_tdee + case active_goal_key
@@ -244,9 +272,9 @@ begin
   );
 
   calculated_activity_goal := pg_catalog.round(
-    pg_catalog.least(
+    least(
       900,
-      pg_catalog.greatest(250, calculated_tdee * 0.20)
+      greatest(250, calculated_tdee * 0.20)
     )
   );
 
@@ -477,7 +505,7 @@ begin
   from public.profiles as profile
   where profile.id = caller_user_id;
 
-  if not pg_catalog.coalesce(targets_ready, false) then
+  if not coalesce(targets_ready, false) then
     raise exception 'ONBOARDING_TARGET_CALCULATION_FAILED';
   end if;
 

@@ -24,11 +24,73 @@ test("migration is transactional and refuses unexpected live schema", () => {
   assert.match(sql, /AUTH_JOURNEY_04E_SCHEMA_PRECONDITION_FAILED/);
   assert.match(sql, /AUTH_JOURNEY_04E_PROFILE_COLUMN_PRECONDITION_FAILED/);
   assert.match(sql, /AUTH_JOURNEY_04E_GOAL_EXCLUSION_PRECONDITION_FAILED/);
+  assert.match(
+    sql,
+    /AUTH_JOURNEY_04E_ACTIVITY_GOAL_CONSTRAINT_PRECONDITION_FAILED/
+  );
   assert.match(sql, /AUTH_JOURNEY_04E_RECALCULATION_SIGNATURE_PRECONDITION_FAILED/);
   assert.match(sql, /AUTH_JOURNEY_04E_TRIGGER_PRECONDITION_FAILED/);
   assert.match(sql, /AUTH_JOURNEY_04E_FUNCTION_OVERLOAD_PRECONDITION_FAILED/);
   assert.match(sql, /AUTH_JOURNEY_04E_FUNCTION_COLLISION/);
   assert.doesNotMatch(sql, /drop table|alter table[\s\S]*drop column|disable trigger/i);
+});
+
+test("migration precondition column loops use an unambiguous variable", () => {
+  const preconditionEnd = sql.indexOf("$preconditions$;");
+  assert.ok(preconditionEnd > 0);
+
+  const preconditions = sql.slice(0, preconditionEnd);
+
+  assert.match(preconditions, /required_column_name text;/i);
+  assert.match(
+    preconditions,
+    /foreach required_column_name in array required_profile_columns loop[\s\S]*?c\.column_name = required_column_name/i
+  );
+  assert.match(
+    preconditions,
+    /foreach required_column_name in array required_goal_columns loop[\s\S]*?c\.column_name = required_column_name/i
+  );
+  assert.doesNotMatch(preconditions, /c\.column_name\s*=\s*column_name\b/i);
+});
+
+test("migration uses valid SQL special forms while preserving secure qualification", () => {
+  assert.doesNotMatch(sql, /pg_catalog\.(?:greatest|least|coalesce)\s*\(/i);
+  assert.match(sql, /calculated_calorie_goal := greatest\(/i);
+  assert.match(sql, /calculated_activity_goal := pg_catalog\.round\(\s*least\(/i);
+  assert.match(sql, /greatest\(250, calculated_tdee \* 0\.20\)/i);
+  assert.match(sql, /if not coalesce\(targets_ready, false\) then/i);
+
+  assert.match(sql, /set search_path = ''/i);
+  assert.match(sql, /from public\.profiles/i);
+  assert.match(sql, /from public\.user_goal_periods/i);
+  assert.match(sql, /from public\.countries/i);
+  assert.match(sql, /auth\.uid\(\)/i);
+  assert.match(sql, /auth\.jwt\(\)/i);
+  assert.match(sql, /public\.recalculate_user_targets_internal\(/i);
+});
+
+test("activity-goal constraint is replaced only from the exact live invariant", () => {
+  const precondition = sql.indexOf(
+    "AUTH_JOURNEY_04E_ACTIVITY_GOAL_CONSTRAINT_PRECONDITION_FAILED"
+  );
+  const dropConstraint = sql.indexOf(
+    "alter table public.profiles\n  drop constraint activity_goal_kcal_range;"
+  );
+
+  assert.ok(precondition >= 0);
+  assert.ok(dropConstraint > precondition);
+  assert.match(
+    sql,
+    /constraint_record\.conname = 'activity_goal_kcal_range'[\s\S]*?constraint_record\.contype = 'c'[\s\S]*?pg_catalog\.pg_get_constraintdef\(constraint_record\.oid, true\) =\s*'CHECK \(activity_goal_kcal IS NULL OR activity_goal_kcal >= 200 AND activity_goal_kcal <= 800\)'/i
+  );
+  assert.match(
+    sql,
+    /alter table public\.profiles\s+drop constraint activity_goal_kcal_range;\s+alter table public\.profiles\s+add constraint activity_goal_kcal_range\s+check \(\s*activity_goal_kcal is null\s+or activity_goal_kcal >= 200 and activity_goal_kcal <= 900\s*\);/i
+  );
+  assert.match(
+    sql,
+    /Rollback contract[\s\S]*?activity_goal_kcal >= 200 and activity_goal_kcal <= 800/i
+  );
 });
 
 test("migration rejects every unexpected protected function overload", () => {
@@ -144,7 +206,7 @@ test("internal calculator is owner-only, active-goal based and preserves live fo
   assert.match(body, /when 'GAIN' then 400/);
   assert.match(body, /when 'male' then 1600/);
   assert.match(body, /else 1200/);
-  assert.match(body, /pg_catalog\.greatest\(250, calculated_tdee \* 0\.20\)/);
+  assert.match(body, /greatest\(250, calculated_tdee \* 0\.20\)/);
   assert.match(body, /water_goal_ml = pg_catalog\.round\(profile_weight_kg \* 35\)/);
   assert.doesNotMatch(body, /\bbmi\b/i);
   assert.match(
