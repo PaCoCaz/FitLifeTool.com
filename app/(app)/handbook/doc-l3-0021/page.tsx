@@ -260,6 +260,21 @@ Dashboard`}
           onboarding blijft altijd eindigen op <code>/dashboard</code>.
         </p>
       </section>
+      <section>
+        <h2>Routing na wachtwoordherstel</h2>
+        <p>
+          Wachtwoordherstel bewaart geen <code>returnTo</code> en navigeert nooit
+          rechtstreeks naar het dashboard. Na een geslaagde wachtwoordwijziging en
+          veilige sessieopruiming gaat de gebruiker naar een locale-aware login met
+          uitsluitend de allowlisted melding <code>password_reset</code>.
+        </p>
+        <p>
+          Pas na die nieuwe login bepaalt de bestaande server-owned resolver op basis
+          van de actuele sessie en profielstatus of onboarding of het dashboard de
+          juiste bestemming is. De recoveryflow introduceert daarmee geen alternatieve
+          routing- of onboardingauthority.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

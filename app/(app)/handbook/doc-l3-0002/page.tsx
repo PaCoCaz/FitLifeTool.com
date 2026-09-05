@@ -193,6 +193,31 @@ export default function DocL30002() {
           betrouwbaar sessieverloop en een onbeschikbare auth-state voor veilige UX-routing.
         </p>
       </section>
+      <section>
+        <h2>Wachtwoordherstel en sessie-isolatie</h2>
+        <p>
+          Een wachtwoordherstellink wordt uitsluitend verwerkt door een tijdelijke,
+          action-scoped Supabase-client zonder cookie- of browseropslag. De
+          herstelcredential blijft alleen in het geheugen, wordt niet gelogd of
+          gerenderd en wordt uit de browser-URL verwijderd voordat providerverificatie
+          plaatsvindt. De normale FitLifeTool-browserclient is geen authority binnen
+          deze herstelhandeling.
+        </p>
+        <p>
+          Na lokale wachtwoordvalidatie voert dezelfde geïsoleerde client achtereenvolgens
+          recovery-verificatie, maximaal één wachtwoordmutatie en globale afmelding uit.
+          Een onzekere mutation-uitkomst wordt nooit automatisch herhaald. Wanneer de
+          mutatie aantoonbaar is geslaagd maar afmelding of lokale sessieopruiming niet
+          volledig kan worden bevestigd, geldt dit als partial success en mag alleen de
+          opruiming opnieuw worden geprobeerd.
+        </p>
+        <p>
+          Providerstatussen zoals verlopen of reeds gebruikte links kunnen alleen binnen
+          de garanties van Supabase worden genormaliseerd. FitLifeTool toont daarom geen
+          ruwe providerfouten en claimt geen sterkere token-, replay- of revocatiegaranties
+          dan in productie afzonderlijk zijn gevalideerd.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

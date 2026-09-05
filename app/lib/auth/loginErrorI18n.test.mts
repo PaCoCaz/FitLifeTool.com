@@ -67,3 +67,24 @@ test("LoginForm never renders provider error details", async () => {
   assert.doesNotMatch(source, /\.message/);
   assert.doesNotMatch(source, /Invalid login credentials/);
 });
+
+test("password reset notice is exact, localized, informational, and typed", async () => {
+  const [textSource, loginPage] = await Promise.all([
+    readFile(new URL("app/lib/uiText.ts", projectRoot), "utf8"),
+    readFile(new URL("app/login/page.tsx", projectRoot), "utf8"),
+  ]);
+  for (const notice of [
+    "Your password has been reset. Log in with your new password.",
+    "Je wachtwoord is opnieuw ingesteld. Log in met je nieuwe wachtwoord.",
+    "Votre mot de passe a été réinitialisé. Connectez-vous avec votre nouveau mot de passe.",
+    "Dein Passwort wurde zurückgesetzt. Melde dich mit deinem neuen Passwort an.",
+    "Twoje hasło zostało zresetowane. Zaloguj się przy użyciu nowego hasła.",
+  ]) {
+    assert.match(textSource, new RegExp(notice.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.equal((textSource.match(/passwordResetNotice:/g) ?? []).length, 5);
+  assert.match(loginPage, /authNotice === "password_reset"/);
+  assert.match(loginPage, /role="status"/);
+  assert.match(loginPage, /\{t\.passwordResetNotice\}/);
+  assert.doesNotMatch(loginPage, /passwordResetSuccess|loginAgain|as any/);
+});

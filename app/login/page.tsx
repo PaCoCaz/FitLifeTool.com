@@ -47,7 +47,7 @@ export default async function LoginPage({ searchParams }: Props) {
         </h1>
         {authNotice === "password_reset" && (
           <p className="mb-4 text-sm text-green-700" role="status">
-            {t.passwordResetSuccess} {t.loginAgain}
+            {t.passwordResetNotice}
           </p>
         )}
         {authNotice === "session_expired" && (

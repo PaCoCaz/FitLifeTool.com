@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import AppProviders from "@/components/providers/AppProviders";
 import {
   asPublicLocale,
   PUBLIC_DEFAULT_LOCALE,
@@ -19,6 +18,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "FitLifeTool",
   description: "Personal health & nutrition platform",
+  robots: { index: false, follow: false },
+  referrer: "no-referrer",
 };
 
 export default async function ResetPasswordLayout({
@@ -32,9 +33,7 @@ export default async function ResetPasswordLayout({
 
   return (
     <html lang={PUBLIC_LOCALE_REGISTRY[locale].htmlLang}>
-      <body>
-        <AppProviders>{children}</AppProviders>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
