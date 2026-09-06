@@ -244,6 +244,39 @@ export default function DocL30002() {
           <code>user.identities</code> of <code>app_metadata</code>-providers.
         </p>
       </section>
+      <section>
+        <h2>Open PRELAUNCH-verificatie — Password Change</h2>
+        <p>
+          <strong>AUTH-JOURNEY-08 implementation/release: PRODUCTION GREEN.</strong>{" "}
+          De exact gereleasete commit is <code>900a92eb574dbf7db81078c1b68f165282c6e241</code>.
+          De smalle publieke/negatieve production smoke is eveneens <strong>GREEN</strong>.
+        </p>
+        <p>
+          <strong>Authenticated/provider PRELAUNCH-evidence: OPEN.</strong>{" "}
+          Dit is geen releasefout, maar vereist nog gecontroleerde live-evidence met een
+          daarvoor bestemd testaccount. De volgende verificaties staan open:
+        </p>
+        <ul>
+          <li>een gecontroleerde geauthenticeerde wachtwoordwijziging met een testaccount;</li>
+          <li>de live Supabase Secure Password Change-configuratie en het gedrag daarvan;</li>
+          <li>de live Require Current Password-configuratie en het gedrag daarvan;</li>
+          <li>de provider-wachtwoordregels, inclusief toepasselijke regels en leaked-password protection;</li>
+          <li>het password-change rate-limitgedrag;</li>
+          <li>password-change security notifications;</li>
+          <li>global refresh-token revocation na een wachtwoordwijziging;</li>
+          <li>access-token expiry/survival na een wachtwoordwijziging;</li>
+          <li>de MFA-ineligible Password Change-UX met een gecontroleerd geauthenticeerd account.</li>
+        </ul>
+        <p>
+          De initiële fase blijft beperkt tot password-authenticated <code>aal1</code>-naar-
+          <code>aal1</code>; MFA- of <code>aal2</code>-sessies zijn daarin bewust niet
+          ondersteund. Na een aantoonbaar geslaagde mutatie wordt een globale provider-afmelding
+          geprobeerd, terwijl Phase06 de enige authority voor lokale logout blijft. Totdat de
+          open evidence is verzameld, wordt geen onmiddellijke access-tokeninvalidatie, bewezen
+          globale revocation, providernotification of live providerconfiguratie geclaimd; bestaande
+          access tokens kunnen binnen providersemantiek tot hun eigen verloop bruikbaar blijven.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

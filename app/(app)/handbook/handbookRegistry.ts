@@ -101,7 +101,7 @@ export const handbookDocuments: HandbookDocument[] = [
 
     isStart: true,
     status: "current",
-    updated: "2026-09-05",
+    updated: "2026-09-06",
   },
 
   {
