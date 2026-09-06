@@ -275,6 +275,29 @@ Dashboard`}
           routing- of onboardingauthority.
         </p>
       </section>
+      <section>
+        <h2>Routing na wachtwoordwijziging</h2>
+        <p>
+          Wachtwoord wijzigen start uitsluitend vanuit geauthenticeerde Settings. Na een
+          aantoonbaar geslaagde mutatie doet de providerclient een globale afmeldpoging.
+          De bestaande Phase06 <code>POST /auth/logout</code>-grens blijft de enige authority
+          voor lokale sessieopruiming, terminale anonieme readback en bestaand cross-tab
+          logoutgedrag. Deze flow introduceert geen parallelle logout- of sessiearchitectuur.
+        </p>
+        <p>
+          Na succesvolle afronding gaat de gebruiker naar
+          <code> /login?lang=&lt;locale&gt;&amp;auth_notice=password_changed</code>. De melding
+          <code>password_changed</code> is gesloten en allowlisted; er wordt geen
+          <code>returnTo</code> meegenomen. Bij een ambigue mutatiestatus wordt de mutatie
+          niet herhaald. Een eventuele retry betreft uitsluitend lokale cleanup en voert nooit
+          fresh auth of <code>updateUser</code> opnieuw uit.
+        </p>
+        <p>
+          Provider access tokens kunnen nog geldig blijven tot hun eigen verlopen. Na de
+          volgende login hervat de bestaande server-owned loginroutering op basis van de
+          actuele sessie en profielstatus.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

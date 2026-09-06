@@ -88,3 +88,23 @@ test("password reset notice is exact, localized, informational, and typed", asyn
   assert.match(loginPage, /\{t\.passwordResetNotice\}/);
   assert.doesNotMatch(loginPage, /passwordResetSuccess|loginAgain|as any/);
 });
+
+test("password changed notice is exact, localized, informational, and allowlisted", async () => {
+  const [textSource, loginPage, redirects] = await Promise.all([
+    readFile(new URL("app/lib/uiText.ts", projectRoot), "utf8"),
+    readFile(new URL("app/login/page.tsx", projectRoot), "utf8"),
+    readFile(new URL("app/lib/auth/authRedirects.ts", projectRoot), "utf8"),
+  ]);
+  for (const notice of [
+    "Your password has been changed. Sign in again with your new password.",
+    "Je wachtwoord is gewijzigd. Log opnieuw in met je nieuwe wachtwoord.",
+    "Votre mot de passe a été modifié. Reconnectez-vous avec votre nouveau mot de passe.",
+    "Dein Passwort wurde geändert. Melde dich erneut mit deinem neuen Passwort an.",
+    "Twoje hasło zostało zmienione. Zaloguj się ponownie przy użyciu nowego hasła.",
+  ]) assert.match(textSource, new RegExp(notice.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.equal((textSource.match(/passwordChangedNotice:/g) ?? []).length, 5);
+  assert.match(redirects, /"password_changed"/);
+  assert.match(loginPage, /authNotice === "password_changed"/);
+  assert.match(loginPage, /\{t\.passwordChangedNotice\}/);
+  assert.match(loginPage, /role="status"/);
+});

@@ -50,6 +50,11 @@ export default async function LoginPage({ searchParams }: Props) {
             {t.passwordResetNotice}
           </p>
         )}
+        {authNotice === "password_changed" && (
+          <p className="mb-4 text-sm text-green-700" role="status">
+            {t.passwordChangedNotice}
+          </p>
+        )}
         {authNotice === "session_expired" && (
           <p className="mb-4 text-sm text-amber-800" role="status">{t.sessionExpired}</p>
         )}

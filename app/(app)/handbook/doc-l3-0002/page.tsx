@@ -218,6 +218,32 @@ export default function DocL30002() {
           dan in productie afzonderlijk zijn gevalideerd.
         </p>
       </section>
+      <section>
+        <h2>Wachtwoord wijzigen</h2>
+        <p>
+          Wachtwoord wijzigen is een afzonderlijke, geauthenticeerde instellingenflow.
+          De normale, server-owned identiteit is daarbij de enige authority: de request-body
+          bevat nooit een gebruiker, e-mailadres of andere identiteit. De server bindt de
+          geverifieerde claims-sub aan die normale identiteit en sluit de flow fail-closed
+          wanneer de AMR ontbreekt, ongeldig is of niet uitsluitend <code>password</code> is.
+        </p>
+        <p>
+          De eerste fase ondersteunt uitsluitend <code>aal1</code>-naar-<code>aal1</code>.
+          MFA- of <code>aal2</code>-sessies zijn daarin niet ondersteund. Voor de actuele
+          identiteitsbinding gebruikt de server een geïsoleerde, niet-persistente
+          fresh-auth-client. Die gebruikt alleen het server-afgeleide e-mailadres en het
+          tijdelijke huidige wachtwoord voor een verse password sign-in; de verse gebruiker
+          moet exact dezelfde identiteit zijn als de normale geauthenticeerde gebruiker.
+        </p>
+        <p>
+          De flow hergebruikt de canonieke gedeelde <code>passwordPolicy</code> zonder
+          trimming of een tweede wachtwoordregel. Per actie wordt maximaal één
+          wachtwoordmutatie geprobeerd. Een ambigue mutatie-uitkomst wordt nooit automatisch
+          herhaald. Providerberichten, secrets en wachtwoorden worden niet gelogd of aan de
+          gebruiker getoond; er is geen service-role-wachtwoordmutatie en geen afleiding uit
+          <code>user.identities</code> of <code>app_metadata</code>-providers.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

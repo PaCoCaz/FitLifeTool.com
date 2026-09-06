@@ -13,6 +13,7 @@ export const AUTH_NOTICE_IDS = [
   "confirmation_failed",
   "session_expired",
   "password_reset",
+  "password_changed",
 ] as const;
 
 export type AuthNotice = (typeof AUTH_NOTICE_IDS)[number];
