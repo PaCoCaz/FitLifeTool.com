@@ -57,8 +57,6 @@ export async function POST(req: Request) {
       .eq("user_id", user.id)
       .single();
 
-  console.log("customer", customer);
-
   if (!customer) {
     return new Response(
       JSON.stringify({ error: "No customer" }),
@@ -95,8 +93,6 @@ export async function POST(req: Request) {
 
     subscription = res.data;
   }
-
-  console.log("subscription", subscription);
 
   if (!subscription) {
 

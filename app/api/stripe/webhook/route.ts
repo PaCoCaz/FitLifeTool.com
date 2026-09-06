@@ -29,10 +29,9 @@ import {
         body,
         signature
       );
-    } catch (err) {
+    } catch {
       console.error(
-        "Stripe signature error",
-        err
+        "STRIPE_WEBHOOK_SIGNATURE_INVALID"
       );
   
       return new Response(
@@ -43,10 +42,9 @@ import {
   
     try {
       await handleStripeEvent(event);
-    } catch (err) {
+    } catch {
       console.error(
-        "Stripe webhook error",
-        err
+        "STRIPE_WEBHOOK_PROCESSING_FAILED"
       );
   
       return new Response(

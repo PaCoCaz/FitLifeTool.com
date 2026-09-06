@@ -119,12 +119,6 @@ export async function handleStripeEvent(
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
-
-        console.log(
-          "SUBSCRIPTION EVENT DATA:",
-          event.data.object
-        );
-
         await handleSubscription(event);
         break;
 
@@ -155,8 +149,8 @@ export async function handleStripeEvent(
   } catch (err) {
 
     console.error(
-      "Stripe handler error",
-      err
+      "STRIPE_EVENT_PROCESSING_FAILED",
+      event.type
     );
 
     throw err;
