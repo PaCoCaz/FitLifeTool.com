@@ -167,12 +167,29 @@ test("all auth responses preserve queued Supabase cookie writes", async () => {
 
 test("Phase 06 proxy behavior preserves cookies and consumes expiry context", async () => {
   let mode: AuthClientMode = "complete";
+  let emailChangeRpcData: unknown = [];
+  let localSignOutCalls = 0;
+  let applicationQueryCalls = 0;
   const moduleMock = mock.module("@supabase/ssr", {
     namedExports: {
       createServerClient(_url: string, _key: string, options: {
         cookies: { setAll(values: Array<{ name: string; value: string; options?: Record<string, unknown> }>): void };
       }) {
         const client = createAuthClient(mode);
+        const originalFrom = client.from;
+        client.from = (table: string) => {
+          applicationQueryCalls += 1;
+          return originalFrom(table);
+        };
+        Object.assign(client, {
+          rpc: async () => ({ data: emailChangeRpcData, error: null }),
+        });
+        Object.assign(client.auth, {
+          signOut: async () => {
+            localSignOutCalls += 1;
+            return { error: null };
+          },
+        });
         const originalGetUser = client.auth.getUser;
         client.auth.getUser = async () => {
           options.cookies.setAll([{ name: "sb-refresh", value: "refreshed", options: { path: "/", httpOnly: true } }]);
@@ -185,9 +202,9 @@ test("Phase 06 proxy behavior preserves cookies and consumes expiry context", as
 
   try {
     const { proxy } = await import("../../../proxy.ts?phase06-behavior");
-    const request = (path: string, marker?: string) => new NextRequest(
+    const request = (path: string, marker?: string, method = "GET") => new NextRequest(
       `https://fitlifetool.test${path}`,
-      marker ? { headers: { cookie: `${AUTH_CONTEXT_COOKIE}=${marker}` } } : undefined
+      { method, ...(marker ? { headers: { cookie: `${AUTH_CONTEXT_COOKIE}=${marker}` } } : {}) }
     );
 
     mode = "complete";
@@ -198,6 +215,62 @@ test("Phase 06 proxy behavior preserves cookies and consumes expiry context", as
       parseAuthContextMarker(authenticated.cookies.get(AUTH_CONTEXT_COOKIE)?.value),
       { version: 1, onboarding: "complete", locale: "nl" }
     );
+
+    emailChangeRpcData = [{
+      status: "requesting",
+      generation: 1,
+      requires_reauthentication: true,
+      pre_provider_recovery_available: true,
+    }];
+    applicationQueryCalls = 0;
+    assert.equal((await proxy(request("/settings"))).status, 200);
+    assert.equal((await proxy(request("/api/auth/change-email", undefined, "POST"))).status, 200);
+    assert.equal(applicationQueryCalls, 0);
+    assert.equal((await proxy(request("/dashboard"))).status, 307);
+    assert.equal(applicationQueryCalls, 2);
+
+    emailChangeRpcData = [{
+      status: "requesting",
+      generation: 1,
+      requires_reauthentication: true,
+      pre_provider_recovery_available: false,
+    }];
+    assert.equal((await proxy(request("/settings", undefined, "POST"))).status, 307);
+    assert.equal((await proxy(request("/api/auth/change-email"))).status, 409);
+
+    emailChangeRpcData = [{
+      status: "requesting",
+      generation: 1,
+      requires_reauthentication: true,
+    }];
+    assert.equal((await proxy(request("/settings"))).status, 503);
+
+    localSignOutCalls = 0;
+    emailChangeRpcData = [{
+      status: "completed",
+      generation: 2,
+      requires_reauthentication: true,
+      pre_provider_recovery_available: false,
+    }];
+    const blockedPage = await proxy(request("/dashboard"));
+    const blockedPageLocation = new URL(blockedPage.headers.get("location")!);
+    assert.equal(blockedPage.status, 307);
+    assert.equal(blockedPageLocation.pathname, "/login");
+    assert.equal(blockedPageLocation.searchParams.get("auth_notice"), "email_changed");
+    assert.equal(localSignOutCalls, 1);
+
+    const blockedOnboarding = await proxy(request("/onboarding"));
+    assert.equal(blockedOnboarding.status, 307);
+    assert.equal(new URL(blockedOnboarding.headers.get("location")!).pathname, "/login");
+    assert.equal(localSignOutCalls, 2);
+
+    const blockedApi = await proxy(request("/api/profile/subscription"));
+    assert.equal(blockedApi.status, 409);
+    assert.deepEqual(await responsePayload(blockedApi), {
+      code: "EMAIL_CHANGE_REAUTH_REQUIRED",
+    });
+    assert.equal(localSignOutCalls, 2);
+    emailChangeRpcData = [];
 
     mode = "anonymous";
     const completeMarker = serializeAuthContextMarker("complete", "fr");
@@ -244,7 +317,7 @@ test("post-login API is same-origin, closed-input, no-store, and generic", async
     read("app/lib/auth/postLoginDestination.ts"),
   ]);
 
-  assert.match(source, /export const POST = createPostLoginHandler\(createClient\)/);
+  assert.match(source, /export const POST = createPostLoginHandler\(createClient, enforceEmailChangeGuard\)/);
   assert.match(source, /request\.headers\.get\("origin"\) !== requestOrigin/);
   assert.match(source, /key !== "returnTo"/);
   assert.match(source, /resolveServerAuthState\(supabase\)/);
@@ -267,6 +340,29 @@ test("post-login endpoint returns a safe destination for a complete user", async
     destination: "/settings?tab=security",
   });
   assertSecurityHeaders(response);
+});
+
+test("post-login dynamically enforces only the current Email Change session", async () => {
+  const blocked = createPostLoginHandler(
+    async () => createAuthClient("complete"),
+    async () => "pending"
+  );
+  const unavailable = createPostLoginHandler(
+    async () => createAuthClient("complete"),
+    async () => "unavailable"
+  );
+
+  const blockedResponse = await blocked(endpointRequest());
+  assert.equal(blockedResponse.status, 409);
+  assert.deepEqual(await responsePayload(blockedResponse), {
+    code: "EMAIL_CHANGE_REAUTH_REQUIRED",
+  });
+
+  const unavailableResponse = await unavailable(endpointRequest());
+  assert.equal(unavailableResponse.status, 503);
+  assert.deepEqual(await responsePayload(unavailableResponse), {
+    code: "AUTH_STATE_UNAVAILABLE",
+  });
 });
 
 test("post-login endpoint forces incomplete users to onboarding", async () => {
@@ -407,4 +503,31 @@ test("registration and the public auth modal remain unchanged integration consum
   assert.match(modal, /<RegisterStep/);
   assert.match(publicProvider, /<RegisterModal/);
   assert.match(registration, /className="mt-2 w-full rounded border/);
+});
+
+test("proxy and post-login enforce durable Email Change reauthentication state", async () => {
+  const [proxy, postLogin, login, migration] = await Promise.all([
+    read("proxy.ts"), read("app/api/auth/post-login/route.ts"), read("app/components/auth/LoginForm.tsx"),
+    read("supabase/migrations/20260908100000_add_auth_email_change_flow.sql"),
+  ]);
+  assert.match(proxy, /get_own_auth_email_change_state/);
+  assert.match(proxy, /readOwnEmailChangeSessionState/);
+  assert.match(proxy, /isProtected \|\| isOnboarding \|\| isProtectedApi/);
+  assert.match(proxy, /apiFailure\("EMAIL_CHANGE_REAUTH_REQUIRED", 409\)/);
+  assert.match(proxy, /signOut\(\{ scope: "local" \}\)/);
+  assert.match(postLogin, /readOwnEmailChangeSessionState/);
+  assert.doesNotMatch(postLogin, /acknowledge_auth_email_change_reauthentication/);
+  assert.match(postLogin, /EMAIL_CHANGE_REAUTH_REQUIRED/);
+  assert.match(login, /fetch\("\/auth\/logout"/);
+  assert.match(login, /notifyClientSessionEvent\("logout"\)/);
+  const begin = migration.slice(
+    migration.indexOf("create function public.begin_auth_email_change_request"),
+    migration.indexOf("create function public.accept_auth_email_change_request")
+  );
+  assert.doesNotMatch(begin, /canonical_changed_at = null/);
+  assert.match(begin, /canonical_changed_generation = null/);
+  assert.match(
+    migration,
+    /request_status = 'request_failed' and change_epoch is null/
+  );
 });

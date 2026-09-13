@@ -4,6 +4,7 @@ import {
   resolveServerAuthState,
   type ServerAuthClient,
 } from "../../../lib/auth/serverAuthState";
+import { readOwnEmailChangeSessionState } from "../../../lib/auth/emailChangeState";
 
 const RESPONSE_HEADERS = {
   "Cache-Control": "private, no-store",
@@ -18,9 +19,21 @@ function failure(code: string, status: number) {
 }
 
 type CreateServerAuthClient = () => Promise<ServerAuthClient>;
+type EmailChangeGuard = (client: ServerAuthClient, userId: string) => Promise<"ok" | "pending" | "unavailable">;
+
+async function enforceEmailChangeGuard(client: ServerAuthClient, userId: string): Promise<"ok" | "pending" | "unavailable"> {
+  void userId;
+  const rpc = (client as unknown as { rpc(name: string): Promise<{ data: unknown; error: unknown }> }).rpc.bind(client);
+  const current = await rpc("get_own_auth_email_change_state");
+  if (current.error) return "unavailable";
+  const state = readOwnEmailChangeSessionState(current.data);
+  if (!state) return "unavailable";
+  return state.requiresReauthentication ? "pending" : "ok";
+}
 
 export function createPostLoginHandler(
-  createServerAuthClient: CreateServerAuthClient
+  createServerAuthClient: CreateServerAuthClient,
+  emailChangeGuard: EmailChangeGuard = async () => "ok"
 ) {
   return async function postLogin(request: Request) {
     const requestOrigin = new URL(request.url).origin;
@@ -51,8 +64,9 @@ export function createPostLoginHandler(
     }
 
     let state;
+    let supabase: ServerAuthClient;
     try {
-      const supabase = await createServerAuthClient();
+      supabase = await createServerAuthClient();
       state = await resolveServerAuthState(supabase);
     } catch {
       return failure("AUTH_STATE_UNAVAILABLE", 503);
@@ -65,6 +79,16 @@ export function createPostLoginHandler(
         : failure(result.code, 503);
     }
 
+    if (!state.userId) return failure("AUTHENTICATION_REQUIRED", 401);
+    let guard: "ok" | "pending" | "unavailable";
+    try {
+      guard = await emailChangeGuard(supabase, state.userId);
+    } catch {
+      return failure("AUTH_STATE_UNAVAILABLE", 503);
+    }
+    if (guard === "pending") return failure("EMAIL_CHANGE_REAUTH_REQUIRED", 409);
+    if (guard === "unavailable") return failure("AUTH_STATE_UNAVAILABLE", 503);
+
     return Response.json(
       { destination: result.destination },
       { status: 200, headers: RESPONSE_HEADERS }
@@ -72,4 +96,4 @@ export function createPostLoginHandler(
   };
 }
 
-export const POST = createPostLoginHandler(createClient);
+export const POST = createPostLoginHandler(createClient, enforceEmailChangeGuard);

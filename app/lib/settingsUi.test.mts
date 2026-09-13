@@ -78,6 +78,36 @@ test("settings receives password-change availability from the server and renders
   assert.match(card, /disabled/);
 });
 
+test("settings keeps canonical email server-owned and renders the dedicated Email Change card", async () => {
+  const [page, grid, account, emailCard] = await Promise.all([
+    read("app/(app)/settings/page.tsx"), read("app/components/layout/SettingsGrid.tsx"),
+    read("app/components/settings/AccountCard.tsx"), read("app/components/settings/EmailChangeCard.tsx"),
+  ]);
+  assert.match(page, /resolveEmailChangeIdentity/);
+  assert.match(page, /canonicalEmail = emailIdentity\.ok \? emailIdentity\.email : null/);
+  assert.match(grid, /<AccountCard canonicalEmail=\{canonicalEmail\}/);
+  assert.match(grid, /<EmailChangeCard language=\{language\} available=\{emailChangeAvailable\} canonicalEmail=\{canonicalEmail\}/);
+  assert.match(account, /\{canonicalEmail \?\? "—"\}/);
+  assert.doesNotMatch(account, /\{user\?\.email\}/);
+  for (const token of ["aria-invalid", "aria-describedby", "notifyClientSessionEvent", "parseLocalCleanup", "window.location.assign"]) assert.match(emailCard, new RegExp(token));
+});
+
+test("Email Change recovery surface remains renderable while surrounding data providers fail closed", async () => {
+  const [providers, language, goals, dashboard, page] = await Promise.all([
+    read("app/components/providers/AppProviders.tsx"),
+    read("app/lib/LangProvider.tsx"),
+    read("app/lib/GoalProvider.tsx"),
+    read("app/lib/DashboardStore.tsx"),
+    read("app/(app)/settings/page.tsx"),
+  ]);
+  assert.match(providers, /<DashboardProvider>\{children\}<\/DashboardProvider>/);
+  assert.match(language, /if \(error\) \{[\s\S]*?setLoadedUserId\(userId\)[\s\S]*?return;/);
+  assert.match(goals, /setGoal\(data\?\.goal_key \?\? null\)/);
+  assert.match(dashboard, /try \{[\s\S]*?finally \{/);
+  assert.match(page, /return <SettingsGrid/);
+  assert.doesNotMatch(page, /\.from\("profiles"\)|\.from\("user_goal_periods"\)/);
+});
+
 test("password-change form is accessible and delegates terminal cleanup to Phase06", async () => {
   const card = await read("app/components/settings/PasswordChangeCard.tsx");
   for (const value of [

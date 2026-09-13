@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { uiText } from "@/lib/uiText";
 import type { Lang } from "@/lib/useLang";
 import { isAllowedPostLoginDestination } from "@/lib/auth/postLoginDestination";
+import { notifyClientSessionEvent } from "@/lib/auth/clientSessionLifecycle";
 
 type Props = {
   language: Lang;
@@ -21,6 +22,22 @@ export default function LoginForm({ language, onRegister, returnTo }: Props) {
   const [password, setPassword] = useState("");
   const [loginFailed, setLoginFailed] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const clearBlockedSession = async () => {
+    try {
+      const response = await fetch("/auth/logout", {
+        method: "POST", credentials: "include", cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language }),
+      });
+      if (!response.ok) return false;
+      notifyClientSessionEvent("logout");
+      window.location.assign(`/login?lang=${language}&auth_notice=email_change_pending`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +70,15 @@ export default function LoginForm({ language, onRegister, returnTo }: Props) {
       });
 
       if (!response.ok) {
+        let code: unknown = null;
+        try {
+          const body: unknown = await response.json();
+          code = body && typeof body === "object" && "code" in body
+            ? (body as { code: unknown }).code : null;
+        } catch { /* stable fallback below */ }
+        if (response.status === 409 && code === "EMAIL_CHANGE_REAUTH_REQUIRED") {
+          if (await clearBlockedSession()) return;
+        }
         window.location.reload();
         return;
       }

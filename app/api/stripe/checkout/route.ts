@@ -48,11 +48,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const { data: customer } = await supabase
+    const { data: customer, error: customerReadError } = await supabase
       .from("customers")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
       .maybeSingle();
+
+    if (customerReadError) {
+      throw new Error("CUSTOMER_MAPPING_READ_FAILED");
+    }
 
     let stripeCustomerId = customer?.stripe_customer_id ?? null;
 
@@ -63,10 +67,21 @@ export async function POST(req: Request) {
 
       stripeCustomerId = newCustomer.id;
 
-      await supabase.from("customers").insert({
-        user_id: user.id,
-        stripe_customer_id: stripeCustomerId,
-      });
+    }
+
+    const { data: mappingResult, error: mappingError } = await supabase.rpc(
+      "establish_customer_mapping",
+      {
+        p_user_id: user.id,
+        p_stripe_customer_id: stripeCustomerId,
+      }
+    );
+
+    if (
+      mappingError ||
+      (mappingResult !== "established" && mappingResult !== "existing")
+    ) {
+      throw new Error("CUSTOMER_MAPPING_ESTABLISHMENT_FAILED");
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -87,8 +102,8 @@ export async function POST(req: Request) {
     });
 
     return new Response(JSON.stringify({ url: session.url }));
-  } catch (err) {
-    console.error(err);
+  } catch {
+    console.error("STRIPE_CHECKOUT_FAILED");
 
     return new Response(
       JSON.stringify({ error: "Server error" }),

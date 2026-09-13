@@ -298,6 +298,29 @@ Dashboard`}
           actuele sessie en profielstatus.
         </p>
       </section>
+      <section>
+        <h2>Routing tijdens en na e-mailwijziging</h2>
+        <p>
+          Een geaccepteerd e-mailwijzigingsverzoek beëindigt de initiërende sessie en
+          navigeert via de bestaande locale-aware publieke-homeauthority naar
+          <code>/</code>, <code>/nl</code>, <code>/fr</code>, <code>/de</code> of
+          <code>/pl</code>; <code>/en</code> bestaat niet. De callback wisselt geen
+          credential om en maakt geen sessie, maar verwijdert providercredentials uit
+          de volgende URL en toont uitsluitend een generieke observatiestatus.
+        </p>
+        <p>
+          Zolang bevestiging of providerstatus onzeker is, blokkeren proxy en
+          post-login-grens protected toegang fail-closed. Na de canonieke Auth-wijziging
+          maakt alleen een nieuwe password-login de daarbij nieuw aangemaakte sessie
+          bruikbaar; een oude of vernieuwde sessie en een andere browser blijven geblokkeerd.
+          Deze grens geldt centraal voor protected pagina&apos;s, onboarding en authenticated
+          application API&apos;s. De database-pre-requestguard voorkomt daarnaast een bypass via
+          directe Data API- of authenticated RPC-aanroepen. Ontbrekende of ambigue
+          sessiemetadata resulteert in <code>AUTH_STATE_UNAVAILABLE</code>; een aantoonbaar
+          niet-vrijgegeven sessie in <code>EMAIL_CHANGE_REAUTH_REQUIRED</code>. Een cleanup-
+          of navigatieretry kan nooit een tweede provider-mutatie uitvoeren.
+        </p>
+      </section>
     </DocumentLayout>
   );
 }

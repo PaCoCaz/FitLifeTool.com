@@ -4,6 +4,8 @@ import { NextResponse, type NextRequest } from "next/server"
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import {
   isOnboardingRoute,
+  isEmailChangeRecoveryRoute,
+  isAuthenticatedApplicationApiRoute,
   isProtectedAppRoute,
   isRouteWithin,
   normalizePathnameForAuth,
@@ -16,6 +18,7 @@ import {
   type PendingAuthCookie,
 } from "./app/lib/auth/serverAuthState"
 import { resolvePostLoginDestination } from "./app/lib/auth/postLoginDestination"
+import { readOwnEmailChangeSessionState } from "./app/lib/auth/emailChangeState"
 import {
   asAuthLocale,
   getSafeProtectedReturnTo,
@@ -88,6 +91,17 @@ export async function proxy(request: NextRequest) {
       )
     )
 
+  const apiFailure = (code: string, status: number) =>
+    finalize(
+      NextResponse.json(
+        { code },
+        {
+          status,
+          headers: { "Cache-Control": "private, no-store", Vary: "Cookie" },
+        }
+      )
+    )
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -109,6 +123,38 @@ export async function proxy(request: NextRequest) {
 
   const isProtected = isProtectedAppRoute(authorizationPathname)
   const isOnboarding = isOnboardingRoute(authorizationPathname)
+  const isProtectedApi = isAuthenticatedApplicationApiRoute(
+    authorizationPathname
+  )
+  const isRecoveryCandidate = isEmailChangeRecoveryRoute(
+    pathname,
+    request.method
+  )
+
+  if (isRecoveryCandidate) {
+    let recoveryIdentity: Awaited<ReturnType<typeof supabase.auth.getUser>>
+    try {
+      recoveryIdentity = await supabase.auth.getUser()
+    } catch {
+      return unavailable()
+    }
+
+    if (!recoveryIdentity.error && recoveryIdentity.data.user) {
+      let emailChange: { data: unknown; error: unknown }
+      try {
+        emailChange = await (supabase as unknown as {
+          rpc(name: string): Promise<{ data: unknown; error: unknown }>
+        }).rpc("get_own_auth_email_change_state")
+      } catch {
+        return unavailable()
+      }
+      if (emailChange.error) return unavailable()
+      const emailChangeState = readOwnEmailChangeSessionState(emailChange.data)
+      if (!emailChangeState) return unavailable()
+      if (emailChangeState.preProviderRecoveryAvailable) return next()
+    }
+  }
+
   const authState = await resolveServerAuthState(supabase)
 
   if (authState.kind === "RESOLUTION_FAILURE") {
@@ -116,6 +162,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (authState.kind === "ANONYMOUS") {
+    if (isProtectedApi) {
+      return apiFailure("AUTHENTICATION_REQUIRED", 401)
+    }
     if ((isProtected || isOnboarding) && priorMarker) {
       markerAction = { value: "", remove: true }
       const requestedPath = isProtected
@@ -148,6 +197,45 @@ export async function proxy(request: NextRequest) {
   }
   requestHeaders.set("x-interface-locale", authState.interfaceLanguage)
   const onboardingStep = authState.onboardingStep
+
+  if (isProtected || isOnboarding || isProtectedApi) {
+    let emailChange: { data: unknown; error: unknown }
+    try {
+      emailChange = await (supabase as unknown as {
+        rpc(name: string): Promise<{ data: unknown; error: unknown }>
+      }).rpc("get_own_auth_email_change_state")
+    } catch {
+      return unavailable()
+    }
+    if (emailChange.error) return unavailable()
+    const emailChangeState = readOwnEmailChangeSessionState(emailChange.data)
+    if (!emailChangeState) return unavailable()
+    if (emailChangeState.requiresReauthentication) {
+      if (isProtectedApi) {
+        return apiFailure("EMAIL_CHANGE_REAUTH_REQUIRED", 409)
+      }
+      try {
+        const signedOut = await supabase.auth.signOut({ scope: "local" })
+        if (signedOut.error) return unavailable()
+      } catch {
+        return unavailable()
+      }
+      const loginUrl = new URL("/login", request.url)
+      loginUrl.searchParams.set("lang", authState.interfaceLanguage)
+      loginUrl.searchParams.set(
+        "auth_notice",
+        emailChangeState.status === "canonical_changed" ||
+          emailChangeState.status === "completed"
+          ? "email_changed"
+          : "email_change_pending"
+      )
+      return finalize(NextResponse.redirect(loginUrl))
+    }
+  }
+
+  if (isProtectedApi) {
+    return next()
+  }
 
   if (isProtected && onboardingStep !== "complete") {
     return finalize(

@@ -58,6 +58,12 @@ export default async function LoginPage({ searchParams }: Props) {
         {authNotice === "session_expired" && (
           <p className="mb-4 text-sm text-amber-800" role="status">{t.sessionExpired}</p>
         )}
+        {authNotice === "email_change_pending" && (
+          <p className="mb-4 text-sm text-amber-800" role="status">{t.emailChangePendingNotice}</p>
+        )}
+        {authNotice === "email_changed" && (
+          <p className="mb-4 text-sm text-green-700" role="status">{t.emailChangedNotice}</p>
+        )}
         <LoginForm language={locale} returnTo={returnTo} />
         <Link
           href={getPublicPagePath("home", locale)}

@@ -9,15 +9,18 @@ import GoalCard from "@/components/settings/GoalCard";
 import SubscriptionCard from "@/components/settings/SubscriptionCard";
 import RegionCard from "@/components/settings/RegionCard";
 import PasswordChangeCard from "@/components/settings/PasswordChangeCard";
+import EmailChangeCard from "@/components/settings/EmailChangeCard";
+import { useLang } from "@/lib/useLang";
 
-export default function SettingsGrid({ passwordChangeAvailable }: { passwordChangeAvailable: boolean }) {
+export default function SettingsGrid({ passwordChangeAvailable, emailChangeAvailable, canonicalEmail }: { passwordChangeAvailable: boolean; emailChangeAvailable: boolean; canonicalEmail: string | null }) {
+  const language = useLang();
   return (
     <section className="grid grid-cols-12 auto-rows-auto gap-4 items-start">
 
       {/* Rij 1 */}
 
       <div className="col-span-12 md:col-span-6">
-        <AccountCard />
+        <AccountCard canonicalEmail={canonicalEmail} />
       </div>
 
       <div className="col-span-12 md:col-span-6">
@@ -48,6 +51,10 @@ export default function SettingsGrid({ passwordChangeAvailable }: { passwordChan
 
       <div className="col-span-12 md:col-span-6">
         <PasswordChangeCard available={passwordChangeAvailable} />
+      </div>
+
+      <div className="col-span-12 md:col-span-6">
+        <EmailChangeCard language={language} available={emailChangeAvailable} canonicalEmail={canonicalEmail} />
       </div>
 
     </section>

@@ -4,6 +4,8 @@ import test from "node:test";
 
 import {
   isAuthEntryRoute,
+  isAuthenticatedApplicationApiRoute,
+  isEmailChangeRecoveryRoute,
   isOnboardingRoute,
   isProtectedAppRoute,
   isRouteWithin,
@@ -11,6 +13,30 @@ import {
   requiresProxyAuth,
   skipsProxyAuth,
 } from "./proxyAuthRules.ts";
+
+test("Email Change recovery is limited to exact paths and methods", () => {
+  assert.equal(isEmailChangeRecoveryRoute("/settings", "GET"), true);
+  assert.equal(isEmailChangeRecoveryRoute("/settings", "HEAD"), true);
+  assert.equal(isEmailChangeRecoveryRoute("/api/auth/change-email", "POST"), true);
+
+  for (const [pathname, method] of [
+    ["/settings", "POST"],
+    ["/settings/", "GET"],
+    ["/settings/security", "GET"],
+    ["/%73ettings", "GET"],
+    ["/settings?recovery=true", "GET"],
+    ["/api/auth/change-email", "GET"],
+    ["/api/auth/change-email", "HEAD"],
+    ["/api/auth/%63hange-email", "POST"],
+    ["/api/auth/change-email/extra", "POST"],
+    ["/dashboard", "GET"],
+    ["/handbook", "GET"],
+    ["/onboarding", "GET"],
+    ["/api/profile/subscription", "POST"],
+  ] as const) {
+    assert.equal(isEmailChangeRecoveryRoute(pathname, method), false, `${method} ${pathname}`);
+  }
+});
 
 const projectRoot = new URL("../../../", import.meta.url);
 const favoritesRouteSource = await readFile(
@@ -42,11 +68,19 @@ function routeHandlerSource(
   );
 }
 
-test("alleen exact /api/favorites slaat proxy-auth over", () => {
-  assert.equal(skipsProxyAuth("/api/favorites"), true);
-
+test("alleen expliciete publieke en service-API's slaan proxy-auth over", () => {
   for (const pathname of [
-    "/api/favorites/",
+    "/api/auth/forgot-password",
+    "/api/auth/resend-confirmation",
+    "/api/auth/post-login",
+    "/api/reference/countries",
+    "/api/stripe/webhook",
+    "/api/cron/auth-email-sync",
+  ]) {
+    assert.equal(skipsProxyAuth(pathname), true, pathname);
+  }
+  for (const pathname of [
+    "/api/favorites",
     "/api/favorites/access",
     "/api/favorites-extra",
     "/api/profile/subscription",
@@ -62,14 +96,31 @@ test("alleen exact /api/favorites slaat proxy-auth over", () => {
   }
 });
 
-test("queryparameters veranderen de exacte pathname-uitsluiting niet", () => {
-  const url = new URL(
-    "/api/favorites?type=food&lang=nl&goal=LOSE",
-    "http://localhost"
-  );
+test("authenticated application APIs are centrally classified", () => {
+  for (const pathname of [
+    "/api/auth/change-email",
+    "/api/auth/change-password",
+    "/api/favorites",
+    "/api/favorites/access",
+    "/api/nutrition/products/search",
+    "/api/onboarding/complete",
+    "/api/profile/subscription",
+    "/api/stripe/checkout",
+    "/api/stripe/change-plan",
+    "/api/stripe/portal",
+  ]) {
+    assert.equal(isAuthenticatedApplicationApiRoute(pathname), true, pathname);
+    assert.equal(requiresProxyAuth(pathname), true, pathname);
+  }
 
-  assert.equal(url.pathname, "/api/favorites");
-  assert.equal(skipsProxyAuth(url.pathname), true);
+  for (const pathname of [
+    "/api/auth/post-login",
+    "/api/reference/countries",
+    "/api/stripe/webhook",
+    "/api/cron/auth-email-sync",
+  ]) {
+    assert.equal(isAuthenticatedApplicationApiRoute(pathname), false, pathname);
+  }
 });
 
 test("protected en onboarding routes blijven expliciet onderscheiden", () => {

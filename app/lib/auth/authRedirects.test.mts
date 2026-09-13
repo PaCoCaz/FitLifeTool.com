@@ -162,6 +162,8 @@ test("auth notices use a closed allowlist", () => {
     "session_expired",
     "password_reset",
     "password_changed",
+    "email_change_pending",
+    "email_changed",
   ]) {
     assert.equal(asAuthNotice(value), value);
   }

@@ -12,6 +12,7 @@ import { useLang, useSetUserLanguage } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
 
 type Lang = "en" | "nl" | "de" | "fr" | "pl";
+type AccountProfile = { first_name: string | null; last_name: string | null };
 
 const OPTIONS: {
   value: Lang;
@@ -26,7 +27,7 @@ const OPTIONS: {
   { value: "pl", label: "Polski", flag: "/images/flags/pl.svg", desc: "Język panelu to polski." },
 ];
 
-export default function AccountCard() {
+export default function AccountCard({ canonicalEmail }: { canonicalEmail: string | null }) {
   const langCode = useLang();
   const t = uiText[langCode];
 
@@ -35,14 +36,14 @@ export default function AccountCard() {
   const lang = useLang();
   const setUserLanguage = useSetUserLanguage();
 
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<AccountProfile | null>(null);
 
   const [draft, setDraft] = useState({
     first_name: "",
     last_name: "",
   });
 
-  const [langDraft, setLangDraft] = useState<Lang | null>(null);
+  const [langDraft, setLangDraft] = useState<Lang>(lang as Lang);
   const [openLang, setOpenLang] = useState(false);
 
   const [saving, setSaving] = useState(false);
@@ -57,25 +58,17 @@ export default function AccountCard() {
       .select("first_name, last_name")
       .eq("id", user.id)
       .single()
-      .then((res: any) => {
+      .then((res: { data: AccountProfile | null }) => {
         if (!res.data) return;
-
-        setProfile(res.data);
+        const data = res.data as AccountProfile;
+        setProfile(data);
 
         setDraft({
-          first_name: res.data.first_name ?? "",
-          last_name: res.data.last_name ?? "",
+          first_name: data.first_name ?? "",
+          last_name: data.last_name ?? "",
         });
       });
   }, [user]);
-
-  /* ───────── LOAD LANGUAGE ───────── */
-
-  useEffect(() => {
-    if (lang) {
-      setLangDraft(lang as Lang);
-    }
-  }, [lang]);
 
   /* ───────── STATES ───────── */
 
@@ -179,7 +172,7 @@ export default function AccountCard() {
           </div>
 
           <div className="border-t border-b py-2 text-sm text-gray-400">
-            {user?.email}
+            {canonicalEmail ?? "—"}
           </div>
         </div>
 

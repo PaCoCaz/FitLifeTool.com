@@ -20,12 +20,20 @@ function getConsoleArguments(source: string) {
   )].map((match) => match[1]);
 }
 
-function createCustomerWriter(error: unknown = null) {
+function createCustomerWriter(
+  error: unknown = null,
+  mappingResult: "established" | "existing" | "conflict" = "established"
+) {
   const writes: CapturedWrite[] = [];
 
   return {
     writes,
     client: {
+      async rpc(functionName: string, values: CapturedWrite) {
+        assert.equal(functionName, "establish_customer_mapping");
+        writes.push(values);
+        return { data: mappingResult, error };
+      },
       from(table: string) {
         assert.equal(table, "customers");
         return {
@@ -55,8 +63,8 @@ test("checkout customer_details email is never persisted", async () => {
   }, state.client);
 
   assert.deepEqual(state.writes, [{
-    stripe_customer_id: "cus_checkout",
-    user_id: "user_checkout",
+    p_stripe_customer_id: "cus_checkout",
+    p_user_id: "user_checkout",
   }]);
   assert.equal("email" in state.writes[0], false);
 });
@@ -75,8 +83,8 @@ test("checkout customer_email fallback is never persisted", async () => {
   }, state.client);
 
   assert.deepEqual(state.writes, [{
-    stripe_customer_id: "cus_fallback",
-    user_id: "user_fallback",
+    p_stripe_customer_id: "cus_fallback",
+    p_user_id: "user_fallback",
   }]);
 });
 
@@ -126,6 +134,31 @@ test("required customer write failures propagate from both handlers", async () =
   );
 });
 
+test("checkout mapping establishment accepts exact replay and rejects bounded conflicts", async () => {
+  const replay = createCustomerWriter(null, "existing");
+  await handleCheckoutSession({
+    data: {
+      object: {
+        customer: "cus_checkout",
+        client_reference_id: "user_checkout",
+      },
+    },
+  }, replay.client);
+  assert.equal(replay.writes.length, 1);
+
+  await assert.rejects(
+    handleCheckoutSession({
+      data: {
+        object: {
+          customer: "cus_stale",
+          client_reference_id: "user_checkout",
+        },
+      },
+    }, createCustomerWriter(null, "conflict").client),
+    /Customer mapping establishment failed/
+  );
+});
+
 test("corrected Stripe paths contain only bounded logging", async () => {
   const root = new URL("../../../", import.meta.url);
   const checkoutHandler = await readFile(
@@ -148,12 +181,24 @@ test("corrected Stripe paths contain only bounded logging", async () => {
     new URL("app/api/stripe/change-plan/route.ts", root),
     "utf8"
   );
+  const checkoutRoute = await readFile(
+    new URL("app/api/stripe/checkout/route.ts", root),
+    "utf8"
+  );
 
   assert.doesNotMatch(checkoutHandler, /console\.|customer_details|customer_email|\bemail\b/);
   assert.doesNotMatch(customerHandler, /console\.|customer\.email|\bemail\b/);
   assert.doesNotMatch(webhook, /SUBSCRIPTION EVENT DATA/);
   assert.doesNotMatch(webhookRoute, /catch\s*\(\s*err/);
   assert.doesNotMatch(changePlan, /console\.(?:log|error)/);
+  assert.match(checkoutRoute, /"establish_customer_mapping"/);
+  assert.match(checkoutRoute, /CUSTOMER_MAPPING_ESTABLISHMENT_FAILED/);
+  assert.match(checkoutRoute, /stripe\.checkout\.sessions\.create/);
+  assert.ok(
+    checkoutRoute.indexOf("CUSTOMER_MAPPING_ESTABLISHMENT_FAILED") <
+      checkoutRoute.indexOf("stripe.checkout.sessions.create")
+  );
+  assert.doesNotMatch(checkoutRoute, /console\.error\((?!"STRIPE_CHECKOUT_FAILED")/);
 
   const consoleArguments = [
     ...getConsoleArguments(webhook),
@@ -175,4 +220,15 @@ test("corrected Stripe paths contain only bounded logging", async () => {
       assert.doesNotMatch(argumentsSource, new RegExp(sensitiveField));
     }
   }
+});
+
+test("Email Change synchronization preserves Auth to customer to Stripe authority", async () => {
+  const root = new URL("../../../", import.meta.url);
+  const worker = await readFile(new URL("app/lib/auth/emailSync.ts", root), "utf8");
+  assert.match(worker, /getConfirmedAuthIdentity\(job\.user_id\)/);
+  assert.match(worker, /sync_auth_email_local_if_current/);
+  assert.match(worker, /updateStripeCustomerEmail/);
+  assert.match(worker, /STRIPE_SYNC_READBACK_FAILED/);
+  assert.match(worker, /establish_customer_mapping|sync_auth_email_local_if_current/);
+  assert.doesNotMatch(worker, /updateUser\(|auth\.admin\.updateUser/);
 });

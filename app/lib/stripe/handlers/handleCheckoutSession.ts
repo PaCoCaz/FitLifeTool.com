@@ -3,17 +3,14 @@
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import type Stripe from "stripe";
 
-type CheckoutCustomerMapping = {
-  stripe_customer_id: string;
-  user_id: string;
-};
-
 type CustomerWriter = {
-  from(table: "customers"): {
-    upsert(
-      values: CheckoutCustomerMapping
-    ): PromiseLike<{ error: unknown | null }>;
-  };
+  rpc(
+    functionName: "establish_customer_mapping",
+    values: {
+      p_user_id: string;
+      p_stripe_customer_id: string;
+    }
+  ): PromiseLike<{ data: unknown; error: unknown | null }>;
 };
 
 export async function handleCheckoutSession(
@@ -43,14 +40,15 @@ export async function handleCheckoutSession(
     );
   }
 
-  const { error } = await supabase
-    .from("customers")
-    .upsert({
-      stripe_customer_id: stripeCustomerId,
-      user_id: userId,
-    });
+  const { data, error } = await supabase.rpc(
+    "establish_customer_mapping",
+    {
+      p_user_id: userId,
+      p_stripe_customer_id: stripeCustomerId,
+    }
+  );
 
-  if (error) {
-    throw error;
+  if (error || (data !== "established" && data !== "existing")) {
+    throw error ?? new Error("Customer mapping establishment failed");
   }
 }
