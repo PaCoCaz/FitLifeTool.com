@@ -1200,7 +1200,8 @@ test("PostgREST pre-request enforcement covers Data API and RPC with one read-on
   const source = migration.slice(start, end);
 
   assert.match(source, /current_setting\('request\.path', true\)/);
-  assert.match(source, /request_path = 'rpc\/get_own_auth_email_change_state'/);
+  assert.match(source, /request_path = '\/rpc\/get_own_auth_email_change_state'/);
+  assert.doesNotMatch(source, /request_path = 'rpc\/get_own_auth_email_change_state'/);
   assert.match(source, /EMAIL_CHANGE_REAUTH_REQUIRED/);
   assert.match(source, /AUTH_STATE_UNAVAILABLE/);
   assert.match(migration, /pgrst\.db_pre_request = %L/);
@@ -1210,4 +1211,34 @@ test("PostgREST pre-request enforcement covers Data API and RPC with one read-on
   assert.match(migration, /role_record\.rolname = 'authenticator'/);
   assert.match(migration, /setting\.setrole = 0[\s\S]*?setting\.setdatabase =/);
   assert.match(migration, /Unexpected existing PostgREST pre-request configuration/);
+});
+
+test("PostgREST pre-request errors use the complete bounded PGRST JSON contract", () => {
+  const start = migration.indexOf(
+    "create function public.enforce_auth_email_change_session_boundary"
+  );
+  const end = migration.indexOf(
+    "create table public.auth_email_sync_jobs",
+    start
+  );
+  const source = migration.slice(start, end);
+
+  assert.equal((source.match(/raise sqlstate 'PGRST'/g) ?? []).length, 4);
+  assert.equal((source.match(/'details', null/g) ?? []).length, 4);
+  assert.equal((source.match(/'hint', null/g) ?? []).length, 4);
+  assert.equal(
+    (source.match(/'headers', pg_catalog\.json_build_object\(\)/g) ?? []).length,
+    4
+  );
+  assert.equal(
+    (source.match(/'code', 'EMAIL_CHANGE_REAUTH_REQUIRED'/g) ?? []).length,
+    2
+  );
+  assert.equal(
+    (source.match(/'code', 'AUTH_STATE_UNAVAILABLE'/g) ?? []).length,
+    2
+  );
+  assert.equal((source.match(/'status', 409/g) ?? []).length, 2);
+  assert.equal((source.match(/'status', 503/g) ?? []).length, 2);
+  assert.doesNotMatch(source, /'status_text'/);
 });

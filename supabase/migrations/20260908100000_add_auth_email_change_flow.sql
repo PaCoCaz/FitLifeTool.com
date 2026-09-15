@@ -622,17 +622,19 @@ begin
     raise sqlstate 'PGRST' using
       message = pg_catalog.json_build_object(
         'code', 'AUTH_STATE_UNAVAILABLE',
-        'message', 'Authentication state unavailable'
+        'message', 'Authentication state unavailable',
+        'details', null,
+        'hint', null
       )::text,
       detail = pg_catalog.json_build_object(
         'status', 503,
-        'status_text', 'Service Unavailable'
+        'headers', pg_catalog.json_build_object()
       )::text;
   end if;
 
   -- This read-only RPC is the sole controlled observation point used by the
   -- Next.js page/API guards to render the correct bounded response.
-  if request_path = 'rpc/get_own_auth_email_change_state' then
+  if request_path = '/rpc/get_own_auth_email_change_state' then
     return;
   end if;
 
@@ -655,11 +657,13 @@ begin
     raise sqlstate 'PGRST' using
       message = pg_catalog.json_build_object(
         'code', 'EMAIL_CHANGE_REAUTH_REQUIRED',
-        'message', 'Email change reauthentication required'
+        'message', 'Email change reauthentication required',
+        'details', null,
+        'hint', null
       )::text,
       detail = pg_catalog.json_build_object(
         'status', 409,
-        'status_text', 'Conflict'
+        'headers', pg_catalog.json_build_object()
       )::text;
   end if;
 
@@ -667,11 +671,13 @@ begin
     raise sqlstate 'PGRST' using
       message = pg_catalog.json_build_object(
         'code', 'AUTH_STATE_UNAVAILABLE',
-        'message', 'Authentication state unavailable'
+        'message', 'Authentication state unavailable',
+        'details', null,
+        'hint', null
       )::text,
       detail = pg_catalog.json_build_object(
         'status', 503,
-        'status_text', 'Service Unavailable'
+        'headers', pg_catalog.json_build_object()
       )::text;
   end if;
 
@@ -679,11 +685,13 @@ begin
     raise sqlstate 'PGRST' using
       message = pg_catalog.json_build_object(
         'code', 'EMAIL_CHANGE_REAUTH_REQUIRED',
-        'message', 'Email change reauthentication required'
+        'message', 'Email change reauthentication required',
+        'details', null,
+        'hint', null
       )::text,
       detail = pg_catalog.json_build_object(
         'status', 409,
-        'status_text', 'Conflict'
+        'headers', pg_catalog.json_build_object()
       )::text;
   end if;
 end
