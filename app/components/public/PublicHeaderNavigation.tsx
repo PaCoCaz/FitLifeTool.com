@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -53,6 +54,7 @@ export default function PublicHeaderNavigation({
   const content = PUBLIC_HEADER_CONTENT[locale];
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [mobileSections, setMobileSections] = useState<
     Record<MobileSection, boolean>
   >({ goals: false, knowledge: false });
@@ -67,7 +69,46 @@ export default function PublicHeaderNavigation({
   const localeReturnFocusRef = useRef<HTMLButtonElement | null>(null);
   const goalsButtonRef = useRef<HTMLButtonElement>(null);
   const knowledgeButtonRef = useRef<HTMLButtonElement>(null);
+  const goalsPanelRef = useRef<HTMLDivElement>(null);
+  const knowledgePanelRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const syncScrollState = () => setScrolled(window.scrollY > 0);
+    syncScrollState();
+    window.addEventListener("scroll", syncScrollState, { passive: true });
+    window.addEventListener("pageshow", syncScrollState);
+    return () => {
+      window.removeEventListener("scroll", syncScrollState);
+      window.removeEventListener("pageshow", syncScrollState);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const panels = {
+      locale: desktopLocalePanelRef.current,
+      goals: goalsPanelRef.current,
+      knowledge: knowledgePanelRef.current,
+    };
+    const activePanel = window.matchMedia("(min-width: 40rem)").matches
+      ? openPanel
+      : null;
+
+    for (const [panelName, element] of Object.entries(panels)) {
+      if (!element) continue;
+      if (panelName === activePanel) {
+        if (!element.matches(":popover-open")) element.showPopover();
+      } else if (element.matches(":popover-open")) {
+        element.hidePopover();
+      }
+    }
+
+    return () => {
+      for (const element of Object.values(panels)) {
+        if (element?.matches(":popover-open")) element.hidePopover();
+      }
+    };
+  }, [openPanel]);
 
   const closeMobileMenu = useCallback((restoreFocus = true) => {
     setMobileOpen(false);
@@ -129,14 +170,27 @@ export default function PublicHeaderNavigation({
   }, [closeDesktopPanel, closeMobileMenu, mobileOpen, openPanel]);
 
   useEffect(() => {
-    const desktopQuery = window.matchMedia("(min-width: 64rem)");
-    const handleDesktopChange = () => {
-      if (desktopQuery.matches) closeMobileMenu(false);
+    const normalNavigationQuery = window.matchMedia("(min-width: 40rem)");
+    const handleNavigationModeChange = () => {
+      closeMobileMenu(false);
+      setOpenPanel(null);
+      if (mobileOpen || openPanel) {
+        requestAnimationFrame(() => {
+          const visibleTrigger = normalNavigationQuery.matches
+            ? openPanel === "locale"
+              ? desktopLocaleButtonRef.current
+              : goalsButtonRef.current
+            : openPanel === "locale"
+              ? mobileLocaleButtonRef.current
+              : mobileButtonRef.current;
+          visibleTrigger?.focus();
+        });
+      }
     };
-    desktopQuery.addEventListener("change", handleDesktopChange);
+    normalNavigationQuery.addEventListener("change", handleNavigationModeChange);
     return () =>
-      desktopQuery.removeEventListener("change", handleDesktopChange);
-  }, [closeMobileMenu]);
+      normalNavigationQuery.removeEventListener("change", handleNavigationModeChange);
+  }, [closeMobileMenu, mobileOpen, openPanel]);
 
   function togglePanel(panel: Exclude<OpenPanel, null>) {
     setOpenPanel((current) => (current === panel ? null : panel));
@@ -193,16 +247,21 @@ export default function PublicHeaderNavigation({
             openLocaleWithKeyboard(presentation);
           }}
         >
-          <Image src="/globe.svg" alt="" width={20} height={20} />
-          <span>{locale.toUpperCase()}</span>
-          <Chevron open={openPanel === "locale"} />
+          <Image
+            src={`/images/flags/${locale}.svg`}
+            alt=""
+            aria-hidden="true"
+            width={24}
+            height={18}
+          />
         </button>
 
         <div
           ref={panelRef}
           id={panelId}
           className="public-web-locale-panel"
-          hidden={openPanel !== "locale"}
+          popover={presentation === "desktop" ? "manual" : undefined}
+          hidden={presentation === "mobile" && openPanel !== "locale"}
         >
           {PUBLIC_LOCALES.map((candidate) => (
             <Link
@@ -213,7 +272,13 @@ export default function PublicHeaderNavigation({
               aria-current={candidate === locale ? "page" : undefined}
             >
               <span>{PUBLIC_LOCALE_REGISTRY[candidate].label}</span>
-              <span aria-hidden="true">{candidate.toUpperCase()}</span>
+              <Image
+                src={`/images/flags/${candidate}.svg`}
+                alt=""
+                aria-hidden="true"
+                width={24}
+                height={18}
+              />
             </Link>
           ))}
         </div>
@@ -239,9 +304,14 @@ export default function PublicHeaderNavigation({
   }
 
   return (
-    <div ref={rootRef} className="public-web-header-navigation">
+    <div
+      ref={rootRef}
+      className="public-web-header-navigation"
+      data-scrolled={scrolled ? "true" : undefined}
+    >
       <div className="public-web-header-actions">
         {renderLocaleSelector("desktop")}
+        {renderLocaleSelector("mobile")}
 
         <span className="public-web-header-divider" aria-hidden="true" />
         <PublicAuthTrigger
@@ -249,12 +319,6 @@ export default function PublicHeaderNavigation({
           className="public-web-header-login"
         >
           {content.login}
-        </PublicAuthTrigger>
-        <PublicAuthTrigger
-          mode="register"
-          className="public-web-header-cta"
-        >
-          {content.headerCta}
         </PublicAuthTrigger>
         <button
           ref={mobileButtonRef}
@@ -275,8 +339,6 @@ export default function PublicHeaderNavigation({
           </span>
         </button>
       </div>
-
-      {renderLocaleSelector("mobile")}
 
       <nav
         className="public-web-desktop-nav"
@@ -305,9 +367,10 @@ export default function PublicHeaderNavigation({
           </button>
 
           <div
+            ref={goalsPanelRef}
             id="public-web-goals-panel"
             className="public-web-goals-panel"
-            hidden={openPanel !== "goals"}
+            popover="manual"
           >
             {content.goals.items.map((item, index) => (
               <div
@@ -327,9 +390,10 @@ export default function PublicHeaderNavigation({
           </div>
 
           <div
+            ref={knowledgePanelRef}
             id="public-web-knowledge-panel"
             className="public-web-knowledge-panel"
-            hidden={openPanel !== "knowledge"}
+            popover="manual"
           >
             {KNOWLEDGE_GROUPS.map(({ key }) => {
               const group = content.knowledge.groups[key];
@@ -451,12 +515,6 @@ export default function PublicHeaderNavigation({
             <div className="public-web-mobile-auth-actions">
               <PublicAuthTrigger mode="login">
                 {content.login}
-              </PublicAuthTrigger>
-              <PublicAuthTrigger
-                mode="register"
-                className="public-web-header-cta"
-              >
-                {content.headerCta}
               </PublicAuthTrigger>
             </div>
           </div>
