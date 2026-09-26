@@ -178,6 +178,118 @@ export default function DocL30030() {
           <li>Tekst is scanbaar en headings zijn logisch en compact.</li>
           <li>Tabellen en andere inhoud blijven mobiel bruikbaar.</li>
         </ul>
+
+        <h3>Public Header Design Contract</h3>
+
+        <p>
+          Dit is het gevalideerde contract van de huidige Public Web-header.
+          De geometrie is niet van nature uitsluitend publiek, maar wordt
+          pas na afzonderlijke App-validatie een gedeeld componentcontract.
+        </p>
+
+        <h4>Header en responsieve modus</h4>
+        <ul>
+          <li>De bovenste rij is 64px en de navy navigatierij 44px; de gesloten header is samen 108px hoog.</li>
+          <li>De volledige Public Header blijft als één geheel zichtbaar bij verticaal scrollen via <code>position: sticky; top: 0</code>.</li>
+          <li>Onder 640px verschijnt de hamburger; vanaf 640px de normale navigatie.</li>
+          <li>Bij de overgang 639px ↔ 640px sluiten achtergebleven open panelen en gaat focus naar een zichtbare, geldige headercontrol.</li>
+        </ul>
+
+        <p>
+          De header en Hero volgen een bewust stackingcontract. Vanaf 640px
+          blijft aan de paginatop de navy navigatierij achter het haar van de
+          Hero-character schilderen, ook wanneer een panel open is. Het geopende
+          niet-modale popover schildert via de browser-toplaag vóór de Hero.
+          Pas bij <code>scrollY &gt; 0</code> schildert de volledige sticky header
+          vóór Hero en overige paginacontent, met een eventueel open panel
+          daarboven. Onder 640px blijft het bestaande mobiele gedrag gelden:
+          een geopend menu- of locale-panel mag de headercontext naar voren
+          brengen.
+        </p>
+
+        <h4>Buitenafstand en referentiegrens</h4>
+        <p>
+          Geopende headerpanelen gebruiken een buitenafstand van 14px.
+          Onder deze header van 108px begint een open panel daarom op
+          Y122. Interne panelpadding staat los van deze buitenafstand.
+        </p>
+        <p>
+          De zichtbare desktop-dropdownpositie wordt berekend vanaf de
+          relevante Hero-/public-contentgrens, niet rechtstreeks vanaf
+          <code> .public-web-desktop-nav-inner</code>. Die navigatiecontainer
+          kan al een eigen responsieve zijgutter hebben; deze nogmaals
+          optellen zou de effectieve 14px-afstand vergroten. Dit contract
+          gebruikt geen speciaal 1150px-, 1165px- of 1200px-breakpoint
+          voor dropdowns.
+        </p>
+
+        <h4>Locale- en hamburgermenu</h4>
+        <ul>
+          <li>Het locale-panel is 175px breed, begint op Y122 en heeft witte rijen van 44px met subtiele separators en vlaggen rechts.</li>
+          <li>De actieve taal heeft een indicator van 3×30px, 4px vanaf de linker panelrand, in Navy <code>#191970</code>.</li>
+          <li>Een niet-actieve taal toont bij hover dezelfde indicator in Accent Blue <code>#1976D2</code>; active + hover blijft Navy. De volledige rij krijgt geen gekleurde hoverachtergrond.</li>
+          <li>Locale-opties behouden toetsenbordbediening, <code>aria-current</code> en Escape-gedrag.</li>
+          <li>Onder 640px begint het hamburgerpanel op Y122 met 14px links en rechts. Bij een echte mobiele layoutviewport van 320px is dit X14, 292px breed en 14px rechts.</li>
+          <li>Het mobiele menu behoudt Doelen, Kennis &amp; tools en Inloggen; het dupliceert geen registratie-CTA. Registratie en andere conversieacties horen bij de Hero of pagina.</li>
+        </ul>
+
+        <h4>Desktop-dropdowns en toegankelijkheid</h4>
+        <ul>
+          <li>Vanaf 640px is Doelen 400px breed, begint op Y122 en staat exact 14px binnen de linker Hero-/public-contentgrens.</li>
+          <li>Kennis &amp; tools begint vanaf 640px op Y122 en staat exact 14px binnen beide Hero-/public-contentgrenzen.</li>
+          <li>Semantische controls, toetsenbordbediening, Escape en zichtbare geldige focus blijven behouden; een moduswisseling laat geen verouderd verborgen open panel achter.</li>
+        </ul>
+
+        <p>
+          Header- en dropdowngeometrie mogen geen Hero-gap of letterboxing
+          introduceren. De desktop-Hero-achtergrond blijft
+          <code> object-fit: cover</code>; <code>contain</code> wordt niet
+          opnieuw ingezet als header- of dropdownfix.
+        </p>
+
+        <h3>Hero v2: responsieve compositie</h3>
+
+        <p>
+          Hero v2 gebruikt bewust vaste hoogtes per responsive bereik. Bij een
+          bottom-anchored vrijstaande afbeelding zou content-driven hoogte een
+          circulaire afhankelijkheid veroorzaken: tekstomloop bepaalt de
+          Herohoogte, die de verticale afbeeldingspositie bepaalt, die weer de
+          tekstomloop bepaalt. Deze Hero gebruikt daarom geen
+          runtime-layoutmeting of <code>ResizeObserver</code> om automatisch te
+          groeien. Content en talen worden per relevant bereik gevalideerd.
+        </p>
+
+        <ul>
+          <li>Phone tot en met 439px: Hero 300px; v2-character groeit van 184px op 320px naar 235px op 439px en blijft rechts/onder verankerd; lead 13.4px met regelhoogte 1.4; exclusion-gap 6px.</li>
+          <li>Intermediate 440–767px: Hero 275px; v2-character groeit responsief van 220px naar 260px; exclusion-gap 8px.</li>
+          <li>Tablet 768–1023px: Hero 250px; responsieve v2-charactergeometrie; exclusion-gap 25px.</li>
+          <li>Desktop vanaf 1024px: Hero maximaal 1150px breed en 250px hoog; v2-character 301×290px; exclusion-gap 25px.</li>
+        </ul>
+
+        <p>
+          De content-edge is in elk bereik 14px. De zichtbare v2-afbeelding is
+          zelf de float met een genormaliseerde <code>shape-outside</code>-contour
+          ten opzichte van haar border-box; H1 en lead breken natuurlijk om de
+          afbeelding heen. De laagvolgorde is achtergrondfoto, readability-
+          overlay, daarna foreground-character en content: de overlay mag de
+          vrouw niet verbleken. Op phone staat de enige Hero-CTA, registratie,
+          over de volle breedte binnen de 14px-randen en mag deze vóór de
+          character schilderen. Inloggen staat in de header, niet als tweede
+          Hero-CTA. De gedeelde tekst/beeldmethode en het onderscheid tussen
+          content-edge en exclusion-gap staan in Handbook 4.5.
+        </p>
+
+        <p>
+          De Hero-eyebrow, H1 en lead zijn voor NL, EN Global, FR, DE en PL
+          gevalideerde en gelockte content. De eyebrow is een gelokaliseerde
+          contextregel in normale casing, geen vast FITLIFETOOL-label. De
+          responsive capaciteit is voor deze vijf talen op acht
+          viewportbreedtes GREEN/LOCKED. CSS dwingt de H1 niet op een vast
+          aantal regels. Een toekomstige, afzonderlijk goedgekeurde
+          copywijziging die de fixed-height-capaciteit overschrijdt, vereist
+          een bewuste responsive content- of compositiebeslissing, geen runtime
+          auto-height.
+        </p>
       </section>
 
       <section>
