@@ -98,28 +98,90 @@ test("auth entrypoints inherit the allowlisted active locale", () => {
     /`\/\$\{entrypoint\}\?lang=\$\{locale\}`/
   );
   assert.match(publicHeaderNavigationSource, /mode="login"/);
-  assert.match(publicHeaderNavigationSource, /mode="register"/);
+  assert.doesNotMatch(publicHeaderNavigationSource, /mode="register"/);
   assert.match(registrySource, /"forgot-password"/);
   assert.doesNotMatch(
     publicHomepageSource,
     /getPublicAuthHref|"forgot-password"|public-web-forgot-link/
   );
   assert.match(publicHomepageSource, /mode="register"/);
-  assert.match(publicHomepageSource, /mode="login"/);
+  assert.equal(publicHomepageSource.match(/mode="register"/g)?.length, 1);
+  assert.doesNotMatch(publicHomepageSource, /mode="login"/);
+  assert.doesNotMatch(publicHomepageSource, /public-web-secondary-cta/);
+});
+
+test("public header keeps mobile login while Hero owns registration", () => {
+  assert.match(
+    publicHeaderNavigationSource,
+    /className="public-web-header-actions"[\s\S]*?mode="login"[\s\S]*?className="public-web-mobile-menu-trigger"/
+  );
+  assert.doesNotMatch(
+    publicHeaderNavigationSource,
+    /className="public-web-header-actions"[\s\S]*?mode="register"[\s\S]*?className="public-web-mobile-menu-trigger"/
+  );
+  assert.doesNotMatch(publicHeaderNavigationSource, /mode="register"/);
+  assert.match(
+    publicHeaderNavigationSource,
+    /className="public-web-mobile-auth-actions"[\s\S]*?<PublicAuthTrigger mode="login">[\s\S]*?\{content\.login\}[\s\S]*?<\/PublicAuthTrigger>/
+  );
+  assert.match(publicHomepageSource, /mode="register"/);
+  assert.match(
+    publicWebCssSource,
+    /@media \(min-width: 40rem\) and \(max-width: 63\.999rem\) \{[\s\S]*?\.public-web-mobile-menu-trigger,[\s\S]*?\.public-web-mobile-menu \{\s*display: none;/
+  );
+});
+
+test("sticky public header keeps the Hero overlap at top and opens desktop panels in the top layer", () => {
+  assert.match(publicHeaderNavigationSource, /setScrolled\(window\.scrollY > 0\)/);
+  assert.match(publicHeaderNavigationSource, /addEventListener\("scroll", syncScrollState, \{ passive: true \}\)/);
+  assert.match(publicHeaderNavigationSource, /removeEventListener\("scroll", syncScrollState\)/);
+  assert.match(publicHeaderNavigationSource, /data-scrolled=\{scrolled \? "true" : undefined\}/);
+  assert.match(publicHeaderNavigationSource, /aria-expanded=\{openPanel === "locale"\}/);
+  assert.match(publicHeaderNavigationSource, /aria-expanded=\{openPanel === "goals"\}/);
+  assert.match(publicHeaderNavigationSource, /aria-expanded=\{openPanel === "knowledge"\}/);
+  assert.match(publicHeaderNavigationSource, /aria-expanded=\{mobileOpen\}/);
+  assert.match(publicHeaderNavigationSource, /popover=\{presentation === "desktop" \? "manual" : undefined\}/);
+  assert.match(publicHeaderNavigationSource, /hidden=\{presentation === "mobile" && openPanel !== "locale"\}/);
+  assert.match(publicHeaderNavigationSource, /className="public-web-goals-panel"\s+popover="manual"/);
+  assert.match(publicHeaderNavigationSource, /className="public-web-knowledge-panel"\s+popover="manual"/);
+  assert.match(publicHeaderNavigationSource, /element\.showPopover\(\)/);
+  assert.match(publicHeaderNavigationSource, /element\.hidePopover\(\)/);
+  assert.match(publicHeaderNavigationSource, /rootRef\.current\.contains\(event\.target as Node\)/);
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-header:has\(\s*\.public-web-header-navigation\[data-scrolled="true"\]\s*\) \{\s*z-index: 100;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /@media \(max-width: 39\.999rem\) \{\s*\.public-web-header:has\(\.public-web-header-navigation \[aria-expanded="true"\]\) \{\s*z-index: 100;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-goals-panel:popover-open,\s*\.public-web-knowledge-panel:popover-open \{\s*display: grid;/
+  );
+  assert.equal(
+    publicWebCssSource.match(/top: calc\(108px \+ var\(--public-web-panel-spacing\)\);/g)?.length,
+    4
+  );
 });
 
 test("HP-02 uses the approved locale copy and metadata", () => {
   for (const copy of [
-    "Daily insight into your lifestyle and goals.",
-    "Elke dag inzicht in je leefstijl en jouw doel.",
-    "Chaque jour, comprenez mieux votre mode de vie et vos objectifs.",
-    "Jeden Tag Klarheit über deinen Lebensstil und deine Ziele.",
-    "Codzienny wgląd w Twój styl życia i cele.",
-    "Bring nutrition, activity, hydration and weight together in one personal overview. See where you stand throughout the day and what fits your goals.",
-    "Breng voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht. Zo zie je op elk moment van de dag waar je staat en wat past bij jouw doel.",
-    "Réunissez alimentation, activité physique, hydratation et poids dans une vue personnalisée. Voyez où vous en êtes à tout moment de la journée et ce qui correspond à vos objectifs.",
-    "Bringe Ernährung, Bewegung, Flüssigkeitszufuhr und Gewicht in einer persönlichen Übersicht zusammen. So siehst du jederzeit, wo du stehst und was zu deinen Zielen passt.",
-    "Połącz odżywianie, aktywność, nawodnienie i masę ciała w jednym osobistym zestawieniu. W każdej chwili dnia widzisz, gdzie jesteś i co odpowiada Twoim celom.",
+    "Insights into your lifestyle",
+    "Krijg inzicht in je leefstijl",
+    "Des repères pour votre mode de vie",
+    "Einblicke in deinen Lebensstil",
+    "Wgląd w Twój styl życia",
+    "See where you stand each day as you move toward your goal.",
+    "Zie elke dag waar je staat op weg naar jouw doel.",
+    "Voyez chaque jour où vous en êtes par rapport à votre objectif.",
+    "Sieh jeden Tag, wo du auf dem Weg zu deinem Ziel stehst.",
+    "Każdego dnia sprawdzaj, gdzie jesteś na drodze do swojego celu.",
+    "Bring your nutrition, activity, hydration and weight together in one personal overview and track your progress throughout the day.",
+    "Breng je voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht en volg tijdens de dag je voortgang.",
+    "Réunissez votre alimentation, votre activité physique, votre hydratation et votre poids dans une vue d’ensemble personnalisée et suivez votre progression tout au long de la journée.",
+    "Bringe deine Ernährung, Aktivität, Hydration und dein Gewicht in einem persönlichen Überblick zusammen und verfolge deinen Fortschritt über den Tag hinweg.",
+    "Połącz swoje odżywianie, aktywność, nawodnienie i wagę w jednym spersonalizowanym przeglądzie i śledź swoje postępy przez cały dzień.",
     "FitLifeTool | Daily lifestyle and goal insights",
     "FitLifeTool | Inzicht in je leefstijl en doelen",
     "FitLifeTool | Suivez votre mode de vie et vos objectifs",
@@ -133,31 +195,191 @@ test("HP-02 uses the approved locale copy and metadata", () => {
   ]) {
     assert.ok(registrySource.includes(copy), copy);
   }
-  assert.equal(
-    registrySource.match(/eyebrow: "FITLIFETOOL"/g)?.length,
-    APP_LANGUAGES.length
-  );
+  assert.equal(registrySource.match(/eyebrow: "/g)?.length, APP_LANGUAGES.length);
+  assert.match(publicWebCssSource, /\.public-web-eyebrow \{[^}]*text-transform: none;/);
 });
 
-test("HP-02 removes the foundation placeholder and simplifies the Hero", () => {
+test("Hero v2 uses the approved full-width background and decorative character composition", () => {
   assert.doesNotMatch(registrySource, /foundationNotice/);
   assert.doesNotMatch(publicHomepageSource, /public-web-foundation-note|<aside/);
   assert.doesNotMatch(publicWebCssSource, /public-web-foundation-note/);
+  assert.match(publicHomepageSource, /import Image from "next\/image"/);
+  assert.match(publicHomepageSource, /<section className="public-web-hero">/);
+  assert.doesNotMatch(
+    publicHomepageSource,
+    /public-web-container public-web-hero/
+  );
+  assert.match(
+    publicHomepageSource,
+    /src="\/images\/hero-background-v2\.png"[\s\S]*?fill[\s\S]*?sizes="100vw"[\s\S]*?public-web-hero-media[\s\S]*?src="\/images\/female-character-v2\.png"[\s\S]*?public-web-hero-copy[\s\S]*?public-web-eyebrow[\s\S]*?<h1>[\s\S]*?public-web-lead[\s\S]*?public-web-actions/
+  );
+  assert.match(publicHomepageSource, /src="\/images\/female-character-v2\.png"/);
+  assert.equal(
+    publicHomepageSource.match(/src="\/images\/female-character-v2\.png"/g)
+      ?.length,
+    1
+  );
+  assert.match(publicHomepageSource, /alt=""/);
+  assert.match(publicHomepageSource, /width=\{301\}/);
+  assert.match(publicHomepageSource, /height=\{290\}/);
+  assert.match(publicHomepageSource, /sizes="\(max-width: 63\.999rem\)/);
+  assert.doesNotMatch(publicHomepageSource, /priority|preload/);
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-hero-surface \{[\s\S]*?position: relative;[\s\S]*?overflow: hidden;[\s\S]*?background: #f5faff;/
+  );
   assert.doesNotMatch(
     publicWebCssSource,
-    /grid-template-columns: minmax\(0, 2fr\) minmax\(16rem, 1fr\)/
+    /\.public-web-hero-surface \{[^}]*?(?:border-radius|box-shadow):/
   );
-  assert.match(publicWebCssSource, /border-radius: 6px/);
-  assert.match(publicWebCssSource, /padding: 16px/);
-  assert.match(publicWebCssSource, /font-size: 17\.6px/);
-  assert.match(publicWebCssSource, /font-size: 22\.4px/);
-  assert.match(publicWebCssSource, /font-size: 24px/);
-  assert.match(publicWebCssSource, /font-size: 28px/);
-  assert.match(publicWebCssSource, /font-weight: 600/);
-  assert.match(publicWebCssSource, /line-height: 42px/);
-  assert.match(publicWebCssSource, /justify-content: flex-end/);
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-hero-background \{[\s\S]*?object-fit: cover;[\s\S]*?pointer-events: none;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web h1 \{[\s\S]*?font-size: clamp\(2rem, 8vw, 2\.75rem\);[\s\S]*?font-weight: 700;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-actions \.public-web-primary-cta,[\s\S]*?min-height: 44px;[\s\S]*?white-space: normal;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /@media \(max-width: 47\.999rem\) \{\s*\.public-web-header \{\s*margin-bottom: 0;\s*box-shadow: none;\s*\}[\s\S]*?\.public-web-hero-surface \{[\s\S]*?display: block;[\s\S]*?min-height: 0;[\s\S]*?overflow: hidden;/
+  );
+  assert.doesNotMatch(publicWebCssSource, /\.public-web-hero \{\s*margin-top: -1px;/);
+  assert.match(
+    publicWebCssSource,
+    /@media \(max-width: 47\.999rem\) \{[\s\S]*?\.public-web h1 \{[\s\S]*?max-width: none;[\s\S]*?font-size: clamp\(18\.5px, calc\(17\.5px \+ 0\.4vw\), 19\.5px\);[\s\S]*?\.public-web-actions \{[\s\S]*?flex-direction: column;[\s\S]*?\.public-web-actions \.public-web-primary-cta,[\s\S]*?width: 100%;[\s\S]*?min-height: 44px;/
+  );
+  const phoneHeroCss = publicWebCssSource
+    .split("@media (max-width: 27.499rem) {")[1]
+    ?.split("@media (min-width: 27.5rem) and (max-width: 47.999rem) {")[0];
+  assert.match(
+    phoneHeroCss ?? "",
+    /\.public-web-hero \{[^}]*--public-web-content-edge-inset: 14px;[^}]*--public-web-image-exclusion-gap-inline: 6px;[^}]*--public-web-character-width: clamp\(184px, calc\(46\.8571424px \+ 42\.857143vw\), 235px\);[^}]*height: 300px;[\s\S]*?\.public-web-hero-background \{\s*object-position: center;\s*\}[\s\S]*?\.public-web-hero-surface::before \{\s*background: linear-gradient\(\s*90deg,\s*rgb\(245 250 255 \/ 98%\) 0%,\s*rgb\(245 250 255 \/ 92%\) 36%,\s*rgb\(245 250 255 \/ 64%\) 58%,\s*rgb\(245 250 255 \/ 8%\) 78%\s*\);\s*\}[\s\S]*?\.public-web-hero-copy::before \{\s*content: none;\s*\}[\s\S]*?\.public-web-hero-media \{[^}]*position: static;[^}]*background-image: none;[^}]*\}[\s\S]*?\.public-web-hero-character \{[^}]*float: right;[^}]*display: block;[^}]*right: 0;[^}]*shape-outside: polygon\([\s\S]*?\) border-box;/
+  );
+  assert.match(phoneHeroCss ?? "", /\.public-web-hero-surface \{\s*height: 100%;\s*overflow: visible;/);
+  assert.match(phoneHeroCss ?? "", /\.public-web-hero-copy \{\s*height: 100%;\s*padding-top: 14px;\s*padding-right: var\(--public-web-content-edge-inset\);\s*padding-left: var\(--public-web-content-edge-inset\);/);
+  assert.match(phoneHeroCss ?? "", /\.public-web h1 \{\s*font-size: clamp\(17px, calc\(14\.310924px \+ 0\.840336vw\), 18px\);\s*\}/);
+  assert.match(phoneHeroCss ?? "", /\.public-web-lead \{\s*font-size: 13\.4px;\s*line-height: 1\.4;\s*\}/);
+  assert.match(phoneHeroCss ?? "", /\.public-web-actions \{\s*position: absolute;\s*z-index: 3;\s*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);\s*clear: none;\s*margin-top: 0;/);
+  assert.match(phoneHeroCss ?? "", /\.public-web-hero-character \{[^}]*bottom: 0;\s*z-index: 2;\s*margin-top: calc\(300px - var\(--public-web-character-height\)\);/);
+  const intermediateHeroCss = publicWebCssSource
+    .split("@media (min-width: 27.5rem) and (max-width: 47.999rem) {")[1]
+    ?.split("@media (min-width: 40rem) and (max-width: 63.999rem) {")[0];
+  assert.ok(intermediateHeroCss);
+  assert.match(intermediateHeroCss, /--public-web-content-edge-inset: 14px;/);
+  assert.match(intermediateHeroCss, /--public-web-image-exclusion-gap-inline: 8px;/);
+  assert.match(intermediateHeroCss, /--public-web-character-width: clamp\(220px, calc\(166\.177371px \+ 12\.232416vw\), 260px\);/);
+  assert.match(intermediateHeroCss, /--public-web-character-right: clamp\(-15px,[^;]*0px\);/);
+  assert.match(intermediateHeroCss, /height: 275px;/);
+  assert.match(intermediateHeroCss, /\.public-web-hero-surface \{\s*overflow: visible;/);
+  assert.match(intermediateHeroCss, /\.public-web-hero-copy \{[^}]*padding-right: var\(--public-web-content-edge-inset\);\s*padding-left: var\(--public-web-content-edge-inset\);/);
+  assert.match(intermediateHeroCss, /\.public-web-hero-copy::before \{\s*content: none;\s*\}/);
+  assert.match(intermediateHeroCss, /\.public-web-actions \{[^}]*position: absolute;\s*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);\s*clear: none;\s*flex-direction: row;/);
+  assert.match(intermediateHeroCss, /\.public-web-hero-media \{[\s\S]*?position: static;[\s\S]*?display: block;[\s\S]*?background-image: none;/);
+  const intermediateCharacterCss = intermediateHeroCss.match(/\.public-web-hero-character \{([^}]*)\}/)?.[1];
+  assert.ok(intermediateCharacterCss);
+  assert.match(intermediateCharacterCss, /float: right;[\s\S]*?width: var\(--public-web-character-width\);[\s\S]*?margin-top: calc\(275px - var\(--public-web-character-height\)\);[\s\S]*?margin-right: var\(--public-web-character-right\);/);
+  assert.match(intermediateCharacterCss, /shape-outside: polygon\(\s*100% 0%,[\s\S]*?100% 100%\s*\) border-box;/);
+  assert.deepEqual(
+    [...intermediateCharacterCss.matchAll(/calc\(([\d.]+)% - var\(--public-web-image-exclusion-gap-inline\)\) ([\d.]+)%/g)]
+      .map(([, x, y]) => [y, x]),
+    [
+      ["0", "53.16"], ["6.90", "41.53"], ["10.34", "41.86"],
+      ["13.79", "35.22"], ["20.69", "31.23"], ["25.86", "27.57"],
+      ["37.93", "27.57"], ["39.31", "28.90"], ["39.66", "20.93"],
+      ["40.34", "20.60"], ["44.83", "15.28"], ["55.17", "12.62"],
+      ["65.52", "8.97"], ["79.31", "6.98"], ["89.66", "3.99"],
+      ["99.66", "2.66"], ["100", "2.66"],
+    ]
+  );
+  assert.doesNotMatch(intermediateCharacterCss, /shape-margin:/);
+  assert.doesNotMatch(intermediateHeroCss, /display: contents|display: flow-root|overflow: hidden|shape-outside: url\(/);
+  const desktopHeroCss = publicWebCssSource
+    .split("@media (min-width: 64rem) {")[1]
+    ?.split("@media (min-width: 71.875rem) {")[0];
+  assert.ok(desktopHeroCss);
+  assert.match(desktopHeroCss, /--public-web-content-edge-inset: 14px;/);
+  assert.match(desktopHeroCss, /--public-web-image-exclusion-gap-inline: 25px;/);
+  assert.match(desktopHeroCss, /\.public-web-hero \{[^}]*max-width: 71\.875rem;\s*height: 15\.625rem;/);
+  assert.match(desktopHeroCss, /\.public-web-hero-surface \{[^}]*display: block;[^}]*overflow: visible;/);
+  const desktopCopyCss = desktopHeroCss.match(/\.public-web-hero-copy \{([^}]*)\}/)?.[1];
+  assert.ok(desktopCopyCss);
+  assert.match(desktopCopyCss, /display: block;\s*width: auto;[^}]*padding: 18px var\(--public-web-content-edge-inset\) 14px;/);
+  assert.doesNotMatch(desktopCopyCss, /display: grid|grid-template-rows|padding: 28px 3rem/);
+  assert.match(desktopHeroCss, /\.public-web h1 \{[^}]*max-width: none;\s*width: auto;[^}]*font-size: clamp\(28px, calc\(16px \+ 1\.171875vw\), 30px\);\s*line-height: 1\.08;/);
+  assert.match(desktopHeroCss, /\.public-web-lead \{[^}]*max-width: none;[^}]*font-size: 15px;\s*line-height: 1\.4;/);
+  assert.match(desktopHeroCss, /\.public-web-actions \{[^}]*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);/);
+  assert.match(desktopHeroCss, /\.public-web-hero-media \{[^}]*position: static;\s*display: block;/);
+  const desktopCharacterCss = desktopHeroCss.match(/\.public-web-hero-character \{([^}]*)\}/)?.[1];
+  assert.ok(desktopCharacterCss);
+  assert.match(desktopCharacterCss, /float: right;[\s\S]*?width: 301px;\s*height: 290px;[\s\S]*?margin-top: -40px;\s*margin-right: calc\(21% - 10\.40625rem\);/);
+  assert.match(desktopCharacterCss, /shape-outside: polygon\(\s*100% 0%,[\s\S]*?100% 100%\s*\) border-box;/);
+  assert.doesNotMatch(desktopCharacterCss, /shape-margin:|transform:/);
+  assert.doesNotMatch(desktopHeroCss, /grid-template-columns: minmax\(0, 1\.3fr\) minmax\(22rem, 0\.7fr\);/);
+  assert.doesNotMatch(publicWebCssSource, /\.public-web-hero::before/);
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-hero-character \{[\s\S]*?pointer-events: none;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-header \{[^}]*position: sticky;\s*top: 0;\s*z-index: 1;/
+  );
+  const tabletHeroCss = publicWebCssSource
+    .split("@media (min-width: 48rem) and (max-width: 63.999rem) {")[1]
+    ?.split("@media (min-width: 64rem) {")[0];
+  assert.ok(tabletHeroCss);
+  assert.match(tabletHeroCss, /--public-web-content-edge-inset: 14px;/);
+  assert.match(tabletHeroCss, /--public-web-image-exclusion-gap-inline: 25px;/);
+  assert.match(tabletHeroCss, /--public-web-character-width: clamp\(16\.25rem, calc\(8\.53rem \+ 16\.08vw\), 18\.8125rem\);/);
+  assert.match(tabletHeroCss, /--public-web-character-right: clamp\(-0\.9375rem, calc\(21\.875vw - 11\.4375rem\), 3rem\);/);
+  assert.match(tabletHeroCss, /\.public-web-hero \{[^}]*height: 250px;/);
+  assert.match(tabletHeroCss, /\.public-web-hero-surface \{[^}]*display: block;[^}]*overflow: visible;/);
+  assert.match(tabletHeroCss, /\.public-web-hero-copy \{[^}]*display: block;\s*width: auto;[^}]*padding: 18px var\(--public-web-content-edge-inset\) 14px;/);
+  assert.match(tabletHeroCss, /\.public-web h1 \{[^}]*max-width: none;\s*width: auto;[^}]*font-size: clamp\(24px, calc\(12px \+ 1\.5625vw\), 28px\);/);
+  assert.match(tabletHeroCss, /\.public-web-lead \{[^}]*max-width: none;[^}]*font-size: clamp\(14px, calc\(11px \+ 0\.390625vw\), 15px\);/);
+  assert.match(tabletHeroCss, /\.public-web-actions \{[^}]*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);/);
+  assert.match(tabletHeroCss, /\.public-web-hero-media \{[^}]*position: static;\s*display: block;/);
+  const tabletCharacterCss = tabletHeroCss.match(/\.public-web-hero-character \{([^}]*)\}/)?.[1];
+  assert.ok(tabletCharacterCss);
+  assert.match(tabletCharacterCss, /float: right;[\s\S]*?width: var\(--public-web-character-width\);[\s\S]*?margin-top: calc\(250px - var\(--public-web-character-height\)\);[\s\S]*?margin-right: var\(--public-web-character-right\);/);
+  assert.match(tabletCharacterCss, /shape-outside: polygon\(\s*100% 0%,[\s\S]*?100% 100%\s*\) border-box;/);
+  assert.deepEqual(
+    [...tabletCharacterCss.matchAll(/calc\(([\d.]+)% - var\(--public-web-image-exclusion-gap-inline\)\) ([\d.]+)%/g)]
+      .map(([, x, y]) => [y, x]),
+    [...intermediateCharacterCss.matchAll(/calc\(([\d.]+)% - var\(--public-web-image-exclusion-gap-inline\)\) ([\d.]+)%/g)]
+      .map(([, x, y]) => [y, x])
+  );
+  assert.deepEqual(
+    [...desktopCharacterCss.matchAll(/calc\(([\d.]+)% - var\(--public-web-image-exclusion-gap-inline\)\) ([\d.]+)%/g)]
+      .map(([, x, y]) => [y, x]),
+    [...tabletCharacterCss.matchAll(/calc\(([\d.]+)% - var\(--public-web-image-exclusion-gap-inline\)\) ([\d.]+)%/g)]
+      .map(([, x, y]) => [y, x])
+  );
+  assert.doesNotMatch(tabletHeroCss, /shape-margin:|display: flow-root|overflow: hidden|width: clamp\(30\.875rem/);
+  assert.match(
+    publicWebCssSource,
+    /@media \(min-width: 40rem\) and \(max-width: 63\.999rem\) \{[\s\S]*?\.public-web-mobile-menu-trigger,[\s\S]*?\.public-web-mobile-menu \{\s*display: none;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-desktop-nav-inner > button \{[\s\S]*?z-index: 42;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-goals-panel,[\s\S]*?\.public-web-knowledge-panel \{[\s\S]*?z-index: 80;/
+  );
+  assert.doesNotMatch(
+    publicHomepageSource + publicWebCssSource,
+    /public-web-hero-character-(?:stack|overlap)/
+  );
   assert.doesNotMatch(publicWebCssSource, /public-web-forgot-link/);
   assert.doesNotMatch(publicWebCssSource, /overflow-wrap: anywhere/);
+  assert.doesNotMatch(publicHomepageSource, /<br\s*\/?\s*>/);
 });
 
 test("metadata foundation has self-canonical, reciprocal hreflang and x-default", () => {
@@ -336,15 +558,15 @@ test("HP-01 exposes keyboard state and mobile dropdown safeguards", () => {
   assert.doesNotMatch(publicHeaderNavigationSource, /document\.body\.style\.overflow = "hidden"/);
   assert.match(
     publicWebCssSource,
-    /\.public-web-mobile-menu \{[\s\S]*?position: absolute;[\s\S]*?top: calc\(100% \+ 0\.8125rem\);[\s\S]*?right: 1rem;[\s\S]*?left: 1rem;/
+    /\.public-web-mobile-menu \{[\s\S]*?position: absolute;[\s\S]*?top: calc\(100% \+ var\(--public-web-panel-spacing\)\);[\s\S]*?right: var\(--public-web-panel-spacing\);[\s\S]*?left: var\(--public-web-panel-spacing\);/
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-locale-selector-mobile \{[\s\S]*?height: 44px;[\s\S]*?background: #191970;/
+    /\.public-web-locale-selector-mobile \{\s*display: block;/
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-locale-selector-mobile \.public-web-locale-panel \{[\s\S]*?top: calc\(100% \+ 0\.8125rem\);[\s\S]*?right: 1rem;/
+    /\.public-web-locale-panel \{[^}]*top: calc\(100% \+ var\(--public-web-panel-spacing\)\);[^}]*right: calc\(max\(0px, \(100% - 71\.875rem\) \/ 2\) \+ var\(--public-web-panel-spacing\)\);[^}]*left: auto;[^}]*width: 175px;/
   );
   assert.match(
     publicHeaderNavigationSource,
@@ -356,6 +578,17 @@ test("HP-01 exposes keyboard state and mobile dropdown safeguards", () => {
   );
   assert.match(publicHeaderNavigationSource, /localeReturnFocusRef/);
   assert.match(publicHeaderNavigationSource, /closeMobileMenu\(false\)/);
+  assert.match(
+    publicHeaderNavigationSource,
+    /src=\{`\/images\/flags\/\$\{locale\}\.svg`\}[\s\S]*?alt=""[\s\S]*?aria-hidden="true"/
+  );
+  assert.match(
+    publicHeaderNavigationSource,
+    /src=\{`\/images\/flags\/\$\{candidate\}\.svg`\}[\s\S]*?alt=""[\s\S]*?aria-hidden="true"/
+  );
+  assert.doesNotMatch(publicHeaderNavigationSource, /src="\/globe\.svg"/);
+  assert.doesNotMatch(publicHeaderNavigationSource, /locale\.toUpperCase\(\)/);
+  assert.doesNotMatch(publicHeaderNavigationSource, /candidate\.toUpperCase\(\)/);
   assert.match(publicWebCssSource, /:focus-visible/);
 });
 
@@ -366,9 +599,13 @@ test("HP-02G.1 keeps public focus and hover contrast above WCAG thresholds", () 
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-locale-selector-mobile \.public-web-locale-trigger:focus-visible,[\s\S]*?\.public-web-desktop-nav button:focus-visible \{[\s\S]*?outline-color: #fff;/
+    /\.public-web-desktop-nav button:focus-visible \{[\s\S]*?outline-color: #fff;/
   );
-  assert.equal(publicWebCssSource.match(/background: #087eae;/g)?.length, 3);
+  assert.equal(publicWebCssSource.match(/background: #087eae;/g)?.length, 1);
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-actions \.public-web-primary-cta:hover \{[\s\S]*?background: #1976d2;/
+  );
 });
 
 test("HP-01 keeps mobile knowledge domains as a one-open-at-a-time accordion", () => {
@@ -380,14 +617,20 @@ test("HP-01 keeps mobile knowledge domains as a one-open-at-a-time accordion", (
   assert.match(publicHeaderNavigationSource, /aria-controls=\{panelId\}/);
 });
 
-test("HP-01 preserves the measured 240 by 48 desktop logo contract", () => {
+test("canonical public header preserves one 200 by 40 logo contract", () => {
   assert.match(publicHeaderSource, /width=\{1500\}/);
   assert.match(publicHeaderSource, /height=\{300\}/);
-  assert.match(publicWebCssSource, /\.public-web-brand img \{[\s\S]*?width: 15rem;[\s\S]*?height: 3rem;/);
+  assert.match(publicWebCssSource, /\.public-web-brand img \{[\s\S]*?width: 12\.5rem;[\s\S]*?height: 2\.5rem;/);
+  assert.match(publicWebCssSource, /\.public-web-brand img \{[^}]*?flex-shrink: 0;/);
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-brand \{[\s\S]*?transform: translateX\(-0\.1953125rem\);/
+  );
+  assert.doesNotMatch(publicWebCssSource, /\.public-web-brand img \{[^}]*?width: (?:100%|15rem|clamp\()/);
   assert.doesNotMatch(publicWebCssSource, /width: min\(9\.5rem/);
 });
 
-test("HP-01I aligns menu icons and hero start with the canonical live baseline", () => {
+test("HP-01I keeps menu icons canonical while Hero v2 connects to the navigation bar", () => {
   assert.match(
     publicWebCssSource,
     /\.public-web-menu-icon \{[\s\S]*?width: 1rem;[\s\S]*?height: 1rem;[\s\S]*?background: #191970;/
@@ -395,38 +638,88 @@ test("HP-01I aligns menu icons and hero start with the canonical live baseline",
   assert.doesNotMatch(publicWebCssSource, /public-web-mobile-knowledge-trigger img/);
   assert.match(
     publicWebCssSource,
-    /\.public-web-main \{[\s\S]*?padding-block: 0\.75rem 3rem;/
-  );
-  assert.match(
-    publicWebCssSource,
-    /@media \(min-width: 56rem\) \{[\s\S]*?\.public-web-main \{[\s\S]*?padding-block: 0\.75rem 4rem;/
-  );
-  assert.match(
-    publicWebCssSource,
-    /@media \(min-width: 64rem\) \{[\s\S]*?\.public-web-main \{[\s\S]*?padding-block: 0\.6875rem 4rem;/
+    /\.public-web-main \{\s*padding: 0;\s*\}/
   );
 });
 
-test("PH-02 keeps the closed mobile header split across logo/menu and locale rows", () => {
+test("canonical header keeps locale in the light-blue top row at every width", () => {
   assert.match(
     publicWebCssSource,
     /\.public-web-header-actions > \.public-web-header-login \{\s*display: none;/
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-header-inner \{[\s\S]*?grid-template-columns: 55% minmax\(0, 45%\);[\s\S]*?grid-template-rows: 64px 44px;/
+    /\.public-web-header-inner \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;[\s\S]*?grid-template-rows: 64px 44px;/
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-brand img \{[\s\S]*?width: 100%;[\s\S]*?height: auto;[\s\S]*?aspect-ratio: 5 \/ 1;/
+    /\.public-web-header-top \{[\s\S]*?#b8cae0 4rem,[\s\S]*?#191970 4rem,[\s\S]*?#191970 100%[\s\S]*?\);/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-locale-trigger img \{[\s\S]*?width: 1\.4rem;[\s\S]*?height: 1\.4rem;[\s\S]*?transform: translateX\(0\.25rem\);/
+  );
+  assert.match(
+    publicWebCssSource,
+    /@media \(max-width: 39\.999rem\) \{[\s\S]*?\.public-web-header-actions \{\s*margin-right: -0\.55078125rem;/
+  );
+  assert.equal(
+    publicWebCssSource.match(/\.public-web-header-actions \{\s*gap: 0\.375rem;/g)
+      ?.length,
+    2
+  );
+  assert.equal(
+    publicWebCssSource.match(/margin-inline: 0\.125rem;/g)?.length,
+    2
   );
   assert.match(publicHeaderNavigationSource, /className="public-web-hamburger"/);
-  assert.match(publicHeaderNavigationSource, /renderLocaleSelector\("desktop"\)/);
-  assert.match(publicHeaderNavigationSource, /renderLocaleSelector\("mobile"\)/);
+  assert.match(
+    publicHeaderNavigationSource,
+    /className="public-web-header-actions">[\s\S]*?renderLocaleSelector\("desktop"\)[\s\S]*?renderLocaleSelector\("mobile"\)[\s\S]*?className="public-web-mobile-menu-trigger"/
+  );
+  assert.equal(
+    publicHeaderNavigationSource.match(/renderLocaleSelector\("mobile"\)/g)?.length,
+    1
+  );
   assert.doesNotMatch(publicHeaderNavigationSource, /className="public-web-mobile-menu-heading"/);
   assert.match(
     publicWebCssSource,
     /\.public-web-mobile-menu-trigger\[aria-expanded="true"\]/
+  );
+});
+
+test("canonical header uses its own 40rem breakpoint and aligned locale panels", () => {
+  assert.match(
+    publicHeaderNavigationSource,
+    /matchMedia\("\(min-width: 40rem\)"\)[\s\S]*?closeMobileMenu\(false\);[\s\S]*?setOpenPanel\(null\);/
+  );
+  assert.match(
+    publicWebCssSource,
+    /@media \(min-width: 40rem\) and \(max-width: 63\.999rem\) \{[\s\S]*?\.public-web-desktop-nav \{/
+  );
+  assert.match(
+    publicWebCssSource,
+    /@media \(min-width: 48rem\) and \(max-width: 63\.999rem\) \{[\s\S]*?\.public-web-hero \{/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-locale-panel \{[^}]*top: calc\(100% \+ var\(--public-web-panel-spacing\)\);[^}]*width: 175px;[^}]*background: #fff;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-locale-panel a:not\(\[aria-current="page"\]\):hover::after \{\s*background: #1976d2;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-locale-panel a:focus-visible \{\s*outline-offset: -3px;/
+  );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-header-login \{\s*padding-left: 0\.425rem;/
+  );
+  assert.equal(
+    publicWebCssSource.match(/top: calc\(100% \+ var\(--public-web-panel-spacing\)\);/g)?.length,
+    2
   );
 });
 
