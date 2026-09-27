@@ -91,9 +91,9 @@ type PublicHeaderContent = {
 export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
   en: {
     eyebrow: "Insights into your lifestyle",
-    title: "See where you stand each day as you move toward your goal.",
+    title: "See where you stand throughout the day as you move toward your goal",
     description:
-      "Bring your nutrition, activity, hydration and weight together in one personal overview and track your progress throughout the day.",
+      "Bring your nutrition, activity, hydration and weight together in one personal overview and track your progress toward your daily goals.",
     primaryCta: "Create a free account",
     forgotPassword: "Forgot password?",
     metadataTitle: "FitLifeTool | Daily lifestyle and goal insights",
@@ -102,9 +102,9 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
   },
   nl: {
     eyebrow: "Krijg inzicht in je leefstijl",
-    title: "Zie elke dag waar je staat op weg naar jouw doel.",
+    title: "Zie gedurende de dag waar je staat op weg naar jouw doel",
     description:
-      "Breng je voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht en volg tijdens de dag je voortgang.",
+      "Breng je voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht en volg je voortgang richting jouw dagelijkse doelen.",
     primaryCta: "Gratis account aanmaken",
     forgotPassword: "Wachtwoord vergeten?",
     metadataTitle: "FitLifeTool | Inzicht in je leefstijl en doelen",
@@ -113,9 +113,9 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
   },
   fr: {
     eyebrow: "Des repères pour votre mode de vie",
-    title: "Voyez chaque jour où vous en êtes par rapport à votre objectif.",
+    title: "Suivez dans la journée votre progression vers votre objectif",
     description:
-      "Réunissez votre alimentation, votre activité physique, votre hydratation et votre poids dans une vue d’ensemble personnalisée et suivez votre progression tout au long de la journée.",
+      "Réunissez alimentation, activité, hydratation et poids dans un aperçu personnalisé et suivez vos progrès vers vos objectifs quotidiens.",
     primaryCta: "Créer un compte gratuit",
     forgotPassword: "Mot de passe oublié ?",
     metadataTitle: "FitLifeTool | Suivez votre mode de vie et vos objectifs",
@@ -124,9 +124,9 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
   },
   de: {
     eyebrow: "Einblicke in deinen Lebensstil",
-    title: "Sieh jeden Tag, wo du auf dem Weg zu deinem Ziel stehst.",
+    title: "Sieh im Tagesverlauf, wo du auf dem Weg zu deinem Ziel stehst",
     description:
-      "Bringe deine Ernährung, Aktivität, Hydration und dein Gewicht in einem persönlichen Überblick zusammen und verfolge deinen Fortschritt über den Tag hinweg.",
+      "Bündle Ernährung, Aktivität, Hydration und Gewicht in deinem persönlichen Überblick und verfolge deinen Fortschritt zu deinen Tageszielen.",
     primaryCta: "Kostenloses Konto erstellen",
     forgotPassword: "Passwort vergessen?",
     metadataTitle: "FitLifeTool | Lebensstil und Ziele im Blick",
@@ -135,9 +135,9 @@ export const PUBLIC_HOME_CONTENT: Record<AppLanguage, PublicHomeContent> = {
   },
   pl: {
     eyebrow: "Wgląd w Twój styl życia",
-    title: "Każdego dnia sprawdzaj, gdzie jesteś na drodze do swojego celu.",
+    title: "W ciągu dnia sprawdzaj, gdzie jesteś na drodze do swojego celu",
     description:
-      "Połącz swoje odżywianie, aktywność, nawodnienie i wagę w jednym spersonalizowanym przeglądzie i śledź swoje postępy przez cały dzień.",
+      "Połącz swoje odżywianie, aktywność, nawodnienie i wagę w jednym spersonalizowanym przeglądzie i śledź swoje postępy w realizacji codziennych celów.",
     primaryCta: "Utwórz bezpłatne konto",
     forgotPassword: "Nie pamiętasz hasła?",
     metadataTitle: "FitLifeTool | Styl życia i cele pod kontrolą",

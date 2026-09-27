@@ -446,7 +446,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0030",
 
     status: "current",
-    updated: "2026-09-26",
+    updated: "2026-09-27",
   },
 ];
 

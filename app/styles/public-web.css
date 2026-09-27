@@ -658,7 +658,7 @@
 }
 
 .public-web-eyebrow {
-  margin-bottom: 4px;
+  margin-bottom: 7px;
   color: #64748b;
   font-family: Arial, sans-serif;
   font-size: 12px;
@@ -819,24 +819,6 @@
     padding: 1.25rem 1rem 1rem;
   }
 
-  .public-web-hero-copy::before {
-    float: right;
-    width: clamp(10rem, 46vw, 15rem);
-    height: calc(3.125rem + clamp(9.632rem, 44.32vw, 14.452rem));
-    margin-left: 0.5rem;
-    shape-outside: polygon(
-      78% 3.125rem,
-      100% 3.125rem,
-      100% 100%,
-      0 100%,
-      8% 78%,
-      22% 58%,
-      54% 36%
-    );
-    shape-margin: 0.375rem;
-    content: "";
-  }
-
   .public-web h1 {
     max-width: none;
     font-size: clamp(18.5px, calc(17.5px + 0.4vw), 19.5px);
@@ -867,27 +849,11 @@
   }
 
   .public-web-hero-media {
-    position: absolute;
-    z-index: 1;
-    top: 4.375rem;
-    right: 1rem;
-    bottom: auto;
-    width: clamp(10rem, 46vw, 15rem);
-    height: clamp(18.438rem, 84.817vw, 27.657rem);
-    padding: 0;
-    background-image: url("/images/female-character-mobile-v1.png");
-    background-position: center top;
-    background-repeat: no-repeat;
-    background-size: 100% auto;
     pointer-events: none;
-  }
-
-  .public-web-hero-character {
-    display: none;
   }
 }
 
-@media (max-width: 27.499rem) {
+@media (width < 27.5rem) {
   .public-web-hero {
     --public-web-content-edge-inset: 14px;
     --public-web-image-exclusion-gap-inline: 6px;
@@ -906,13 +872,21 @@
   }
 
   .public-web-hero-surface::before {
-    background: linear-gradient(
-      90deg,
-      rgb(245 250 255 / 98%) 0%,
-      rgb(245 250 255 / 92%) 36%,
-      rgb(245 250 255 / 64%) 58%,
-      rgb(245 250 255 / 8%) 78%
-    );
+    background:
+      linear-gradient(
+        180deg,
+        transparent 12%,
+        rgb(245 250 255 / 22%) 16%,
+        rgb(245 250 255 / 22%) 23%,
+        transparent 28%
+      ),
+      linear-gradient(
+        90deg,
+        rgb(245 250 255 / 98%) 0%,
+        rgb(245 250 255 / 92%) 36%,
+        rgb(245 250 255 / 64%) 58%,
+        rgb(245 250 255 / 8%) 78%
+      );
   }
 
   .public-web-hero-copy {
@@ -1033,21 +1007,25 @@
     content: none;
   }
 
+  .public-web-eyebrow {
+    font-size: clamp(12px, calc(10.6536px + 0.306vw), 13px);
+  }
+
   .public-web h1 {
     font-size: clamp(
       19.26px,
-      calc(12.887px + 1.448vw),
+      calc(12.88198px + 1.44955vw),
       24px
     );
   }
 
   .public-web-lead {
     font-size: clamp(
-      14px,
-      calc(14.711px - 0.0915vw),
-      14.312px
+      13.5px,
+      calc(10.808828px + 0.61163vw),
+      15.5px
     );
-    line-height: calc(22.293px - 0.3506vw);
+    line-height: 1.35;
   }
 
   .public-web-actions {
@@ -1105,6 +1083,26 @@
       calc(2.66% - var(--public-web-image-exclusion-gap-inline)) 100%,
       100% 100%
     ) border-box;
+  }
+}
+
+@media (min-width: 440px) and (max-width: 500px) {
+  .public-web-hero-surface::before {
+    background:
+      linear-gradient(
+        180deg,
+        transparent 14.18%,
+        rgb(245 250 255 / 22%) 16%,
+        rgb(245 250 255 / 22%) 18%,
+        transparent 21.7%
+      ),
+      linear-gradient(
+        90deg,
+        rgb(245 250 255 / 98%) 0%,
+        rgb(245 250 255 / 92%) 36%,
+        rgb(245 250 255 / 64%) 58%,
+        rgb(245 250 255 / 8%) 78%
+      );
   }
 }
 
@@ -1290,7 +1288,7 @@
     --public-web-content-edge-inset: 14px;
     --public-web-image-exclusion-gap-inline: 25px;
     --public-web-character-width: clamp(16.25rem, calc(8.53rem + 16.08vw), 18.8125rem);
-    --public-web-character-right: clamp(-0.9375rem, calc(21.875vw - 11.4375rem), 3rem);
+    --public-web-character-right: clamp(-15px, calc(21% - 205.62px + 3.8203125vw), 49px);
     --public-web-character-height: calc(var(--public-web-character-width) * 0.96345515);
     max-width: 71.875rem;
     height: 250px;
@@ -1323,11 +1321,12 @@
     display: block;
     width: auto;
     height: 100%;
-    padding: 18px var(--public-web-content-edge-inset) 14px;
+    padding: 14px var(--public-web-content-edge-inset) 14px;
   }
 
   .public-web-eyebrow {
-    margin-bottom: 4px;
+    margin-bottom: 7px;
+    font-size: 13px;
   }
 
   .public-web h1 {
@@ -1340,8 +1339,8 @@
   .public-web-lead {
     max-width: none;
     margin-block: 10px 0;
-    font-size: clamp(14px, calc(11px + 0.390625vw), 15px);
-    line-height: 1.4;
+    font-size: clamp(15.5px, calc(12.5px + 0.390625vw), 16.5px);
+    line-height: 1.35;
   }
 
   .public-web-actions {
@@ -1443,11 +1442,12 @@
     display: block;
     width: auto;
     height: 100%;
-    padding: 18px var(--public-web-content-edge-inset) 14px;
+    padding: 14px var(--public-web-content-edge-inset) 14px;
   }
 
   .public-web-eyebrow {
-    margin-bottom: 4px;
+    margin-bottom: 7px;
+    font-size: 13px;
   }
 
   .public-web h1 {
@@ -1460,8 +1460,8 @@
   .public-web-lead {
     max-width: none;
     margin-block: 10px 0;
-    font-size: 15px;
-    line-height: 1.4;
+    font-size: 16.5px;
+    line-height: 1.35;
   }
 
   .public-web-actions {

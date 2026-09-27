@@ -272,7 +272,11 @@ export default function DocL30030() {
           ten opzichte van haar border-box; H1 en lead breken natuurlijk om de
           afbeelding heen. De laagvolgorde is achtergrondfoto, readability-
           overlay, daarna foreground-character en content: de overlay mag de
-          vrouw niet verbleken. Op phone staat de enige Hero-CTA, registratie,
+          vrouw niet verbleken. De gerichte extra readability-behandeling achter
+          de eerste H1-regel op ≤439px en 440–500px hoort bij de GREEN/LOCKED
+          Hero-compositie; Hero-geometrie, responsive typography en
+          image-exclusion-architectuur blijven ongewijzigd. Op phone staat de
+          enige Hero-CTA, registratie,
           over de volle breedte binnen de 14px-randen en mag deze vóór de
           character schilderen. Inloggen staat in de header, niet als tweede
           Hero-CTA. De gedeelde tekst/beeldmethode en het onderscheid tussen
@@ -282,10 +286,15 @@ export default function DocL30030() {
         <p>
           De Hero-eyebrow, H1 en lead zijn voor NL, EN Global, FR, DE en PL
           gevalideerde en gelockte content. De eyebrow is een gelokaliseerde
-          contextregel in normale casing, geen vast FITLIFETOOL-label. De
-          responsive capaciteit is voor deze vijf talen op acht
-          viewportbreedtes GREEN/LOCKED. CSS dwingt de H1 niet op een vast
-          aantal regels. Een toekomstige, afzonderlijk goedgekeurde
+          contextregel in normale casing, geen vast FITLIFETOOL-label. De H1
+          beschrijft waar de gebruiker gedurende de dag staat richting één
+          persoonlijk einddoel en eindigt zonder afsluitende punt. De lead
+          brengt voeding, beweging, hydratatie en gewicht samen in één
+          persoonlijk overzicht en koppelt dit aan voortgang richting meerdere
+          dagelijkse doelen; deze eindigt met een afsluitende punt. De
+          definitieve Hero-content is voor alle vijf talen opnieuw responsive
+          capacity GREEN/LOCKED. CSS dwingt de H1 niet op een vast aantal
+          regels. Een toekomstige, afzonderlijk goedgekeurde
           copywijziging die de fixed-height-capaciteit overschrijdt, vereist
           een bewuste responsive content- of compositiebeslissing, geen runtime
           auto-height.
