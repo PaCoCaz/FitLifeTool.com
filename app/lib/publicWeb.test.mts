@@ -172,16 +172,16 @@ test("HP-02 uses the approved locale copy and metadata", () => {
     "Des repères pour votre mode de vie",
     "Einblicke in deinen Lebensstil",
     "Wgląd w Twój styl życia",
-    "See where you stand each day as you move toward your goal.",
-    "Zie elke dag waar je staat op weg naar jouw doel.",
-    "Voyez chaque jour où vous en êtes par rapport à votre objectif.",
-    "Sieh jeden Tag, wo du auf dem Weg zu deinem Ziel stehst.",
-    "Każdego dnia sprawdzaj, gdzie jesteś na drodze do swojego celu.",
-    "Bring your nutrition, activity, hydration and weight together in one personal overview and track your progress throughout the day.",
-    "Breng je voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht en volg tijdens de dag je voortgang.",
-    "Réunissez votre alimentation, votre activité physique, votre hydratation et votre poids dans une vue d’ensemble personnalisée et suivez votre progression tout au long de la journée.",
-    "Bringe deine Ernährung, Aktivität, Hydration und dein Gewicht in einem persönlichen Überblick zusammen und verfolge deinen Fortschritt über den Tag hinweg.",
-    "Połącz swoje odżywianie, aktywność, nawodnienie i wagę w jednym spersonalizowanym przeglądzie i śledź swoje postępy przez cały dzień.",
+    "See where you stand throughout the day as you move toward your goal",
+    "Zie gedurende de dag waar je staat op weg naar jouw doel",
+    "Suivez dans la journée votre progression vers votre objectif",
+    "Sieh im Tagesverlauf, wo du auf dem Weg zu deinem Ziel stehst",
+    "W ciągu dnia sprawdzaj, gdzie jesteś na drodze do swojego celu",
+    "Bring your nutrition, activity, hydration and weight together in one personal overview and track your progress toward your daily goals.",
+    "Breng je voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht en volg je voortgang richting jouw dagelijkse doelen.",
+    "Réunissez alimentation, activité, hydratation et poids dans un aperçu personnalisé et suivez vos progrès vers vos objectifs quotidiens.",
+    "Bündle Ernährung, Aktivität, Hydration und Gewicht in deinem persönlichen Überblick und verfolge deinen Fortschritt zu deinen Tageszielen.",
+    "Połącz swoje odżywianie, aktywność, nawodnienie i wagę w jednym spersonalizowanym przeglądzie i śledź swoje postępy w realizacji codziennych celów.",
     "FitLifeTool | Daily lifestyle and goal insights",
     "FitLifeTool | Inzicht in je leefstijl en doelen",
     "FitLifeTool | Suivez votre mode de vie et vos objectifs",
@@ -197,6 +197,18 @@ test("HP-02 uses the approved locale copy and metadata", () => {
   }
   assert.equal(registrySource.match(/eyebrow: "/g)?.length, APP_LANGUAGES.length);
   assert.match(publicWebCssSource, /\.public-web-eyebrow \{[^}]*text-transform: none;/);
+  const heroContentSource = registrySource
+    .split("export const PUBLIC_HOME_CONTENT")[1]
+    ?.split("export const PUBLIC_HEADER_CONTENT")[0];
+  assert.ok(heroContentSource);
+  for (const locale of APP_LANGUAGES) {
+    const localeContent = heroContentSource.match(new RegExp(`\\b${locale}: \\{([\\s\\S]*?)\\n  \\},`))?.[1];
+    assert.ok(localeContent, locale);
+    const title = localeContent.match(/title: "([^"]+)"/)?.[1];
+    const description = localeContent.match(/description:\s*"([^"]+)"/)?.[1];
+    assert.ok(title && !title.endsWith("."), `${locale} H1 must not end in a period`);
+    assert.ok(description?.endsWith("."), `${locale} lead must end in a period`);
+  }
 });
 
 test("Hero v2 uses the approved full-width background and decorative character composition", () => {
@@ -253,13 +265,27 @@ test("Hero v2 uses the approved full-width background and decorative character c
     publicWebCssSource,
     /@media \(max-width: 47\.999rem\) \{[\s\S]*?\.public-web h1 \{[\s\S]*?max-width: none;[\s\S]*?font-size: clamp\(18\.5px, calc\(17\.5px \+ 0\.4vw\), 19\.5px\);[\s\S]*?\.public-web-actions \{[\s\S]*?flex-direction: column;[\s\S]*?\.public-web-actions \.public-web-primary-cta,[\s\S]*?width: 100%;[\s\S]*?min-height: 44px;/
   );
+  assert.match(publicWebCssSource, /\.public-web-eyebrow \{\s*margin-bottom: 7px;/);
+  const mobileBaseCss = publicWebCssSource
+    .split("@media (max-width: 47.999rem) {")[1]
+    ?.split("@media (width < 27.5rem) {")[0];
+  assert.ok(mobileBaseCss);
+  assert.match(mobileBaseCss, /\.public-web-hero-media \{\s*pointer-events: none;\s*\}/);
+  assert.doesNotMatch(mobileBaseCss, /\.public-web-hero-copy::before|\.public-web-hero-character \{\s*display: none;/);
+  assert.doesNotMatch(publicWebCssSource, /female-character-mobile-v1\.png|female-character-v1\.png|hero-background-v1\.png/);
   const phoneHeroCss = publicWebCssSource
-    .split("@media (max-width: 27.499rem) {")[1]
+    .split("@media (width < 27.5rem) {")[1]
     ?.split("@media (min-width: 27.5rem) and (max-width: 47.999rem) {")[0];
+  assert.ok(phoneHeroCss);
   assert.match(
-    phoneHeroCss ?? "",
-    /\.public-web-hero \{[^}]*--public-web-content-edge-inset: 14px;[^}]*--public-web-image-exclusion-gap-inline: 6px;[^}]*--public-web-character-width: clamp\(184px, calc\(46\.8571424px \+ 42\.857143vw\), 235px\);[^}]*height: 300px;[\s\S]*?\.public-web-hero-background \{\s*object-position: center;\s*\}[\s\S]*?\.public-web-hero-surface::before \{\s*background: linear-gradient\(\s*90deg,\s*rgb\(245 250 255 \/ 98%\) 0%,\s*rgb\(245 250 255 \/ 92%\) 36%,\s*rgb\(245 250 255 \/ 64%\) 58%,\s*rgb\(245 250 255 \/ 8%\) 78%\s*\);\s*\}[\s\S]*?\.public-web-hero-copy::before \{\s*content: none;\s*\}[\s\S]*?\.public-web-hero-media \{[^}]*position: static;[^}]*background-image: none;[^}]*\}[\s\S]*?\.public-web-hero-character \{[^}]*float: right;[^}]*display: block;[^}]*right: 0;[^}]*shape-outside: polygon\([\s\S]*?\) border-box;/
+    phoneHeroCss,
+    /\.public-web-hero \{[^}]*--public-web-content-edge-inset: 14px;[^}]*--public-web-image-exclusion-gap-inline: 6px;[^}]*--public-web-character-width: clamp\(184px, calc\(46\.8571424px \+ 42\.857143vw\), 235px\);[^}]*height: 300px;/
   );
+  assert.match(phoneHeroCss, /\.public-web-hero-background \{\s*object-position: center;\s*\}/);
+  assert.match(phoneHeroCss, /\.public-web-hero-surface::before \{\s*background:\s*linear-gradient\(\s*180deg,\s*transparent 12%,\s*rgb\(245 250 255 \/ 22%\) 16%,\s*rgb\(245 250 255 \/ 22%\) 23%,\s*transparent 28%\s*\),\s*linear-gradient\(\s*90deg,\s*rgb\(245 250 255 \/ 98%\) 0%,\s*rgb\(245 250 255 \/ 92%\) 36%,\s*rgb\(245 250 255 \/ 64%\) 58%,\s*rgb\(245 250 255 \/ 8%\) 78%\s*\);/);
+  assert.match(phoneHeroCss, /\.public-web-hero-copy::before \{\s*content: none;\s*\}/);
+  assert.match(phoneHeroCss, /\.public-web-hero-media \{[^}]*position: static;[^}]*background-image: none;/);
+  assert.match(phoneHeroCss, /\.public-web-hero-character \{[^}]*float: right;[^}]*display: block;[^}]*right: 0;[^}]*shape-outside: polygon\([\s\S]*?\) border-box;/);
   assert.match(phoneHeroCss ?? "", /\.public-web-hero-surface \{\s*height: 100%;\s*overflow: visible;/);
   assert.match(phoneHeroCss ?? "", /\.public-web-hero-copy \{\s*height: 100%;\s*padding-top: 14px;\s*padding-right: var\(--public-web-content-edge-inset\);\s*padding-left: var\(--public-web-content-edge-inset\);/);
   assert.match(phoneHeroCss ?? "", /\.public-web h1 \{\s*font-size: clamp\(17px, calc\(14\.310924px \+ 0\.840336vw\), 18px\);\s*\}/);
@@ -268,7 +294,7 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.match(phoneHeroCss ?? "", /\.public-web-hero-character \{[^}]*bottom: 0;\s*z-index: 2;\s*margin-top: calc\(300px - var\(--public-web-character-height\)\);/);
   const intermediateHeroCss = publicWebCssSource
     .split("@media (min-width: 27.5rem) and (max-width: 47.999rem) {")[1]
-    ?.split("@media (min-width: 40rem) and (max-width: 63.999rem) {")[0];
+    ?.split("@media (min-width: 440px) and (max-width: 500px) {")[0];
   assert.ok(intermediateHeroCss);
   assert.match(intermediateHeroCss, /--public-web-content-edge-inset: 14px;/);
   assert.match(intermediateHeroCss, /--public-web-image-exclusion-gap-inline: 8px;/);
@@ -276,8 +302,11 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.match(intermediateHeroCss, /--public-web-character-right: clamp\(-15px,[^;]*0px\);/);
   assert.match(intermediateHeroCss, /height: 275px;/);
   assert.match(intermediateHeroCss, /\.public-web-hero-surface \{\s*overflow: visible;/);
-  assert.match(intermediateHeroCss, /\.public-web-hero-copy \{[^}]*padding-right: var\(--public-web-content-edge-inset\);\s*padding-left: var\(--public-web-content-edge-inset\);/);
+  assert.match(intermediateHeroCss, /\.public-web-hero-copy \{[^}]*padding-top: 14px;\s*padding-right: var\(--public-web-content-edge-inset\);\s*padding-left: var\(--public-web-content-edge-inset\);/);
   assert.match(intermediateHeroCss, /\.public-web-hero-copy::before \{\s*content: none;\s*\}/);
+  assert.match(intermediateHeroCss, /\.public-web-eyebrow \{\s*font-size: clamp\(12px, calc\(10\.6536px \+ 0\.306vw\), 13px\);/);
+  assert.match(intermediateHeroCss, /\.public-web h1 \{\s*font-size: clamp\(\s*19\.26px,\s*calc\(12\.88198px \+ 1\.44955vw\),\s*24px\s*\);/);
+  assert.match(intermediateHeroCss, /\.public-web-lead \{\s*font-size: clamp\(\s*13\.5px,\s*calc\(10\.808828px \+ 0\.61163vw\),\s*15\.5px\s*\);\s*line-height: 1\.35;/);
   assert.match(intermediateHeroCss, /\.public-web-actions \{[^}]*position: absolute;\s*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);\s*clear: none;\s*flex-direction: row;/);
   assert.match(intermediateHeroCss, /\.public-web-hero-media \{[\s\S]*?position: static;[\s\S]*?display: block;[\s\S]*?background-image: none;/);
   const intermediateCharacterCss = intermediateHeroCss.match(/\.public-web-hero-character \{([^}]*)\}/)?.[1];
@@ -298,6 +327,11 @@ test("Hero v2 uses the approved full-width background and decorative character c
   );
   assert.doesNotMatch(intermediateCharacterCss, /shape-margin:/);
   assert.doesNotMatch(intermediateHeroCss, /display: contents|display: flow-root|overflow: hidden|shape-outside: url\(/);
+  const firstLineReadabilityCss = publicWebCssSource
+    .split("@media (min-width: 440px) and (max-width: 500px) {")[1]
+    ?.split("@media (min-width: 40rem) and (max-width: 63.999rem) {")[0];
+  assert.ok(firstLineReadabilityCss);
+  assert.match(firstLineReadabilityCss, /\.public-web-hero-surface::before \{\s*background:\s*linear-gradient\(\s*180deg,\s*transparent 14\.18%,\s*rgb\(245 250 255 \/ 22%\) 16%,\s*rgb\(245 250 255 \/ 22%\) 18%,\s*transparent 21\.7%\s*\),\s*linear-gradient\(\s*90deg,\s*rgb\(245 250 255 \/ 98%\) 0%,\s*rgb\(245 250 255 \/ 92%\) 36%,\s*rgb\(245 250 255 \/ 64%\) 58%,\s*rgb\(245 250 255 \/ 8%\) 78%\s*\);/);
   const desktopHeroCss = publicWebCssSource
     .split("@media (min-width: 64rem) {")[1]
     ?.split("@media (min-width: 71.875rem) {")[0];
@@ -308,10 +342,11 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.match(desktopHeroCss, /\.public-web-hero-surface \{[^}]*display: block;[^}]*overflow: visible;/);
   const desktopCopyCss = desktopHeroCss.match(/\.public-web-hero-copy \{([^}]*)\}/)?.[1];
   assert.ok(desktopCopyCss);
-  assert.match(desktopCopyCss, /display: block;\s*width: auto;[^}]*padding: 18px var\(--public-web-content-edge-inset\) 14px;/);
+  assert.match(desktopCopyCss, /display: block;\s*width: auto;[^}]*padding: 14px var\(--public-web-content-edge-inset\) 14px;/);
   assert.doesNotMatch(desktopCopyCss, /display: grid|grid-template-rows|padding: 28px 3rem/);
+  assert.match(desktopHeroCss, /\.public-web-eyebrow \{\s*margin-bottom: 7px;\s*font-size: 13px;/);
   assert.match(desktopHeroCss, /\.public-web h1 \{[^}]*max-width: none;\s*width: auto;[^}]*font-size: clamp\(28px, calc\(16px \+ 1\.171875vw\), 30px\);\s*line-height: 1\.08;/);
-  assert.match(desktopHeroCss, /\.public-web-lead \{[^}]*max-width: none;[^}]*font-size: 15px;\s*line-height: 1\.4;/);
+  assert.match(desktopHeroCss, /\.public-web-lead \{[^}]*max-width: none;[^}]*font-size: 16\.5px;\s*line-height: 1\.35;/);
   assert.match(desktopHeroCss, /\.public-web-actions \{[^}]*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);/);
   assert.match(desktopHeroCss, /\.public-web-hero-media \{[^}]*position: static;\s*display: block;/);
   const desktopCharacterCss = desktopHeroCss.match(/\.public-web-hero-character \{([^}]*)\}/)?.[1];
@@ -336,12 +371,13 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.match(tabletHeroCss, /--public-web-content-edge-inset: 14px;/);
   assert.match(tabletHeroCss, /--public-web-image-exclusion-gap-inline: 25px;/);
   assert.match(tabletHeroCss, /--public-web-character-width: clamp\(16\.25rem, calc\(8\.53rem \+ 16\.08vw\), 18\.8125rem\);/);
-  assert.match(tabletHeroCss, /--public-web-character-right: clamp\(-0\.9375rem, calc\(21\.875vw - 11\.4375rem\), 3rem\);/);
+  assert.match(tabletHeroCss, /--public-web-character-right: clamp\(-15px, calc\(21% - 205\.62px \+ 3\.8203125vw\), 49px\);/);
   assert.match(tabletHeroCss, /\.public-web-hero \{[^}]*height: 250px;/);
   assert.match(tabletHeroCss, /\.public-web-hero-surface \{[^}]*display: block;[^}]*overflow: visible;/);
-  assert.match(tabletHeroCss, /\.public-web-hero-copy \{[^}]*display: block;\s*width: auto;[^}]*padding: 18px var\(--public-web-content-edge-inset\) 14px;/);
+  assert.match(tabletHeroCss, /\.public-web-hero-copy \{[^}]*display: block;\s*width: auto;[^}]*padding: 14px var\(--public-web-content-edge-inset\) 14px;/);
+  assert.match(tabletHeroCss, /\.public-web-eyebrow \{\s*margin-bottom: 7px;\s*font-size: 13px;/);
   assert.match(tabletHeroCss, /\.public-web h1 \{[^}]*max-width: none;\s*width: auto;[^}]*font-size: clamp\(24px, calc\(12px \+ 1\.5625vw\), 28px\);/);
-  assert.match(tabletHeroCss, /\.public-web-lead \{[^}]*max-width: none;[^}]*font-size: clamp\(14px, calc\(11px \+ 0\.390625vw\), 15px\);/);
+  assert.match(tabletHeroCss, /\.public-web-lead \{[^}]*max-width: none;[^}]*font-size: clamp\(15\.5px, calc\(12\.5px \+ 0\.390625vw\), 16\.5px\);\s*line-height: 1\.35;/);
   assert.match(tabletHeroCss, /\.public-web-actions \{[^}]*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);/);
   assert.match(tabletHeroCss, /\.public-web-hero-media \{[^}]*position: static;\s*display: block;/);
   const tabletCharacterCss = tabletHeroCss.match(/\.public-web-hero-character \{([^}]*)\}/)?.[1];
