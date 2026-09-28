@@ -144,6 +144,7 @@ test("sticky public header keeps the Hero overlap at top and opens desktop panel
   assert.match(publicHeaderNavigationSource, /hidden=\{presentation === "mobile" && openPanel !== "locale"\}/);
   assert.match(publicHeaderNavigationSource, /className="public-web-goals-panel"\s+popover="manual"/);
   assert.match(publicHeaderNavigationSource, /className="public-web-knowledge-panel"\s+popover="manual"/);
+  assert.match(publicHeaderNavigationSource, /className="public-web-knowledge-panel"\s+popover="manual"\s*>\s*<div className="public-web-knowledge-grid">/);
   assert.match(publicHeaderNavigationSource, /element\.showPopover\(\)/);
   assert.match(publicHeaderNavigationSource, /element\.hidePopover\(\)/);
   assert.match(publicHeaderNavigationSource, /rootRef\.current\.contains\(event\.target as Node\)/);
@@ -157,8 +158,14 @@ test("sticky public header keeps the Hero overlap at top and opens desktop panel
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-goals-panel:popover-open,\s*\.public-web-knowledge-panel:popover-open \{\s*display: grid;/
+    /\.public-web-goals-panel:popover-open,\s*\.public-web-knowledge-panel:popover-open \{\s*display: block;/
   );
+  assert.match(
+    publicWebCssSource,
+    /@media \(min-width: 40rem\) \{\s*\.public-web-goals-panel,\s*\.public-web-knowledge-panel \{\s*max-block-size: max\(0px, calc\(100dvh - 108px - var\(--public-web-panel-spacing\) - var\(--public-web-panel-spacing\)\)\);\s*overflow-y: auto;/
+  );
+  assert.doesNotMatch(publicWebCssSource, /block-size: max-content;/);
+  assert.equal(publicWebCssSource.match(/\.public-web-knowledge-grid \{\s*display: grid;\s*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/g)?.length, 2);
   assert.equal(
     publicWebCssSource.match(/top: calc\(108px \+ var\(--public-web-panel-spacing\)\);/g)?.length,
     4
@@ -300,7 +307,15 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.match(intermediateHeroCss, /--public-web-image-exclusion-gap-inline: 8px;/);
   assert.match(intermediateHeroCss, /--public-web-character-width: clamp\(220px, calc\(166\.177371px \+ 12\.232416vw\), 260px\);/);
   assert.match(intermediateHeroCss, /--public-web-character-right: clamp\(-15px,[^;]*0px\);/);
-  assert.match(intermediateHeroCss, /height: 275px;/);
+  assert.match(intermediateHeroCss, /--public-web-hero-height: clamp\(275px, calc\(336\.666667px - 8\.333333vw\), 300px\);/);
+  assert.match(intermediateHeroCss, /height: var\(--public-web-hero-height\);/);
+  const intermediateHeroHeight = (viewportWidth: number, scrollbarGutter = 0) =>
+    Math.min(300, Math.max(275, 336.666667 - (viewportWidth - scrollbarGutter) / 12));
+  for (const gutter of [0, 15]) {
+    assert.ok(Math.abs(intermediateHeroHeight(440, gutter) - 300) < 0.01);
+    assert.ok(Math.abs(intermediateHeroHeight(767, gutter) - 275) < 0.01);
+    assert.ok(intermediateHeroHeight(600, gutter) < intermediateHeroHeight(500, gutter));
+  }
   assert.match(intermediateHeroCss, /\.public-web-hero-surface \{\s*overflow: visible;/);
   assert.match(intermediateHeroCss, /\.public-web-hero-copy \{[^}]*padding-top: 14px;\s*padding-right: var\(--public-web-content-edge-inset\);\s*padding-left: var\(--public-web-content-edge-inset\);/);
   assert.match(intermediateHeroCss, /\.public-web-hero-copy::before \{\s*content: none;\s*\}/);
@@ -309,9 +324,10 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.match(intermediateHeroCss, /\.public-web-lead \{\s*font-size: clamp\(\s*13\.5px,\s*calc\(10\.808828px \+ 0\.61163vw\),\s*15\.5px\s*\);\s*line-height: 1\.35;/);
   assert.match(intermediateHeroCss, /\.public-web-actions \{[^}]*position: absolute;\s*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);\s*clear: none;\s*flex-direction: row;/);
   assert.match(intermediateHeroCss, /\.public-web-hero-media \{[\s\S]*?position: static;[\s\S]*?display: block;[\s\S]*?background-image: none;/);
+  assert.match(intermediateHeroCss, /\.public-web-hero-media \{[^}]*padding-top: calc\(var\(--public-web-hero-height\) - var\(--public-web-character-height\)\);\s*margin-bottom: calc\(var\(--public-web-character-height\) - var\(--public-web-hero-height\)\);/);
   const intermediateCharacterCss = intermediateHeroCss.match(/\.public-web-hero-character \{([^}]*)\}/)?.[1];
   assert.ok(intermediateCharacterCss);
-  assert.match(intermediateCharacterCss, /float: right;[\s\S]*?width: var\(--public-web-character-width\);[\s\S]*?margin-top: calc\(275px - var\(--public-web-character-height\)\);[\s\S]*?margin-right: var\(--public-web-character-right\);/);
+  assert.match(intermediateCharacterCss, /float: right;[\s\S]*?width: var\(--public-web-character-width\);[\s\S]*?margin-top: 0;[\s\S]*?margin-right: var\(--public-web-character-right\);/);
   assert.match(intermediateCharacterCss, /shape-outside: polygon\(\s*100% 0%,[\s\S]*?100% 100%\s*\) border-box;/);
   assert.deepEqual(
     [...intermediateCharacterCss.matchAll(/calc\(([\d.]+)% - var\(--public-web-image-exclusion-gap-inline\)\) ([\d.]+)%/g)]
@@ -331,7 +347,7 @@ test("Hero v2 uses the approved full-width background and decorative character c
     .split("@media (min-width: 440px) and (max-width: 500px) {")[1]
     ?.split("@media (min-width: 40rem) and (max-width: 63.999rem) {")[0];
   assert.ok(firstLineReadabilityCss);
-  assert.match(firstLineReadabilityCss, /\.public-web-hero-surface::before \{\s*background:\s*linear-gradient\(\s*180deg,\s*transparent 14\.18%,\s*rgb\(245 250 255 \/ 22%\) 16%,\s*rgb\(245 250 255 \/ 22%\) 18%,\s*transparent 21\.7%\s*\),\s*linear-gradient\(\s*90deg,\s*rgb\(245 250 255 \/ 98%\) 0%,\s*rgb\(245 250 255 \/ 92%\) 36%,\s*rgb\(245 250 255 \/ 64%\) 58%,\s*rgb\(245 250 255 \/ 8%\) 78%\s*\);/);
+  assert.match(firstLineReadabilityCss, /\.public-web-hero-surface::before \{\s*background:\s*linear-gradient\(\s*180deg,\s*transparent 39px,\s*rgb\(245 250 255 \/ 22%\) 44px,\s*rgb\(245 250 255 \/ 22%\) 49\.5px,\s*transparent 59\.675px\s*\),\s*linear-gradient\(\s*90deg,\s*rgb\(245 250 255 \/ 98%\) 0%,\s*rgb\(245 250 255 \/ 92%\) 36%,\s*rgb\(245 250 255 \/ 64%\) 58%,\s*rgb\(245 250 255 \/ 8%\) 78%\s*\);/);
   const desktopHeroCss = publicWebCssSource
     .split("@media (min-width: 64rem) {")[1]
     ?.split("@media (min-width: 71.875rem) {")[0];
