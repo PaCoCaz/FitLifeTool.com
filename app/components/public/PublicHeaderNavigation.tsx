@@ -395,26 +395,28 @@ export default function PublicHeaderNavigation({
             className="public-web-knowledge-panel"
             popover="manual"
           >
-            {KNOWLEDGE_GROUPS.map(({ key }) => {
-              const group = content.knowledge.groups[key];
-              return (
-                <section key={key} className="public-web-knowledge-group">
-                  <h2>
-                    <span
-                      className={`public-web-menu-icon public-web-menu-icon-${key}`}
-                      aria-hidden="true"
-                    />
-                    {group.label}
-                  </h2>
-                  {group.items.map((item) => (
-                    <div key={item.label} className="public-web-menu-label">
-                      <span>{item.label}</span>
-                      <small>{item.description}</small>
-                    </div>
-                  ))}
-                </section>
-              );
-            })}
+            <div className="public-web-knowledge-grid">
+              {KNOWLEDGE_GROUPS.map(({ key }) => {
+                const group = content.knowledge.groups[key];
+                return (
+                  <section key={key} className="public-web-knowledge-group">
+                    <h2>
+                      <span
+                        className={`public-web-menu-icon public-web-menu-icon-${key}`}
+                        aria-hidden="true"
+                      />
+                      {group.label}
+                    </h2>
+                    {group.items.map((item) => (
+                      <div key={item.label} className="public-web-menu-label">
+                        <span>{item.label}</span>
+                        <small>{item.description}</small>
+                      </div>
+                    ))}
+                  </section>
+                );
+              })}
+            </div>
           </div>
         </div>
       </nav>
