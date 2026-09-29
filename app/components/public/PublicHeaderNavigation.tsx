@@ -10,7 +10,11 @@ import {
   useState,
 } from "react";
 import type { AppLanguage } from "@/lib/languagePreference";
-import { PublicAuthTrigger } from "@/components/public/PublicAuthModalProvider";
+import {
+  PublicAuthTrigger,
+  usePublicOverlay,
+  type PublicTopLevelOverlay,
+} from "@/components/public/PublicAuthModalProvider";
 import {
   getPublicPagePath,
   PUBLIC_HEADER_CONTENT,
@@ -32,6 +36,10 @@ const KNOWLEDGE_GROUPS = [
 
 type KnowledgeGroupKey = (typeof KNOWLEDGE_GROUPS)[number]["key"];
 
+function isOpenPanel(overlay: PublicTopLevelOverlay): overlay is Exclude<OpenPanel, null> {
+  return overlay === "locale" || overlay === "goals" || overlay === "knowledge";
+}
+
 function Chevron({ open }: { open: boolean }) {
   return (
     <svg
@@ -52,8 +60,9 @@ export default function PublicHeaderNavigation({
   pageKey: PublicPageKey;
 }) {
   const content = PUBLIC_HEADER_CONTENT[locale];
-  const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { activeOverlay, setActiveOverlay } = usePublicOverlay();
+  const openPanel: OpenPanel = isOpenPanel(activeOverlay) ? activeOverlay : null;
+  const mobileOpen = activeOverlay === "mobile";
   const [scrolled, setScrolled] = useState(false);
   const [mobileSections, setMobileSections] = useState<
     Record<MobileSection, boolean>
@@ -111,26 +120,26 @@ export default function PublicHeaderNavigation({
   }, [openPanel]);
 
   const closeMobileMenu = useCallback((restoreFocus = true) => {
-    setMobileOpen(false);
+    if (!mobileOpen) return;
+    setActiveOverlay(null);
     if (restoreFocus) {
       requestAnimationFrame(() => mobileButtonRef.current?.focus());
     }
-  }, []);
+  }, [mobileOpen, setActiveOverlay]);
 
   const closeDesktopPanel = useCallback((restoreFocus = false) => {
-    setOpenPanel((current) => {
-      if (restoreFocus) {
-        const trigger =
-          current === "locale"
-            ? localeReturnFocusRef.current
-            : current === "goals"
-              ? goalsButtonRef.current
-              : knowledgeButtonRef.current;
-        requestAnimationFrame(() => trigger?.focus());
-      }
-      return null;
-    });
-  }, []);
+    if (!openPanel) return;
+    if (restoreFocus) {
+      const trigger =
+        openPanel === "locale"
+          ? localeReturnFocusRef.current
+          : openPanel === "goals"
+            ? goalsButtonRef.current
+            : knowledgeButtonRef.current;
+      requestAnimationFrame(() => trigger?.focus());
+    }
+    setActiveOverlay(null);
+  }, [openPanel, setActiveOverlay]);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -172,8 +181,9 @@ export default function PublicHeaderNavigation({
   useEffect(() => {
     const normalNavigationQuery = window.matchMedia("(min-width: 40rem)");
     const handleNavigationModeChange = () => {
-      closeMobileMenu(false);
-      setOpenPanel(null);
+      setActiveOverlay((current) =>
+        current === "mobile" || isOpenPanel(current) ? null : current
+      );
       if (mobileOpen || openPanel) {
         requestAnimationFrame(() => {
           const visibleTrigger = normalNavigationQuery.matches
@@ -190,10 +200,10 @@ export default function PublicHeaderNavigation({
     normalNavigationQuery.addEventListener("change", handleNavigationModeChange);
     return () =>
       normalNavigationQuery.removeEventListener("change", handleNavigationModeChange);
-  }, [closeMobileMenu, mobileOpen, openPanel]);
+  }, [mobileOpen, openPanel, setActiveOverlay]);
 
   function togglePanel(panel: Exclude<OpenPanel, null>) {
-    setOpenPanel((current) => (current === panel ? null : panel));
+    setActiveOverlay((current) => (current === panel ? null : panel));
   }
 
   function getLocaleRefs(presentation: LocalePresentation) {
@@ -211,15 +221,13 @@ export default function PublicHeaderNavigation({
   function toggleLocale(presentation: LocalePresentation) {
     const { buttonRef } = getLocaleRefs(presentation);
     localeReturnFocusRef.current = buttonRef.current;
-    closeMobileMenu(false);
     togglePanel("locale");
   }
 
   function openLocaleWithKeyboard(presentation: LocalePresentation) {
     const { buttonRef, panelRef } = getLocaleRefs(presentation);
     localeReturnFocusRef.current = buttonRef.current;
-    closeMobileMenu(false);
-    setOpenPanel("locale");
+    setActiveOverlay("locale");
     requestAnimationFrame(() =>
       panelRef.current?.querySelector<HTMLElement>("a")?.focus()
     );
@@ -328,8 +336,9 @@ export default function PublicHeaderNavigation({
           aria-controls="public-web-mobile-menu"
           aria-expanded={mobileOpen}
           onClick={() => {
-            setOpenPanel(null);
-            setMobileOpen((current) => !current);
+            setActiveOverlay((current) =>
+              current === "mobile" ? null : "mobile"
+            );
           }}
         >
           <span aria-hidden="true" className="public-web-hamburger">

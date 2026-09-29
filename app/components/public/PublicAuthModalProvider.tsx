@@ -8,7 +8,9 @@ import {
   useRef,
   useState,
   type ButtonHTMLAttributes,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
 import type { AuthModalMode } from "@/components/auth/RegisterModal";
 import type { AppLanguage } from "@/lib/languagePreference";
@@ -23,7 +25,17 @@ type PublicAuthModules = {
   useLangContext: LangProviderModule["useLangContext"];
 };
 
+export type PublicTopLevelOverlay =
+  | "locale"
+  | "goals"
+  | "knowledge"
+  | "mobile"
+  | AuthModalMode
+  | null;
+
 type PublicAuthModalContextValue = {
+  activeOverlay: PublicTopLevelOverlay;
+  setActiveOverlay: Dispatch<SetStateAction<PublicTopLevelOverlay>>;
   openAuthModal: (mode: AuthModalMode) => void;
 };
 
@@ -36,12 +48,16 @@ function LoadedAuthModal({
   mode,
   onModeChange,
   onClose,
+  returnFocusTo,
+  onFocusReady,
 }: {
   modules: PublicAuthModules;
   locale: AppLanguage;
   mode: AuthModalMode;
   onModeChange: (mode: AuthModalMode) => void;
   onClose: () => void;
+  returnFocusTo: HTMLElement | null;
+  onFocusReady: () => void;
 }) {
   const { LangProvider } = modules;
 
@@ -53,6 +69,8 @@ function LoadedAuthModal({
         mode={mode}
         onModeChange={onModeChange}
         onClose={onClose}
+        returnFocusTo={returnFocusTo}
+        onFocusReady={onFocusReady}
       />
     </LangProvider>
   );
@@ -64,12 +82,16 @@ function LocalizedAuthModal({
   mode,
   onModeChange,
   onClose,
+  returnFocusTo,
+  onFocusReady,
 }: {
   modules: PublicAuthModules;
   locale: AppLanguage;
   mode: AuthModalMode;
   onModeChange: (mode: AuthModalMode) => void;
   onClose: () => void;
+  returnFocusTo: HTMLElement | null;
+  onFocusReady: () => void;
 }) {
   const { RegisterModal, useLangContext } = modules;
   const { setInterfaceLanguage } = useLangContext();
@@ -90,6 +112,8 @@ function LocalizedAuthModal({
       publicWebLayout
       onModeChange={onModeChange}
       onClose={onClose}
+      returnFocusTo={returnFocusTo}
+      onFocusReady={onFocusReady}
     />
   );
 }
@@ -101,13 +125,17 @@ function PublicAuthModalState({
   children: ReactNode;
   locale: AppLanguage;
 }) {
-  const [mode, setMode] = useState<AuthModalMode | null>(null);
+  const [activeOverlay, setActiveOverlay] = useState<PublicTopLevelOverlay>(null);
+  const [focusReady, setFocusReady] = useState(false);
   const [authModules, setAuthModules] = useState<PublicAuthModules | null>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
   const modalPromiseRef = useRef<Promise<PublicAuthModules> | null>(null);
-  const requestedModeRef = useRef<AuthModalMode | null>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const mountedRef = useRef(true);
+  const mode =
+    activeOverlay === "login" || activeOverlay === "register"
+      ? activeOverlay
+      : null;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -117,16 +145,14 @@ function PublicAuthModalState({
   }, []);
 
   const openAuthModal = useCallback((nextMode: AuthModalMode) => {
-    requestedModeRef.current = nextMode;
     openerRef.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
+    setFocusReady(false);
+    setActiveOverlay(nextMode);
 
-    if (authModules) {
-      setMode(nextMode);
-      return;
-    }
+    if (authModules) return;
 
     if (modalPromiseRef.current) return;
 
@@ -143,34 +169,37 @@ function PublicAuthModalState({
     void modalPromise.then((modules) => {
       if (!mountedRef.current) return;
       setAuthModules(modules);
-      openerRef.current?.focus();
-      setMode(requestedModeRef.current);
     });
   }, [authModules]);
 
   const closeAuthModal = useCallback(() => {
-    setMode(null);
+    setFocusReady(false);
+    setActiveOverlay(null);
   }, []);
+
+  const handleFocusReady = useCallback(() => setFocusReady(true), []);
 
   useEffect(() => {
     const background = backgroundRef.current;
     if (!background) return;
 
-    if (mode) {
+    if (mode && focusReady) {
       background.setAttribute("inert", "");
     } else {
       background.removeAttribute("inert");
     }
 
     return () => background.removeAttribute("inert");
-  }, [mode]);
+  }, [focusReady, mode]);
 
   return (
-    <PublicAuthModalContext.Provider value={{ openAuthModal }}>
+    <PublicAuthModalContext.Provider
+      value={{ activeOverlay, setActiveOverlay, openAuthModal }}
+    >
       <div
         ref={backgroundRef}
         className="public-web-auth-background"
-        aria-hidden={mode ? true : undefined}
+        aria-hidden={mode && focusReady ? true : undefined}
       >
         {children}
       </div>
@@ -179,12 +208,22 @@ function PublicAuthModalState({
           modules={authModules}
           locale={locale}
           mode={mode}
-          onModeChange={setMode}
+          onModeChange={setActiveOverlay}
           onClose={closeAuthModal}
+          returnFocusTo={openerRef.current}
+          onFocusReady={handleFocusReady}
         />
       ) : null}
     </PublicAuthModalContext.Provider>
   );
+}
+
+export function usePublicOverlay() {
+  const context = useContext(PublicAuthModalContext);
+  if (!context) {
+    throw new Error("usePublicOverlay must be used inside PublicAuthModalProvider");
+  }
+  return context;
 }
 
 export default function PublicAuthModalProvider({

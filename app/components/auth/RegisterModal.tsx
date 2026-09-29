@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -21,6 +22,8 @@ type Props = {
   initialLanguage?: Lang;
   onModeChange?: (mode: AuthModalMode) => void;
   publicWebLayout?: boolean;
+  returnFocusTo?: HTMLElement | null;
+  onFocusReady?: () => void;
 };
 
 export default function RegisterModal({
@@ -30,6 +33,8 @@ export default function RegisterModal({
   initialLanguage,
   onModeChange,
   publicWebLayout = false,
+  returnFocusTo,
+  onFocusReady,
 }: Props) {
   const [selectedLanguage, setSelectedLanguage] = useState<Lang | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -45,17 +50,38 @@ export default function RegisterModal({
     setSelectedLanguage(null);
     onClose();
     requestAnimationFrame(() => {
-      if (returnFocus?.isConnected) returnFocus.focus();
+      const fallback = publicWebLayout
+        ? Array.from(
+            document.querySelectorAll<HTMLElement>(
+              ".public-web-mobile-menu-trigger, .public-web-header-login"
+            )
+          ).find((element) => element.getClientRects().length > 0)
+        : null;
+      const target = returnFocus?.isConnected && returnFocus.getClientRects().length > 0
+        ? returnFocus
+        : fallback;
+      target?.focus();
     });
-  }, [onClose]);
+  }, [onClose, publicWebLayout]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || publicWebLayout) return;
     returnFocusRef.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-  }, [initialLanguage, open]);
+  }, [initialLanguage, open, publicWebLayout]);
+
+  useLayoutEffect(() => {
+    if (!open || !publicWebLayout) return;
+    returnFocusRef.current = returnFocusTo ?? null;
+    const dialog = dialogRef.current;
+    const initialControl = dialog?.querySelector<HTMLElement>(
+      "input:not([disabled]), select:not([disabled]), textarea:not([disabled])"
+    );
+    (initialControl ?? dialog)?.focus();
+    if (dialog?.contains(document.activeElement)) onFocusReady?.();
+  }, [mode, onFocusReady, open, publicWebLayout, returnFocusTo]);
 
   useEffect(() => {
     if (!open) return;
@@ -69,13 +95,15 @@ export default function RegisterModal({
   useEffect(() => {
     if (!open) return;
 
-    const focusFrame = requestAnimationFrame(() => {
-      const dialog = dialogRef.current;
-      const initialControl = dialog?.querySelector<HTMLElement>(
-        "input:not([disabled]), select:not([disabled]), textarea:not([disabled])"
-      );
-      (initialControl ?? dialog)?.focus();
-    });
+    const focusFrame = publicWebLayout
+      ? null
+      : requestAnimationFrame(() => {
+          const dialog = dialogRef.current;
+          const initialControl = dialog?.querySelector<HTMLElement>(
+            "input:not([disabled]), select:not([disabled]), textarea:not([disabled])"
+          );
+          (initialControl ?? dialog)?.focus();
+        });
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -115,10 +143,10 @@ export default function RegisterModal({
 
     document.addEventListener("keydown", onKey, true);
     return () => {
-      cancelAnimationFrame(focusFrame);
+      if (focusFrame !== null) cancelAnimationFrame(focusFrame);
       document.removeEventListener("keydown", onKey, true);
     };
-  }, [closeModal, mode, open]);
+  }, [closeModal, mode, open, publicWebLayout]);
 
   if (!open) return null;
 
