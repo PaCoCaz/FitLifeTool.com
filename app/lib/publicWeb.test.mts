@@ -674,10 +674,7 @@ test("canonical public header preserves one 200 by 40 logo contract", () => {
   assert.match(publicHeaderSource, /height=\{300\}/);
   assert.match(publicWebCssSource, /\.public-web-brand img \{[\s\S]*?width: 12\.5rem;[\s\S]*?height: 2\.5rem;/);
   assert.match(publicWebCssSource, /\.public-web-brand img \{[^}]*?flex-shrink: 0;/);
-  assert.match(
-    publicWebCssSource,
-    /\.public-web-brand \{[\s\S]*?transform: translateX\(-0\.1953125rem\);/
-  );
+  assert.doesNotMatch(publicWebCssSource, /\.public-web-brand \{[^}]*?transform:/);
   assert.doesNotMatch(publicWebCssSource, /\.public-web-brand img \{[^}]*?width: (?:100%|15rem|clamp\()/);
   assert.doesNotMatch(publicWebCssSource, /width: min\(9\.5rem/);
 });
@@ -729,8 +726,9 @@ test("canonical header keeps locale in the light-blue top row at every width", (
   );
   assert.match(
     publicWebCssSource,
-    /@media \(max-width: 39\.999rem\) \{[\s\S]*?\.public-web-header-actions \{\s*margin-right: -0\.55078125rem;/
+    /\.public-web-header-inner \{\s*width: calc\(100% - 28px\);[\s\S]*?max-width: calc\(71\.875rem - 28px\);/
   );
+  assert.doesNotMatch(publicWebCssSource, /\.public-web-header-actions \{[^}]*?margin-right:/);
   assert.equal(
     publicWebCssSource.match(/\.public-web-header-actions \{\s*gap: 0\.375rem;/g)
       ?.length,
