@@ -615,6 +615,17 @@
   padding: 0;
 }
 
+.public-web-section-card {
+  width: 100%;
+  max-width: 71.875rem;
+  margin: 14px auto 0;
+  background: #f5faff;
+}
+
+.public-web-section-card-content {
+  padding: clamp(16px, 2.5vw, 32px);
+}
+
 .public-web-hero {
   position: relative;
   width: 100%;

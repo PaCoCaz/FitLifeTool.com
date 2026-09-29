@@ -694,6 +694,22 @@ test("HP-01I keeps menu icons canonical while Hero v2 connects to the navigation
   );
 });
 
+test("homepage section card follows the Hero frame without a fixed height", async () => {
+  const sectionCardSource = await read("app/components/public/PublicSectionCard.tsx");
+  assert.match(publicHomepageSource, /<\/section>\s*<PublicSectionCard \/>/);
+  assert.match(sectionCardSource, /className="public-web-section-card"/);
+  assert.match(sectionCardSource, /className="public-web-section-card-content">\{children\}/);
+  const cardRule = publicWebCssSource.match(/\.public-web-section-card \{([^}]+)\}/)?.[1];
+  assert.ok(cardRule);
+  assert.match(cardRule, /width: 100%;/);
+  assert.match(cardRule, /max-width: 71\.875rem;/);
+  assert.match(cardRule, /margin: 14px auto 0;/);
+  assert.doesNotMatch(cardRule, /border-radius:/);
+  assert.match(cardRule, /background: #f5faff;/);
+  assert.doesNotMatch(cardRule, /(?:^|\s)(?:min-)?height:|position: absolute;/);
+  assert.match(publicWebCssSource, /\.public-web-section-card-content \{\s*padding: clamp\(16px, 2\.5vw, 32px\);/);
+});
+
 test("canonical header keeps locale in the light-blue top row at every width", () => {
   assert.match(
     publicWebCssSource,
