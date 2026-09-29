@@ -10,17 +10,48 @@
   margin-inline: auto;
 }
 
-@media (max-width: 63.999rem) {
-  .public-web-auth-modal-overlay {
-    align-items: flex-start;
-    padding: 7.5625rem 1rem 1rem;
-  }
+.public-web-auth-modal-overlay {
+  align-items: flex-start;
+  justify-content: flex-end;
+  overflow-y: hidden;
+  padding: 122px max(14px, calc((100% - 70.125rem) / 2)) 14px 14px;
+}
 
+.public-web-auth-modal-dialog {
+  max-height: max(0px, calc(100dvh - 136px));
+  border: 1px solid #d5deea;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 18px 42px rgb(15 23 42 / 0.2);
+}
+
+.public-web-auth-modal-dialog > div:first-child > button {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-block: -8px;
+  padding: 0;
+  color: #191970;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.public-web-auth-modal-dialog form > label > select {
+  margin-top: 8px;
+}
+
+.public-web-auth-modal-dialog form > div > label + select {
+  margin-top: 4px;
+}
+
+@media (max-width: 63.999rem) {
   .public-web-auth-modal-dialog {
     width: 100%;
     max-width: none;
-    max-height: calc(100dvh - 8.5625rem);
     overscroll-behavior: contain;
+    padding-inline: 14px;
   }
 }
 

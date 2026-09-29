@@ -522,7 +522,7 @@ test("legacy public category navigation stays removed from the shared app shell"
 
 test("HP-01K reuses one accessible auth dialog without replacing direct routes", () => {
   assert.match(publicHomepageSource, /PublicAuthModalProvider locale=\{locale\}/);
-  assert.match(publicAuthModalProviderSource, /useState<AuthModalMode \| null>/);
+  assert.match(publicAuthModalProviderSource, /useState<PublicTopLevelOverlay>\(null\)/);
   assert.doesNotMatch(
     publicAuthModalProviderSource,
     /import RegisterModal[\s\S]*?from "@\/components\/auth\/RegisterModal"/
@@ -569,17 +569,72 @@ test("HP-01K reuses one accessible auth dialog without replacing direct routes",
   assert.match(registrySource, /return `\/\$\{entrypoint\}\?lang=\$\{locale\}`/);
 });
 
-test("HP-01M aligns only public mobile auth dialogs with the canonical grid", () => {
+test("HP-01K keeps one top-level menu or auth dialog with a focus-ready handoff", () => {
+  assert.match(
+    publicAuthModalProviderSource,
+    /type PublicTopLevelOverlay =[\s\S]*?"locale"[\s\S]*?"goals"[\s\S]*?"knowledge"[\s\S]*?"mobile"[\s\S]*?AuthModalMode/
+  );
+  assert.match(
+    publicAuthModalProviderSource,
+    /setActiveOverlay\(nextMode\)/
+  );
+  assert.match(
+    publicHeaderNavigationSource,
+    /usePublicOverlay\(\)[\s\S]*?isOpenPanel\(activeOverlay\)[\s\S]*?activeOverlay === "mobile"/
+  );
+  assert.match(publicHeaderNavigationSource, /setActiveOverlay\("locale"\)/);
+  assert.match(
+    publicHeaderNavigationSource,
+    /setActiveOverlay\(\(current\) => \(current === panel \? null : panel\)\)/
+  );
+  assert.doesNotMatch(publicHeaderNavigationSource, /useState<OpenPanel>|useState\(false\).*mobileOpen/);
+  assert.match(
+    registerModalSource,
+    /\(initialControl \?\? dialog\)\?\.focus\(\);\s*if \(dialog\?\.contains\(document\.activeElement\)\) onFocusReady\?\.\(\);/
+  );
+  assert.match(publicAuthModalProviderSource, /aria-hidden=\{mode && focusReady \? true : undefined\}/);
+  assert.match(publicAuthModalProviderSource, /if \(mode && focusReady\) \{\s*background\.setAttribute\("inert", ""\)/);
+  assert.match(publicAuthModalProviderSource, /returnFocusTo=\{openerRef\.current\}/);
+  assert.match(registerModalSource, /returnFocus\?\.isConnected && returnFocus\.getClientRects\(\)\.length > 0[\s\S]*?\? returnFocus[\s\S]*?: fallback/);
+});
+
+test("HP-01M aligns public auth dialogs with the menu shell and viewport", () => {
   assert.match(registerModalSource, /publicWebLayout\?: boolean/);
   assert.match(registerModalSource, /publicWebLayout = false/);
   assert.match(publicAuthModalProviderSource, /publicWebLayout/);
   assert.match(
-    publicWebCssSource,
-    /@media \(max-width: 63\.999rem\) \{[\s\S]*?\.public-web-auth-modal-overlay \{[\s\S]*?align-items: flex-start;[\s\S]*?padding: 7\.5625rem 1rem 1rem;/
+    registerModalSource,
+    /fixed inset-0 z-\[100\] flex items-center justify-center overflow-y-auto bg-black\/40 px-4 py-6/
   );
   assert.match(
+    registerModalSource,
+    /max-h-\[calc\(100dvh-2rem\)\] w-full max-w-md overflow-y-auto/
+  );
+
+  const overlayRules = publicWebCssSource.match(
+    /^\.public-web-auth-modal-overlay \{([^}]*)\}/m
+  )?.[1];
+  assert.ok(overlayRules);
+  assert.match(overlayRules, /align-items: flex-start;/);
+  assert.match(overlayRules, /justify-content: flex-end;/);
+  assert.match(overlayRules, /overflow-y: hidden;/);
+  assert.match(
+    overlayRules,
+    /padding: 122px max\(14px, calc\(\(100% - 70\.125rem\) \/ 2\)\) 14px 14px;/
+  );
+
+  const dialogRules = publicWebCssSource.match(
+    /^\.public-web-auth-modal-dialog \{([^}]*)\}/m
+  )?.[1];
+  assert.ok(dialogRules);
+  assert.match(dialogRules, /max-height: max\(0px, calc\(100dvh - 136px\)\);/);
+  assert.match(dialogRules, /border: 1px solid #d5deea;/);
+  assert.match(dialogRules, /border-radius: 6px;/);
+  assert.match(dialogRules, /background: #fff;/);
+  assert.match(dialogRules, /box-shadow: 0 18px 42px rgb\(15 23 42 \/ 0\.2\);/);
+  assert.match(
     publicWebCssSource,
-    /\.public-web-auth-modal-dialog \{[\s\S]*?width: 100%;[\s\S]*?max-width: none;[\s\S]*?max-height: calc\(100dvh - 8\.5625rem\);[\s\S]*?overscroll-behavior: contain;/
+    /@media \(max-width: 63\.999rem\) \{\s*\.public-web-auth-modal-dialog \{\s*width: 100%;\s*max-width: none;\s*overscroll-behavior: contain;\s*padding-inline: 14px;/
   );
 });
 
@@ -757,7 +812,7 @@ test("canonical header keeps locale in the light-blue top row at every width", (
 test("canonical header uses its own 40rem breakpoint and aligned locale panels", () => {
   assert.match(
     publicHeaderNavigationSource,
-    /matchMedia\("\(min-width: 40rem\)"\)[\s\S]*?closeMobileMenu\(false\);[\s\S]*?setOpenPanel\(null\);/
+    /matchMedia\("\(min-width: 40rem\)"\)[\s\S]*?setActiveOverlay\(\(current\) =>\s*current === "mobile" \|\| isOpenPanel\(current\) \? null : current/
   );
   assert.match(
     publicWebCssSource,
