@@ -273,12 +273,16 @@ export default function DocL30014() {
         </p>
 
         <p>
-          Daarnaast gebruikt de Public Web-authmodal nog
-          <code> #087eae</code> voor de hoverstate van de verzendknop. Voor
-          <code> #22C55E</code> vond die audit geen exacte
-          implementatietoepassing. Deze feiten maken de canonieke waarde niet
-          ongeldig: de bestaande kleuren blijven voorlopig ongemoeid en
-          wachten op een gecontroleerde migratie per component.
+          De Hero-CTA en de primaire verzendknoppen van de Public Web Login-
+          en Register-modal gebruiken inmiddels Navy <code>#191970</code> als
+          normale achtergrond en Accent Blue <code>#1976D2</code> bij hover.
+          De gedeelde primaire acties op de directe <code>/login</code>-,
+          <code> /register</code>- en onboardingroutes zijn nog niet volledig
+          gemigreerd. Hun passende hoverstates worden later afzonderlijk
+          vanuit de nieuwste geïntegreerde Account &amp; Security-basis
+          beoordeeld; dit is geen claim dat alle FitLifeTool-buttons al het
+          canonieke kleurencontract volgen. Voor <code>#22C55E</code> vond de
+          eerdere audit geen exacte implementatietoepassing.
         </p>
 
         <p>
