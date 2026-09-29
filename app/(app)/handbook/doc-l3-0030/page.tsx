@@ -196,6 +196,14 @@ export default function DocL30030() {
         </ul>
 
         <p>
+          De geometrische containerinset en de zichtbare rand van een control
+          of asset hoeven optisch niet samen te vallen. Bij de goedgekeurde
+          headeruitlijning telt ook transparante ruimte in het logo mee;
+          zichtbare interactieve elementen blijven volledig binnen hun
+          klik- en aanraakgebied.
+        </p>
+
+        <p>
           De header en Hero volgen een bewust stackingcontract. Vanaf 640px
           blijft aan de paginatop de navy navigatierij achter het haar van de
           Hero-character schilderen, ook wanneer een panel open is. Het geopende
@@ -240,6 +248,44 @@ export default function DocL30030() {
           <li>Semantische controls, toetsenbordbediening, Escape en zichtbare geldige focus blijven behouden; een moduswisseling laat geen verouderd verborgen open panel achter.</li>
         </ul>
 
+        <h4>Top-level menu&apos;s en auth-dialogen</h4>
+        <p>
+          Er staat maximaal één interactieve top-level headeroverlay open.
+          Taal, Doelen, Kennis &amp; tools, het mobiele menu en Login/Register
+          delen een exclusieve open-state: openen van een andere overlay
+          sluit of vervangt de vorige. De panelen verschijnen onder de
+          volledige header/navy-balk, visueel in het Hero-gebied. Taal
+          gebruikt dezelfde boven- en rechterreferentie als Kennis &amp; tools;
+          Login en Register volgen die referentie met een eigen functionele
+          breedte en behouden hun donkere fullscreen page-overlay.
+        </p>
+
+        <p>
+          Gewone popovers volgen hun inhoud; een viewportbegrenzing en interne
+          verticale scroll worden pas zichtbaar als de inhoud werkelijk niet
+          in de beschikbare hoogte past. Login en Register blijven eveneens
+          content-driven, met een maximale breedte van 448px op desktop.
+          Vanaf de minimaal ondersteunde viewportbreedte van 320px heeft de
+          auth-card mobiel effectief 14px buitenruimte links en rechts en
+          14px interne horizontale ruimte. Op korte viewports scrollt zo nodig
+          de card intern, zonder horizontale overflow.
+        </p>
+
+        <p>
+          Bij het openen van auth blijft de oorspronkelijke opener bewaard.
+          De achtergrond krijgt pas <code>aria-hidden</code> en
+          <code> inert</code> nadat focus aantoonbaar in de dialog staat;
+          bij sluiten keert focus logisch terug naar een beschikbare opener.
+          Zo blijft focus niet achter in een verborgen achtergrond.
+          Voor de gedeelde <code>LoginForm</code> en
+          <code> RegisterStep</code> staan ontbrekende
+          <code> name</code>-attributen en de Login-autocomplete nog open voor
+          afzonderlijke beoordeling vanuit de nieuwste geïntegreerde
+          Account &amp; Security-basis. Daarna worden Chrome Issues,
+          autofill/passwordmanagers, modal en directe routes opnieuw
+          gevalideerd.
+        </p>
+
         <p>
           Header- en dropdowngeometrie mogen geen Hero-gap of letterboxing
           introduceren. De desktop-Hero-achtergrond blijft
@@ -250,7 +296,7 @@ export default function DocL30030() {
         <h3>Hero v2: responsieve compositie</h3>
 
         <p>
-          Hero v2 gebruikt bewust vaste hoogtes per responsive bereik. Bij een
+          Hero v2 gebruikt bewust voorspelbare hoogtes per responsive bereik. Bij een
           bottom-anchored vrijstaande afbeelding zou content-driven hoogte een
           circulaire afhankelijkheid veroorzaken: tekstomloop bepaalt de
           Herohoogte, die de verticale afbeeldingspositie bepaalt, die weer de
@@ -261,7 +307,7 @@ export default function DocL30030() {
 
         <ul>
           <li>Phone tot en met 439px: Hero 300px; v2-character groeit van 184px op 320px naar 235px op 439px en blijft rechts/onder verankerd; lead 13.4px met regelhoogte 1.4; exclusion-gap 6px.</li>
-          <li>Intermediate 440–767px: Hero 275px; v2-character groeit responsief van 220px naar 260px; exclusion-gap 8px.</li>
+          <li>Intermediate 440–767px: Hero verloopt vloeiend van 300px bij 440px naar 275px bij 767px; v2-character groeit responsief van 220px naar 260px en blijft onderaan verankerd; exclusion-gap 8px.</li>
           <li>Tablet 768–1023px: Hero 250px; responsieve v2-charactergeometrie; exclusion-gap 25px.</li>
           <li>Desktop vanaf 1024px: Hero maximaal 1150px breed en 250px hoog; v2-character 301×290px; exclusion-gap 25px.</li>
         </ul>
@@ -274,8 +320,8 @@ export default function DocL30030() {
           overlay, daarna foreground-character en content: de overlay mag de
           vrouw niet verbleken. De gerichte extra readability-behandeling achter
           de eerste H1-regel op ≤439px en 440–500px hoort bij de GREEN/LOCKED
-          Hero-compositie; Hero-geometrie, responsive typography en
-          image-exclusion-architectuur blijven ongewijzigd. Op phone staat de
+          Hero-compositie; de bestaande responsive typography en
+          image-exclusion-architectuur blijven behouden. Op phone staat de
           enige Hero-CTA, registratie,
           over de volle breedte binnen de 14px-randen en mag deze vóór de
           character schilderen. Inloggen staat in de header, niet als tweede
@@ -298,6 +344,18 @@ export default function DocL30030() {
           copywijziging die de fixed-height-capaciteit overschrijdt, vereist
           een bewuste responsive content- of compositiebeslissing, geen runtime
           auto-height.
+        </p>
+
+        <h3>Homepage section-card foundation</h3>
+        <p>
+          Direct onder de Hero staat een herbruikbare
+          <code> PublicSectionCard</code> met dezelfde buitenste contentbreedte
+          als de Hero, een vierkante buitenvorm en 14px verticale tussenruimte.
+          De hoogte volgt de inhoud en de interne padding schaalt responsief.
+          De huidige blanco foundation gebruikt <code>#F5FAFF</code>. De kleur
+          en uiteindelijke visuele compositie zijn nog niet definitief gelockt:
+          zij worden beoordeeld met de echte inhoud van Sectie 2,
+          “Jouw leefstijl in één overzicht”.
         </p>
       </section>
 

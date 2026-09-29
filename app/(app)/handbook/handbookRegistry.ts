@@ -311,7 +311,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0014",
 
     status: "current",
-    updated: "2026-09-26",
+    updated: "2026-09-29",
   },
 
   /* ─────────────── H5 ─────────────── */
@@ -446,7 +446,7 @@ export const handbookDocuments: HandbookDocument[] = [
     path: "/handbook/doc-l3-0030",
 
     status: "current",
-    updated: "2026-09-27",
+    updated: "2026-09-29",
   },
 ];
 
