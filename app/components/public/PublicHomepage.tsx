@@ -4,6 +4,7 @@ import PublicAuthModalProvider, {
   PublicAuthTrigger,
 } from "@/components/public/PublicAuthModalProvider";
 import PublicHeader from "@/components/public/PublicHeader";
+import PublicSectionCard from "@/components/public/PublicSectionCard";
 import {
   PUBLIC_HOME_CONTENT,
   PUBLIC_LOCALE_REGISTRY,
@@ -52,6 +53,7 @@ export default function PublicHomepage({ locale }: { locale: AppLanguage }) {
               </div>
             </div>
           </section>
+          <PublicSectionCard />
         </main>
       </PublicAuthModalProvider>
     </div>
