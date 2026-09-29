@@ -24,6 +24,8 @@ const [
   topNavigationSource,
   publicAuthModalProviderSource,
   registerModalSource,
+  loginFormSource,
+  registerStepSource,
   publicWebCssSource,
   proxySource,
   uiTextSource,
@@ -49,6 +51,8 @@ const [
   read("app/components/layout/TopNavigation.tsx"),
   read("app/components/public/PublicAuthModalProvider.tsx"),
   read("app/components/auth/RegisterModal.tsx"),
+  read("app/components/auth/LoginForm.tsx"),
+  read("app/components/auth/RegisterStep.tsx"),
   read("app/styles/public-web.css"),
   read("proxy.ts"),
   read("app/lib/uiText.ts"),
@@ -708,11 +712,17 @@ test("HP-02G.1 keeps public focus and hover contrast above WCAG thresholds", () 
     publicWebCssSource,
     /\.public-web-desktop-nav button:focus-visible \{[\s\S]*?outline-color: #fff;/
   );
-  assert.equal(publicWebCssSource.match(/background: #087eae;/g)?.length, 1);
   assert.match(
     publicWebCssSource,
-    /\.public-web-actions \.public-web-primary-cta:hover \{[\s\S]*?background: #1976d2;/
+    /\.public-web-auth-modal-dialog button\[type="submit"\]:hover \{[^}]*background: #1976d2;/
   );
+  assert.match(
+    publicWebCssSource,
+    /\.public-web-actions \.public-web-primary-cta:hover \{[^}]*background: #1976d2;/
+  );
+  assert.match(publicWebCssSource, /\.public-web-actions \.public-web-primary-cta \{[^}]*background: #191970;/);
+  assert.match(loginFormSource, /bg-\[#191970\]/);
+  assert.match(registerStepSource, /bg-\[#191970\]/);
 });
 
 test("HP-01 keeps mobile knowledge domains as a one-open-at-a-time accordion", () => {
