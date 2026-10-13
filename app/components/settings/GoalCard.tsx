@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
 import { useGoalContext, GoalKey } from "@/lib/GoalProvider";
@@ -45,20 +45,16 @@ export default function GoalCard() {
   const { goal, setUserGoal } = useGoalContext();
   const { refreshDashboard } = useDashboard();
 
-  const [draft, setDraft] =
-    useState<GoalKey | null>(null);
+  const [selection, setSelection] = useState<{
+    base: GoalKey | null;
+    value: GoalKey;
+  } | null>(null);
 
   const [open, setOpen] = useState(false);
 
   const [saving, setSaving] = useState(false);
 
-  /* load */
-
-  useEffect(() => {
-    if (goal) {
-      setDraft(goal);
-    }
-  }, [goal]);
+  const draft = selection?.base === goal ? selection.value : goal;
 
   const dirty = draft !== goal;
 
@@ -137,7 +133,7 @@ export default function GoalCard() {
               <button
                 key={o.value}
                 onClick={() => {
-                  setDraft(o.value);
+                  setSelection({ base: goal, value: o.value });
                   setOpen(false);
                 }}
                 className="

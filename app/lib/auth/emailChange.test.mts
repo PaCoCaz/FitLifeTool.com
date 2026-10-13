@@ -4,11 +4,10 @@ import { readFile } from "node:fs/promises";
 import { AuthApiError, AuthRetryableFetchError } from "@supabase/auth-js";
 import {
   buildEmailChangeRedirect, createEmailChangeAction, getEmailChangeRequestTransition, isValidEmailChange,
-  parseEmailChangeBody, resolveEmailChangeIdentity,
+  createEmailChangePostHandler, parseEmailChangeBody, resolveEmailChangeIdentity,
   type EmailChangeFreshClient, type EmailChangeNormalClient,
 } from "./emailChange.ts";
 import { blocksEmailChangeRequest } from "./emailChangeState.ts";
-import { createEmailChangePostHandler } from "../../api/auth/change-email/route.ts";
 
 const USER = "11111111-1111-4111-8111-111111111111";
 const MARKED = async () => true;
@@ -336,7 +335,7 @@ test("same-current email is rejected before reservation, fresh auth, or provider
 });
 
 test("request route enforces origin, JSON, size, exact schema and durable reservation before mutation",async()=>{
-  const source=await readFile(new URL("../../../app/api/auth/change-email/route.ts",import.meta.url),"utf8");
+  const source=await readFile(new URL("./emailChange.ts",import.meta.url),"utf8");
   const post=source.slice(source.indexOf("export function createEmailChangePostHandler"));
   for(const token of ["ORIGIN_NOT_ALLOWED","application/json","EMAIL_CHANGE_MAX_BODY_BYTES","parseEmailChangeBody","begin_auth_email_change_request","readReservation","getEmailChangeRequestTransition","mark_auth_email_change_provider_mutation_started","release_auth_email_change_before_provider","mark_auth_email_change_status_unknown"]){assert.match(source,new RegExp(token));}
   for(const prerequisite of ["readConfig()","buildEmailChangeRedirect","createAdminClient()","createFreshClient"]){
@@ -348,10 +347,10 @@ test("request route enforces origin, JSON, size, exact schema and durable reserv
     const start=source.indexOf(`rpc("${transition}"`);
     const call=source.slice(start,source.indexOf(");",start)+2);
     assert.notEqual(start,-1);
-    assert.match(call,/p_generation:reservation\.generation/);
-    assert.match(call,/p_correlation_id:reservation\.correlationId/);
+    assert.match(call,/p_generation:\s*reservation\.generation/);
+    assert.match(call,/p_correlation_id:\s*reservation\.correlationId/);
   }
-  assert.match(source,/markerAttempted\?"fail_auth_email_change_request":"release_auth_email_change_before_provider"/);
+  assert.match(source,/markerAttempted\s*\?\s*"fail_auth_email_change_request"\s*:\s*"release_auth_email_change_before_provider"/);
   assert.doesNotMatch(source,/console\.|error\.message|body\.(?:userId|user_id|emailRedirectTo)/);
 });
 

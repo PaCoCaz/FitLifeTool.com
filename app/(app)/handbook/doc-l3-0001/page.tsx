@@ -62,7 +62,7 @@ export default function DocL30001() {
         </ul>
 
         <p>
-          Hierdoor bestaat er geen verborgen of "magische" state. Alles wat een gebruiker ziet is uiteindelijk herleidbaar tot opgeslagen data en deterministische berekeningen.
+          Hierdoor bestaat er geen verborgen of &quot;magische&quot; state. Alles wat een gebruiker ziet is uiteindelijk herleidbaar tot opgeslagen data en deterministische berekeningen.
         </p>
       </section>
 

@@ -1,15 +1,16 @@
 // app/lib/stripe/handlers/handlePrice.ts
 
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import type Stripe from "stripe";
 
 
 
 export async function handlePrice(
-  event: any
+  event: Stripe.Event
 ) {
   const supabase = createSupabaseServer();
 
-  const price = event.data.object;
+  const price = event.data.object as Stripe.Price;
 
   await supabase
     .from("prices")

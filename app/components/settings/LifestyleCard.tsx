@@ -79,7 +79,7 @@ export default function LifestyleCard() {
       .select("activity_level")
       .eq("id", user.id)
       .single()
-      .then((res: any) => {
+      .then((res: { data: { activity_level: ActivityLevel | null } | null }) => {
         if (res.data?.activity_level) {
           setLevel(res.data.activity_level);
           setDraft(res.data.activity_level);

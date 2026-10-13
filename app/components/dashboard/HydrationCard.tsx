@@ -37,6 +37,11 @@ export default function HydrationCard() {
   const t = uiText[lang];
 
   const now = useNow();
+  const currentMinuteKey = Math.floor(now.getTime() / 60_000);
+  const minuteNow = useMemo(
+    () => new Date(currentMinuteKey * 60_000),
+    [currentMinuteKey]
+  );
 
   const {
     setHydrationScore,
@@ -62,7 +67,7 @@ export default function HydrationCard() {
     return getHydrationStatus(
       currentMl,
       hydrationGoal,
-      now,
+      minuteNow,
       t,
       lang
     );
@@ -70,8 +75,7 @@ export default function HydrationCard() {
   }, [
     currentMl,
     hydrationGoal,
-    now.getHours(),
-    now.getMinutes(),
+    minuteNow,
     t,
     lang,
   ]);
@@ -84,7 +88,7 @@ export default function HydrationCard() {
     if (!hydrationGoal) return 0;
 
     const expectedProgress =
-      getExpectedHydrationProgress(now);
+      getExpectedHydrationProgress(minuteNow);
 
     const expectedMl =
       hydrationGoal * expectedProgress;
@@ -102,8 +106,7 @@ export default function HydrationCard() {
   }, [
     currentMl,
     hydrationGoal,
-    now.getHours(),
-    now.getMinutes(),
+    minuteNow,
   ]);
 
 

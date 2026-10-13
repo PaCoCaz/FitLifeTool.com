@@ -2,13 +2,14 @@
 
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useSyncExternalStore } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@/lib/AuthProvider";
 import Card from "@/components/ui/Card";
 import CardHeader from "@/components/ui/CardHeader";
 import { useDashboard } from "@/lib/DashboardStore";
 import { useRouter } from "next/navigation";
+import { getLocalDayKey } from "@/lib/dayKey";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
@@ -30,6 +31,10 @@ type WeightLog = {
   log_date: string;
   weight_kg: number;
   bmi?: number;
+};
+
+type WeightChartPoint = WeightLog & {
+  moving_avg: number;
 };
 
 type PeriodOption = {
@@ -149,13 +154,13 @@ function getTargetDate(
 /* ───────────────── Save weight ───────────────── */
 
 async function saveWeight(
-  user: any,
+  user: { id: string } | null,
   draftWeight: string,
   draftTarget: string,
   heightCm: number | null,
   setSaving: (v: boolean) => void,
   refreshDashboard: () => Promise<void>,
-  router: any
+  router: { push: (href: string) => void }
 ) {
   if (!user) return;
 
@@ -198,7 +203,7 @@ async function saveWeight(
       user_id: user.id,
       weight_kg: w,
       bmi,
-      log_date: now.toISOString().slice(0, 10),
+      log_date: getLocalDayKey(now),
       log_time_local: now.toTimeString().slice(0, 8),
       timezone:
         Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -229,10 +234,14 @@ export default function WeightPage() {
   const [draftTarget, setDraftTarget] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const [dirty, setDirty] = useState(false);
+  const [originalValues, setOriginalValues] = useState({
+    weight: "",
+    target: "",
+  });
 
-  const originalWeightRef = useRef<string>("");
-  const originalTargetRef = useRef<string>("");
+  const dirty =
+    draftWeight !== originalValues.weight ||
+    draftTarget !== originalValues.target;
 
   const invalid =
     !draftWeight ||
@@ -250,12 +259,10 @@ export default function WeightPage() {
       router
     );
 
-    originalWeightRef.current = draftWeight;
-    originalTargetRef.current = draftTarget;
-    setDirty(false);
+    setOriginalValues({ weight: draftWeight, target: draftTarget });
   };
 
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<WeightChartPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [periodDays, setPeriodDays] =
     useState<7 | 30 | 90 | 180 | 365>(30);
@@ -266,19 +273,14 @@ export default function WeightPage() {
   const [showBMI, setShowBMI] = useState(false);
   const [heightCm, setHeightCm] = useState<number | null>(null);
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const isDirty =
-      draftWeight !== originalWeightRef.current ||
-      draftTarget !== originalTargetRef.current;
-
-    setDirty(isDirty);
-  }, [draftWeight, draftTarget]);
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
@@ -302,7 +304,7 @@ export default function WeightPage() {
 
       const since = new Date();
       since.setDate(since.getDate() - periodDays);
-      const sinceKey = since.toISOString().slice(0, 10);
+      const sinceKey = getLocalDayKey(since);
 
       const [{ data: logs }, { data: profile }] =
         await Promise.all([
@@ -320,7 +322,7 @@ export default function WeightPage() {
             .single(),
         ]);
 
-      const withMA = calculateMovingAverage(logs ?? []).map(
+      const withMA = calculateMovingAverage((logs ?? []) as WeightLog[]).map(
         (d) => ({
           ...d,
           bmi:
@@ -347,8 +349,7 @@ export default function WeightPage() {
       setDraftWeight(w);
       setDraftTarget(target);
 
-      originalWeightRef.current = w;
-      originalTargetRef.current = target;
+      setOriginalValues({ weight: w, target });
 
       setLoading(false);
     };

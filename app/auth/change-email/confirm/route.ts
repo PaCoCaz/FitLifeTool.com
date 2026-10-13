@@ -1,24 +1,38 @@
 import { NextResponse } from "next/server";
 import {
+  type EmailChangeCallbackObservation,
   EMAIL_CHANGE_FRAGMENT_BOOTSTRAP_SCRIPT,
+  observeEmailChangeQuery,
+  parseEmailChangeCallbackObservation,
   resolveEmailChangeCallback,
   resolveEmailChangeFragmentEvidence,
   shouldBootstrapEmailChangeFragment,
 } from "@/lib/auth/emailChangeCallback";
 
-function confirmationResponse(request: Request, result: ReturnType<typeof resolveEmailChangeCallback>) {
+const OBSERVATION_HEADER = "X-FitLifeTool-AJ09-Callback-Observation";
+
+function confirmationResponse(
+  request: Request,
+  result: ReturnType<typeof resolveEmailChangeCallback>,
+  observation?: EmailChangeCallbackObservation | null,
+) {
   const destination = new URL("/auth/change-email/confirmation", request.url);
   destination.searchParams.set("lang", result.language);
   destination.searchParams.set("state", result.state);
-  return new NextResponse(null, { status: 303, headers: {
+  const headers: Record<string, string> = {
     Location: destination.toString(), "Cache-Control": "private, no-store", "Referrer-Policy": "no-referrer",
-  } });
+  };
+  if (observation) {
+    headers[OBSERVATION_HEADER] = JSON.stringify({ ...observation, parserResult: result.state });
+  }
+  return new NextResponse(null, { status: 303, headers });
 }
 
 export function GET(request: Request) {
   const url = new URL(request.url);
   if (!shouldBootstrapEmailChangeFragment(url)) {
-    return confirmationResponse(request, resolveEmailChangeCallback(url));
+    const result = resolveEmailChangeCallback(url);
+    return confirmationResponse(request, result, observeEmailChangeQuery(url, result.state));
   }
 
   const nonce = crypto.randomUUID().replaceAll("-", "");
@@ -35,7 +49,7 @@ export function GET(request: Request) {
 export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
   const contentLength = Number(request.headers.get("content-length") ?? "0");
-  if (!contentType.startsWith("application/x-www-form-urlencoded") || contentLength > 512) {
+  if (!contentType.startsWith("application/x-www-form-urlencoded") || contentLength > 8192) {
     return confirmationResponse(request, resolveEmailChangeFragmentEvidence([]));
   }
 
@@ -46,7 +60,15 @@ export async function POST(request: Request) {
       if (typeof value !== "string") return confirmationResponse(request, resolveEmailChangeFragmentEvidence([]));
       entries.push([key, value]);
     }
-    return confirmationResponse(request, resolveEmailChangeFragmentEvidence(entries));
+    const observations = entries.filter(([key]) => key === "observation").map(([, value]) => value);
+    const observation = observations.length === 1
+      ? parseEmailChangeCallbackObservation(observations[0])
+      : null;
+    return confirmationResponse(
+      request,
+      resolveEmailChangeFragmentEvidence(entries),
+      observation?.source === "fragment" ? observation : null,
+    );
   } catch {
     return confirmationResponse(request, resolveEmailChangeFragmentEvidence([]));
   }

@@ -15,14 +15,16 @@ export default function Header() {
   const { user, loading } = useUser();
 
   /* ❗ Hooks ALTIJD bovenin, onvoorwaardelijk */
-  const [firstName, setFirstName] = useState<string | null>(null);
+  const [profileName, setProfileName] = useState<{
+    userId: string;
+    firstName: string | null;
+  } | null>(null);
   const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      setFirstName(null);
-      return;
-    }
+    if (!user) return;
+
+    const userId = user.id;
 
     const loadProfile = async () => {
       const {
@@ -34,16 +36,19 @@ export default function Header() {
       } = await supabase
         .from("profiles")
         .select("first_name")
-        .eq("id", user.id)
+        .eq("id", userId)
         .single();
 
       if (!error && data) {
-        setFirstName(data.first_name);
+        setProfileName({ userId, firstName: data.first_name });
       }
     };
 
     loadProfile();
   }, [user]);
+
+  const firstName =
+    user && profileName?.userId === user.id ? profileName.firstName : null;
 
   /* ✅ TOEGEVOEGD: luister naar globale register-trigger */
   useEffect(() => {

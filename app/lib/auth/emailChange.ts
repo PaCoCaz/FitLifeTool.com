@@ -175,3 +175,117 @@ export function createDefaultEmailChangeFreshClient(url: string, key: string) {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   }) as unknown as EmailChangeFreshClient;
 }
+
+const EMAIL_CHANGE_STATUSES: Record<EmailChangeCode, number> = {
+  INVALID_REQUEST: 400, ORIGIN_NOT_ALLOWED: 403, EMAIL_CHANGE_NOT_AVAILABLE: 403,
+  EMAIL_CHANGE_REAUTH_REQUIRED: 401, EMAIL_CHANGE_REAUTH_FAILED: 403,
+  EMAIL_CHANGE_IDENTITY_MISMATCH: 403, EMAIL_CHANGE_EMAIL_INVALID: 422,
+  EMAIL_CHANGE_EMAIL_UNCHANGED: 422, EMAIL_CHANGE_REQUEST_BLOCKED: 409,
+  EMAIL_CHANGE_REQUEST_ACCEPTED: 202, EMAIL_CHANGE_REQUEST_ACCEPTED_CLEANUP_REQUIRED: 202,
+  EMAIL_CHANGE_UNAVAILABLE: 503, EMAIL_CHANGE_STATUS_UNKNOWN: 409, AUTH_STATE_UNAVAILABLE: 503,
+};
+export function emailChangeReply(code: EmailChangeCode) {
+  return Response.json({ code }, { status: EMAIL_CHANGE_STATUSES[code], headers: EMAIL_CHANGE_RESPONSE_HEADERS });
+}
+type EmailChangeReservation = { generation: number; correlationId: string };
+function readReservation(value: unknown): EmailChangeReservation | null {
+  const row = Array.isArray(value) ? value[0] : value;
+  if (!row || typeof row !== "object") return null;
+  const generation = (row as Record<string, unknown>).generation;
+  const correlationId = (row as Record<string, unknown>).correlation_id;
+  if (typeof generation !== "number" || !Number.isSafeInteger(generation) || generation < 1) return null;
+  if (typeof correlationId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(correlationId)) return null;
+  return { generation, correlationId };
+}
+type EmailChangeQuery = {
+  select(columns: string): EmailChangeQuery;
+  eq(column: string, value: string): EmailChangeQuery;
+  maybeSingle(): Promise<{ data: { status?: unknown } | null; error: unknown | null }>;
+};
+export type EmailChangeAdmin = {
+  from(table: string): EmailChangeQuery;
+  rpc(name: string, input: Record<string, unknown>): Promise<{ data: unknown; error: unknown | null }>;
+};
+export type EmailChangeConfiguration = { url: string; key: string; site: string };
+export type EmailChangePostDependencies = {
+  createNormalClient: () => Promise<EmailChangeNormalClient>;
+  createAdminClient: () => EmailChangeAdmin;
+  createFreshClient: (url: string, key: string) => EmailChangeFreshClient;
+  readConfiguration: () => EmailChangeConfiguration | null;
+};
+export async function readEmailChangeState(admin: EmailChangeAdmin, userId: string) {
+  const [request, job] = await Promise.all([
+    admin.from("auth_email_change_requests").select("status").eq("user_id", userId).maybeSingle(),
+    admin.from("auth_email_sync_jobs").select("status").eq("user_id", userId).maybeSingle(),
+  ]);
+  if (request.error || job.error) throw new Error("state unavailable");
+  return { admin, requestStatus: request.data?.status ?? null, syncStatus: job.data?.status ?? null };
+}
+
+export function createEmailChangePostHandler(dependencies: EmailChangePostDependencies) {
+  const { createNormalClient, createAdminClient, createFreshClient } = dependencies;
+  const readConfig = dependencies.readConfiguration;
+  return async function post(request: Request) {
+    if (request.headers.get("origin") !== new URL(request.url).origin) return emailChangeReply("ORIGIN_NOT_ALLOWED");
+    if (request.headers.get("content-type")?.split(";", 1)[0].trim() !== "application/json") return emailChangeReply("INVALID_REQUEST");
+    const declared = Number(request.headers.get("content-length") ?? "0");
+    if (!Number.isFinite(declared) || declared > EMAIL_CHANGE_MAX_BODY_BYTES) return emailChangeReply("INVALID_REQUEST");
+    let raw: string;
+    try { raw = await request.text(); } catch { return emailChangeReply("INVALID_REQUEST"); }
+    if (new TextEncoder().encode(raw).byteLength > EMAIL_CHANGE_MAX_BODY_BYTES) return emailChangeReply("INVALID_REQUEST");
+    let body;
+    try { body = parseEmailChangeBody(JSON.parse(raw)); } catch { body = null; }
+    if (!body) return emailChangeReply("INVALID_REQUEST");
+    if (!isValidEmailChange(body.newEmail)) return emailChangeReply("EMAIL_CHANGE_EMAIL_INVALID");
+    let identity;
+    try { identity = await resolveEmailChangeIdentity(await createNormalClient()); }
+    catch { return emailChangeReply("AUTH_STATE_UNAVAILABLE"); }
+    if (!identity.ok) return emailChangeReply(identity.code);
+    if (identity.email.trim().toLowerCase() === body.newEmail.toLowerCase()) return emailChangeReply("EMAIL_CHANGE_EMAIL_UNCHANGED");
+    const configuration = readConfig();
+    if (!configuration) return emailChangeReply("EMAIL_CHANGE_UNAVAILABLE");
+    let redirect: string;
+    try { redirect = buildEmailChangeRedirect(configuration.site, body.language); }
+    catch { return emailChangeReply("EMAIL_CHANGE_UNAVAILABLE"); }
+    let admin: EmailChangeAdmin;
+    try { admin = createAdminClient(); } catch { return emailChangeReply("EMAIL_CHANGE_UNAVAILABLE"); }
+    let fresh: EmailChangeFreshClient;
+    try { fresh = createFreshClient(configuration.url, configuration.key); }
+    catch { return emailChangeReply("EMAIL_CHANGE_UNAVAILABLE"); }
+    let current;
+    let reservation: EmailChangeReservation;
+    try {
+      current = await readEmailChangeState(admin, identity.userId);
+      const reserved = await current.admin.rpc("begin_auth_email_change_request", { p_user_id: identity.userId });
+      const parsedReservation = reserved.error ? null : readReservation(reserved.data);
+      if (!parsedReservation) return emailChangeReply("EMAIL_CHANGE_REQUEST_BLOCKED");
+      reservation = parsedReservation;
+    } catch { return emailChangeReply("AUTH_STATE_UNAVAILABLE"); }
+    let markerAttempted = false;
+    const action = createEmailChangeAction(fresh, identity, {
+      currentPassword: body.currentPassword, newEmail: body.newEmail, redirect,
+    }, async () => {
+      markerAttempted = true;
+      const started = await current.admin.rpc("mark_auth_email_change_provider_mutation_started", {
+        p_user_id: identity.userId, p_generation: reservation.generation, p_correlation_id: reservation.correlationId,
+      });
+      return !started.error && started.data === true;
+    });
+    const code=await action();
+    const transition = getEmailChangeRequestTransition(code);
+    try {
+      if (transition === "accept") {
+        const accepted = await current.admin.rpc("accept_auth_email_change_request", { p_user_id: identity.userId, p_generation: reservation.generation, p_correlation_id: reservation.correlationId });
+        if (accepted.error || accepted.data !== true) return emailChangeReply("EMAIL_CHANGE_STATUS_UNKNOWN");
+      } else if (transition === "status_unknown") {
+        const unknown = await current.admin.rpc("mark_auth_email_change_status_unknown", { p_user_id: identity.userId, p_generation: reservation.generation, p_correlation_id: reservation.correlationId });
+        if (unknown.error || unknown.data !== true) return emailChangeReply("EMAIL_CHANGE_STATUS_UNKNOWN");
+      } else {
+        const transitionName = markerAttempted ? "fail_auth_email_change_request" : "release_auth_email_change_before_provider";
+        const failed = await current.admin.rpc(transitionName, { p_user_id: identity.userId, p_generation: reservation.generation, p_correlation_id: reservation.correlationId });
+        if (failed.error || failed.data !== true) return emailChangeReply("EMAIL_CHANGE_STATUS_UNKNOWN");
+      }
+    } catch { return emailChangeReply("EMAIL_CHANGE_STATUS_UNKNOWN"); }
+    return emailChangeReply(code);
+  };
+}

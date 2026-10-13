@@ -38,10 +38,7 @@ export default function DocL30027() {
               <tr>
                 <td>Volledige tests</td>
                 <td>
-                  <code>
-                    node --experimental-strip-types --test
-                    app/lib/**/*.test.mts
-                  </code>
+                  <code>npm test</code>
                 </td>
               </tr>
               <tr>
@@ -75,11 +72,13 @@ export default function DocL30027() {
         </p>
 
         <p>
-          Het project heeft momenteel geen <code>test</code>- of
-          <code>typecheck</code>-script in <code>package.json</code>. Het
-          hierboven vermelde Node-commando voert de bestaande testbestanden
-          rechtstreeks uit. Nieuwe npm-scripts worden pas gedocumenteerd nadat
-          zij daadwerkelijk zijn toegevoegd.
+          Het <code>test</code>-script gebruikt de exact gepinde
+          TypeScript-loader uit <code>devDependencies</code> en voert de
+          bestaande <code>app/lib/**/*.test.mts</code>-bestanden uit. Gebruik
+          voor een gerichte controle dezelfde loader via
+          <code>npx tsx --test --experimental-test-module-mocks &lt;testbestand&gt;</code>.
+          TypeScript blijft een
+          afzonderlijke controle met <code>npx tsc --noEmit</code>.
         </p>
       </section>
 

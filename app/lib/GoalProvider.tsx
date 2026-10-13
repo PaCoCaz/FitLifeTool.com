@@ -25,23 +25,38 @@ const GoalContext = createContext<GoalContextType | null>(null);
 export function GoalProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
 
+  if (!user) {
+    return (
+      <GoalContext.Provider
+        value={{ goal: null, isLoading: false, setUserGoal: async () => {} }}
+      >
+        {children}
+      </GoalContext.Provider>
+    );
+  }
+
+  return (
+    <AuthenticatedGoalProvider key={user.id} userId={user.id}>
+      {children}
+    </AuthenticatedGoalProvider>
+  );
+}
+
+function AuthenticatedGoalProvider({
+  children,
+  userId,
+}: {
+  children: React.ReactNode;
+  userId: string;
+}) {
+
   const [goal, setGoal] = useState<GoalKey | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   /* LOAD ACTIVE GOAL */
 
   useEffect(() => {
-    if (!user) {
-      setGoal(null);
-      setIsLoading(false);
-      return;
-    }
-
-    const userId = user.id;
-
     async function loadGoal() {
-      setIsLoading(true);
-
       const { data } = await supabase
         .from("user_goal_periods")
         .select("goal_key")
@@ -56,16 +71,13 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
     }
 
     loadGoal();
-  }, [user]);
+  }, [userId]);
 
   /* CHANGE GOAL */
 
   const setUserGoal = useCallback(
     async (newGoal: GoalKey) => {
-      if (!user) return;
-  
-      const userId = user.id;
-      const now = new Date().toISOString(); // ✅ FIX
+      const now = new Date().toJSON();
   
       if (newGoal === goal) return;
   
@@ -132,7 +144,7 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
 
       setGoal(newGoal);
     },
-    [user, goal]
+    [userId, goal]
   );
 
   return (

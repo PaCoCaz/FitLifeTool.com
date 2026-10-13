@@ -27,6 +27,7 @@ import {
   ReferenceLine,
   Scatter,
 } from "recharts";
+import type { ScatterShapeProps } from "recharts";
 
 import { getExpectedHydrationProgress } from "@/lib/hydrationScore";
 import { useRef } from "react";
@@ -111,6 +112,42 @@ type DrinkItem = {
   preparation: string;
   unit: string;
 };
+
+type HydrationDot = {
+  hasDrink: boolean;
+  hasFood: boolean;
+};
+
+function HydrationDotShape({ cx, cy, payload }: ScatterShapeProps) {
+  const dot = payload as HydrationDot | undefined;
+  const r = 5.5;
+
+  if (cx === undefined || cy === undefined || !dot) return <g />;
+
+  if (dot.hasDrink && !dot.hasFood) {
+    return <circle cx={cx} cy={cy} r={r} fill="#0284c7" stroke="white" strokeWidth={2} />;
+  }
+
+  if (!dot.hasDrink && dot.hasFood) {
+    return <circle cx={cx} cy={cy} r={r} fill="#f97316" stroke="white" strokeWidth={2} />;
+  }
+
+  return (
+    <g>
+      <defs>
+        <clipPath id={`left-${cx}-${cy}`}>
+          <rect x={cx - r} y={cy - r} width={r} height={r * 2} />
+        </clipPath>
+        <clipPath id={`right-${cx}-${cy}`}>
+          <rect x={cx} y={cy - r} width={r} height={r * 2} />
+        </clipPath>
+      </defs>
+      <circle cx={cx} cy={cy} r={r} fill="#0284c7" clipPath={`url(#left-${cx}-${cy})`} />
+      <circle cx={cx} cy={cy} r={r} fill="#f97316" clipPath={`url(#right-${cx}-${cy})`} />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="white" strokeWidth={2} />
+    </g>
+  );
+}
 
 /* ───────────────── Page ───────────────── */
 
@@ -321,7 +358,7 @@ export default function HydrationPage() {
     }
 
     return getHydrationStatus(currentMl, safeGoal, nowTime, t, langCode);
-  }, [currentMl, safeGoal, nowTime, lang]);
+  }, [currentMl, safeGoal, nowTime, t, langCode]);
 
   const hydrationScore = useMemo(() => {
     if (!safeGoal) return 0;
@@ -374,7 +411,7 @@ export default function HydrationPage() {
           getExpectedHydrationProgress(pointTime),
       };
     });
-  }, [logs, totalFood]);
+  }, [logs, hydrationFactorMap, safeGoal]);
 
   /* ───────────────── Totals ───────────────── */
 
@@ -424,7 +461,7 @@ export default function HydrationPage() {
         hasFood: values.food > 0,
       };
     });
-  }, [logs]);
+  }, [logs, hydrationFactorMap]);
 
   /* ───────────────── UI ───────────────── */
 
@@ -538,80 +575,7 @@ export default function HydrationPage() {
                 <Scatter
                   data={combinedDots}
                   dataKey="value"
-                  shape={({ cx, cy, payload }: any) => {
-                    const r = 5.5;
-
-                    // alleen drinken
-                    if (payload.hasDrink && !payload.hasFood) {
-                      return (
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={r}
-                          fill="#0284c7"
-                          stroke="white"
-                          strokeWidth={2}
-                        />
-                      );
-                    }
-
-                    // alleen food
-                    if (!payload.hasDrink && payload.hasFood) {
-                      return (
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={r}
-                          fill="#f97316"
-                          stroke="white"
-                          strokeWidth={2}
-                        />
-                      );
-                    }
-
-                    // 🔥 BEIDE → half-half
-                    return (
-                      <g>
-                        <defs>
-                          <clipPath id={`left-${cx}-${cy}`}>
-                            <rect x={cx - r} y={cy - r} width={r} height={r * 2} />
-                          </clipPath>
-
-                          <clipPath id={`right-${cx}-${cy}`}>
-                            <rect x={cx} y={cy - r} width={r} height={r * 2} />
-                          </clipPath>
-                        </defs>
-
-                        {/* linker helft = drink */}
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={r}
-                          fill="#0284c7"
-                          clipPath={`url(#left-${cx}-${cy})`}
-                        />
-
-                        {/* rechter helft = food */}
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={r}
-                          fill="#f97316"
-                          clipPath={`url(#right-${cx}-${cy})`}
-                        />
-
-                        {/* border */}
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={r}
-                          fill="none"
-                          stroke="white"
-                          strokeWidth={2}
-                        />
-                      </g>
-                    );
-                  }}
+                  shape={HydrationDotShape}
                 />
 
                 <ReferenceLine

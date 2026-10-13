@@ -7,7 +7,7 @@ import {
   useContext,
   useCallback,
   useState,
-  useEffect,
+  useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -44,11 +44,11 @@ export function ToastProvider({
   children: React.ReactNode;
 }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const showToast = useCallback(
     (

@@ -9,7 +9,7 @@ import { DayKey } from "./dayKey";
  * (bijv. UTC-dag of handmatige YYYY-MM-DD) wordt gebruikt.
  */
 export function eqDay<T>(
-  query: T & { eq: (column: string, value: any) => T },
+  query: T & { eq: (column: string, value: unknown) => T },
   column: string,
   dayKey: DayKey
 ): T {

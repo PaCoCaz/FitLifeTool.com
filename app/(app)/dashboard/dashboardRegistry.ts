@@ -63,15 +63,21 @@ export const dashboardRouteMap: Record<string, RouteConfig> = {
   },
 };
 
-export function resolveLabel(t: any, key: string) {
-  const value = key
-    .split(".")
-    .reduce((obj, k) => obj?.[k], t);
+type TranslationTree = {
+  [key: string]: string | TranslationTree;
+};
 
-  return value ?? key; // fallback = key tonen
+export function resolveLabel(t: TranslationTree, key: string) {
+  let value: string | TranslationTree | undefined = t;
+
+  for (const segment of key.split(".")) {
+    value = typeof value === "object" ? value[segment] : undefined;
+  }
+
+  return typeof value === "string" ? value : key;
 }
 
-export function buildBreadcrumbs(path: string, t: any) {
+export function buildBreadcrumbs(path: string, t: TranslationTree) {
   const crumbs: {
     path: string;
     label: string;

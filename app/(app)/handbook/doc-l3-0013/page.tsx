@@ -111,7 +111,7 @@ export default function DocL30013() {
 
         <p>
           Navigatie wordt centraal opgebouwd via layouts en gedeelde
-          componenten. Pagina's bepalen niet zelf hoe zij binnen de applicatie
+          componenten. Pagina&apos;s bepalen niet zelf hoe zij binnen de applicatie
           bereikbaar zijn.
         </p>
 
@@ -131,7 +131,7 @@ Gebruiker`}
 
         <p>
           Hierdoor blijft navigatie voorspelbaar en kan een volledige sectie
-          worden uitgebreid zonder individuele pagina's aan te passen.
+          worden uitgebreid zonder individuele pagina&apos;s aan te passen.
         </p>
       </section>
 
@@ -157,7 +157,7 @@ Gebruiker`}
         <ul>
           <li>Navigatie wordt centraal door layouts beheerd.</li>
 
-          <li>Pagina's bevatten geen eigen navigatiestructuur.</li>
+          <li>Pagina&apos;s bevatten geen eigen navigatiestructuur.</li>
 
           <li>Mobile-first bepaalt de informatiedichtheid.</li>
 

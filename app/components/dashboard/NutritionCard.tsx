@@ -82,6 +82,12 @@ export default function NutritionCard() {
   const now =
     useNow();
 
+  const currentMinuteKey = Math.floor(now.getTime() / 60_000);
+  const minuteNow = useMemo(
+    () => new Date(currentMinuteKey * 60_000),
+    [currentMinuteKey]
+  );
+
 
   const lang =
     useLang();
@@ -133,7 +139,7 @@ export default function NutritionCard() {
         currentCalories,
         dailyLimit,
         scoreGoal,
-        now
+        minuteNow
 
       );
 
@@ -143,8 +149,7 @@ export default function NutritionCard() {
       currentCalories,
       dailyLimit,
       scoreGoal,
-      now.getHours(),
-      now.getMinutes(),
+      minuteNow,
 
     ]);
 
@@ -183,7 +188,7 @@ export default function NutritionCard() {
         currentCalories,
         dailyLimit,
         scoreGoal,
-        now,
+        minuteNow,
         t,
         lang
 
@@ -195,8 +200,7 @@ export default function NutritionCard() {
       currentCalories,
       dailyLimit,
       scoreGoal,
-      now.getHours(),
-      now.getMinutes(),
+      minuteNow,
       t,
       lang,
 

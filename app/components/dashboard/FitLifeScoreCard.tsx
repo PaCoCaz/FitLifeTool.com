@@ -4,8 +4,7 @@
 
 import {
   useMemo,
-  useState,
-  useEffect,
+  useSyncExternalStore,
 } from "react";
 
 import Card from "@/components/ui/Card";
@@ -75,19 +74,11 @@ export default function FitLifeScoreCard() {
 
 
 
-  const [
-    mounted,
-    setMounted,
-
-  ] = useState(false);
-
-
-
-  useEffect(() => {
-
-    setMounted(true);
-
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
 
 

@@ -139,7 +139,7 @@ export const labels: Record<Language, Labels> = {
   },
 
   // Tijdelijk: andere talen vallen terug op nl
-  en: {} as any,
-  de: {} as any,
-  fr: {} as any,
+  en: {} as Labels,
+  de: {} as Labels,
+  fr: {} as Labels,
 };

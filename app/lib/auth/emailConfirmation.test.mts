@@ -3,10 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { AuthSessionMissingError } from "@supabase/auth-js";
 import { AuthRetryableFetchError } from "@supabase/supabase-js";
-import { createEmailConfirmationHandler } from "../../auth/confirm/route.ts";
-import { createResendConfirmationHandler } from "../../api/auth/resend-confirmation/route.ts";
 import {
   buildEmailConfirmationRedirectUrl,
+  createEmailConfirmationHandler,
+  createResendConfirmationHandler,
   EMAIL_CONFIRMATION_COOLDOWN_SECONDS,
   getEmailConfirmationCooldownDeadline,
   getEmailConfirmationCooldownSeconds,

@@ -1,15 +1,16 @@
 // app/lib/stripe/handlers/handleProduct.ts
 
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import type Stripe from "stripe";
 
 
 
 export async function handleProduct(
-  event: any
+  event: Stripe.Event
 ) {
   const supabase = createSupabaseServer();
 
-  const product = event.data.object;
+  const product = event.data.object as Stripe.Product;
 
   await supabase
     .from("products")

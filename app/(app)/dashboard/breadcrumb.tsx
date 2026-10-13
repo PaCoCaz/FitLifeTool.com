@@ -24,7 +24,10 @@ export default function DashboardBreadcrumb() {
 
   const crumbs = buildBreadcrumbs(pathname, t);
 
-  const [dynamicLabel, setDynamicLabel] = useState<string | null>(null);
+  const [loadedLabel, setLoadedLabel] = useState<{
+    cacheKey: string;
+    label: string;
+  } | null>(null);
 
   /* 🔥 detect productKey */
   const productKey =
@@ -32,22 +35,20 @@ export default function DashboardBreadcrumb() {
       ? pathname.split("/add/")[1]?.split("/")[0] ?? null
       : null;
 
-  /* ✅ reset bij route change */
-  useEffect(() => {
-    setDynamicLabel(null);
-  }, [pathname]);
+  const cacheKey = productKey && lang ? `${productKey}_${lang}` : null;
+  const dynamicLabel = cacheKey
+    ? productNameCache.get(cacheKey) ??
+      (loadedLabel?.cacheKey === cacheKey ? loadedLabel.label : null)
+    : null;
 
   /* 🔥 load product naam */
   useEffect(() => {
     if (!productKey || !lang) return;
 
     const key = productKey;
-    const cacheKey = `${key}_${lang}`;
+    const requestedCacheKey = `${key}_${lang}`;
 
-    if (productNameCache.has(cacheKey)) {
-      setDynamicLabel(productNameCache.get(cacheKey)!);
-      return;
-    }
+    if (productNameCache.has(requestedCacheKey)) return;
 
     async function loadProductName() {
       const { data } = await supabase
@@ -58,8 +59,8 @@ export default function DashboardBreadcrumb() {
         .maybeSingle();
 
       if (data?.name) {
-        productNameCache.set(cacheKey, data.name);
-        setDynamicLabel(data.name);
+        productNameCache.set(requestedCacheKey, data.name);
+        setLoadedLabel({ cacheKey: requestedCacheKey, label: data.name });
       }
     }
 

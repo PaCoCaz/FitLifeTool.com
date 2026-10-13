@@ -6,8 +6,6 @@ import {
   createContext,
   useContext,
   useState,
-  useEffect,
-  useRef,
 } from "react";
 
 import { useDayNow } from "@/lib/useDayNow";
@@ -67,9 +65,18 @@ export function ScoreProvider({
   const dayKey =
     getLocalDayKey(dayNow);
 
+  return (
+    <DailyScoreProvider key={dayKey}>
+      {children}
+    </DailyScoreProvider>
+  );
+}
 
-  const currentDayRef =
-    useRef(dayKey);
+function DailyScoreProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
 
 
 
@@ -127,48 +134,6 @@ export function ScoreProvider({
     setActivityStatusColor,
 
   ] = useState<string | null>(null);
-
-
-
-  /* ───────────────── Day reset ───────────────── */
-
-
-  useEffect(() => {
-
-
-    if (
-      currentDayRef.current === dayKey
-    ) {
-
-      return;
-
-    }
-
-
-    currentDayRef.current =
-      dayKey;
-
-
-
-    // Reset scores
-
-    setHydrationScore(0);
-    setNutritionScore(0);
-    setActivityScore(0);
-
-
-
-    // Reset status
-
-    setHydrationStatusColor(null);
-    setNutritionStatusColor(null);
-    setActivityStatusColor(null);
-
-
-
-  }, [
-    dayKey,
-  ]);
 
 
 

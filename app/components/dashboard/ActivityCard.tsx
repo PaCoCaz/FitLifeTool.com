@@ -61,6 +61,12 @@ export default function ActivityCard() {
   const now =
     useNow();
 
+  const currentMinuteKey = Math.floor(now.getTime() / 60_000);
+  const minuteNow = useMemo(
+    () => new Date(currentMinuteKey * 60_000),
+    [currentMinuteKey]
+  );
+
 
 
   /* ───────────────── Score ───────────────── */
@@ -81,7 +87,7 @@ export default function ActivityCard() {
 
         activityCalories,
         activityGoal,
-        now
+        minuteNow
 
       );
 
@@ -90,8 +96,7 @@ export default function ActivityCard() {
 
       activityCalories,
       activityGoal,
-      now.getHours(),
-      now.getMinutes(),
+      minuteNow,
 
     ]);
 
@@ -126,7 +131,7 @@ export default function ActivityCard() {
 
         activityCalories,
         activityGoal,
-        now,
+        minuteNow,
         t,
         lang
 
@@ -137,8 +142,7 @@ export default function ActivityCard() {
 
       activityCalories,
       activityGoal,
-      now.getHours(),
-      now.getMinutes(),
+      minuteNow,
       t,
       lang,
 

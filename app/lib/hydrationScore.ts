@@ -8,7 +8,18 @@
 
  import { formatNumber } from "@/lib/formatNumber";
  import type { Lang } from "@/lib/useLang";
- 
+
+ type HydrationStatusText = {
+   hydration: {
+     status: {
+       noGoal: string;
+       goalReached: string;
+       ahead: string;
+       behind: string;
+     };
+   };
+ };
+
  /**
   * Verwachte hydratatie-voortgang (0–1)
   * Faseverdeling:
@@ -29,7 +40,7 @@
  
    return 1;
  }
- 
+
  /**
   * Live hydratatiescore (0–100) op basis van dagschema
   */
@@ -61,7 +72,7 @@
    currentMl: number,
    dailyGoalMl: number,
    now: Date = new Date(),
-   t: any,
+   t: HydrationStatusText,
    lang: Lang
  ) {
    if (dailyGoalMl <= 0) {
@@ -122,4 +133,4 @@
      expectedProgress,
    };
  }
- 
+

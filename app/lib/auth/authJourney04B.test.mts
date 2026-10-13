@@ -20,7 +20,7 @@ test("Phase 06 proxy uses bounded auth context only for expiry UX", async () => 
   assert.doesNotMatch(onboarding, /response\.status === 401[^]*router\.replace\("\/"\)/);
 });
 import { AuthSessionMissingError } from "@supabase/auth-js";
-import { createPostLoginHandler } from "../../api/auth/post-login/route.ts";
+import { createPostLoginHandler } from "./postLogin.ts";
 import type { ServerAuthClient } from "./serverAuthState.ts";
 
 const root = new URL("../../../", import.meta.url);
@@ -312,12 +312,13 @@ test("Phase 06 proxy behavior preserves cookies and consumes expiry context", as
 });
 
 test("post-login API is same-origin, closed-input, no-store, and generic", async () => {
-  const [source, destinationSource] = await Promise.all([
+  const [routeSource, source, destinationSource] = await Promise.all([
     read("app/api/auth/post-login/route.ts"),
+    read("app/lib/auth/postLogin.ts"),
     read("app/lib/auth/postLoginDestination.ts"),
   ]);
 
-  assert.match(source, /export const POST = createPostLoginHandler\(createClient, enforceEmailChangeGuard\)/);
+  assert.match(routeSource, /export const POST = createPostLoginHandler\(createClient, enforceEmailChangeGuard\)/);
   assert.match(source, /request\.headers\.get\("origin"\) !== requestOrigin/);
   assert.match(source, /key !== "returnTo"/);
   assert.match(source, /resolveServerAuthState\(supabase\)/);
@@ -507,7 +508,7 @@ test("registration and the public auth modal remain unchanged integration consum
 
 test("proxy and post-login enforce durable Email Change reauthentication state", async () => {
   const [proxy, postLogin, login, migration] = await Promise.all([
-    read("proxy.ts"), read("app/api/auth/post-login/route.ts"), read("app/components/auth/LoginForm.tsx"),
+    read("proxy.ts"), read("app/lib/auth/postLogin.ts"), read("app/components/auth/LoginForm.tsx"),
     read("supabase/migrations/20260908100000_add_auth_email_change_flow.sql"),
   ]);
   assert.match(proxy, /get_own_auth_email_change_state/);

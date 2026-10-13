@@ -3,6 +3,17 @@
 import { formatNumber } from "@/lib/formatNumber";
 import type { Lang } from "@/lib/useLang";
 
+type ActivityStatusText = {
+  activity: {
+    status: {
+      noGoal: string;
+      goalReached: string;
+      ahead: string;
+      behind: string;
+    };
+  };
+};
+
 /**
  * Verwachte activiteit-voortgang (0–1)
  *
@@ -49,7 +60,7 @@ export function getActivityStatus(
   burnedCalories: number,
   dailyGoal: number,
   now: Date = new Date(),
-  t: any,
+  t: ActivityStatusText,
   lang: Lang
 ) {
   if (dailyGoal <= 0) {

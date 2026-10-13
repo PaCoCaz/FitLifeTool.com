@@ -27,6 +27,17 @@ export type NutritionGoal =
   | "maintain"
   | "gain_weight";
 
+type NutritionStatusText = {
+  nutrition: {
+    status: {
+      noGoal: string;
+      onTrack: string;
+      behind: string;
+      over: string;
+    };
+  };
+};
+
 /* ───────────────── Schema (tijd-gewogen) ───────────────── */
 
 export function getExpectedNutritionProgress(
@@ -107,7 +118,7 @@ export function getNutritionStatus(
   dailyLimit: number,
   goal: NutritionGoal,
   _now: Date = new Date(),
-  t: any,
+  t: NutritionStatusText,
   lang: Lang
 ) {
   if (dailyLimit <= 0) {
