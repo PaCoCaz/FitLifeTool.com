@@ -19,6 +19,7 @@ const [
   germanPageSource,
   polishPageSource,
   publicHomepageSource,
+  publicPageShellSource,
   publicHeaderSource,
   publicHeaderNavigationSource,
   topNavigationSource,
@@ -46,6 +47,7 @@ const [
   read("app/(public-web-de)/de/page.tsx"),
   read("app/(public-web-pl)/pl/page.tsx"),
   read("app/components/public/PublicHomepage.tsx"),
+  read("app/components/public/PublicPageShell.tsx"),
   read("app/components/public/PublicHeader.tsx"),
   read("app/components/public/PublicHeaderNavigation.tsx"),
   read("app/components/layout/TopNavigation.tsx"),
@@ -109,7 +111,7 @@ test("auth entrypoints inherit the allowlisted active locale", () => {
     /getPublicAuthHref|"forgot-password"|public-web-forgot-link/
   );
   assert.match(publicHomepageSource, /mode="register"/);
-  assert.equal(publicHomepageSource.match(/mode="register"/g)?.length, 1);
+  assert.equal(publicHomepageSource.match(/mode="register"/g)?.length, 2);
   assert.doesNotMatch(publicHomepageSource, /mode="login"/);
   assert.doesNotMatch(publicHomepageSource, /public-web-secondary-cta/);
 });
@@ -178,35 +180,34 @@ test("sticky public header keeps the Hero overlap at top and opens desktop panel
 
 test("HP-02 uses the approved locale copy and metadata", () => {
   for (const copy of [
-    "Insights into your lifestyle",
+    "Get insight into your lifestyle",
     "Krijg inzicht in je leefstijl",
-    "Des repères pour votre mode de vie",
-    "Einblicke in deinen Lebensstil",
-    "Wgląd w Twój styl życia",
-    "See where you stand throughout the day as you move toward your goal",
+    "Mieux comprendre ton mode de vie",
+    "Gewinne Einblick in deinen Lebensstil",
+    "Lepiej zrozum swój styl życia",
+    "See where you stand throughout the day as you work towards your goal",
     "Zie gedurende de dag waar je staat op weg naar jouw doel",
-    "Suivez dans la journée votre progression vers votre objectif",
-    "Sieh im Tagesverlauf, wo du auf dem Weg zu deinem Ziel stehst",
-    "W ciągu dnia sprawdzaj, gdzie jesteś na drodze do swojego celu",
-    "Bring your nutrition, activity, hydration and weight together in one personal overview and track your progress toward your daily goals.",
+    "Vois où tu en es au fil de la journée sur le chemin vers ton objectif",
+    "Sieh im Laufe des Tages, wo du auf dem Weg zu deinem Ziel stehst",
+    "Zobacz w ciągu dnia, gdzie jesteś na drodze do swojego celu",
+    "Bring your nutrition, activity, hydration and weight together in one personalised overview and track your progress towards your daily goals.",
     "Breng je voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht en volg je voortgang richting jouw dagelijkse doelen.",
-    "Réunissez alimentation, activité, hydratation et poids dans un aperçu personnalisé et suivez vos progrès vers vos objectifs quotidiens.",
-    "Bündle Ernährung, Aktivität, Hydration und Gewicht in deinem persönlichen Überblick und verfolge deinen Fortschritt zu deinen Tageszielen.",
-    "Połącz swoje odżywianie, aktywność, nawodnienie i wagę w jednym spersonalizowanym przeglądzie i śledź swoje postępy w realizacji codziennych celów.",
-    "FitLifeTool | Daily lifestyle and goal insights",
-    "FitLifeTool | Inzicht in je leefstijl en doelen",
-    "FitLifeTool | Suivez votre mode de vie et vos objectifs",
-    "FitLifeTool | Lebensstil und Ziele im Blick",
-    "FitLifeTool | Styl życia i cele pod kontrolą",
-    "Bring nutrition, activity, hydration and weight together in one personal overview. See throughout the day where you stand in relation to your goals.",
-    "Breng voeding, beweging, hydratatie en gewicht samen in één persoonlijk overzicht. Zie gedurende de dag waar je staat ten opzichte van jouw doel.",
-    "Réunissez alimentation, activité physique, hydratation et poids dans une vue personnalisée. Suivez votre progression vers vos objectifs tout au long de la journée.",
-    "Bringe Ernährung, Bewegung, Flüssigkeitszufuhr und Gewicht in einer persönlichen Übersicht zusammen. Sieh jederzeit, wo du im Hinblick auf deine Ziele stehst.",
-    "Połącz odżywianie, aktywność, nawodnienie i masę ciała w jednym osobistym zestawieniu. Sprawdzaj przez cały dzień, gdzie jesteś względem swoich celów.",
+    "Réunis ton alimentation, ton activité physique, ton hydratation et ton poids dans une vue d’ensemble personnalisée, et suis tes progrès vers tes objectifs quotidiens.",
+    "Sieh Ernährung, Bewegung, Trinken und Gewicht auf einen Blick und verfolge deinen Fortschritt bei deinen täglichen Zielen.",
+    "Połącz informacje o odżywianiu, aktywności fizycznej, nawodnieniu i wadze w jednym spersonalizowanym zestawieniu i śledź postępy w realizacji swoich dziennych celów.",
+    "FitLifeTool | Lifestyle & Progress Insights",
+    "FitLifeTool | Inzicht in je leefstijl en voortgang",
+    "FitLifeTool | Mieux comprendre ton mode de vie et tes progrès",
+    "FitLifeTool | Einblick in Lebensstil und Fortschritt",
+    "FitLifeTool | Lepiej zrozum swój styl życia i postępy",
+    "Get insight into your nutrition, activity, hydration and weight. Track your daily progress and see how it aligns with your personal goal.",
+    "Krijg inzicht in je voeding, beweging, hydratatie en gewicht. Volg je dagelijkse voortgang en zie hoe die aansluit op jouw persoonlijke doel.",
+    "Mieux comprendre ton alimentation, ton activité physique, ton hydratation et ton poids. Suis tes progrès quotidiens en fonction de ton objectif personnel.",
+    "Gewinne Einblick in Ernährung, Bewegung, Flüssigkeitszufuhr und Gewicht. Verfolge deinen täglichen Fortschritt und sieh, wie er zu deinem persönlichen Ziel passt.",
+    "Lepiej zrozum swoje odżywianie, aktywność fizyczną, nawodnienie i wagę. Śledź codzienne postępy i zobacz, jak odnoszą się do Twojego celu.",
   ]) {
     assert.ok(registrySource.includes(copy), copy);
   }
-  assert.equal(registrySource.match(/eyebrow: "/g)?.length, APP_LANGUAGES.length);
   assert.match(publicWebCssSource, /\.public-web-eyebrow \{[^}]*text-transform: none;/);
   const heroContentSource = registrySource
     .split("export const PUBLIC_HOME_CONTENT")[1]
@@ -215,8 +216,13 @@ test("HP-02 uses the approved locale copy and metadata", () => {
   for (const locale of APP_LANGUAGES) {
     const localeContent = heroContentSource.match(new RegExp(`\\b${locale}: \\{([\\s\\S]*?)\\n  \\},`))?.[1];
     assert.ok(localeContent, locale);
-    const title = localeContent.match(/title: "([^"]+)"/)?.[1];
-    const description = localeContent.match(/description:\s*"([^"]+)"/)?.[1];
+    const heroCopy = localeContent.split("    sectionTwo: {")[0];
+    const sectionTwoCopy = localeContent.match(/sectionTwo: \{([\s\S]*?)\n    \},/)?.[1];
+    assert.ok(sectionTwoCopy, `${locale} Section 2 content`);
+    assert.equal(heroCopy.match(/eyebrow: "/g)?.length, 1, `${locale} Hero eyebrow`);
+    assert.equal(sectionTwoCopy.match(/eyebrow: "/g)?.length, 1, `${locale} Section 2 eyebrow`);
+    const title = heroCopy.match(/title: "([^"]+)"/)?.[1];
+    const description = heroCopy.match(/description:\s*"([^"]+)"/)?.[1];
     assert.ok(title && !title.endsWith("."), `${locale} H1 must not end in a period`);
     assert.ok(description?.endsWith("."), `${locale} lead must end in a period`);
   }
@@ -296,13 +302,16 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.match(phoneHeroCss, /\.public-web-hero-surface::before \{\s*background:\s*linear-gradient\(\s*180deg,\s*transparent 12%,\s*rgb\(245 250 255 \/ 22%\) 16%,\s*rgb\(245 250 255 \/ 22%\) 23%,\s*transparent 28%\s*\),\s*linear-gradient\(\s*90deg,\s*rgb\(245 250 255 \/ 98%\) 0%,\s*rgb\(245 250 255 \/ 92%\) 36%,\s*rgb\(245 250 255 \/ 64%\) 58%,\s*rgb\(245 250 255 \/ 8%\) 78%\s*\);/);
   assert.match(phoneHeroCss, /\.public-web-hero-copy::before \{\s*content: none;\s*\}/);
   assert.match(phoneHeroCss, /\.public-web-hero-media \{[^}]*position: static;[^}]*background-image: none;/);
-  assert.match(phoneHeroCss, /\.public-web-hero-character \{[^}]*float: right;[^}]*display: block;[^}]*right: 0;[^}]*shape-outside: polygon\([\s\S]*?\) border-box;/);
+  const phoneCharacterCss = phoneHeroCss.match(/\.public-web-hero-character \{([^}]*)\}/)?.[1];
+  assert.ok(phoneCharacterCss);
+  assert.match(phoneCharacterCss, /float: right;\s*display: block;\s*box-sizing: content-box;/);
+  assert.match(phoneCharacterCss, /right: 0;\s*bottom: 0;\s*z-index: 2;\s*padding-top: calc\(300px - var\(--public-web-character-height\)\);\s*margin-top: 0;/);
+  assert.match(phoneCharacterCss, /shape-outside: polygon\(\s*100% 3px,\s*calc\(53\.16% - var\(--public-web-image-exclusion-gap-inline\)\) 3px,[\s\S]*?100% 100%\s*\) content-box;/);
   assert.match(phoneHeroCss ?? "", /\.public-web-hero-surface \{\s*height: 100%;\s*overflow: visible;/);
   assert.match(phoneHeroCss ?? "", /\.public-web-hero-copy \{\s*height: 100%;\s*padding-top: 14px;\s*padding-right: var\(--public-web-content-edge-inset\);\s*padding-left: var\(--public-web-content-edge-inset\);/);
   assert.match(phoneHeroCss ?? "", /\.public-web h1 \{\s*font-size: clamp\(17px, calc\(14\.310924px \+ 0\.840336vw\), 18px\);\s*\}/);
   assert.match(phoneHeroCss ?? "", /\.public-web-lead \{\s*font-size: 13\.4px;\s*line-height: 1\.4;\s*\}/);
   assert.match(phoneHeroCss ?? "", /\.public-web-actions \{\s*position: absolute;\s*z-index: 3;\s*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);\s*clear: none;\s*margin-top: 0;/);
-  assert.match(phoneHeroCss ?? "", /\.public-web-hero-character \{[^}]*bottom: 0;\s*z-index: 2;\s*margin-top: calc\(300px - var\(--public-web-character-height\)\);/);
   const intermediateHeroCss = publicWebCssSource
     .split("@media (min-width: 27.5rem) and (max-width: 47.999rem) {")[1]
     ?.split("@media (min-width: 440px) and (max-width: 500px) {")[0];
@@ -353,7 +362,9 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.ok(firstLineReadabilityCss);
   assert.match(firstLineReadabilityCss, /\.public-web-hero-surface::before \{\s*background:\s*linear-gradient\(\s*180deg,\s*transparent 39px,\s*rgb\(245 250 255 \/ 22%\) 44px,\s*rgb\(245 250 255 \/ 22%\) 49\.5px,\s*transparent 59\.675px\s*\),\s*linear-gradient\(\s*90deg,\s*rgb\(245 250 255 \/ 98%\) 0%,\s*rgb\(245 250 255 \/ 92%\) 36%,\s*rgb\(245 250 255 \/ 64%\) 58%,\s*rgb\(245 250 255 \/ 8%\) 78%\s*\);/);
   const desktopHeroCss = publicWebCssSource
-    .split("@media (min-width: 64rem) {")[1]
+    .split("@media (min-width: 64rem) {")
+    .slice(1)
+    .find((block) => /\.public-web-hero \{\s*--public-web-content-edge-inset: 14px;\s*--public-web-image-exclusion-gap-inline: 25px;\s*max-width: 71\.875rem;/.test(block))
     ?.split("@media (min-width: 71.875rem) {")[0];
   assert.ok(desktopHeroCss);
   assert.match(desktopHeroCss, /--public-web-content-edge-inset: 14px;/);
@@ -365,7 +376,7 @@ test("Hero v2 uses the approved full-width background and decorative character c
   assert.match(desktopCopyCss, /display: block;\s*width: auto;[^}]*padding: 14px var\(--public-web-content-edge-inset\) 14px;/);
   assert.doesNotMatch(desktopCopyCss, /display: grid|grid-template-rows|padding: 28px 3rem/);
   assert.match(desktopHeroCss, /\.public-web-eyebrow \{\s*margin-bottom: 7px;\s*font-size: 13px;/);
-  assert.match(desktopHeroCss, /\.public-web h1 \{[^}]*max-width: none;\s*width: auto;[^}]*font-size: clamp\(28px, calc\(16px \+ 1\.171875vw\), 30px\);\s*line-height: 1\.08;/);
+  assert.match(desktopHeroCss, /\.public-web h1 \{[^}]*max-width: none;\s*width: auto;[^}]*font-size: min\(clamp\(28px, calc\(16px \+ 1\.171875vw\), 30px\), 29\.4765625px\);\s*line-height: 1\.08;/);
   assert.match(desktopHeroCss, /\.public-web-lead \{[^}]*max-width: none;[^}]*font-size: 16\.5px;\s*line-height: 1\.35;/);
   assert.match(desktopHeroCss, /\.public-web-actions \{[^}]*right: var\(--public-web-content-edge-inset\);\s*bottom: 14px;\s*left: var\(--public-web-content-edge-inset\);/);
   assert.match(desktopHeroCss, /\.public-web-hero-media \{[^}]*position: static;\s*display: block;/);
@@ -485,6 +496,7 @@ test("request-dependent roots retain allowlisted locale inheritance", () => {
 
 test("public homepage renderer and language switcher stay server-only", () => {
   assert.doesNotMatch(publicHomepageSource, /["']use client["']/);
+  assert.doesNotMatch(publicPageShellSource, /["']use client["']/);
   assert.doesNotMatch(publicHeaderSource, /["']use client["']/);
   assert.match(publicHeaderNavigationSource, /^["']use client["']/);
   assert.match(publicHeaderNavigationSource, /PUBLIC_LOCALES\.map/);
@@ -503,7 +515,68 @@ test("shared public header requires explicit page context", () => {
     publicHeaderNavigationSource,
     /getPublicPagePath\(pageKey, candidate\)/
   );
-  assert.match(publicHomepageSource, /<PublicHeader locale=\{locale\} pageKey="home" \/>/);
+  assert.match(publicHomepageSource, /<PublicPageShell locale=\{locale\} pageKey="home">/);
+  assert.match(publicPageShellSource, /<PublicHeader locale=\{locale\} pageKey=\{pageKey\} \/>/);
+});
+
+test("sitewide public shell uses the approved slogan and non-interactive footer labels", () => {
+  const expected = {
+    nl: ["Neem de regie en krijg inzicht in je leefstijl!", "Privacy", "Voorwaarden", "Over ons", "Contact"],
+    en: ["Take control and understand your lifestyle!", "Privacy", "Terms", "About us", "Contact"],
+    de: ["Entscheide selbst und verstehe deinen Lebensstil!", "Datenschutz", "Nutzungsbedingungen", "Über uns", "Kontakt"],
+    fr: ["Prends les choses en main et comprends ton mode de vie !", "Confidentialité", "Conditions d’utilisation", "À propos de nous", "Contact"],
+    pl: ["Przejmij kontrolę i poznaj swój styl życia!", "Prywatność", "Warunki korzystania", "O nas", "Kontakt"],
+  };
+  const footerContentSource = registrySource
+    .split("export const PUBLIC_FOOTER_CONTENT:")[1]
+    ?.split("export function asPublicLocale")[0];
+  assert.ok(footerContentSource);
+  for (const [locale, copy] of Object.entries(expected)) {
+    const localeSource = footerContentSource.split(`  ${locale}: {`)[1]?.split("\n  },")[0];
+    assert.ok(localeSource, `${locale} footer copy`);
+    for (const text of copy) {
+      assert.ok(localeSource.includes(JSON.stringify(text)), `${locale}: ${text}`);
+    }
+    const labelsSource = localeSource.match(/labels: (\[[^\n]+\])/);
+    assert.ok(labelsSource, `${locale} footer label order`);
+    assert.deepEqual(JSON.parse(labelsSource[1]), copy.slice(1));
+  }
+
+  assert.match(publicPageShellSource, /<main className="public-web-main">\{children\}<\/main>[\s\S]*?className="public-web-slogan-bar"[\s\S]*?<footer className="public-web-footer">/);
+  assert.match(publicPageShellSource, /src="\/logo_fitlifetool\.png"/);
+  assert.match(publicPageShellSource, /<footer className="public-web-footer">[\s\S]*?className="public-web-footer-brand"[\s\S]*?className="public-web-footer-labels"[\s\S]*?className="public-web-footer-copyright"/);
+  assert.match(publicPageShellSource, /footer\.labels\.map\(\(label, index\) => \([\s\S]*?index > 0 && \([\s\S]*?className="public-web-footer-divider" aria-hidden="true"[\s\S]*?\{label\}/);
+  assert.doesNotMatch(publicPageShellSource, /href=["']#|href=\{label\}/);
+  assert.match(publicPageShellSource, /© 2026 FitLifeTool\.com/);
+  assert.match(publicWebCssSource, /\.public-web \{[^}]*background: #b8cae0;/);
+  assert.match(publicWebCssSource, /\.public-web-main \{[^}]*max-width: 71\.875rem;[^}]*background: #e8f3fe;/);
+  assert.match(publicWebCssSource, /\.public-web-slogan-bar \{[^}]*background: #191970;[^}]*color: #fff;/);
+  assert.match(publicWebCssSource, /body:has\(> \.public-web\) \{\s*background: #e2e8f0;/);
+  assert.match(publicWebCssSource, /\.public-web \{[^}]*--public-web-navy-bar-height: 44px;[^}]*max-width: 1150px;/);
+  assert.match(publicWebCssSource, /\.public-web-slogan-bar \{[^}]*height: var\(--public-web-navy-bar-height\);/);
+  assert.match(publicWebCssSource, /\.public-web-slogan-bar p \{[^}]*font-size: 13px;[^}]*font-style: italic;[^}]*line-height: 17px;[^}]*text-align: center;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 40rem\) \{\s*\.public-web-slogan-bar p \{\s*text-align: left;/);
+  assert.equal(publicWebCssSource.match(/grid-template-rows: 64px var\(--public-web-navy-bar-height\);/g)?.length, 3);
+  assert.match(publicWebCssSource, /\.public-web-footer \{[^}]*background: #b8cae0;/);
+  assert.match(publicWebCssSource, /\.public-web-footer-content \{[^}]*box-sizing: border-box;[^}]*width: 100%;[^}]*grid-template-columns: 130px minmax\(0, 1fr\);[^}]*grid-template-areas: "brand labels" "\. copyright";[^}]*column-gap: 14px;[^}]*padding: 14px;[^}]*align-items: baseline;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 40rem\) \{\s*\.public-web-footer-content \{[^}]*grid-template-columns: 150px minmax\(0, 1fr\);/);
+  assert.match(publicWebCssSource, /\.public-web-footer-brand img \{[^}]*max-width: 150px;[^}]*height: auto;/);
+  assert.match(publicWebCssSource, /\.public-web-footer-labels \{[^}]*flex-direction: column;[^}]*width: 100%;[^}]*text-align: right;/);
+  assert.match(publicWebCssSource, /\.public-web-footer-labels \{[^}]*font-size: 14px;[^}]*line-height: 1\.5;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 40rem\) \{\s*\.public-web-footer-content \{[^}]*grid-template-columns: 150px minmax\(0, 1fr\);[^}]*\}\s*\.public-web-footer-labels \{[^}]*flex-direction: row;[^}]*justify-content: flex-end;/);
+  assert.match(publicWebCssSource, /\.public-web-footer-divider \{[^}]*display: none;/);
+  assert.match(publicWebCssSource, /\.public-web-footer \{[^}]*--public-web-footer-divider-color: #91a6c2;/);
+  assert.match(publicWebCssSource, /\.public-web-footer-divider \{[^}]*width: 1px;[^}]*margin-inline: 7px;[^}]*background: var\(--public-web-footer-divider-color\);/);
+  assert.match(publicWebCssSource, /\.public-web-footer-copyright \{[^}]*grid-area: copyright;[^}]*justify-self: end;[^}]*text-align: right;/);
+  assert.match(publicWebCssSource, /@media \(max-width: 39\.99rem\) \{\s*\.public-web-footer-content \{[^}]*grid-template-columns: minmax\(0, 1fr\);[^}]*grid-template-areas: "brand" "labels" "copyright";[^}]*justify-items: center;/);
+  assert.match(publicWebCssSource, /\.public-web-footer-labels li:nth-child\(even\) \.public-web-footer-divider \{[^}]*left: -0\.5px;[^}]*display: block;[^}]*width: 1px;/);
+  assert.match(publicWebCssSource, /\.public-web-footer-labels li:nth-child\(3\) \.public-web-footer-divider \{\s*display: none;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 20rem\) and \(max-width: 339\.99px\) \{\s*\.public-web-footer-labels \{[^}]*font-size: 13\.08px;[^}]*line-height: 1\.5;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 500px\) and \(max-width: 39\.99rem\) \{\s*\.public-web-footer-labels \{[^}]*display: flex;[^}]*flex-direction: row;[^}]*flex-wrap: nowrap;[^}]*justify-content: center;/);
+  assert.match(publicWebCssSource, /\.public-web-footer-labels li:nth-child\(n \+ 2\) \.public-web-footer-divider \{[^}]*display: block;[^}]*width: 1px;[^}]*margin-inline: 7px;[^}]*background: var\(--public-web-footer-divider-color\);/);
+  assert.match(publicWebCssSource, /\.public-web-header-divider \{[^}]*width: 1px;[^}]*background: #91a6c2;/);
+  assert.doesNotMatch(publicWebCssSource, /\.public-web-footer-labels li \+ li::before/);
+  assert.doesNotMatch(publicWebCssSource, /@media \(min-width: 48rem\) \{\s*\.public-web-footer-content/);
 });
 
 test("HP-01 keeps unpublished destinations non-interactive and route-safe", () => {
@@ -525,7 +598,7 @@ test("legacy public category navigation stays removed from the shared app shell"
 });
 
 test("HP-01K reuses one accessible auth dialog without replacing direct routes", () => {
-  assert.match(publicHomepageSource, /PublicAuthModalProvider locale=\{locale\}/);
+  assert.match(publicPageShellSource, /PublicAuthModalProvider locale=\{locale\}/);
   assert.match(publicAuthModalProviderSource, /useState<PublicTopLevelOverlay>\(null\)/);
   assert.doesNotMatch(
     publicAuthModalProviderSource,
@@ -643,6 +716,17 @@ test("HP-01M aligns public auth dialogs with the menu shell and viewport", () =>
 });
 
 test("HP-01 header copy is complete for all five public locales", () => {
+  const headerContentSource = registrySource
+    .split("export const PUBLIC_HEADER_CONTENT:")[1]
+    ?.split("\n};")[0];
+  assert.ok(headerContentSource);
+  const navigationLabels = {
+    en: "Main navigation",
+    nl: "Hoofdnavigatie",
+    fr: "Navigation principale",
+    de: "Hauptnavigation",
+    pl: "Nawigacja główna",
+  };
   for (const field of [
     "navigationLabel",
     "login",
@@ -651,11 +735,12 @@ test("HP-01 header copy is complete for all five public locales", () => {
     "openMenu",
     "closeMenu",
   ]) {
-    assert.equal(
-      registrySource.match(new RegExp(`${field}:`, "g"))?.length,
-      APP_LANGUAGES.length + 1,
-      field
-    );
+    assert.equal(headerContentSource.match(new RegExp(`${field}:`, "g"))?.length, APP_LANGUAGES.length, field);
+  }
+  for (const locale of APP_LANGUAGES) {
+    const localeHeaderSource = headerContentSource.split(`  ${locale}: {`)[1]?.split("\n  },")[0];
+    assert.ok(localeHeaderSource, `${locale} header content`);
+    assert.ok(localeHeaderSource.includes(`navigationLabel: "${navigationLabels[locale]}"`), `${locale} navigation label`);
   }
 });
 
@@ -752,13 +837,13 @@ test("HP-01I keeps menu icons canonical while Hero v2 connects to the navigation
   assert.doesNotMatch(publicWebCssSource, /public-web-mobile-knowledge-trigger img/);
   assert.match(
     publicWebCssSource,
-    /\.public-web-main \{\s*padding: 0;\s*\}/
+    /\.public-web-main \{[^}]*?padding: 0;[^}]*?\}/
   );
 });
 
 test("homepage section card follows the Hero frame without a fixed height", async () => {
   const sectionCardSource = await read("app/components/public/PublicSectionCard.tsx");
-  assert.match(publicHomepageSource, /<\/section>\s*<PublicSectionCard \/>/);
+  assert.match(publicHomepageSource, /<\/section>\s*\{bodySections\.map\(\(\[sectionKey, section\]\) => \(\s*<PublicSectionCard key=\{sectionKey\}>/);
   assert.match(sectionCardSource, /className="public-web-section-card"/);
   assert.match(sectionCardSource, /className="public-web-section-card-content">\{children\}/);
   const cardRule = publicWebCssSource.match(/\.public-web-section-card \{([^}]+)\}/)?.[1];
@@ -767,9 +852,136 @@ test("homepage section card follows the Hero frame without a fixed height", asyn
   assert.match(cardRule, /max-width: 71\.875rem;/);
   assert.match(cardRule, /margin: 14px auto 0;/);
   assert.doesNotMatch(cardRule, /border-radius:/);
-  assert.match(cardRule, /background: #f5faff;/);
+  assert.match(cardRule, /background: transparent;/);
   assert.doesNotMatch(cardRule, /(?:^|\s)(?:min-)?height:|position: absolute;/);
-  assert.match(publicWebCssSource, /\.public-web-section-card-content \{\s*padding: clamp\(16px, 2\.5vw, 32px\);/);
+  assert.match(publicWebCssSource, /\.public-web-section-card-content \{\s*padding-block: clamp\(16px, 2\.5vw, 32px\);\s*padding-inline: 14px;/);
+  assert.match(publicWebCssSource, /\.public-web-section-card-content:has\(> \.public-web-section-two\) \{\s*padding-block: 14px;/);
+});
+
+test("homepage Section 2 retains exact five-locale copy for the text-first review", () => {
+  const expectedCopy = {
+    nl: [
+      "Jouw leefstijl in één overzicht",
+      "Zie hoe voeding, beweging, hydratatie en gewicht samenkomen",
+      "FitLifeTool brengt deze onderdelen samen in één persoonlijk overzicht, zodat je meer inzicht krijgt in jouw leefstijl.",
+      "Je leefstijl bestaat uit meer dan losse registraties. Wat je eet, hoeveel je beweegt, hoeveel je drinkt en hoe je gewicht zich ontwikkelt, kunnen samen meer context geven dan ieder onderdeel afzonderlijk. Door die informatie naast elkaar te bekijken, wordt het makkelijker om patronen over dagen en langere periodes te herkennen.",
+      "Zo zie je niet alleen afzonderlijke cijfers, maar krijg je meer context bij je dagelijkse keuzes en de ontwikkeling die je doormaakt. Je kunt beter volgen wat er verandert, wat redelijk constant blijft en hoe verschillende onderdelen zich naast elkaar ontwikkelen. Dat helpt je om je voortgang beter te begrijpen en bewuster naar je leefstijl te kijken.",
+    ],
+    en: [
+      "Your lifestyle in one overview",
+      "See how nutrition, activity, hydration and weight come together",
+      "FitLifeTool brings these areas together in one personalised overview, giving you a clearer picture of your lifestyle.",
+      "Your lifestyle is about more than individual entries. What you eat, how active you are, how much you drink and how your weight changes can provide more context together than each area on its own. Looking at this information side by side makes it easier to recognise patterns across days and over longer periods.",
+      "Instead of seeing only separate numbers, you get more context for your daily choices and how things change over time. You can follow what changes, what remains relatively consistent and how different areas develop alongside each other. This helps you better understand your progress and how the different parts of your lifestyle relate to one another.",
+    ],
+    de: [
+      "Dein Lebensstil auf einen Blick",
+      "Sieh, wie Ernährung, Bewegung, Flüssigkeitszufuhr und Gewicht zusammenwirken",
+      "FitLifeTool bringt diese Bereiche in einer persönlichen Übersicht zusammen, damit du deinen Lebensstil besser verstehen kannst.",
+      "Dein Lebensstil besteht aus mehr als einzelnen Einträgen. Was du isst, wie viel du dich bewegst, wie viel du trinkst und wie sich dein Gewicht entwickelt, kann zusammen mehr Kontext geben als jeder Bereich für sich. Wenn du diese Informationen nebeneinander betrachtest, kannst du Muster über mehrere Tage und längere Zeiträume leichter erkennen.",
+      "So siehst du nicht nur einzelne Zahlen, sondern erhältst mehr Kontext zu deinen täglichen Entscheidungen und dazu, wie sich verschiedene Bereiche entwickeln. Du kannst besser verfolgen, was sich verändert, was relativ konstant bleibt und wie sich die einzelnen Bereiche im Verhältnis zueinander entwickeln. Das hilft dir, deinen Fortschritt besser zu verstehen und die Zusammenhänge in deinem Lebensstil klarer zu erkennen.",
+    ],
+    fr: [
+      "Ton mode de vie en un coup d’œil",
+      "Vois comment ton alimentation, ton activité physique, ton hydratation et ton poids sont liés",
+      "FitLifeTool réunit ces différents aspects dans une vue d’ensemble personnalisée pour t’aider à mieux comprendre ton mode de vie.",
+      "Ton mode de vie ne se résume pas à des données prises séparément. Ce que tu manges, ton niveau d’activité, ce que tu bois et l’évolution de ton poids peuvent apporter davantage de contexte lorsqu’ils sont considérés ensemble. En regardant ces informations côte à côte, il devient plus facile d’identifier des tendances au fil des jours et sur des périodes plus longues.",
+      "Tu ne vois ainsi pas seulement des chiffres isolés : tu peux aussi mieux comprendre tes choix quotidiens et la façon dont les différents aspects de ton mode de vie évoluent. Tu peux voir plus clairement ce qui change, ce qui reste relativement stable et comment les différents aspects de ton mode de vie se situent les uns par rapport aux autres. Cela t’aide à mieux comprendre tes progrès et les liens entre les différentes dimensions de ton mode de vie.",
+    ],
+    pl: [
+      "Twój styl życia w jednym miejscu",
+      "Zobacz, jak łączą się odżywianie, aktywność fizyczna, nawodnienie i waga",
+      "FitLifeTool łączy te obszary w jednym spersonalizowanym zestawieniu, pomagając Ci lepiej zrozumieć swój styl życia.",
+      "Twój styl życia to coś więcej niż pojedyncze wpisy. To, co jesz, jak dużo się ruszasz, ile pijesz i jak zmienia się Twoja waga, daje więcej kontekstu, gdy spojrzysz na te informacje razem, a nie na każdy obszar osobno. Zestawienie ich obok siebie ułatwia dostrzeganie powtarzających się tendencji na przestrzeni kolejnych dni i dłuższych okresów.",
+      "Dzięki temu widzisz nie tylko pojedyncze liczby, ale zyskujesz też więcej kontekstu dla swoich codziennych wyborów i zachodzących zmian. Możesz lepiej zauważyć, co się zmienia, co pozostaje względnie stałe i jak poszczególne obszary wyglądają względem siebie w czasie. Pomaga Ci to lepiej rozumieć swoje postępy i zależności między różnymi elementami Twojego stylu życia.",
+    ],
+  };
+  const homeContentSource = registrySource.split("export const PUBLIC_HOME_CONTENT:")[1];
+  assert.ok(homeContentSource);
+  for (const [locale, copy] of Object.entries(expectedCopy)) {
+    const localeSource = homeContentSource.split(`  ${locale}: {`)[1]?.split("    primaryCta:")[0];
+    assert.ok(localeSource, `missing ${locale} homepage content`);
+    assert.match(localeSource, /sectionTwo: \{[\s\S]*?body: \[[\s\S]*?\],/);
+    assert.equal(copy.length, 5, `${locale} eyebrow, H2, lead and two body paragraphs`);
+    for (const text of copy) {
+      assert.ok(localeSource.includes(JSON.stringify(text)), `missing exact ${locale} Section 2 copy: ${text}`);
+    }
+  }
+
+  assert.match(publicHomepageSource, /\["two", content\.sectionTwo\][\s\S]*?\["three", content\.sectionThree\][\s\S]*?\["four", content\.sectionFour\][\s\S]*?\["five", content\.sectionFive\][\s\S]*?\["six", content\.sectionSix\]/);
+  assert.match(publicHomepageSource, /<PublicSectionCard key=\{sectionKey\}>[\s\S]*?aria-labelledby=\{`public-web-section-\$\{sectionKey\}-title`\}[\s\S]*?<p className="public-web-eyebrow">\{section\.eyebrow\}<\/p>[\s\S]*?<h2 id=\{`public-web-section-\$\{sectionKey\}-title`\}>\{section\.title\}<\/h2>[\s\S]*?<p className="public-web-lead">\{section\.description\}<\/p>/);
+  assert.match(publicHomepageSource, /<p>\{section\.body\[0\]\}<\/p>\s*\{sectionKey === "two" \|\| sectionKey === "four" \? \(\s*<div className="public-web-section-two-photo-row">[\s\S]*?src=\{sectionKey === "two" \? "\/images\/section-two-lifestyle-overview-final\.webp" : "\/images\/section-four-activity-progress\.webp"\}[\s\S]*?<p>\{section\.body\[1\]\}<\/p>/);
+  assert.doesNotMatch(publicHomepageSource, /PublicSectionTwoBody|section-two-panorama/);
+  assert.match(publicHomepageSource, /aria-labelledby="public-web-section-seven-title"[\s\S]*?content\.sectionSeven\.primaryCta/);
+  assert.equal(publicHomepageSource.match(/mode="register"/g)?.length, 2);
+
+  const copyRule = publicWebCssSource.match(/\.public-web-section-two-copy \{([^}]+)\}/)?.[1];
+  assert.ok(copyRule);
+  assert.match(copyRule, /width: 100%;[\s\S]*?min-width: 0;[\s\S]*?text-align: left;/);
+  assert.doesNotMatch(copyRule, /max-width:|margin-left:|(?:min-)?height:|position: absolute;|overflow: hidden;/);
+  assert.match(publicWebCssSource, /\.public-web-section-two h2 \{[^}]*font-size: clamp\(1rem, 3\.2vw, 1\.375rem\);[^}]*font-weight: 600;/);
+  assert.match(publicWebCssSource, /\.public-web-section-two-body \{[^}]*font-size: clamp\(14px, 1\.8vw, 15px\);[^}]*line-height: 1\.5;/);
+  assert.match(publicWebCssSource, /\.public-web-section-two-detail \{[^}]*margin-top: 16px;/);
+  assert.match(publicWebCssSource, /\.public-web-section-two-photo \{[^}]*aspect-ratio: 380 \/ 150;[^}]*border-radius: 6px;[^}]*overflow: hidden;/);
+  assert.match(publicWebCssSource, /\.public-web-section-two-photo img \{\s*object-fit: cover;/);
+  assert.match(publicWebCssSource, /\.public-web-section-two-photo-frame \{[^}]*position: relative;[^}]*border-radius: 6px;[^}]*overflow: hidden;/);
+  assert.match(publicWebCssSource, /@media \(max-width: 449px\) \{\s*\.public-web-section-two\[aria-labelledby="public-web-section-two-title"\] \.public-web-section-two-body \{\s*gap: 0;[\s\S]*?\.public-web-section-two-photo \{\s*width: 100%;\s*aspect-ratio: 5 \/ 2;\s*margin-inline: 0;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 450px\) and \(max-width: 519px\) \{[\s\S]*?\.public-web-homepage-text-body \.public-web-section-two-photo \{\s*float: none;\s*width: 100%;\s*height: auto;\s*aspect-ratio: 5 \/ 2;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 28\.125rem\) \{[\s\S]*?\.public-web-section-two-photo-row \{\s*display: flow-root;\s*margin-top: 0\.5lh;[\s\S]*?\.public-web-section-two-photo \{\s*float: left;\s*box-sizing: border-box;\s*width: calc\(\(7lh - 10px\) \* 5 \/ 2\);\s*height: 7lh;[^}]*padding-top: 10px;\s*shape-outside: inset\(0\);\s*shape-margin: 0;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 28\.125rem\) and \(max-width: 34\.374rem\) \{\s*\.public-web-section-two-photo \{\s*width: calc\(\(5lh - 10px\) \* 5 \/ 2\);\s*height: 5lh;/);
+  assert.match(publicWebCssSource, /@media \(min-width: 34\.375rem\) and \(max-width: 39\.999rem\) \{\s*\.public-web-section-two-photo \{\s*width: calc\(\(6lh - 10px\) \* 5 \/ 2\);\s*height: 6lh;/);
+  assert.match(publicWebCssSource, /\.public-web-section-two-photo-frame \{[^}]*aspect-ratio: 5 \/ 2;\s*transform: translateY\(-5px\);/);
+  assert.doesNotMatch(publicHomepageSource, /public-web-section-two-visual(?:--leading|--with-p2)?/);
+  assert.doesNotMatch(publicWebCssSource, /--public-web-section-two-start/);
+  assert.match(publicWebCssSource, /\.public-web-section-two-photo-row \{\s*display: contents;/);
+  assert.match(publicWebCssSource, /\.public-web-section-two-body p \{\s*margin: 0;\s*\}/);
+  assert.doesNotMatch(publicWebCssSource, /\.public-web-section-two-before/);
+  assert.doesNotMatch(publicWebCssSource, /\.public-web-section-two-(?:eyebrow|lead) \{/);
+});
+
+test("text-first homepage includes complete Sections 3–7 in every locale", () => {
+  const homeContentSource = registrySource
+    .split("export const PUBLIC_HOME_CONTENT:")[1]
+    ?.split("export const PUBLIC_HEADER_CONTENT:")[0];
+  assert.ok(homeContentSource);
+
+  for (const locale of APP_LANGUAGES) {
+    const localeSource = homeContentSource.split(`  ${locale}: {`)[1]?.split("\n  },")[0];
+    assert.ok(localeSource, `${locale} homepage`);
+    for (const key of ["sectionThree", "sectionFour", "sectionFive", "sectionSix"]) {
+      const sectionSource = localeSource.split(`    ${key}: {`)[1]?.split("\n    },")[0];
+      assert.ok(sectionSource, `${locale} ${key}`);
+      assert.match(sectionSource, /eyebrow: "[^"]+"/);
+      assert.match(sectionSource, /title: "[^"]+"/);
+      assert.match(sectionSource, /description:\s*"[^"]+"/);
+      assert.match(sectionSource, /body: \[\s*"[^"]+",\s*"[^"]+",\s*\]/);
+    }
+    const finalSource = localeSource.split("    sectionSeven: {")[1]?.split("\n    },")[0];
+    assert.ok(finalSource, `${locale} sectionSeven`);
+    assert.match(finalSource, /eyebrow: "[^"]+"/);
+    assert.match(finalSource, /title: "[^"]+"/);
+    assert.match(finalSource, /description:\s*"[^"]+"/);
+    assert.match(finalSource, /primaryCta: "[^"]+"/);
+  }
+
+  for (const [sectionKey, visualClass, imagePath] of [
+    ["three", "public-web-section-three-visual", "section-three-personal-goal-v2.webp"],
+    ["five", "public-web-section-three-visual public-web-section-five-visual", "section-five-progress-trends.webp"],
+    ["six", "public-web-section-three-visual public-web-section-six-visual", "section-six-trust-control.webp"],
+  ]) {
+    const sectionSource = publicHomepageSource.split(`sectionKey === "${sectionKey}" ? (`)[1]?.split("                      ) :")[0];
+    assert.ok(sectionSource, `${sectionKey} section structure`);
+    assert.match(sectionSource, /<p>\{section\.body\[0\]\}<\/p>/);
+    assert.match(sectionSource, /<p>\{section\.body\[1\]\}<\/p>/);
+    assert.ok(sectionSource.indexOf("<p>{section.body[0]}</p>") < sectionSource.indexOf(`className="${visualClass}"`), `${sectionKey} P1 before visual`);
+    assert.ok(sectionSource.indexOf(`className="${visualClass}"`) < sectionSource.indexOf("<p>{section.body[1]}</p>"), `${sectionKey} visual before P2`);
+    assert.ok(sectionSource.includes(`src="/images/${imagePath}"`), `${sectionKey} approved visual`);
+  }
+  assert.match(publicHomepageSource, /\{sectionKey === "two" \|\| sectionKey === "four" \? \(\s*<div className="public-web-section-two-photo-row">[\s\S]*?<p>\{section\.body\[1\]\}<\/p>/);
+  assert.match(publicHomepageSource, /src=\{sectionKey === "two" \? "\/images\/section-two-lifestyle-overview-final\.webp" : "\/images\/section-four-activity-progress\.webp"\}/);
+  assert.match(publicHomepageSource, /<PublicAuthTrigger mode="register" className="public-web-primary-cta">\s*\{content\.sectionSeven\.primaryCta\}/);
+  assert.match(publicWebCssSource, /\.public-web-homepage-text-body p \+ p \{\s*margin-top: 0\.5lh;/);
+  assert.match(publicWebCssSource, /\.public-web-homepage-final-actions \{\s*position: static;/);
 });
 
 test("canonical header keeps locale in the light-blue top row at every width", () => {
@@ -779,7 +991,7 @@ test("canonical header keeps locale in the light-blue top row at every width", (
   );
   assert.match(
     publicWebCssSource,
-    /\.public-web-header-inner \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;[\s\S]*?grid-template-rows: 64px 44px;/
+    /\.public-web-header-inner \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;[\s\S]*?grid-template-rows: 64px var\(--public-web-navy-bar-height\);/
   );
   assert.match(
     publicWebCssSource,
