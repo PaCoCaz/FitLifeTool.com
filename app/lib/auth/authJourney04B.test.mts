@@ -201,7 +201,12 @@ test("Phase 06 proxy behavior preserves cookies and consumes expiry context", as
   });
 
   try {
-    const { proxy } = await import("../../../proxy.ts?phase06-behavior");
+    type ProxyExport = typeof import("../../../proxy.ts")["proxy"];
+    const proxyModule = await import("../../../proxy.ts?phase06-behavior");
+    const proxy = "proxy" in proxyModule
+      ? proxyModule.proxy
+      : (proxyModule as unknown as { default?: { proxy?: ProxyExport } }).default?.proxy;
+    assert.ok(typeof proxy === "function");
     const request = (path: string, marker?: string, method = "GET") => new NextRequest(
       `https://fitlifetool.test${path}`,
       { method, ...(marker ? { headers: { cookie: `${AUTH_CONTEXT_COOKIE}=${marker}` } } : {}) }

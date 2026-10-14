@@ -81,7 +81,12 @@ test("logout route preserves auth-cookie mutations and deletes marker only on te
   });
 
   try {
-    const { POST } = await import("../../auth/logout/route.ts?phase06-cookie-behavior");
+    type PostExport = typeof import("../../auth/logout/route.ts")["POST"];
+    const routeModule = await import("../../auth/logout/route.ts?phase06-cookie-behavior");
+    const POST = "POST" in routeModule
+      ? routeModule.POST
+      : (routeModule as unknown as { default?: { POST?: PostExport } }).default?.POST;
+    assert.ok(typeof POST === "function");
     const success = await POST(request({ language: "nl" }));
     assert.equal(success.status, 200);
     assert.deepEqual(await success.json(), { code: "LOGOUT_COMPLETED", destination: "/nl" });
