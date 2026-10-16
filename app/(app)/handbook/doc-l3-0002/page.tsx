@@ -353,6 +353,18 @@ export default function DocL30002() {
           blokkeert de retry vóór een providermutatie.
         </p>
         <p>
+          Een provider-geaccepteerd verzoek kan uitsluitend administratief naar de terminale
+          status <code>cancelled</code> worden gebracht nadat de database onder dezelfde
+          per-user transactielock rechtstreeks heeft vastgesteld dat alle provider-owned
+          pending Email Change-markeringen afwezig zijn. De exact gefencete transitie vereist
+          dezelfde user, generation en correlation ID, weigert iedere canonieke wijziging of
+          sync-job en schrijft atomair een PII-vrij audit-event. <code>cancelled</code> betekent
+          nadrukkelijk niet <code>completed</code>; provideracceptatie en requesthistorie blijven
+          bewaard, terwijl pas daarna een nieuwe generation mag worden gereserveerd. Het wissen
+          van providerstate blijft een afzonderlijke, expliciet geautoriseerde operatie en is
+          geen verantwoordelijkheid van deze databasefunctie.
+        </p>
+        <p>
           Downstream workers schrijven de lokale customer-email uitsluitend via één
           transactioneel generation- en lease-gefencete databasefunctie die de actuele
           Auth-email zelf leest. Stripe-writes gebruiken een generation-specifieke

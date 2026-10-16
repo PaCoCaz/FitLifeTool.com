@@ -19,7 +19,7 @@ export function readEmailChangeStatus(value: unknown): string | null {
   if (!row || typeof row !== "object" || !("status" in row)) return null;
   const status = (row as { status?: unknown }).status;
   return typeof status === "string" && (ACTIVE_EMAIL_CHANGE_STATUSES as readonly string[]).includes(status)
-    ? status : status === "completed" || status === "request_failed" ? status : null;
+    ? status : status === "completed" || status === "request_failed" || status === "cancelled" ? status : null;
 }
 
 export function readOwnEmailChangeSessionState(

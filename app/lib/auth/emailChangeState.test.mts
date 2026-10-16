@@ -35,6 +35,19 @@ test("email change state is fail closed", () => {
     requiresReauthentication: true,
     preProviderRecoveryAvailable: true,
   });
+  assert.equal(blocksEmailChangeRequest("cancelled"), false);
+  assert.equal(deriveEmailChangePublicState("cancelled", null), "idle");
+  assert.deepEqual(readOwnEmailChangeSessionState([{
+    status: "cancelled",
+    generation: 1,
+    requires_reauthentication: false,
+    pre_provider_recovery_available: false,
+  }]), {
+    status: "cancelled",
+    generation: 1,
+    requiresReauthentication: false,
+    preProviderRecoveryAvailable: false,
+  });
   for (const malformed of [
     null,
     [{}],
