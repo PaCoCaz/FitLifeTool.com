@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useUser } from "@/lib/AuthProvider";
 import { supabase } from "@/lib/supabaseClient";
 import { canAccessHandbook } from "@/lib/auth/handbookAccess";
+import { canManagePublicRegistration } from "@/lib/auth/publicRegistration";
 
 import { useLang } from "@/lib/useLang";
 import { uiText } from "@/lib/uiText";
@@ -62,7 +63,12 @@ export default function TopNavigation() {
   }, [userId]);
 
   const navItems = isLoggedIn
-    ? getAuthNavItems(t, canAccessHandbook(role))
+    ? [
+        ...getAuthNavItems(t, canAccessHandbook(role)),
+        ...(canManagePublicRegistration(role)
+          ? [{ label: t.nav.registrationControl, href: "/admin/registration" }]
+          : []),
+      ]
     : [];
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);

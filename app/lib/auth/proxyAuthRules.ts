@@ -32,6 +32,7 @@ export function isRouteWithin(pathname: string, root: string) {
 export function isProtectedAppRoute(pathname: string) {
   return (
     isRouteWithin(pathname, "/dashboard") ||
+    isRouteWithin(pathname, "/admin") ||
     isRouteWithin(pathname, "/settings") ||
     isRouteWithin(pathname, "/handbook")
   );
@@ -49,6 +50,7 @@ export function isAuthenticatedApplicationApiRoute(pathname: string) {
   return (
     pathname === "/api/auth/change-email" ||
     pathname === "/api/auth/change-password" ||
+    isRouteWithin(pathname, "/api/admin") ||
     isRouteWithin(pathname, "/api/favorites") ||
     pathname === "/api/nutrition/products/search" ||
     isRouteWithin(pathname, "/api/onboarding") ||

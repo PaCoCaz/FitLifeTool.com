@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import Link from "next/link";
+import { useEffect, useId, useState } from "react";
 import CountrySelect from "@/components/auth/CountrySelect";
 import EmailConfirmationPanel from "@/components/auth/EmailConfirmationPanel";
 import { supabase } from "@/lib/supabaseClient";
@@ -54,6 +55,26 @@ export default function RegisterStep({ selectedLanguage, onLanguageSelect }: Pro
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [registrationStatusLoaded, setRegistrationStatusLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/auth/registration-status", { cache: "no-store", credentials: "same-origin" })
+      .then(async (response) => {
+        const body: unknown = await response.json();
+        const open = response.ok && !!body && typeof body === "object" && !Array.isArray(body)
+          && (body as { open?: unknown }).open === true;
+        if (!cancelled) setRegistrationOpen(open);
+      })
+      .catch(() => {
+        if (!cancelled) setRegistrationOpen(false);
+      })
+      .finally(() => {
+        if (!cancelled) setRegistrationStatusLoaded(true);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const fieldIds: Record<RegistrationField, string> = {
     language: `${formId}-language`,
@@ -162,6 +183,21 @@ export default function RegisterStep({ selectedLanguage, onLanguageSelect }: Pro
         language={selectedLanguage ?? "en"}
         email={email.trim()}
       />
+    );
+  }
+
+  if (!registrationStatusLoaded) {
+    return <p role="status" className="text-sm text-gray-600">{t.registrationStatusLoading}</p>;
+  }
+
+  if (!registrationOpen) {
+    return (
+      <div className="space-y-4" role="status">
+        <p className="text-sm text-gray-700">{t.registrationClosed}</p>
+        <Link href={`/login?lang=${selectedLanguage ?? "en"}`} className="inline-flex rounded-[var(--radius)] bg-[#191970] px-4 py-2 text-white hover:bg-[#0BA4E0]">
+          {t.login}
+        </Link>
+      </div>
     );
   }
 

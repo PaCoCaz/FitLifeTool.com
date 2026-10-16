@@ -100,6 +100,7 @@ test("authenticated application APIs are centrally classified", () => {
   for (const pathname of [
     "/api/auth/change-email",
     "/api/auth/change-password",
+    "/api/admin/registration-control",
     "/api/favorites",
     "/api/favorites/access",
     "/api/nutrition/products/search",
@@ -127,9 +128,11 @@ test("protected en onboarding routes blijven expliciet onderscheiden", () => {
   assert.equal(isProtectedAppRoute("/dashboard"), true);
   assert.equal(isProtectedAppRoute("/dashboard/"), true);
   assert.equal(isProtectedAppRoute("/dashboard/activity"), true);
+  assert.equal(isProtectedAppRoute("/admin/registration"), true);
   assert.equal(isProtectedAppRoute("/settings/profile"), true);
   assert.equal(isProtectedAppRoute("/handbook"), true);
   assert.equal(isProtectedAppRoute("/dashboard-evil"), false);
+  assert.equal(isProtectedAppRoute("/administrator"), false);
   assert.equal(isProtectedAppRoute("/dashboardXYZ"), false);
   assert.equal(isProtectedAppRoute("/settings-old"), false);
   assert.equal(isProtectedAppRoute("/handbookish"), false);

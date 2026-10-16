@@ -78,6 +78,16 @@ test("registration renders language selection before the remaining fields", asyn
   assert.match(source, /selectedLanguage && \(/);
 });
 
+test("shared registration surfaces fail closed before rendering the signup form", async () => {
+  const source = await read("app/components/auth/RegisterStep.tsx");
+  assert.match(source, /fetch\("\/api\/auth\/registration-status"/);
+  assert.match(source, /setRegistrationOpen\(false\)/);
+  assert.match(source, /if \(!registrationStatusLoaded\)/);
+  assert.match(source, /if \(!registrationOpen\)/);
+  assert.ok(source.indexOf("if (!registrationOpen)") < source.indexOf("<form onSubmit={handleRegister}"));
+  assert.match(source, /href=\{`\/login\?lang=/);
+});
+
 test("shared registration validation blocks password and confirmation failures", () => {
   const shortPassword = validateRegistrationFields({
     ...validRegistration,
@@ -209,6 +219,8 @@ test("all registration validation copy is present in every supported locale", as
     "confirmationRequired",
     "passwordMismatch",
     "countryInvalid",
+    "registrationStatusLoading",
+    "registrationClosed",
   ];
 
   for (const key of expectedKeys) {

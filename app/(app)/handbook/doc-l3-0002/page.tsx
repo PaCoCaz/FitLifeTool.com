@@ -278,6 +278,32 @@ export default function DocL30002() {
         </p>
       </section>
       <section>
+        <h2>Beheer van publieke registratie</h2>
+        <p>
+          Publieke zelfregistratie is standaard gesloten en wordt uitsluitend
+          server-side beheerd door een gebruiker met de canonieke profielrol
+          <code>owner</code> of <code>admin</code>. Tijdelijke openstellingen
+          gebruiken de databaseklok, verlopen automatisch en worden samen met
+          onbeperkte openstelling en handmatig sluiten transactioneel en zonder
+          e-mailadressen of tokens geaudit.
+        </p>
+        <p>
+          De publieke statusroute en registratie-interface zijn alleen UX-lagen.
+          De gezaghebbende grens is de Supabase Before User Created-hook. Ontbrekende
+          configuratie, een ongeldige hookpayload of een onleesbare singleton leidt
+          altijd tot weigering. De hook kent geen clientmetadata- of rolbypass.
+        </p>
+        <p>
+          De providergrens behandelt publieke <code>signUp</code> en administratieve
+          <code>inviteUserByEmail</code> gelijk: beide zijn alleen beschikbaar wanneer
+          registratie effectief open is. De afzonderlijke, bevoegde Supabase-route
+          <code>admin.createUser</code> roept deze hook niet aan en blijft daarom ook
+          bij gesloten registratie beschikbaar. Hookactivering en migratie-installatie
+          zijn afzonderlijke releasehandelingen en mogen nooit uit de beheerinterface
+          zelf worden uitgevoerd.
+        </p>
+      </section>
+      <section>
         <h2>Geverifieerde wijziging van het e-mailadres</h2>
         <p>
           <code>auth.users.email</code> is de enige canonieke e-mailidentiteit.

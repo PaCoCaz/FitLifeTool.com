@@ -13,7 +13,7 @@ const en = {
     registrationErrors: { languageInvalid: "Select a language.", firstNameRequired: "Enter your first name.", lastNameRequired: "Enter your last name.", emailRequired: "Enter your email address.", emailInvalid: "Enter a valid email address.", passwordRequired: "Enter a password.", passwordTooShort: "Use at least {{minimum}} characters.", confirmationRequired: "Confirm your password.", passwordMismatch: "The passwords do not match.", countryInvalid: "Select a valid country." },
     residenceCountry: "Country of residence", foodRegion: "Food region", selectCountry: "Select a country",
     loadingCountries: "Loading countries…", countryLoadError: "Countries could not be loaded. Please try again.",
-    requiredFields: "Complete all required fields.", registrationFailure: "We couldn’t create your account. Please try again.", next: "Next", registering: "Creating account…",
+    requiredFields: "Complete all required fields.", registrationFailure: "We couldn’t create your account. Please try again.", registrationStatusLoading: "Checking registration availability…", registrationClosed: "Public registration is currently closed. Existing accounts can still log in.", next: "Next", registering: "Creating account…",
     checkEmailTitle: "Check your email", checkEmailMessage: "We sent a confirmation link to {{email}}.",
     confirmationSpamGuidance: "Didn't receive an email? Check your spam folder.", confirmationResend: "Resend confirmation email", confirmationResending: "Sending…",
     confirmationResendSuccess: "A new confirmation email has been sent.", confirmationResendCooldown: "Try again in {{seconds}} seconds.", confirmationResendFailure: "We couldn't send the confirmation email. Please try again.",
@@ -207,6 +207,7 @@ const en = {
     activity: "Activity",
     weight: "Weight",
     handbook: "Handbook",
+    registrationControl: "Registration control",
   },
 
   nutrition: {
@@ -277,6 +278,17 @@ const en = {
     title: "Settings",
   },
 
+  registrationControl: {
+    title: "Public registration control",
+    description: "Open or close public self-registration. Administrative user creation remains separate.",
+    inviteRestriction: "Administrative email invitations are also blocked while registration is closed; authorized admin.createUser remains available.",
+    currentStatus: "Current status", open: "Open", closed: "Closed", loading: "Loading…",
+    duration: "Temporary opening", minutes: "{{minutes}} minutes", openTemporary: "Open temporarily",
+    openIndefinite: "Open without end time", closeNow: "Close now", closesAt: "Closes at",
+    remaining: "about {{minutes}} minutes remaining", noEndTime: "No end time is set.",
+    saved: "Registration status has been updated.", error: "The registration status could not be updated safely. Try again.",
+  },
+
   subscription: {
     title: "Subscription",
     loading: "Loading...",
@@ -343,7 +355,7 @@ const nl = {
     registrationErrors: { languageInvalid: "Kies een taal.", firstNameRequired: "Vul je voornaam in.", lastNameRequired: "Vul je achternaam in.", emailRequired: "Vul je e-mailadres in.", emailInvalid: "Vul een geldig e-mailadres in.", passwordRequired: "Vul een wachtwoord in.", passwordTooShort: "Gebruik minimaal {{minimum}} tekens.", confirmationRequired: "Bevestig je wachtwoord.", passwordMismatch: "De wachtwoorden komen niet overeen.", countryInvalid: "Kies een geldig land." },
     residenceCountry: "Woonland", foodRegion: "Voedselregio", selectCountry: "Selecteer een land",
     loadingCountries: "Landen laden…", countryLoadError: "Landen konden niet worden geladen. Probeer het opnieuw.",
-    requiredFields: "Vul alle verplichte velden in.", registrationFailure: "We konden je account niet aanmaken. Probeer het opnieuw.", next: "Volgende", registering: "Account aanmaken…",
+    requiredFields: "Vul alle verplichte velden in.", registrationFailure: "We konden je account niet aanmaken. Probeer het opnieuw.", registrationStatusLoading: "Beschikbaarheid van registratie controleren…", registrationClosed: "Publieke registratie is momenteel gesloten. Bestaande accounts kunnen gewoon inloggen.", next: "Volgende", registering: "Account aanmaken…",
     checkEmailTitle: "Controleer je e-mail", checkEmailMessage: "We hebben een bevestigingslink gestuurd naar {{email}}.",
     confirmationSpamGuidance: "Geen e-mail ontvangen? Controleer je spamfolder.", confirmationResend: "Bevestigingsmail opnieuw versturen", confirmationResending: "Versturen…",
     confirmationResendSuccess: "Er is een nieuwe bevestigingsmail verstuurd.", confirmationResendCooldown: "Probeer het over {{seconds}} seconden opnieuw.", confirmationResendFailure: "We konden de bevestigingsmail niet versturen. Probeer het opnieuw.",
@@ -536,6 +548,7 @@ const nl = {
     activity: "Activiteiten",
     weight: "Gewicht",
     handbook: "Handboek",
+    registrationControl: "Registratiebeheer",
   },
 
   nutrition: {
@@ -606,6 +619,17 @@ const nl = {
     title: "Instellingen",
   },
 
+  registrationControl: {
+    title: "Publieke registratie beheren",
+    description: "Open of sluit publieke zelfregistratie. Administratieve gebruikersaanmaak blijft hiervan gescheiden.",
+    inviteRestriction: "Administratieve e-mailuitnodigingen zijn ook geblokkeerd zolang registratie gesloten is; bevoegde admin.createUser blijft beschikbaar.",
+    currentStatus: "Huidige status", open: "Open", closed: "Gesloten", loading: "Laden…",
+    duration: "Tijdelijke openstelling", minutes: "{{minutes}} minuten", openTemporary: "Tijdelijk openen",
+    openIndefinite: "Openen zonder eindtijd", closeNow: "Direct sluiten", closesAt: "Sluit om",
+    remaining: "nog ongeveer {{minutes}} minuten", noEndTime: "Er is geen eindtijd ingesteld.",
+    saved: "De registratiestatus is bijgewerkt.", error: "De registratiestatus kon niet veilig worden bijgewerkt. Probeer het opnieuw.",
+  },
+
   subscription: {
     title: "Abonnement",
     loading: "Laden...",
@@ -672,7 +696,7 @@ const fr = {
     registrationErrors: { languageInvalid: "Sélectionnez une langue.", firstNameRequired: "Saisissez votre prénom.", lastNameRequired: "Saisissez votre nom.", emailRequired: "Saisissez votre adresse e-mail.", emailInvalid: "Saisissez une adresse e-mail valide.", passwordRequired: "Saisissez un mot de passe.", passwordTooShort: "Utilisez au moins {{minimum}} caractères.", confirmationRequired: "Confirmez votre mot de passe.", passwordMismatch: "Les mots de passe ne correspondent pas.", countryInvalid: "Sélectionnez un pays valide." },
     residenceCountry: "Pays de résidence", foodRegion: "Région alimentaire", selectCountry: "Sélectionnez un pays",
     loadingCountries: "Chargement des pays…", countryLoadError: "Impossible de charger les pays. Réessayez.",
-    requiredFields: "Remplissez tous les champs obligatoires.", registrationFailure: "Nous n’avons pas pu créer votre compte. Veuillez réessayer.", next: "Suivant", registering: "Création du compte…",
+    requiredFields: "Remplissez tous les champs obligatoires.", registrationFailure: "Nous n’avons pas pu créer votre compte. Veuillez réessayer.", registrationStatusLoading: "Vérification de la disponibilité des inscriptions…", registrationClosed: "Les inscriptions publiques sont actuellement fermées. Les comptes existants peuvent toujours se connecter.", next: "Suivant", registering: "Création du compte…",
     checkEmailTitle: "Vérifiez votre e-mail", checkEmailMessage: "Nous avons envoyé un lien de confirmation à {{email}}.",
     confirmationSpamGuidance: "Vous n’avez pas reçu d’e-mail ? Vérifiez votre dossier de courriers indésirables.", confirmationResend: "Renvoyer l’e-mail de confirmation", confirmationResending: "Envoi…",
     confirmationResendSuccess: "Un nouvel e-mail de confirmation a été envoyé.", confirmationResendCooldown: "Réessayez dans {{seconds}} secondes.", confirmationResendFailure: "Nous n’avons pas pu envoyer l’e-mail de confirmation. Veuillez réessayer.",
@@ -866,6 +890,7 @@ const fr = {
     activity: "Activités",
     weight: "Poids",
     handbook: "Guide",
+    registrationControl: "Gestion des inscriptions",
   },
 
   nutrition: {
@@ -936,6 +961,17 @@ const fr = {
     title: "Paramètres",
   },
 
+  registrationControl: {
+    title: "Gestion des inscriptions publiques",
+    description: "Ouvrez ou fermez l’inscription publique. La création administrative d’utilisateurs reste séparée.",
+    inviteRestriction: "Les invitations administratives par e-mail sont également bloquées lorsque les inscriptions sont fermées ; admin.createUser autorisé reste disponible.",
+    currentStatus: "Statut actuel", open: "Ouvert", closed: "Fermé", loading: "Chargement…",
+    duration: "Ouverture temporaire", minutes: "{{minutes}} minutes", openTemporary: "Ouvrir temporairement",
+    openIndefinite: "Ouvrir sans heure de fin", closeNow: "Fermer maintenant", closesAt: "Fermeture à",
+    remaining: "environ {{minutes}} minutes restantes", noEndTime: "Aucune heure de fin n’est définie.",
+    saved: "Le statut des inscriptions a été mis à jour.", error: "Le statut des inscriptions n’a pas pu être mis à jour en toute sécurité. Réessayez.",
+  },
+
   subscription: {
     title: "Abonnement",
     loading: "Chargement...",
@@ -1002,7 +1038,7 @@ const de = {
     registrationErrors: { languageInvalid: "Wähle eine Sprache aus.", firstNameRequired: "Gib deinen Vornamen ein.", lastNameRequired: "Gib deinen Nachnamen ein.", emailRequired: "Gib deine E-Mail-Adresse ein.", emailInvalid: "Gib eine gültige E-Mail-Adresse ein.", passwordRequired: "Gib ein Passwort ein.", passwordTooShort: "Verwende mindestens {{minimum}} Zeichen.", confirmationRequired: "Bestätige dein Passwort.", passwordMismatch: "Die Passwörter stimmen nicht überein.", countryInvalid: "Wähle ein gültiges Land aus." },
     residenceCountry: "Wohnland", foodRegion: "Lebensmittelregion", selectCountry: "Land auswählen",
     loadingCountries: "Länder werden geladen…", countryLoadError: "Länder konnten nicht geladen werden. Bitte erneut versuchen.",
-    requiredFields: "Fülle alle Pflichtfelder aus.", registrationFailure: "Dein Konto konnte nicht erstellt werden. Bitte versuche es erneut.", next: "Weiter", registering: "Konto wird erstellt…",
+    requiredFields: "Fülle alle Pflichtfelder aus.", registrationFailure: "Dein Konto konnte nicht erstellt werden. Bitte versuche es erneut.", registrationStatusLoading: "Verfügbarkeit der Registrierung wird geprüft…", registrationClosed: "Die öffentliche Registrierung ist derzeit geschlossen. Bestehende Konten können sich weiterhin anmelden.", next: "Weiter", registering: "Konto wird erstellt…",
     checkEmailTitle: "Prüfe deine E-Mail", checkEmailMessage: "Wir haben einen Bestätigungslink an {{email}} gesendet.",
     confirmationSpamGuidance: "Keine E-Mail erhalten? Prüfe deinen Spam-Ordner.", confirmationResend: "Bestätigungs-E-Mail erneut senden", confirmationResending: "Wird gesendet…",
     confirmationResendSuccess: "Eine neue Bestätigungs-E-Mail wurde gesendet.", confirmationResendCooldown: "Versuche es in {{seconds}} Sekunden erneut.", confirmationResendFailure: "Wir konnten die Bestätigungs-E-Mail nicht senden. Bitte versuche es erneut.",
@@ -1196,6 +1232,7 @@ const de = {
     activity: "Aktivitäten",
     weight: "Gewicht",
     handbook: "Handbuch",
+    registrationControl: "Registrierungsverwaltung",
   },
 
   nutrition: {
@@ -1266,6 +1303,17 @@ const de = {
     title: "Einstellungen",
   },
 
+  registrationControl: {
+    title: "Öffentliche Registrierung verwalten",
+    description: "Öffne oder schließe die öffentliche Selbstregistrierung. Die administrative Benutzererstellung bleibt getrennt.",
+    inviteRestriction: "Administrative E-Mail-Einladungen sind bei geschlossener Registrierung ebenfalls blockiert; autorisiertes admin.createUser bleibt verfügbar.",
+    currentStatus: "Aktueller Status", open: "Offen", closed: "Geschlossen", loading: "Wird geladen…",
+    duration: "Vorübergehende Öffnung", minutes: "{{minutes}} Minuten", openTemporary: "Vorübergehend öffnen",
+    openIndefinite: "Ohne Endzeit öffnen", closeNow: "Jetzt schließen", closesAt: "Schließt um",
+    remaining: "noch etwa {{minutes}} Minuten", noEndTime: "Es ist keine Endzeit festgelegt.",
+    saved: "Der Registrierungsstatus wurde aktualisiert.", error: "Der Registrierungsstatus konnte nicht sicher aktualisiert werden. Bitte versuche es erneut.",
+  },
+
   subscription: {
     title: "Abonnement",
     loading: "Laden...",
@@ -1332,7 +1380,7 @@ const pl = {
     registrationErrors: { languageInvalid: "Wybierz język.", firstNameRequired: "Wpisz imię.", lastNameRequired: "Wpisz nazwisko.", emailRequired: "Wpisz adres e-mail.", emailInvalid: "Wpisz prawidłowy adres e-mail.", passwordRequired: "Wpisz hasło.", passwordTooShort: "Użyj co najmniej {{minimum}} znaków.", confirmationRequired: "Potwierdź hasło.", passwordMismatch: "Hasła nie są zgodne.", countryInvalid: "Wybierz prawidłowy kraj." },
     residenceCountry: "Kraj zamieszkania", foodRegion: "Region żywności", selectCountry: "Wybierz kraj",
     loadingCountries: "Ładowanie krajów…", countryLoadError: "Nie udało się załadować krajów. Spróbuj ponownie.",
-    requiredFields: "Wypełnij wszystkie wymagane pola.", registrationFailure: "Nie udało się utworzyć konta. Spróbuj ponownie.", next: "Dalej", registering: "Tworzenie konta…",
+    requiredFields: "Wypełnij wszystkie wymagane pola.", registrationFailure: "Nie udało się utworzyć konta. Spróbuj ponownie.", registrationStatusLoading: "Sprawdzanie dostępności rejestracji…", registrationClosed: "Rejestracja publiczna jest obecnie zamknięta. Istniejące konta mogą nadal się logować.", next: "Dalej", registering: "Tworzenie konta…",
     checkEmailTitle: "Sprawdź pocztę", checkEmailMessage: "Wysłaliśmy link potwierdzający na adres {{email}}.",
     confirmationSpamGuidance: "Nie masz wiadomości? Sprawdź folder ze spamem.", confirmationResend: "Wyślij ponownie wiadomość potwierdzającą", confirmationResending: "Wysyłanie…",
     confirmationResendSuccess: "Nowa wiadomość potwierdzająca została wysłana.", confirmationResendCooldown: "Spróbuj ponownie za {{seconds}} s.", confirmationResendFailure: "Nie udało się wysłać wiadomości potwierdzającej. Spróbuj ponownie.",
@@ -1526,6 +1574,7 @@ const pl = {
     activity: "Aktywności",
     weight: "Waga",
     handbook: "Poradnik",
+    registrationControl: "Zarządzanie rejestracją",
   },
 
   nutrition: {
@@ -1594,6 +1643,17 @@ const pl = {
 
   settings: {
     title: "Ustawienia",
+  },
+
+  registrationControl: {
+    title: "Zarządzanie rejestracją publiczną",
+    description: "Otwórz lub zamknij publiczną samodzielną rejestrację. Administracyjne tworzenie użytkowników pozostaje oddzielne.",
+    inviteRestriction: "Administracyjne zaproszenia e-mail są również blokowane, gdy rejestracja jest zamknięta; autoryzowane admin.createUser pozostaje dostępne.",
+    currentStatus: "Bieżący status", open: "Otwarta", closed: "Zamknięta", loading: "Ładowanie…",
+    duration: "Tymczasowe otwarcie", minutes: "{{minutes}} minut", openTemporary: "Otwórz tymczasowo",
+    openIndefinite: "Otwórz bez czasu końcowego", closeNow: "Zamknij teraz", closesAt: "Zamyka się o",
+    remaining: "pozostało około {{minutes}} minut", noEndTime: "Nie ustawiono czasu końcowego.",
+    saved: "Status rejestracji został zaktualizowany.", error: "Nie udało się bezpiecznie zaktualizować statusu rejestracji. Spróbuj ponownie.",
   },
 
   subscription: {
