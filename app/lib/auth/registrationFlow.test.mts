@@ -85,7 +85,50 @@ test("shared registration surfaces fail closed before rendering the signup form"
   assert.match(source, /if \(!registrationStatusLoaded\)/);
   assert.match(source, /if \(!registrationOpen\)/);
   assert.ok(source.indexOf("if (!registrationOpen)") < source.indexOf("<form onSubmit={handleRegister}"));
+  assert.match(source, /onLogin\?: \(\) => void/);
+  assert.match(source, /onClick=\{onLogin\}/);
   assert.match(source, /href=\{`\/login\?lang=/);
+});
+
+test("registration-closed login action reuses the public auth modal", async () => {
+  const [modal, directRegistration] = await Promise.all([
+    read("app/components/auth/RegisterModal.tsx"),
+    read("app/register/RegisterPageClient.tsx"),
+  ]);
+
+  assert.match(modal, /onLogin=\{[\s\S]*onModeChange\("login"\)[\s\S]*\}/);
+  assert.match(directRegistration, /<RegisterStep[\s\S]*onLanguageSelect=\{setLanguage\}[\s\S]*\/>/);
+  assert.doesNotMatch(directRegistration, /onLogin=/);
+});
+
+test("registration-closed modal uses approved branding, layout and close actions", async () => {
+  const [modal, step, text] = await Promise.all([
+    read("app/components/auth/RegisterModal.tsx"),
+    read("app/components/auth/RegisterStep.tsx"),
+    read("app/lib/uiText.ts"),
+  ]);
+
+  assert.match(modal, /registrationClosed \? "p-\[14px\]" : "p-6"/);
+  assert.match(modal, /src="\/images\/fitlifetool-heart-footer\.png"/);
+  assert.match(modal, /aria-hidden="true"/);
+  assert.match(modal, /registrationClosed \? \([\s\S]*<Image[\s\S]*\) : \([\s\S]*aria-label=\{t\.common\.close\}/);
+  assert.match(step, /onClick=\{onDismiss\}/);
+  assert.match(step, /w-full rounded-\[var\(--radius\)\]/);
+  assert.match(step, /border-t border-\[#91A6C2\]/);
+  assert.match(step, /d="M2\.5 8h10m-4-4 4 4-4 4"/);
+  assert.match(step, /no-underline hover:text-\[#0BA4E0\] hover:no-underline/);
+  assert.doesNotMatch(step, /underline-offset/);
+  assert.match(text, /registrationClosedTitle: "Binnenkort beschikbaar!"/);
+  assert.match(text, /registrationClosedAcknowledge: "Begrepen"/);
+  assert.match(text, /registrationClosedAccountPrompt: "Heb je al een account\?"/);
+  assert.match(text, /registrationClosedLoginAction: "Inloggen"/);
+  assert.match(text, /registrationClosed: "We're working hard on FitLifeTool to bring you the best possible experience\."/);
+  assert.match(text, /registrationClosed: "Nous travaillons activement sur FitLifeTool pour vous offrir bientôt la meilleure expérience possible\."/);
+  assert.match(text, /registrationClosed: "Intensywnie pracujemy nad FitLifeTool, aby już niedługo zapewnić Ci jak najlepsze doświadczenia\."/);
+  assert.match(text, /registrationClosedDetails: "Dlatego rejestracja jest obecnie niedostępna\. Zajrzyj do nas ponownie wkrótce!"/);
+  for (const action of ["Inloggen", "Log in", "Se connecter", "Anmelden", "Zaloguj się"]) {
+    assert.match(text, new RegExp(`registrationClosedLoginAction: "${action}"`));
+  }
 });
 
 test("shared registration validation blocks password and confirmation failures", () => {
@@ -220,7 +263,12 @@ test("all registration validation copy is present in every supported locale", as
     "passwordMismatch",
     "countryInvalid",
     "registrationStatusLoading",
+    "registrationClosedTitle",
     "registrationClosed",
+    "registrationClosedDetails",
+    "registrationClosedAcknowledge",
+    "registrationClosedAccountPrompt",
+    "registrationClosedLoginAction",
   ];
 
   for (const key of expectedKeys) {

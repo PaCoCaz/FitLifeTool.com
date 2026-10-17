@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   useCallback,
   useEffect,
@@ -37,6 +38,7 @@ export default function RegisterModal({
   onFocusReady,
 }: Props) {
   const [selectedLanguage, setSelectedLanguage] = useState<Lang | null>(null);
+  const [registrationOpen, setRegistrationOpen] = useState<boolean | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
@@ -44,10 +46,12 @@ export default function RegisterModal({
   const t = initialLanguage
     ? uiText[selectedLanguage ?? initialLanguage]
     : uiText[selectedLanguage ?? "en"];
+  const registrationClosed = mode === "register" && registrationOpen === false;
 
   const closeModal = useCallback(() => {
     const returnFocus = returnFocusRef.current;
     setSelectedLanguage(null);
+    setRegistrationOpen(null);
     onClose();
     requestAnimationFrame(() => {
       const fallback = publicWebLayout
@@ -165,22 +169,43 @@ export default function RegisterModal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[var(--radius)] bg-white p-6 shadow-xl${
+        className={`max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[var(--radius)] bg-white shadow-xl ${
+          registrationClosed ? "p-[14px]" : "p-6"
+        }${
           publicWebLayout ? " public-web-auth-modal-dialog" : ""
         }`}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id={titleId} className="text-lg font-semibold text-[#191970]">
-            {mode === "login" ? t.auth.loginTitle : t.auth.accountTitle}
-          </h2>
-          <button
-            type="button"
-            onClick={closeModal}
-            className="rounded text-xl text-gray-400 hover:text-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BA4E0]"
-            aria-label={t.common.close}
+        <div className={`mb-4 flex justify-between ${registrationClosed ? "items-end" : "items-center"}`}>
+          <h2
+            id={titleId}
+            className={`${registrationClosed ? "text-base leading-5" : "text-lg"} font-semibold text-[#191970]`}
           >
-            ×
-          </button>
+            {mode === "login"
+              ? t.auth.loginTitle
+              : registrationClosed
+                ? t.auth.registrationClosedTitle
+                : t.auth.accountTitle}
+          </h2>
+          {registrationClosed ? (
+            <Image
+              src="/images/fitlifetool-heart-footer.png"
+              alt=""
+              width={2048}
+              height={2048}
+              sizes="40px"
+              aria-hidden="true"
+              className="h-10 w-10 shrink-0 object-contain"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={closeModal}
+              className="rounded text-xl text-gray-400 hover:text-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BA4E0]"
+              aria-label={t.common.close}
+            >
+              ×
+            </button>
+          )}
         </div>
         {mode === "login" ? (
           <LoginForm
@@ -195,6 +220,13 @@ export default function RegisterModal({
           <RegisterStep
             selectedLanguage={selectedLanguage ?? initialLanguage ?? null}
             onLanguageSelect={setSelectedLanguage}
+            onLogin={
+              onModeChange
+                ? () => onModeChange("login")
+                : undefined
+            }
+            onDismiss={closeModal}
+            onRegistrationOpenChange={setRegistrationOpen}
           />
         )}
       </div>

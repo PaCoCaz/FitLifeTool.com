@@ -36,12 +36,43 @@ const FIELD_ORDER: RegistrationField[] = [
   "countryCode",
 ];
 
+function LoginArrow() {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      className="h-4 w-4 shrink-0"
+    >
+      <path
+        d="M2.5 8h10m-4-4 4 4-4 4"
+        stroke="currentColor"
+        strokeWidth="2.0"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 type Props = {
   selectedLanguage: Lang | null;
   onLanguageSelect: (language: Lang) => void;
+  onLogin?: () => void;
+  onDismiss?: () => void;
+  onRegistrationOpenChange?: (open: boolean) => void;
 };
 
-export default function RegisterStep({ selectedLanguage, onLanguageSelect }: Props) {
+export default function RegisterStep({
+  selectedLanguage,
+  onLanguageSelect,
+  onLogin,
+  onDismiss,
+  onRegistrationOpenChange,
+}: Props) {
   const formId = useId();
   const setInterfaceLanguage = useSetInterfaceLanguage();
   const t = uiText[selectedLanguage ?? "en"].auth;
@@ -65,16 +96,22 @@ export default function RegisterStep({ selectedLanguage, onLanguageSelect }: Pro
         const body: unknown = await response.json();
         const open = response.ok && !!body && typeof body === "object" && !Array.isArray(body)
           && (body as { open?: unknown }).open === true;
-        if (!cancelled) setRegistrationOpen(open);
+        if (!cancelled) {
+          setRegistrationOpen(open);
+          onRegistrationOpenChange?.(open);
+        }
       })
       .catch(() => {
-        if (!cancelled) setRegistrationOpen(false);
+        if (!cancelled) {
+          setRegistrationOpen(false);
+          onRegistrationOpenChange?.(false);
+        }
       })
       .finally(() => {
         if (!cancelled) setRegistrationStatusLoaded(true);
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [onRegistrationOpenChange]);
 
   const fieldIds: Record<RegistrationField, string> = {
     language: `${formId}-language`,
@@ -192,11 +229,43 @@ export default function RegisterStep({ selectedLanguage, onLanguageSelect }: Pro
 
   if (!registrationOpen) {
     return (
-      <div className="space-y-4" role="status">
-        <p className="text-sm text-gray-700">{t.registrationClosed}</p>
-        <Link href={`/login?lang=${selectedLanguage ?? "en"}`} className="inline-flex rounded-[var(--radius)] bg-[#191970] px-4 py-2 text-white hover:bg-[#0BA4E0]">
-          {t.login}
-        </Link>
+      <div className="space-y-4">
+        <div className="space-y-3 text-sm leading-6 text-gray-700" role="status">
+          <p>{t.registrationClosed}</p>
+          <p>{t.registrationClosedDetails}</p>
+        </div>
+        {onDismiss ? (
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="w-full rounded-[var(--radius)] bg-[#191970] px-4 py-2.5 font-semibold text-white hover:bg-[#0BA4E0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BA4E0]"
+          >
+            {t.registrationClosedAcknowledge}
+          </button>
+        ) : null}
+        <div className="border-t border-[#91A6C2] pt-4 text-center text-sm leading-6 text-gray-700">
+          <p className="flex flex-wrap items-center justify-center gap-x-1">
+            <span>{t.registrationClosedAccountPrompt}</span>
+            {onLogin ? (
+              <button
+                type="button"
+                onClick={onLogin}
+                className="inline-flex max-w-full items-center gap-1 font-semibold text-[#191970] no-underline hover:text-[#0BA4E0] hover:no-underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BA4E0]"
+              >
+                {t.registrationClosedLoginAction}
+                <LoginArrow />
+              </button>
+            ) : (
+              <Link
+                href={`/login?lang=${selectedLanguage ?? "en"}`}
+                className="inline-flex max-w-full items-center gap-1 font-semibold text-[#191970] no-underline hover:text-[#0BA4E0] hover:no-underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BA4E0]"
+              >
+                {t.registrationClosedLoginAction}
+                <LoginArrow />
+              </Link>
+            )}
+          </p>
+        </div>
       </div>
     );
   }

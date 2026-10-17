@@ -302,6 +302,24 @@ export default function DocL30002() {
           zijn afzonderlijke releasehandelingen en mogen nooit uit de beheerinterface
           zelf worden uitgevoerd.
         </p>
+        <p>
+          Wanneer registratie gesloten is, vervangt de gedeelde registratie-interface
+          het formulier door de meertalige melding &ldquo;Binnenkort beschikbaar&rdquo;.
+          De melding ondersteunt Nederlands, Engels, Frans, Duits en Pools. De knop
+          <strong> Begrepen</strong>, <kbd>Escape</kbd> en de achtergrond sluiten de
+          dialog; het FitLifeTool-hart is uitsluitend branding. Onder de scheidingslijn
+          opent de compacte loginactie met pijl de bestaande loginmodal. De directe
+          routes <code>/register</code> en <code>/login</code> behouden hun technische
+          fallbackgedrag en de server-side registratiestatus blijft in alle gevallen
+          leidend.
+        </p>
+        <p>
+          Dit UI-contract is lokaal bewezen met contracttests, TypeScript-, lint-,
+          build- en responsieve browserverificatie. Muterende hosted-provider-E2E-tests
+          voor publieke signup, <code>inviteUserByEmail</code> en
+          <code>admin.createUser</code> vallen buiten deze UX-validatie en worden niet
+          door de modaltest geclaimd.
+        </p>
       </section>
       <section>
         <h2>Geverifieerde wijziging van het e-mailadres</h2>
