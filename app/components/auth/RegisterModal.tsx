@@ -39,6 +39,7 @@ export default function RegisterModal({
 }: Props) {
   const [selectedLanguage, setSelectedLanguage] = useState<Lang | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState<boolean | null>(null);
+  const registrationRequestRef = useRef(0);
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
@@ -47,6 +48,44 @@ export default function RegisterModal({
     ? uiText[selectedLanguage ?? initialLanguage]
     : uiText[selectedLanguage ?? "en"];
   const registrationClosed = mode === "register" && registrationOpen === false;
+  const modalReady = open && (mode !== "register" || registrationOpen !== null);
+
+  useEffect(() => {
+    if (!open || mode !== "register") {
+      registrationRequestRef.current += 1;
+      setRegistrationOpen(null);
+      return;
+    }
+
+    const requestId = registrationRequestRef.current + 1;
+    registrationRequestRef.current = requestId;
+    const controller = new AbortController();
+    setRegistrationOpen(null);
+
+    void fetch("/api/auth/registration-status", {
+      cache: "no-store",
+      credentials: "same-origin",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const body: unknown = await response.json();
+        const isOpen = response.ok
+          && !!body
+          && typeof body === "object"
+          && !Array.isArray(body)
+          && (body as { open?: unknown }).open === true;
+        if (registrationRequestRef.current === requestId) {
+          setRegistrationOpen(isOpen);
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted && registrationRequestRef.current === requestId) {
+          setRegistrationOpen(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, [mode, open]);
 
   const closeModal = useCallback(() => {
     const returnFocus = returnFocusRef.current;
@@ -77,7 +116,7 @@ export default function RegisterModal({
   }, [initialLanguage, open, publicWebLayout]);
 
   useLayoutEffect(() => {
-    if (!open || !publicWebLayout) return;
+    if (!modalReady || !publicWebLayout) return;
     returnFocusRef.current = returnFocusTo ?? null;
     const dialog = dialogRef.current;
     const initialControl = dialog?.querySelector<HTMLElement>(
@@ -85,19 +124,19 @@ export default function RegisterModal({
     );
     (initialControl ?? dialog)?.focus();
     if (dialog?.contains(document.activeElement)) onFocusReady?.();
-  }, [mode, onFocusReady, open, publicWebLayout, returnFocusTo]);
+  }, [modalReady, mode, onFocusReady, publicWebLayout, returnFocusTo]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!modalReady) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [open]);
+  }, [modalReady]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!modalReady) return;
 
     const focusFrame = publicWebLayout
       ? null
@@ -150,9 +189,9 @@ export default function RegisterModal({
       if (focusFrame !== null) cancelAnimationFrame(focusFrame);
       document.removeEventListener("keydown", onKey, true);
     };
-  }, [closeModal, mode, open, publicWebLayout]);
+  }, [closeModal, modalReady, mode, publicWebLayout]);
 
-  if (!open) return null;
+  if (!modalReady) return null;
 
   return (
     <div
@@ -226,7 +265,7 @@ export default function RegisterModal({
                 : undefined
             }
             onDismiss={closeModal}
-            onRegistrationOpenChange={setRegistrationOpen}
+            resolvedRegistrationOpen={registrationOpen ?? false}
           />
         )}
       </div>

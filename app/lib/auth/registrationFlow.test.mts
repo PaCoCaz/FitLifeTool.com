@@ -79,15 +79,39 @@ test("registration renders language selection before the remaining fields", asyn
 });
 
 test("shared registration surfaces fail closed before rendering the signup form", async () => {
-  const source = await read("app/components/auth/RegisterStep.tsx");
-  assert.match(source, /fetch\("\/api\/auth\/registration-status"/);
-  assert.match(source, /setRegistrationOpen\(false\)/);
-  assert.match(source, /if \(!registrationStatusLoaded\)/);
-  assert.match(source, /if \(!registrationOpen\)/);
-  assert.ok(source.indexOf("if (!registrationOpen)") < source.indexOf("<form onSubmit={handleRegister}"));
-  assert.match(source, /onLogin\?: \(\) => void/);
-  assert.match(source, /onClick=\{onLogin\}/);
-  assert.match(source, /href=\{`\/login\?lang=/);
+  const [modal, step] = await Promise.all([
+    read("app/components/auth/RegisterModal.tsx"),
+    read("app/components/auth/RegisterStep.tsx"),
+  ]);
+
+  assert.match(modal, /fetch\("\/api\/auth\/registration-status"/);
+  assert.match(modal, /const modalReady = open && \(mode !== "register" \|\| registrationOpen !== null\)/);
+  assert.match(modal, /if \(!modalReady\) return null/);
+  assert.ok(modal.indexOf("if (!modalReady) return null") < modal.indexOf('role="dialog"'));
+  assert.match(modal, /\.catch\(\(\) => \{[\s\S]*setRegistrationOpen\(false\)/);
+  assert.match(step, /resolvedRegistrationOpen\?: boolean/);
+  assert.match(step, /if \(resolvedRegistrationOpen !== undefined\)/);
+  assert.match(step, /fetch\("\/api\/auth\/registration-status"/);
+  assert.match(step, /setRegistrationOpen\(false\)/);
+  assert.match(step, /if \(!registrationStatusLoaded\)/);
+  assert.match(step, /if \(!registrationOpen\)/);
+  assert.ok(step.indexOf("if (!registrationOpen)") < step.indexOf("<form onSubmit={handleRegister}"));
+  assert.match(step, /onLogin\?: \(\) => void/);
+  assert.match(step, /onClick=\{onLogin\}/);
+  assert.match(step, /href=\{`\/login\?lang=/);
+});
+
+test("registration modal waits for one current status result and ignores stale requests", async () => {
+  const modal = await read("app/components/auth/RegisterModal.tsx");
+
+  assert.match(modal, /const registrationRequestRef = useRef\(0\)/);
+  assert.match(modal, /const controller = new AbortController\(\)/);
+  assert.match(modal, /signal: controller\.signal/);
+  assert.match(modal, /registrationRequestRef\.current === requestId/);
+  assert.match(modal, /!controller\.signal\.aborted/);
+  assert.match(modal, /return \(\) => controller\.abort\(\)/);
+  assert.match(modal, /resolvedRegistrationOpen=\{registrationOpen \?\? false\}/);
+  assert.doesNotMatch(modal, /registrationStatusLoading/);
 });
 
 test("registration-closed login action reuses the public auth modal", async () => {

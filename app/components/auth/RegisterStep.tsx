@@ -63,7 +63,7 @@ type Props = {
   onLanguageSelect: (language: Lang) => void;
   onLogin?: () => void;
   onDismiss?: () => void;
-  onRegistrationOpenChange?: (open: boolean) => void;
+  resolvedRegistrationOpen?: boolean;
 };
 
 export default function RegisterStep({
@@ -71,7 +71,7 @@ export default function RegisterStep({
   onLanguageSelect,
   onLogin,
   onDismiss,
-  onRegistrationOpenChange,
+  resolvedRegistrationOpen,
 }: Props) {
   const formId = useId();
   const setInterfaceLanguage = useSetInterfaceLanguage();
@@ -86,10 +86,18 @@ export default function RegisterStep({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
-  const [registrationOpen, setRegistrationOpen] = useState(false);
-  const [registrationStatusLoaded, setRegistrationStatusLoaded] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(resolvedRegistrationOpen ?? false);
+  const [registrationStatusLoaded, setRegistrationStatusLoaded] = useState(
+    resolvedRegistrationOpen !== undefined
+  );
 
   useEffect(() => {
+    if (resolvedRegistrationOpen !== undefined) {
+      setRegistrationOpen(resolvedRegistrationOpen);
+      setRegistrationStatusLoaded(true);
+      return;
+    }
+
     let cancelled = false;
     void fetch("/api/auth/registration-status", { cache: "no-store", credentials: "same-origin" })
       .then(async (response) => {
@@ -98,20 +106,18 @@ export default function RegisterStep({
           && (body as { open?: unknown }).open === true;
         if (!cancelled) {
           setRegistrationOpen(open);
-          onRegistrationOpenChange?.(open);
         }
       })
       .catch(() => {
         if (!cancelled) {
           setRegistrationOpen(false);
-          onRegistrationOpenChange?.(false);
         }
       })
       .finally(() => {
         if (!cancelled) setRegistrationStatusLoaded(true);
       });
     return () => { cancelled = true; };
-  }, [onRegistrationOpenChange]);
+  }, [resolvedRegistrationOpen]);
 
   const fieldIds: Record<RegistrationField, string> = {
     language: `${formId}-language`,
