@@ -85,9 +85,25 @@ export function selectEntitlementSubscription(
     const subscriptionPlan =
       chooseHighestPlan(subscription.planIds);
 
+    const planDifference =
+      getPlanPriority(subscriptionPlan) -
+      getPlanPriority(selected.planId);
+    const statusDifference =
+      (subscription.status === "active" ? 1 : 0) -
+      (selected.status === "active" ? 1 : 0);
+    const periodDifference =
+      (subscription.currentPeriodEnd ?? "").localeCompare(
+        selected.currentPeriodEnd ?? ""
+      );
+    const idDifference = (selected.subscriptionId ?? "").localeCompare(
+      subscription.id ?? ""
+    );
+
     if (
-      getPlanPriority(subscriptionPlan) >
-      getPlanPriority(selected.planId)
+      planDifference > 0 ||
+      (planDifference === 0 && statusDifference > 0) ||
+      (planDifference === 0 && statusDifference === 0 && periodDifference > 0) ||
+      (planDifference === 0 && statusDifference === 0 && periodDifference === 0 && idDifference > 0)
     ) {
       selected = {
         planId: subscriptionPlan,

@@ -158,3 +158,29 @@ test("active subscriptions with cancel_at_period_end keep access", () => {
     "premium"
   );
 });
+
+test("equal plans use status, period end and stable subscription id tie-breakers", () => {
+  const result = selectEntitlementSubscription([
+    {
+      id: "sub_z",
+      status: "trialing",
+      planIds: ["pro"],
+      currentPeriodEnd: "2026-12-31",
+    },
+    {
+      id: "sub_b",
+      status: "active",
+      planIds: ["pro"],
+      currentPeriodEnd: "2026-10-31",
+    },
+    {
+      id: "sub_a",
+      status: "active",
+      planIds: ["pro"],
+      currentPeriodEnd: "2026-10-31",
+    },
+  ]);
+
+  assert.equal(result.subscriptionId, "sub_a");
+  assert.equal(result.status, "active");
+});

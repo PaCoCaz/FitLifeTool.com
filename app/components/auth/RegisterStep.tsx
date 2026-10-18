@@ -86,15 +86,14 @@ export default function RegisterStep({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
-  const [registrationOpen, setRegistrationOpen] = useState(resolvedRegistrationOpen ?? false);
-  const [registrationStatusLoaded, setRegistrationStatusLoaded] = useState(
-    resolvedRegistrationOpen !== undefined
-  );
+  const [fetchedRegistrationOpen, setFetchedRegistrationOpen] = useState(false);
+  const [fetchedRegistrationStatusLoaded, setFetchedRegistrationStatusLoaded] = useState(false);
+  const registrationOpen = resolvedRegistrationOpen ?? fetchedRegistrationOpen;
+  const registrationStatusLoaded = resolvedRegistrationOpen !== undefined
+    || fetchedRegistrationStatusLoaded;
 
   useEffect(() => {
     if (resolvedRegistrationOpen !== undefined) {
-      setRegistrationOpen(resolvedRegistrationOpen);
-      setRegistrationStatusLoaded(true);
       return;
     }
 
@@ -105,16 +104,16 @@ export default function RegisterStep({
         const open = response.ok && !!body && typeof body === "object" && !Array.isArray(body)
           && (body as { open?: unknown }).open === true;
         if (!cancelled) {
-          setRegistrationOpen(open);
+          setFetchedRegistrationOpen(open);
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setRegistrationOpen(false);
+          setFetchedRegistrationOpen(false);
         }
       })
       .finally(() => {
-        if (!cancelled) setRegistrationStatusLoaded(true);
+        if (!cancelled) setFetchedRegistrationStatusLoaded(true);
       });
     return () => { cancelled = true; };
   }, [resolvedRegistrationOpen]);

@@ -39,6 +39,7 @@ export default function RegisterModal({
 }: Props) {
   const [selectedLanguage, setSelectedLanguage] = useState<Lang | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState<boolean | null>(null);
+  const [registrationContext, setRegistrationContext] = useState({ open, mode });
   const registrationRequestRef = useRef(0);
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
@@ -47,20 +48,22 @@ export default function RegisterModal({
   const t = initialLanguage
     ? uiText[selectedLanguage ?? initialLanguage]
     : uiText[selectedLanguage ?? "en"];
+  if (registrationContext.open !== open || registrationContext.mode !== mode) {
+    setRegistrationContext({ open, mode });
+    setRegistrationOpen(null);
+  }
   const registrationClosed = mode === "register" && registrationOpen === false;
   const modalReady = open && (mode !== "register" || registrationOpen !== null);
 
   useEffect(() => {
     if (!open || mode !== "register") {
       registrationRequestRef.current += 1;
-      setRegistrationOpen(null);
       return;
     }
 
     const requestId = registrationRequestRef.current + 1;
     registrationRequestRef.current = requestId;
     const controller = new AbortController();
-    setRegistrationOpen(null);
 
     void fetch("/api/auth/registration-status", {
       cache: "no-store",

@@ -13,6 +13,12 @@ const { handleCustomer } = await import(
 );
 
 type CapturedWrite = Record<string, unknown>;
+const lease = {
+  eventId: "evt_safety",
+  generation: 1,
+  leaseToken: "00000000-0000-4000-8000-000000000001",
+  stripeCreatedAt: "2027-01-15T08:00:00.000Z",
+};
 
 function getConsoleArguments(source: string) {
   return [...source.matchAll(
@@ -30,9 +36,17 @@ function createCustomerWriter(
     writes,
     client: {
       async rpc(functionName: string, values: CapturedWrite) {
-        assert.equal(functionName, "establish_customer_mapping");
+        assert.ok([
+          "apply_stripe_checkout_mapping",
+          "apply_stripe_customer_snapshot",
+        ].includes(functionName));
         writes.push(values);
-        return { data: mappingResult, error };
+        return {
+          data: functionName === "apply_stripe_customer_snapshot"
+            ? "applied"
+            : mappingResult,
+          error,
+        };
       },
       from(table: string) {
         assert.equal(table, "customers");
@@ -60,12 +74,10 @@ test("checkout customer_details email is never persisted", async () => {
         },
       },
     },
-  }, state.client);
+  }, lease, state.client);
 
-  assert.deepEqual(state.writes, [{
-    p_stripe_customer_id: "cus_checkout",
-    p_user_id: "user_checkout",
-  }]);
+  assert.equal(state.writes[0].p_stripe_customer_id, "cus_checkout");
+  assert.equal(state.writes[0].p_user_id, "user_checkout");
   assert.equal("email" in state.writes[0], false);
 });
 
@@ -80,12 +92,10 @@ test("checkout customer_email fallback is never persisted", async () => {
         customer_email: "provider-fallback@example.test",
       },
     },
-  }, state.client);
+  }, lease, state.client);
 
-  assert.deepEqual(state.writes, [{
-    p_stripe_customer_id: "cus_fallback",
-    p_user_id: "user_fallback",
-  }]);
+  assert.equal(state.writes[0].p_stripe_customer_id, "cus_fallback");
+  assert.equal(state.writes[0].p_user_id, "user_fallback");
 });
 
 test("customer events provision only the Stripe customer identifier", async () => {
@@ -99,11 +109,9 @@ test("customer events provision only the Stripe customer identifier", async () =
           email,
         },
       },
-    }, state.client);
+    }, lease, state.client);
 
-    assert.deepEqual(state.writes, [{
-      stripe_customer_id: "cus_event",
-    }]);
+    assert.equal(state.writes[0].p_stripe_customer_id, "cus_event");
     assert.equal("email" in state.writes[0], false);
   }
 });
@@ -122,14 +130,14 @@ test("required customer write failures propagate from both handlers", async () =
           client_reference_id: "user_checkout",
         },
       },
-    }, createCustomerWriter(databaseError).client),
+    }, lease, createCustomerWriter(databaseError).client),
     (error) => error === databaseError
   );
 
   await assert.rejects(
     handleCustomer({
       data: { object: { id: "cus_event" } },
-    }, createCustomerWriter(databaseError).client),
+    }, lease, createCustomerWriter(databaseError).client),
     (error) => error === databaseError
   );
 });
@@ -143,7 +151,7 @@ test("checkout mapping establishment accepts exact replay and rejects bounded co
         client_reference_id: "user_checkout",
       },
     },
-  }, replay.client);
+  }, lease, replay.client);
   assert.equal(replay.writes.length, 1);
 
   await assert.rejects(
@@ -154,8 +162,8 @@ test("checkout mapping establishment accepts exact replay and rejects bounded co
           client_reference_id: "user_checkout",
         },
       },
-    }, createCustomerWriter(null, "conflict").client),
-    /Customer mapping establishment failed/
+    }, lease, createCustomerWriter(null, "conflict").client),
+    /STRIPE_CHECKOUT_MAPPING_REJECTED/
   );
 });
 

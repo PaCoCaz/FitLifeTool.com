@@ -168,6 +168,55 @@ export default function DocL30016() {
       </section>
 
       <section>
+        <h2>Transactionele Stripe-webhookmirror</h2>
+
+        <p>
+          Stripe blijft de providerbron voor abonnementen. De lokale database
+          is een duurzame billingmirror voor server-side rechten en
+          productweergave. Een gesigneerd webhookevent wordt eerst atomisch
+          geclaimd met een lease, token en strikt stijgende generatie.
+        </p>
+
+        <ul>
+          <li>
+            Stripe-API-reads vinden buiten databasetransacties plaats; tijdens
+            netwerkverkeer wordt geen databaserij vergrendeld gehouden.
+          </li>
+          <li>
+            Subscription, actuele items, entitlementmirror en eventcompletion
+            worden in één korte databasetransactie verwerkt.
+          </li>
+          <li>
+            Een verlopen lease of retryable event kan door een volgende
+            gesigneerde webhook opportunistisch worden hernomen en via het
+            event-ID opnieuw bij Stripe worden opgehaald.
+          </li>
+          <li>
+            Generatie-fencing voorkomt late completion door een oude worker.
+            Provider-eventtijd en event-ID voorkomen dat een vertraagd
+            terminal snapshot nieuwere state overschrijft.
+          </li>
+          <li>
+            Een ongebonden customerplaceholder kan subscriptionstate bewaren,
+            maar verleent nooit betaalde rechten.
+          </li>
+          <li>
+            Bij meerdere subscriptions wordt deterministisch gekozen op
+            planprioriteit, daarna active vóór trialing, periode-einde en
+            subscription-ID.
+          </li>
+        </ul>
+
+        <p>
+          De eventtabel bevat geen raw webhookpayload, e-mailadres of
+          betaalgegevens. Directe clienttoegang ontbreekt; de statefuncties
+          zijn uitsluitend beschikbaar voor de server-side service-role.
+          Conflicterende metadata of customerkoppelingen stoppen fail-closed
+          in handmatige beoordeling.
+        </p>
+      </section>
+
+      <section>
         <h2>Feature-gating</h2>
 
         <p>

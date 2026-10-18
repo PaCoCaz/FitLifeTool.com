@@ -46,21 +46,20 @@ export async function POST() {
 
   }
 
-  const { data: sub } =
+  const { data: subscriptions, error: subscriptionsError } =
     await supabaseAdmin
       .from("subscriptions")
       .select("id")
       .eq("customer_id", customer.id)
-      .eq("status", "active")
-      .single();
+      .in("status", ["active", "trialing"]);
 
-  if (!sub) {
+  if (subscriptionsError || subscriptions?.length !== 1) {
 
     return new Response(
       JSON.stringify({
-        error: "No subscription",
+        error: "Subscription cannot be managed directly",
       }),
-      { status: 400 }
+      { status: 409 }
     );
 
   }
@@ -78,7 +77,7 @@ export async function POST() {
           type: "subscription_update",
 
           subscription_update: {
-            subscription: sub.id,
+            subscription: subscriptions[0].id,
           },
         },
       }

@@ -92,7 +92,19 @@ test("shared registration surfaces fail closed before rendering the signup form"
   assert.match(step, /resolvedRegistrationOpen\?: boolean/);
   assert.match(step, /if \(resolvedRegistrationOpen !== undefined\)/);
   assert.match(step, /fetch\("\/api\/auth\/registration-status"/);
-  assert.match(step, /setRegistrationOpen\(false\)/);
+  assert.match(
+    step,
+    /\[fetchedRegistrationOpen, setFetchedRegistrationOpen\] = useState\(false\)/
+  );
+  assert.match(
+    step,
+    /const registrationOpen = resolvedRegistrationOpen \?\? fetchedRegistrationOpen/
+  );
+  assert.match(step, /\(body as \{ open\?: unknown \}\)\.open === true/);
+  assert.match(
+    step,
+    /\.catch\(\(\) => \{[\s\S]*?setFetchedRegistrationOpen\(false\)/
+  );
   assert.match(step, /if \(!registrationStatusLoaded\)/);
   assert.match(step, /if \(!registrationOpen\)/);
   assert.ok(step.indexOf("if (!registrationOpen)") < step.indexOf("<form onSubmit={handleRegister}"));

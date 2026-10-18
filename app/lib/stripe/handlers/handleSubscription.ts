@@ -1,95 +1,36 @@
-// app/lib/stripe/handlers/handleSubscription.ts
-
-import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import type Stripe from "stripe";
 import { stripe } from "../stripe";
-import { syncCustomerEntitlements } from "../entitlementSync";
-import { persistStripeSubscription } from "../subscriptionPersistence";
-
-function getStripeId(
-  value: string | { id?: string } | null
-) {
-  if (!value) return null;
-  if (typeof value === "string") return value;
-  return value.id ?? null;
-}
+import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import {
+  applyStripeSubscriptionSnapshot,
+  type StripeEventLease,
+  type SupabaseClientLike,
+} from "../subscriptionPersistence";
 
 export async function handleSubscription(
-  event: Stripe.Event
+  event: Stripe.Event,
+  lease: StripeEventLease,
+  dependencies: {
+    supabase?: SupabaseClientLike;
+    retrieveSubscription?: (id: string) => Promise<Stripe.Subscription>;
+  } = {}
 ) {
-  const supabase = createSupabaseServer();
-
-  const sub =
-    event.data.object as Stripe.Subscription;
-
-  const stripeCustomerId =
-    getStripeId(sub.customer);
-
-  if (!stripeCustomerId) {
-    return;
-  }
-
-  // -------------------------
-  // get full subscription
-  // -------------------------
-
-  const subscription = (await stripe.subscriptions.retrieve(
-    sub.id,
-    {
+  const eventSubscription = event.data.object as Stripe.Subscription;
+  const snapshotIsCurrent =
+    event.type !== "customer.subscription.deleted";
+  const retrieve =
+    dependencies.retrieveSubscription ??
+    ((id: string) => stripe.subscriptions.retrieve(id, {
       expand: ["items.data.price"],
-    }
-  )) as Stripe.Subscription;
+    }) as Promise<Stripe.Subscription>);
+  const subscription = snapshotIsCurrent
+    ? await retrieve(eventSubscription.id)
+    : eventSubscription;
 
-  // -------------------------
-  // find customer
-  // -------------------------
-
-  const { data: existingCustomer, error: customerError } =
-    await supabase
-      .from("customers")
-      .select("*")
-      .eq("stripe_customer_id", stripeCustomerId)
-      .maybeSingle();
-
-  if (customerError) {
-    throw customerError;
-  }
-
-  let customer = existingCustomer;
-
-  if (!customer) {
-    const { error: insertCustomerError } =
-      await supabase
-        .from("customers")
-        .insert({
-          stripe_customer_id: stripeCustomerId,
-        });
-
-    if (insertCustomerError) {
-      throw insertCustomerError;
-    }
-
-    const {
-      data: createdCustomer,
-      error: createdCustomerError,
-    } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("stripe_customer_id", stripeCustomerId)
-      .single();
-
-    if (createdCustomerError) {
-      throw createdCustomerError;
-    }
-
-    customer = createdCustomer;
-  }
-
-  await persistStripeSubscription(
-    supabase,
+  return applyStripeSubscriptionSnapshot(
+    dependencies.supabase ?? createSupabaseServer(),
     subscription,
-    customer.id
+    lease,
+    { snapshotIsCurrent }
   );
-
-  await syncCustomerEntitlements(stripeCustomerId);
 }

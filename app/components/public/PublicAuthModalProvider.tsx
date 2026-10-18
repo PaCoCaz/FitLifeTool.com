@@ -95,14 +95,9 @@ function LocalizedAuthModal({
 }) {
   const { RegisterModal, useLangContext } = modules;
   const { setInterfaceLanguage } = useLangContext();
-  const [readyLocale, setReadyLocale] = useState<AppLanguage | null>(null);
-
   useEffect(() => {
     setInterfaceLanguage(locale);
-    setReadyLocale(locale);
   }, [locale, setInterfaceLanguage]);
-
-  if (readyLocale !== locale) return null;
 
   return (
     <RegisterModal
@@ -128,9 +123,9 @@ function PublicAuthModalState({
   const [activeOverlay, setActiveOverlay] = useState<PublicTopLevelOverlay>(null);
   const [focusReady, setFocusReady] = useState(false);
   const [authModules, setAuthModules] = useState<PublicAuthModules | null>(null);
+  const [returnFocusTo, setReturnFocusTo] = useState<HTMLElement | null>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
   const modalPromiseRef = useRef<Promise<PublicAuthModules> | null>(null);
-  const openerRef = useRef<HTMLElement | null>(null);
   const mountedRef = useRef(true);
   const mode =
     activeOverlay === "login" || activeOverlay === "register"
@@ -145,10 +140,11 @@ function PublicAuthModalState({
   }, []);
 
   const openAuthModal = useCallback((nextMode: AuthModalMode) => {
-    openerRef.current =
+    setReturnFocusTo(
       document.activeElement instanceof HTMLElement
         ? document.activeElement
-        : null;
+        : null
+    );
     setFocusReady(false);
     setActiveOverlay(nextMode);
 
@@ -210,7 +206,7 @@ function PublicAuthModalState({
           mode={mode}
           onModeChange={setActiveOverlay}
           onClose={closeAuthModal}
-          returnFocusTo={openerRef.current}
+          returnFocusTo={returnFocusTo}
           onFocusReady={handleFocusReady}
         />
       ) : null}

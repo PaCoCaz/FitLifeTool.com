@@ -55,6 +55,11 @@ export default function SubscriptionCard() {
     }
 
     loadingRef.current = true;
+    await Promise.resolve();
+    if (!mountedRef.current) {
+      loadingRef.current = false;
+      return;
+    }
     setLoading(true);
 
     try {
@@ -110,9 +115,12 @@ export default function SubscriptionCard() {
 
   useEffect(() => {
     mountedRef.current = true;
-    void load();
+    const loadTimer = window.setTimeout(() => {
+      void load();
+    }, 0);
 
     return () => {
+      window.clearTimeout(loadTimer);
       mountedRef.current = false;
     };
   }, [load]);

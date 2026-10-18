@@ -64,46 +64,25 @@ export async function POST(req: Request) {
     );
   }
 
-  // -------------------------
-  // try subscription with customers.id
-  // -------------------------
-
-  let { data: subscription } =
+  const { data: subscriptions, error: subscriptionsError } =
     await supabaseAdmin
       .from("subscriptions")
-      .select("*")
+      .select("id")
       .eq("customer_id", customer.id)
-      .maybeSingle();
+      .in("status", ["active", "trialing"]);
 
-  // -------------------------
-  // try subscription with stripe id
-  // -------------------------
-
-  if (!subscription) {
-
-    const res =
-      await supabaseAdmin
-        .from("subscriptions")
-        .select("*")
-        .eq(
-          "customer_id",
-          customer.stripe_customer_id
-        )
-        .maybeSingle();
-
-    subscription = res.data;
-  }
-
-  if (!subscription) {
+  if (subscriptionsError || subscriptions?.length !== 1) {
 
     return new Response(
       JSON.stringify({
-        error: "No subscription found",
+        error: "Subscription cannot be changed",
       }),
-      { status: 400 }
+      { status: 409 }
     );
 
   }
+
+  const subscription = subscriptions[0];
 
   // -------------------------
   // stripe subscription
@@ -114,8 +93,14 @@ export async function POST(req: Request) {
       subscription.id
     );
 
-  const itemId =
-    sub.items.data[0].id;
+  if (sub.items.data.length !== 1) {
+    return new Response(
+      JSON.stringify({ error: "Subscription cannot be changed" }),
+      { status: 409 }
+    );
+  }
+
+  const itemId = sub.items.data[0].id;
 
   await stripe.subscriptions.update(
     subscription.id,

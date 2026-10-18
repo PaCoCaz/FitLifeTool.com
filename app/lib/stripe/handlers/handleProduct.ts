@@ -1,23 +1,29 @@
-// app/lib/stripe/handlers/handleProduct.ts
-
-import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import type Stripe from "stripe";
-
-
+import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
+import type {
+  StripeEventLease,
+  SupabaseClientLike,
+} from "../subscriptionPersistence";
 
 export async function handleProduct(
-  event: Stripe.Event
+  event: Stripe.Event,
+  lease: StripeEventLease,
+  supabase: SupabaseClientLike = createSupabaseServer()
 ) {
-  const supabase = createSupabaseServer();
-
   const product = event.data.object as Stripe.Product;
-
-  await supabase
-    .from("products")
-    .upsert({
-      id: product.id,
-      name: product.name,
-      active: product.active,
-      metadata: product.metadata ?? {},
-    });
+  const { data, error } = await supabase.rpc(
+    "apply_stripe_product_snapshot",
+    {
+      p_event_id: lease.eventId,
+      p_generation: lease.generation,
+      p_lease_token: lease.leaseToken,
+      p_stripe_event_created_at: lease.stripeCreatedAt,
+      p_product_id: product.id,
+      p_name: product.name,
+      p_active: product.active,
+    }
+  );
+  if (error || !["applied", "stale_ignored"].includes(data as string)) {
+    throw error ?? new Error("STRIPE_PRODUCT_APPLY_REJECTED");
+  }
 }

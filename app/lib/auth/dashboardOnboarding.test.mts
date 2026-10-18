@@ -6,8 +6,11 @@ const source = await readFile(new URL("../DashboardStore.tsx", import.meta.url),
 
 test("DashboardProvider does not refresh before onboarding profile bootstrap", () => {
   assert.match(source, /pathname === "\/onboarding"/);
-  assert.match(source, /if \(!user\?\.id \|\| isOnboarding\)/);
-  assert.match(source, /enabled: Boolean\(user\?\.id\) && !isOnboarding/);
+  assert.match(
+    source,
+    /const userId = user\?\.id \?\? null[\s\S]*?if \(!userId \|\| isOnboarding\)/
+  );
+  assert.match(source, /enabled: Boolean\(userId\) && !isOnboarding/);
 });
 
 test("an absent onboarding profile is an optional query result", () => {

@@ -47,7 +47,10 @@ export default function RegistrationControlPanel() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
   useEffect(() => {
     const timer = window.setInterval(() => setNow((current) => current + 1000), 1000);
     return () => window.clearInterval(timer);

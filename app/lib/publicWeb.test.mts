@@ -630,8 +630,13 @@ test("HP-01K reuses one accessible auth dialog without replacing direct routes",
   );
   assert.match(
     publicAuthModalProviderSource,
-    /setInterfaceLanguage\(locale\);[\s\S]*?setReadyLocale\(locale\);[\s\S]*?readyLocale !== locale[\s\S]*?<RegisterModal/
+    /setInterfaceLanguage\(locale\);[\s\S]*?<RegisterModal[\s\S]*?initialLanguage=\{locale\}/
   );
+  assert.match(
+    registerModalSource,
+    /const activeLanguage = selectedLanguage \?\? initialLanguage \?\? "en"/
+  );
+  assert.match(registerModalSource, /<LoginForm[\s\S]*?language=\{activeLanguage\}/);
   assert.match(publicAuthModalProviderSource, /setAttribute\("inert", ""\)/);
   assert.match(registerModalSource, /<LoginForm/);
   assert.match(registerModalSource, /<RegisterStep/);
@@ -671,7 +676,11 @@ test("HP-01K keeps one top-level menu or auth dialog with a focus-ready handoff"
   );
   assert.match(publicAuthModalProviderSource, /aria-hidden=\{mode && focusReady \? true : undefined\}/);
   assert.match(publicAuthModalProviderSource, /if \(mode && focusReady\) \{\s*background\.setAttribute\("inert", ""\)/);
-  assert.match(publicAuthModalProviderSource, /returnFocusTo=\{openerRef\.current\}/);
+  assert.match(
+    publicAuthModalProviderSource,
+    /setReturnFocusTo\([\s\S]*?document\.activeElement instanceof HTMLElement[\s\S]*?: null[\s\S]*?\)/
+  );
+  assert.match(publicAuthModalProviderSource, /returnFocusTo=\{returnFocusTo\}/);
   assert.match(registerModalSource, /returnFocus\?\.isConnected && returnFocus\.getClientRects\(\)\.length > 0[\s\S]*?\? returnFocus[\s\S]*?: fallback/);
 });
 

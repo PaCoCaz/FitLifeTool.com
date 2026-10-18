@@ -51,6 +51,7 @@ export default function ActivityPage() {
 
   const dayNow = useDayNow();
   const dayKey = getLocalDayKey(dayNow);
+  const userId = user?.id ?? null;
   const weightKg = user?.user_metadata?.weight_kg ?? 75;
 
   const [selectedType, setSelectedType] =
@@ -116,7 +117,7 @@ export default function ActivityPage() {
 
   const fetchTodayActivities = useCallback(
     async () => {
-      if (!user?.id) {
+      if (!userId) {
         return [];
       }
 
@@ -125,7 +126,7 @@ export default function ActivityPage() {
         .select(
           "activity_type, duration_minutes, calories"
         )
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("log_date", dayKey);
 
       if (error) {
@@ -136,51 +137,50 @@ export default function ActivityPage() {
         (data ?? []) as ActivityRow[]
       );
     },
-    [user?.id, dayKey]
+    [userId, dayKey]
   );
 
   useEffect(() => {
     let cancelled = false;
 
-    if (!user?.id) {
-      setTodayActivities([]);
-      setIsInitialLoading(false);
-      return;
-    }
+    async function loadActivities() {
+      await Promise.resolve();
+      if (cancelled) return;
 
-    setIsInitialLoading(true);
-    setHasLoadError(false);
+      if (!userId) {
+        setTodayActivities([]);
+        setIsInitialLoading(false);
+        return;
+      }
 
-    void fetchTodayActivities()
-      .then((activities) => {
-        if (cancelled) {
-          return;
-        }
+      setIsInitialLoading(true);
+      setHasLoadError(false);
 
+      try {
+        const activities = await fetchTodayActivities();
+        if (cancelled) return;
         setTodayActivities(activities);
-      })
-      .catch((error: unknown) => {
-        if (cancelled) {
-          return;
-        }
-
+      } catch (error: unknown) {
+        if (cancelled) return;
         console.error(
           "Activity load failed:",
           error
         );
         setTodayActivities([]);
         setHasLoadError(true);
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) {
           setIsInitialLoading(false);
         }
-      });
+      }
+    }
+
+    void loadActivities();
 
     return () => {
       cancelled = true;
     };
-  }, [user?.id, fetchTodayActivities]);
+  }, [userId, fetchTodayActivities]);
 
   async function retryLoad() {
     setIsInitialLoading(true);

@@ -29,7 +29,7 @@ export default function ResetPasswordClient() {
   const initialized = useRef(false);
   const requestInFlight = useRef(false);
   const tokenHash = useRef<string | null>(null);
-  const recoveryAction = useRef<PasswordRecoveryAction | null>(null);
+  const [recoveryAction, setRecoveryAction] = useState<PasswordRecoveryAction | null>(null);
   const [language, setLanguage] = useState<AppLanguage>("en");
   const [state, setState] = useState<ViewState | null>(null);
   const [password, setPassword] = useState("");
@@ -41,17 +41,24 @@ export default function ResetPasswordClient() {
   useLayoutEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    const parsed = initializePasswordRecoveryLocation(
-      window.location.href,
-      (path) => window.history.replaceState(null, "", path)
-    );
-    setLanguage(parsed.language);
-    if (!parsed.valid) {
-      setState("RECOVERY_LINK_INVALID");
-      return;
-    }
-    tokenHash.current = parsed.tokenHash;
-    setState("READY");
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      const parsed = initializePasswordRecoveryLocation(
+        window.location.href,
+        (path) => window.history.replaceState(null, "", path)
+      );
+      setLanguage(parsed.language);
+      if (!parsed.valid) {
+        setState("RECOVERY_LINK_INVALID");
+        return;
+      }
+      tokenHash.current = parsed.tokenHash;
+      setState("READY");
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function clearSensitiveState() {
@@ -81,7 +88,7 @@ export default function ResetPasswordClient() {
         requestLogout: (endpoint, init) => fetch(endpoint, init),
         notifyLogout: () => notifyClientSessionEvent("logout"),
         clearSensitiveState: () => {
-          recoveryAction.current = null;
+          setRecoveryAction(null);
           clearSensitiveState();
           setState("PASSWORD_RESET_COMPLETED");
         },
@@ -142,7 +149,7 @@ export default function ResetPasswordClient() {
       }
 
       const { action, result } = submission;
-      recoveryAction.current = action;
+      setRecoveryAction(action);
 
       if (
         result === "PASSWORD_RESET_COMPLETED" ||
@@ -162,7 +169,7 @@ export default function ResetPasswordClient() {
       }
 
       setState(result);
-      recoveryAction.current = null;
+      setRecoveryAction(null);
       if (
         result !== "RECOVERY_VERIFICATION_UNAVAILABLE" &&
         result !== "PASSWORD_RESET_UNAVAILABLE"
@@ -171,7 +178,7 @@ export default function ResetPasswordClient() {
       }
     } catch {
       setState("RECOVERY_VERIFICATION_UNAVAILABLE");
-      recoveryAction.current = null;
+      setRecoveryAction(null);
     } finally {
       requestInFlight.current = false;
       setLoading(false);
@@ -267,11 +274,11 @@ export default function ResetPasswordClient() {
           </form>
         )}
 
-        {state === "PASSWORD_RESET_COMPLETED_CLEANUP_REQUIRED" && recoveryAction.current && (
+        {state === "PASSWORD_RESET_COMPLETED_CLEANUP_REQUIRED" && recoveryAction && (
           <button
             type="button"
             disabled={loading}
-            onClick={() => void finishApplicationCleanup(recoveryAction.current!, true)}
+            onClick={() => void finishApplicationCleanup(recoveryAction, true)}
             className="w-full rounded-[var(--radius)] bg-[#191970] py-2 text-white disabled:opacity-50"
           >
             {t.resetPasswordRetryCleanup}

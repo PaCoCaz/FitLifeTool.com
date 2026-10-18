@@ -538,14 +538,13 @@ export default function ProductSearchPage({ type }: Props) {
     const requestSequence =
       ++searchRequestSequenceRef.current;
 
-    if (authLoading || !user?.id || !lang) {
-      setResults([]);
-      return;
-    }
-
-    if (search.length < 1) {
-      setResults([]);
-      return;
+    if (authLoading || !user?.id || !lang || search.length < 1) {
+      const resetTimeout = window.setTimeout(() => {
+        if (requestSequence === searchRequestSequenceRef.current) {
+          setResults([]);
+        }
+      }, 0);
+      return () => window.clearTimeout(resetTimeout);
     }
 
     const controller = new AbortController();

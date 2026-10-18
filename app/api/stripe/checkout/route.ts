@@ -63,6 +63,8 @@ export async function POST(req: Request) {
     if (!stripeCustomerId) {
       const newCustomer = await stripe.customers.create({
         metadata: { user_id: user.id },
+      }, {
+        idempotencyKey: `fitlifetool-customer-${user.id}`,
       });
 
       stripeCustomerId = newCustomer.id;

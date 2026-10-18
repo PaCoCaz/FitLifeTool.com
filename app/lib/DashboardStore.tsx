@@ -93,6 +93,7 @@ export function DashboardProvider({
   children: React.ReactNode;
 }) {
   const { user } = useUser();
+  const userId = user?.id ?? null;
   const pathname = usePathname();
   const isOnboarding =
     pathname === "/onboarding" || pathname.startsWith("/onboarding/");
@@ -144,7 +145,7 @@ export function DashboardProvider({
   const refreshDashboard = useCallback(async (
     dayKeyOverride?: string
   ): Promise<void> => {
-    if (!user?.id || isOnboarding) {
+    if (!userId || isOnboarding) {
       return;
     }
 
@@ -176,7 +177,7 @@ export function DashboardProvider({
         planResult,
       ] = await Promise.all([
         supabase.rpc("dashboard_day_summary", {
-          p_user_id: user.id,
+          p_user_id: userId,
           p_day: freshDayKey,
         }),
 
@@ -190,17 +191,17 @@ export function DashboardProvider({
             abonnement
             `
           )
-          .eq("id", user.id)
+          .eq("id", userId)
           .maybeSingle(),
 
         supabase
           .from("profiles")
           .select("goal")
-          .eq("id", user.id)
+          .eq("id", userId)
           .maybeSingle(),
 
         supabase.rpc("get_user_plan_features", {
-          p_user_id: user.id,
+          p_user_id: userId,
         }),
       ]);
 
@@ -340,23 +341,27 @@ export function DashboardProvider({
         setReady(true);
       }
     }
-  }, [isOnboarding, user?.id]);
+  }, [isOnboarding, userId]);
 
   /* ───────────────── Load ───────────────── */
 
   useEffect(() => {
-    if (!user?.id || isOnboarding) {
-      setReady(false);
-      return;
-    }
+    const refreshTimer = window.setTimeout(() => {
+      if (!userId || isOnboarding) {
+        setReady(false);
+        return;
+      }
 
-    void refreshDashboard(dayKey);
-  }, [user?.id, dayKey, isOnboarding, refreshDashboard]);
+      void refreshDashboard(dayKey);
+    }, 0);
+
+    return () => window.clearTimeout(refreshTimer);
+  }, [userId, dayKey, isOnboarding, refreshDashboard]);
 
   useBrowserReturnRefresh(
     () => refreshDashboard(),
     {
-      enabled: Boolean(user?.id) && !isOnboarding,
+      enabled: Boolean(userId) && !isOnboarding,
     }
   );
 
