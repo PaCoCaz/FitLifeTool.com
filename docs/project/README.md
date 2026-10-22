@@ -1,10 +1,39 @@
 # Centraal projectstatusdossier
 
-Dit dossier is het centrale startpunt voor projectvoortgang, Account & Security-
-roadmap en historisch bewijs voor volgende ChatGPT- en Codex-sessies.
-Lees eerst [projectstatus](FITLIFETOOL_PROJECT_STATUS.md), daarna de
-[roadmap](ACCOUNT_SECURITY_ROADMAP.md) en het
-[bewijsregister](ACCOUNT_SECURITY_EVIDENCE.md).
+[FITLIFETOOL_PROJECT_STATUS.md](FITLIFETOOL_PROJECT_STATUS.md) is het centrale
+startpunt voor projectregie: werkstromen, planningsbesluiten, afhankelijkheden,
+blokkades en de Permanente Security & Privacy Guard. Dit dossier ontsluit ook
+de [Account & Security-roadmap](ACCOUNT_SECURITY_ROADMAP.md) en het
+[bewijsregister](ACCOUNT_SECURITY_EVIDENCE.md). Afzonderlijke roadmaps en
+evidence-dossiers blijven de inhoudelijke bron voor hun eigen traject; de
+centrale status vat samen en verwijst, zonder hun bewijs of regels te vervangen.
+
+## Begrippen en overdracht tussen chats
+
+- Een **werkstroom** is een inhoudelijk projectonderdeel met een eigen doel.
+- Een **roadmap** is een plan voor ontwikkeling en afhankelijkheden; een plan
+  bewijst geen implementatie of acceptatie.
+- Een **worktree** is een technische Git-werkmap; haar bestaan of chatvolgorde
+  bepaalt geen projectprioriteit.
+
+Bij hervatting van een Codex-werkstroom worden de daadwerkelijk toegankelijke,
+actuele centrale status en de relevante roadmap en bewijsbronnen gelezen,
+naast de toepasselijke AGENTS.md en workflow. Controleer peildatum, kandidaat,
+omgeving en geldigheid van bewijs; een historisch resultaat wordt geen live-status.
+De centrale planning bepaalt de volgorde en registreert expliciete besluiten
+van de projecteigenaar. Een niet-vastgestelde prioriteit blijft onbekend.
+
+ChatGPT-chats worden niet automatisch bijgewerkt door Git-wijzigingen.
+De actuele projectdocumenten moeten in de hervatte sessie daadwerkelijk
+toegankelijk zijn, met hun versie/commit of lokale wijzigingsstatus. Een
+chatverwijzing, chatgeheugen of een pad naar een ontoegankelijk bestand is
+geen bewijs dat de actuele inhoud is gelezen. Rapporteer ontbrekende toegang
+concreet en vul de inhoud niet uit aannames aan.
+
+Bij afronding van een goedgekeurde fase worden de relevante statusdocumenten
+binnen dezelfde fase bijgewerkt, zoals hieronder vastgelegd. Geef bij overdracht
+de gebruikte bronversie, eventuele ongecommitte aanvullingen, open blokkades,
+besluiten en de eerstvolgende stap binnen de toegestane scope mee.
 
 ## Reikwijdte en brongezag
 
@@ -51,9 +80,17 @@ Deze documentatieworktree is geïsoleerd aangemaakt vanaf de lokaal gelijke refs
 `develop` en `origin/develop`, basis `f90c074ef8eaa592a9ca180cb192f0804c32c20e`.
 Deze gelijkheid betreft de aanwezige refs; er is geen remote fetch of live
 releaseverificatie uitgevoerd. De beschermde main-checkout blijft afzonderlijk.
-Alles blijft lokaal, unstaged en ongecommit ter beoordeling.
+De oorspronkelijke zesbestandenintegratie is lokaal gecommit als
+`126ecc7d438970b69c8a38062ee94c5f944c55ee` op
+`codex/central-project-status-docs`. Zij is niet naar `develop` overgebracht
+en binnen deze fasen niet naar GitHub gepusht; er is geen deployment uitgevoerd.
+De governance-aanvulling van 22 oktober 2026 wijzigt uitsluitend de centrale
+projectstatus en deze dossierindex en blijft unstaged en ongecommit bovenop
+die lokale commit. Actuele externe remote- of Production-status wordt hiermee
+niet geclaimd. De develop-overdracht blijft geblokkeerd door beschermd lokaal
+vervolgwerk in de bestaande develop-worktree.
 
-Exact documentatiemanifest:
+Exact documentatiemanifest van de oorspronkelijke integratie:
 
 | Bestand | Integratie |
 |---|---|
@@ -71,6 +108,23 @@ De harde regeleinden uit de drie bronnen zijn met Markdown-backslashes behouden
 in plaats van afsluitende spaties, zodat ook nieuwe bestanden de whitespacecheck
 doorstaan. De overige broninhoud is behouden, met uitsluitend de navigatie en
 lokale documentstatus zoals hierboven vermeld.
+
+## Governance-aanvulling — 22 oktober 2026
+
+Documentatie-impact: uitsluitend
+[FITLIFETOOL_PROJECT_STATUS.md](FITLIFETOOL_PROJECT_STATUS.md) en deze
+[dossierindex](README.md). De oorspronkelijke zesbestandencommit blijft intact.
+De roadmap en het evidence-register zijn niet gewijzigd; hun historische
+resultaten, open voorwaarden en onderscheid tussen lokale en Production-status
+blijven behouden. Handbook, AGENTS.md en de bestaande documentrouter blijven
+inhoudelijk ongewijzigd. Er is in deze fase geen staging, commit, branchverplaatsing,
+overdracht, push of deployment toegestaan of uitgevoerd.
+
+Werkstromen en toekomstvoorstellen zijn gekoppeld aan de aanwezige
+Handbook-/dossierbronnen. Een bronhoofdstuk is geen bewijs van een afzonderlijke
+roadmap of actuele faseacceptatie. De Permanente Security & Privacy Guard is
+als blijvende verantwoordelijkheid vastgelegd, met operationele inrichting nog
+open. Er is geen projectbrede rangorde bedacht.
 
 ### Herkomst
 
