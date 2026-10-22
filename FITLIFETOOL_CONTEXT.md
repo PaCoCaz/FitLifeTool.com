@@ -55,6 +55,9 @@ onjuiste koppeling; het wijzigt geen enkele scoremethodologie.
 
 Gebruik deze router om de diepste canonieke bron te vinden:
 
+- Projectvoortgang, Account & Security-roadmap en historisch bewijs →
+  [centraal projectstatusdossier](docs/project/README.md); lees de peildatum en
+  houd lokale validatie, historische resultaten en Production-status gescheiden.
 - Architectuur en kernprincipes → Handbook H1
 - Identiteit, dag-/datamodel en producten → Handbook H2
 - FitLifeScore, status en voortgang → Handbook H3

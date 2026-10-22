@@ -24,6 +24,8 @@ Follow the canonical workflow before performing any Git or release action.
 
 ## Project documentation
 
+- Central project status, Account & Security roadmap and historical evidence:
+  [`docs/project/README.md`](docs/project/README.md)
 - Shared project orientation and document router:
   [`FITLIFETOOL_CONTEXT.md`](FITLIFETOOL_CONTEXT.md)
 - AI agent execution policy: [`AGENTS.md`](AGENTS.md)
