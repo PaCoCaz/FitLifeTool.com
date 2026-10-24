@@ -67,9 +67,9 @@ export async function GET() {
 
   if (error || !data.user) return errorResponse("UNAUTHENTICATED", 401);
 
-  const admin = createSupabaseServer();
   let status;
   try {
+    const admin = createSupabaseServer();
     status = await readEmailChangeStatus(data.user, admin);
   } catch {
     return errorResponse("STATUS_UNAVAILABLE", 503);
