@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { processAuthEmailSyncBatch } from "@/lib/auth/emailSync";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
-import { stripe } from "@/lib/stripe/stripe";
+import { getStripe } from "@/lib/stripe/stripe";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await processAuthEmailSyncBatch({ supabase: createSupabaseServer(), stripe, limit: 10 });
+    const result = await processAuthEmailSyncBatch({ supabase: createSupabaseServer(), stripe: getStripe(), limit: 10 });
     return NextResponse.json({ ok: true, claimed: result.claimed }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ ok: false }, { status: 500, headers: { "Cache-Control": "no-store" } });

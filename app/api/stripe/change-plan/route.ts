@@ -1,6 +1,6 @@
 //  app/api/stripe/change-plan/route.ts
 
-import { stripe } from "@/lib/stripe/stripe";
+import { getStripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
 import { isAllowedStripePriceId } from "@/lib/stripe/planLookup";
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
         },
 
         async retrieveStripeSubscription(subscriptionId) {
-          return stripe.subscriptions.retrieve(
+          return getStripe().subscriptions.retrieve(
             subscriptionId
           );
         },
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
           subscriptionId,
           update
         ) {
-          await stripe.subscriptions.update(
+          await getStripe().subscriptions.update(
             subscriptionId,
             {
               items: [

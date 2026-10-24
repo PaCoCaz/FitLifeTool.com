@@ -1,6 +1,6 @@
 // app/api/stripe/checkout/route.ts
 
-import { stripe } from "@/lib/stripe/stripe";
+import { getStripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
 import { isAllowedStripePriceId } from "@/lib/stripe/planLookup";
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     let stripeCustomerId = customer?.stripe_customer_id ?? null;
 
     if (!stripeCustomerId) {
-      const newCustomer = await stripe.customers.create({
+      const newCustomer = await getStripe().customers.create({
         ...(user.email ? { email: user.email } : {}),
         metadata: { user_id: user.id },
       });
@@ -82,13 +82,13 @@ export async function POST(req: Request) {
         stripeCustomerId,
       });
 
-      await stripe.customers.update(stripeCustomerId, {
+      await getStripe().customers.update(stripeCustomerId, {
         ...(user.email ? { email: user.email } : {}),
         metadata: { user_id: user.id },
       });
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       mode: "subscription",
       customer: stripeCustomerId,
 

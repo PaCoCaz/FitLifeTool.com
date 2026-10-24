@@ -1,6 +1,6 @@
 // app/lib/stripe/handlers/handleInvoice.ts
 
-import { stripe } from "@/lib/stripe/stripe";
+import { getStripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import type Stripe from "stripe";
 import { syncCustomerEntitlements } from "../entitlementSync";
@@ -40,7 +40,7 @@ export async function handleInvoice(
   // -------------------------
 
   const subscription =
-    (await stripe.subscriptions.retrieve(
+    (await getStripe().subscriptions.retrieve(
       subscriptionId,
       {
         expand: ["items.data.price"],
@@ -64,7 +64,7 @@ export async function handleInvoice(
     supabase,
     stripeCustomerId,
     retrieveStripeCustomer: async (customerId) =>
-      stripe.customers.retrieve(customerId),
+      getStripe().customers.retrieve(customerId),
   });
 
   // -------------------------

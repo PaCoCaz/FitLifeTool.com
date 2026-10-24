@@ -1,6 +1,6 @@
 // app/api/stripe/portal-update/route.ts
 
-import { stripe } from "@/lib/stripe/stripe";
+import { getStripe } from "@/lib/stripe/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import { createSupabaseServerUser } from "@/lib/supabase/supabaseServerUser";
 
@@ -66,7 +66,7 @@ export async function POST() {
   }
 
   const portal =
-    await stripe.billingPortal.sessions.create(
+    await getStripe().billingPortal.sessions.create(
       {
         customer:
           customer.stripe_customer_id,

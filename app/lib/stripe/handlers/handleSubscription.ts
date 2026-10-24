@@ -2,7 +2,7 @@
 
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import type Stripe from "stripe";
-import { stripe } from "../stripe";
+import { getStripe } from "../stripe";
 import { syncCustomerEntitlements } from "../entitlementSync";
 import { persistStripeSubscription } from "../subscriptionPersistence";
 import { resolveLocalCustomerMapping } from "../customerMapping";
@@ -34,7 +34,7 @@ export async function handleSubscription(
   // get full subscription
   // -------------------------
 
-  const subscription = (await stripe.subscriptions.retrieve(
+  const subscription = (await getStripe().subscriptions.retrieve(
     sub.id,
     {
       expand: ["items.data.price"],
@@ -49,7 +49,7 @@ export async function handleSubscription(
     supabase,
     stripeCustomerId,
     retrieveStripeCustomer: async (customerId) =>
-      stripe.customers.retrieve(customerId),
+      getStripe().customers.retrieve(customerId),
   });
 
   await persistStripeSubscription(

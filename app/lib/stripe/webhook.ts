@@ -1,6 +1,6 @@
 // app/lib/stripe/webhook.ts
 
-import { stripe } from "./stripe";
+import { getStripe } from "./stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabaseServer";
 import type Stripe from "stripe";
 
@@ -30,7 +30,7 @@ export function verifyStripeEvent(
     );
   }
 
-  return stripe.webhooks.constructEvent(
+  return getStripe().webhooks.constructEvent(
     body,
     signature,
     secret
