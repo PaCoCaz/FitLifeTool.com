@@ -6,7 +6,34 @@
 **Documentstatus:** lokaal opgenomen ter beoordeling; samengesteld uit historische gespreksrapporten, niet opnieuw live geverifieerd\
 **Operationele status:** uitsluitend na actuele verificatie van Git/externe systemen als live-status beschouwen.
 
-## Direct hervattingspunt
+## Documentatieconsolidatie V1.1 met aanvulling — 24 oktober 2026
+
+**Actuele documentatiestatus:** lokale governancecommit
+`3b24cbf8ecce92e02f5165754ac08cd4769e7eca`, met deze nieuwe ongecommitte
+kandidaat op `codex/central-project-status-docs`; bij start schoon. Geen staging,
+commit, integratie, push, merge of deployment. Nog niet naar develop
+overgebracht. Historische reconstructie en operationele bewijscategorieën
+hierboven blijven ongewijzigd.
+
+| Onderwerp | Centrale vastlegging | Status en bewijsgrens |
+|---|---|---|
+| Core | [Roadmap V1.1 met aanvulling](CORE_APPLICATION_ROADMAP.md). | Productvisie, doelrichtingen, Leefstijlkwaliteit, één numerieke hoofdscore, interne Excel, app-UX-herziening en coach-ready richting vastgelegd. |
+| Uitvoeringsvolgorde | Twaalf voorgestelde fases, genummerd 1–12 in de Core-roadmap. | Voorstel; geen formeel goedgekeurde of afgeronde fases. A&S parallel, UX-ontwerp tijdig parallel en implementatie gefaseerd. Eerste formele releasescope open. |
+| Commercieel/financieel | [Word-masterverwijzing en afgeleide samenvatting](COMMERCIAL_FINANCIAL_BASELINE.md). | Maximaal 30 dagen beperkt proefgebruik zonder kaart/automatische omzetting; Premium € 6,95, Pro € 9,95 incl. 21% btw. Planning, geen financiële of app-/Stripevalidatie. |
+| Open werk | Open besluiten en faseafhankelijkheden in de Core-roadmap. | Formules, featurematrix (fase 3), proefafloop/export/bewaren, historische contracten, trenddekking, releasescope en actueel implementatie-/acceptatiebewijs open. |
+| Overdracht | [Dossierindex](README.md) en [projectcontext](../../FITLIFETOOL_CONTEXT.md). | Bestanden moeten daadwerkelijk leesbaar zijn voor ChatGPT/Codex; externe Word-toegang niet universeel bewezen. |
+
+Strategische prioriteit: eerst Core Application, daarna Public SEO, vervolgens
+eventuele mobiele apps. Bestaande goedgekeurde parallelle werkzaamheden blijven
+gerespecteerd. A&S/Guard lopen parallel; security, privacy, herstelbaarheid en
+noodzakelijke compliance zijn releasevoorwaarden. Fase 12 is latere uitbreiding,
+geen automatisch onderdeel van de eerste core-release. De voorgestelde volgorde
+vereist geen volledig sequentiële uitvoering en verleent geen uitvoeringsautorisatie.
+
+## Historisch AUTH10-hervattingspunt
+
+Dit is het eerdere hervattingspunt van het afzonderlijke A&S-traject; geen
+automatische volgende opdracht voor deze documentatiefase of de Core-roadmap.
 
 **Actief traject:** Account & Security → AUTH10 → Security & Payment / herstel- en containmentvoorbereiding.\
 **Eerstvolgende concrete handeling:** Stripe **Sandbox 1 → Developers/Workbench → Webhooks**: read-only overzicht van endpointnamen/URL's, status en eventselecties inventariseren, **zonder API-keys of signing secrets**. Vercel-projectinventarisatie niet herhalen.\
@@ -51,7 +78,7 @@ nergens bestaat. Deze aanvulling omvat geen nieuwe live-audit.
 |---|---|---|---|
 | Public SEO & Content Architecture — vindbare, meertalige publieke content | [Handbook 5.11](<../../app/(app)/handbook/doc-l3-0030/page.tsx>), met implementatiefasen in sectie 27 en open owner decisions in sectie 28 | Ontwerpwerk in aparte chat historisch genoemd. Het Handbook bevat een fasering, maar actuele faseacceptaties en de aparte chatroadmap zijn hier niet volledig geïnventariseerd. Definitieve SEO-copy volgt volgens die bron na locale-specifieke research. | De bestaande chatroadmap toegankelijk maken en aan de Handbook-fasen en acceptatiebewijzen koppelen; geen voortgang afleiden uit de aanwezigheid van een worktree. |
 | Productdatabase / Product Intelligence — betrouwbare productreferenties en beheer | [Productdatagovernance](../product-data/PRODUCT_DATA_GOVERNANCE.md), Handbook [2.5](<../../app/(app)/handbook/doc-l3-0022/page.tsx>), [2.6](<../../app/(app)/handbook/doc-l3-0023/page.tsx>) en [2.7](<../../app/(app)/handbook/doc-l3-0024/page.tsx>) | Bestaand domein en methodologie; actuele Excel-/databasevoortgang en afzonderlijke roadmap niet geconsolideerd. Canoniek productiewerkboek en provenancepersistentie blijven open beslissingen. | Bestaande roadmap, verantwoordelijke bron en actuele voortgang bevestigen; geen workbook aanwijzen, master wijzigen of datastructuur aanpassen. |
-| FitLifeScore — uitlegbare dagelijkse voortgang en coachingfeedback | [Handbook 3.1](<../../app/(app)/handbook/doc-l3-0005/page.tsx>) en H3 via de [documentrouter](../../FITLIFETOOL_CONTEXT.md) | Vastgesteld productdomein; domein-/architectuurdocumentatie aanwezig. Geen afzonderlijke ontwikkelroadmap of actuele faseacceptatie aangetroffen in de geraadpleegde bronnen. | Bestaande plannen en eventuele aparte roadmap laten bevestigen. Geen nieuwe scorefase, methodologie, formule, gewicht of statusregel afleiden of wijzigen. |
+| FitLifeScore — uitlegbare dagelijkse voortgang en coachingfeedback | [Handbook 3.1](<../../app/(app)/handbook/doc-l3-0005/page.tsx>) en H3 via de [documentrouter](../../FITLIFETOOL_CONTEXT.md) | Vastgesteld productdomein; architectuurdocumentatie aanwezig. Sinds 24 oktober ontsloten via de [Core-roadmap V1.1](CORE_APPLICATION_ROADMAP.md), voorgestelde fase 8. Actuele faseacceptatie niet vastgesteld. | Score-/kwaliteitscontracten en bewijs afbakenen. Eén numerieke hoofdscore; geen formule, gewicht of statusregel uit een voorstel afleiden. |
 | Legal & Consumer Compliance — juridische en privacyvoorbereiding voor commerciële lancering | [Handbook 5.10](<../../app/(app)/handbook/doc-l3-0029/page.tsx>) | Bestaande interne checklist, inclusief open Privacyverklaring; geen definitieve juridische documenten of actuele acceptatie bewezen. Geen afzonderlijke geconsolideerde roadmap aangetroffen. | Bestaande open beslissingen en reviewverantwoordelijkheid bevestigen; geen juridisch akkoord of afgeronde compliance claimen. |
 
 ### Voorgestelde toekomstige werkstromen
@@ -72,13 +99,16 @@ De centrale projectplanning bepaalt de gewenste volgorde. De volgorde van
 ChatGPT-/Codex-chats, hun activiteit en de aanwezigheid van Git-worktrees
 bepalen geen prioriteit en geven geen uitvoeringsgoedkeuring.
 
-In de bestaande bronnen is alleen het AUTH10-hervattingspunt en de interne
-[A&S-beslisvolgorde](ACCOUNT_SECURITY_ROADMAP.md) concreet vastgelegd. De
-Public Web-fasering staat in Handbook 5.11; dit is geen rangorde tussen alle
-projectwerkstromen. Er is nog geen bevestigde projectbrede prioriteitenlijst.
-De tabellen hierboven zijn een register, geen impliciete uitvoeringsvolgorde.
-Leg toekomstige besluiten van de projecteigenaar met datum, bron en relevante
-afhankelijkheden hier vast, zonder ontbrekende volgordebesluiten in te vullen.
+De reconstructiebronnen van 22 oktober legden alleen het AUTH10-hervattingspunt
+en de interne [A&S-beslisvolgorde](ACCOUNT_SECURITY_ROADMAP.md) concreet vast.
+De consolidatie van 24 oktober ontsluit V1.1 en de aanvulling in de
+[Core-roadmap](CORE_APPLICATION_ROADMAP.md): strategie Core → Public SEO →
+eventuele mobiele apps, met respect voor goedgekeurd parallel werk. De twaalf
+fases hebben een voorgestelde uitvoeringsvolgorde, geen formele fasegoedkeuring
+of afronding. A&S loopt parallel; UX-ontwerp start vroeg, implementatie gefaseerd.
+Public Web behoudt zijn eigen Handbook 5.11-fasering. Eerste releasescope en
+actueel bewijs blijven open. Leg latere eigenaarbesluiten met datum, bron en
+afhankelijkheden vast zonder ontbrekende keuzes of acceptaties in te vullen.
 Een eerstvolgende stap in dit register wordt alleen uitgevoerd wanneer de
 actuele opdracht die scope toestaat; deze fase autoriseert uitsluitend documentatie.
 
@@ -157,4 +187,4 @@ monitor, afgeronde privacyreview of nieuwe certificering.
 
 Registreer in dezelfde reeds goedgekeurde fase, voor zover binnen scope: datum/tijd, traject, kandidaatbasis en commit, exact manifest, migratiehash, testmatrix, omgeving, gate-uitkomst, gewijzigde risico's, beschermde worktrees, releasebewijs, eerstvolgende actie en STOP-voorwaarden. Geen aparte micro-gate. **Schrijfstatusdocumenten niet automatisch wanneer de bestaande goedkeuring alleen read-only toegang geeft.**
 
-**Bij start nieuwe chat:** lees dit document, daarna `ACCOUNT_SECURITY_ROADMAP.md` en `ACCOUNT_SECURITY_EVIDENCE.md`; controleer de laatst gemarkeerde verificatiedatum en vraag alleen ontbrekend bewijs op. Chatgeheugen is geen vervanging voor dit dossier.
+**Bij start nieuwe chat:** lees projectcontext en dit document, daarna de relevante bron via de [dossierindex](README.md): Core-roadmap V1.1 met aanvulling, commercieel basisplan of eigen roadmap/bewijsbron. Voor A&S blijven `ACCOUNT_SECURITY_ROADMAP.md` en `ACCOUNT_SECURITY_EVIDENCE.md` vereist. Controleer versie, ongecommitte aanvullingen en verificatiedatum; vraag alleen ontbrekend bewijs op. Chatgeheugen is geen vervanging voor dit dossier.

@@ -8,6 +8,25 @@ de [Account & Security-roadmap](ACCOUNT_SECURITY_ROADMAP.md) en het
 evidence-dossiers blijven de inhoudelijke bron voor hun eigen traject; de
 centrale status vat samen en verwijst, zonder hun bewijs of regels te vervangen.
 
+## Centrale bronnen en leesroute
+
+| Vraag | Leidende bron |
+|---|---|
+| Projectregie, afhankelijkheden en documentatiestatus | [Projectstatus](FITLIFETOOL_PROJECT_STATUS.md) |
+| Core-productrichting, ontwerpkaders, twaalf fases en voorgestelde uitvoeringsvolgorde | [Core Application-roadmap](CORE_APPLICATION_ROADMAP.md), eigenaarbasis V1.1 met aanvulling |
+| Commerciële en financiële planning | [Aangewezen Word-master en afgeleide samenvatting](COMMERCIAL_FINANCIAL_BASELINE.md) |
+| Functionele en technische architectuur | [Developer Handbook](<../../app/(app)/handbook/>) |
+| Account & Security-status en eigen historisch bewijs | [A&S-roadmap](ACCOUNT_SECURITY_ROADMAP.md) en [bewijsregister](ACCOUNT_SECURITY_EVIDENCE.md) |
+| Productdatamethodologie | [Product Data Governance](../product-data/PRODUCT_DATA_GOVERNANCE.md) |
+
+AGENTS.md, CODEX.md en toepasselijke workflow bepalen uitvoeringsgrenzen.
+Lees na projectcontext/projectstatus de diepste bron voor de actuele vraag.
+Specifieke roadmaps en bewijsregisters blijven eigenaar van hun technische
+status; de productroadmap verandert bewezen feiten niet. Productbesluiten,
+commerciële planning, implementatie en gevalideerde releases blijven
+afzonderlijk. Geen plan of Handbook-beschrijving bewijst op zichzelf werking
+of Production. Het externe Word-bestand kent een expliciete toegangsbeperking.
+
 ## Begrippen en overdracht tussen chats
 
 - Een **werkstroom** is een inhoudelijk projectonderdeel met een eigen doel.
@@ -84,11 +103,14 @@ De oorspronkelijke zesbestandenintegratie is lokaal gecommit als
 `126ecc7d438970b69c8a38062ee94c5f944c55ee` op
 `codex/central-project-status-docs`. Zij is niet naar `develop` overgebracht
 en binnen deze fasen niet naar GitHub gepusht; er is geen deployment uitgevoerd.
-De governance-aanvulling van 22 oktober 2026 wijzigt uitsluitend de centrale
-projectstatus en deze dossierindex en blijft unstaged en ongecommit bovenop
-die lokale commit. Actuele externe remote- of Production-status wordt hiermee
-niet geclaimd. De develop-overdracht blijft geblokkeerd door beschermd lokaal
-vervolgwerk in de bestaande develop-worktree.
+De governance-aanvulling van 22 oktober 2026 is inmiddels lokaal gecommit als
+`3b24cbf8ecce92e02f5165754ac08cd4769e7eca`. Bij aanvang van de consolidatie van
+24 oktober was deze documentatieworktree schoon op die commit. V1.1 hieronder
+is een nieuwe ongecommitte kandidaat; de oude omschrijving als ongecommitte
+governance-aanvulling is hiermee gecorrigeerd. Geen overdracht naar develop is
+uitgevoerd. De bestaande develop-worktree bevat beschermd lokaal vervolgwerk.
+Er is geen fetch uitgevoerd; actuele externe remote- of Production-status
+wordt niet geclaimd.
 
 Exact documentatiemanifest van de oorspronkelijke integratie:
 
@@ -151,3 +173,41 @@ De open bewijs- en releasepunten in de drie documenten blijven open.
 Documentatievalidatie controleert Markdown-structuur, verwijzingen, bronbehoud,
 manifest, diff-whitespace en worktree-integriteit; applicatie-, database- en
 integratietests zijn niet nodig voor deze uitsluitend documenterende wijziging.
+
+## Consolidatie V1.1 met uitvoeringsvolgorde — 24 oktober 2026
+
+Complete vervangende eigenaaropdracht binnen dezelfde documentatiefase, met de
+daaropvolgende aanvulling over voorgestelde uitvoeringsvolgorde. Eerdere
+schrijfacties zijn geweigerd wegens aanvullende eigenaarinformatie en hebben
+geen bestanden gewijzigd. De eigenaar autoriseert deze bestaande worktree:
+`codex/central-project-status-docs`, basis
+`3b24cbf8ecce92e02f5165754ac08cd4769e7eca`; geen nieuwe worktree/branchwissel.
+
+Exact kandidaatmanifest:
+
+- Nieuw: `docs/project/CORE_APPLICATION_ROADMAP.md`.
+- Nieuw: `docs/project/COMMERCIAL_FINANCIAL_BASELINE.md`.
+- Gewijzigd: `docs/project/README.md`, `docs/project/FITLIFETOOL_PROJECT_STATUS.md`,
+  `FITLIFETOOL_CONTEXT.md` en repository-`README.md`.
+
+V1.1 en aanvulling leggen productrichtingen en twaalf voorgestelde fases in
+voorgestelde uitvoeringsvolgorde vast; geen formele fasegoedkeuring, afronding
+of eerste releasescope. A&S loopt parallel, UX-ontwerp start tijdig parallel
+en implementatie gefaseerd. Strategie: Core, daarna Public SEO, vervolgens
+eventuele mobiele apps; bestaande goedgekeurde parallelle werkzaamheden blijven
+gerespecteerd. Health is latere uitbreiding.
+
+Word blijft de enige commerciële/financiële master, extern en ongewijzigd;
+geen kopie toegevoegd. De repositorysamenvatting is afgeleid. A&S-roadmap,
+bewijsregister, Handbook, agentinstructies en productdatagovernance blijven
+ongewijzigd. Securityreconstructiepeildatum blijft 22 oktober; deze nieuwe
+documentatiedatum actualiseert geen operationele/Production-status.
+
+Deze kandidaat blijft unstaged en ongecommit. Geen commit, branchintegratie,
+push, merge of deployment. Latere Git-/releaseacties vereisen hun bestaande
+expliciete autorisatie.
+
+Normale documentatiecontrole: exact manifest, volledige diff, whitespace,
+lokale links, twaalf fases/volgorde, prijs-/trialconsistentie, besluit- versus
+bewijsstatus, masterintegriteit en behoud van worktrees. Resultaten staan in
+de oplevering. Geen applicatietests, builds, brede audit of externe validatie.

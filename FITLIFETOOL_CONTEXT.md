@@ -58,6 +58,14 @@ Gebruik deze router om de diepste canonieke bron te vinden:
 - Projectvoortgang, Account & Security-roadmap en historisch bewijs →
   [centraal projectstatusdossier](docs/project/README.md); lees de peildatum en
   houd lokale validatie, historische resultaten en Production-status gescheiden.
+- Core-productvisie, Leefstijlkwaliteit, app-UX, twaalf voorgestelde fases en
+  uitvoeringsvolgorde → [Core Application-roadmap](docs/project/CORE_APPLICATION_ROADMAP.md),
+  eigenaarbasis V1.1 met aanvulling. Voorgestelde volgorde bewijst geen formeel
+  goedgekeurde/afgeronde fases; A&S en vroeg UX-ontwerp lopen parallel.
+- Commerciële/financiële planning → [basisplan en aangewezen Word-master](docs/project/COMMERCIAL_FINANCIAL_BASELINE.md).
+  De samenvatting is afgeleid, geen tweede master; externe Word-toegang is niet
+  universeel bewezen. Bedragen zijn planning, geen financiële validatie.
+
 - Architectuur en kernprincipes → Handbook H1
 - Identiteit, dag-/datamodel en producten → Handbook H2
 - FitLifeScore, status en voortgang → Handbook H3

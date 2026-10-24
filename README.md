@@ -26,6 +26,10 @@ Follow the canonical workflow before performing any Git or release action.
 
 - Central project status, Account & Security roadmap and historical evidence:
   [`docs/project/README.md`](docs/project/README.md)
+- Core Application product direction, twelve proposed phases and execution order (V1.1 with owner supplement):
+  [`docs/project/CORE_APPLICATION_ROADMAP.md`](docs/project/CORE_APPLICATION_ROADMAP.md)
+- Commercial and financial planning, with a single designated external Word master:
+  [`docs/project/COMMERCIAL_FINANCIAL_BASELINE.md`](docs/project/COMMERCIAL_FINANCIAL_BASELINE.md)
 - Shared project orientation and document router:
   [`FITLIFETOOL_CONTEXT.md`](FITLIFETOOL_CONTEXT.md)
 - AI agent execution policy: [`AGENTS.md`](AGENTS.md)
