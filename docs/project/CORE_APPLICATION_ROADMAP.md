@@ -2,9 +2,14 @@
 
 **Bronbasis:** Centrale projectdocumentatie V1.1 en de aanvullende
 uitvoeringsvolgorde van de projecteigenaar, overgenomen op 24 oktober 2026.
-**Documentatiestatus:** nieuwe ongecommitte kandidaat op
-`codex/central-project-status-docs`, basis
-`3b24cbf8ecce92e02f5165754ac08cd4769e7eca`.
+**Officiële bron:** dit bestaande Markdown-bestand is de enige SSOT voor
+Core Application-planning en fasevoortgang, aangewezen door de eigenaar op
+25 oktober 2026. Canonieke ontwikkelbranch: `develop`.
+**Voortgangspeildatum:** 25 oktober 2026.
+**Git-basis van deze documentatiekandidaat:** `be3525c9baa79916ca4c3825569d7cb1f56786d3`.
+V1.1 is op 24 oktober vastgelegd in `c71daa94374e6dd9bbd0b7da860ef2febe3c677e`,
+lokaal op develop geïntegreerd en naar origin/develop gepusht.
+De huidige governance-aanvulling is nog ongecommit en ongepubliceerd.
 
 Dit register maakt productrichtingen, ontwerpkaders, voorgestelde fases en
 bewijsgrenzen centraal vindbaar. Het verleent geen toestemming voor
@@ -13,6 +18,92 @@ implementatie, formulewijzigingen of release.
 [Projectstatus](FITLIFETOOL_PROJECT_STATUS.md) · [Dossierindex](README.md) ·
 [Commercieel basisplan](COMMERCIAL_FINANCIAL_BASELINE.md) ·
 [A&S-roadmap](ACCOUNT_SECURITY_ROADMAP.md) · [Bewijsregister](ACCOUNT_SECURITY_EVIDENCE.md)
+
+## Verplicht projectbreed gebruik en eigenaarschap
+
+Deze roadmap- en workflowafspraken gelden als projectbeleid voor alle bestaande
+en toekomstige FitLifeTool-chats en Codex-sessies. De projecteigenaar beslist
+over productrichting, prioriteit, faseomvang en acceptatie. ChatGPT en Codex
+raadplegen en onderhouden deze ene roadmap binnen hun daadwerkelijk goedgekeurde
+scope. Deze opdracht start geen nieuwe ontwikkel- of releasefase.
+
+De twaalf fases en voorgestelde volgorde hieronder blijven ongewijzigd.
+Een status `PLANNED` is geen uitvoeringsgoedkeuring. De projectstatus is een
+navigatie-/werkstromenregister; zij houdt geen tweede tabel met Core-fasestatussen
+bij. Afzonderlijke A&S- en productdatabronnen behouden hun eigen detailplanning
+en kandidaatgebonden bewijs. Het Handbook blijft de architectuurbron.
+
+De verplichting wordt ontsloten via [AGENTS.md](../../AGENTS.md),
+[CODEX.md](../../CODEX.md), [projectcontext](../../FITLIFETOOL_CONTEXT.md) en de
+[centrale lees- en overdrachtsafspraken](README.md). De bestaande externe
+`FITLIFETOOL_CHATGPT_WORKFLOW.md` verwijst naar dezelfde bron. De exacte
+eenmalige ChatGPT-projectinstructie staat in de dossierindex; zij dupliceert
+geen faseplanning.
+
+Dit document wijzigen verandert niet automatisch alle bestaande chats,
+werkboomkopieën of cloudprojectinstellingen. Oudere branches kunnen oudere
+instructies bevatten. Raadpleeg dan deze develop-versie read-only zonder
+beschermde branches/worktrees te wijzigen. Bij ontbrekende actuele bron:
+expliciet melden vóór een nieuwe fase wordt gekozen. Commit, push en eventuele
+projectinstellingen hebben hun eigen bestaande autorisatie; deze kandidaat
+claimt nog geen projectbrede technische uitrol.
+
+## Statusmodel en bewijsniveaus
+
+| Status | Definitie en voorwaarde |
+|---|---|
+| PLANNED | Opgenomen in de roadmap; start/uitvoering niet als begonnen bewezen. Open ontwerpkeuzes en nog niet vervulde afhankelijkheden zijn zichtbaar. Geen impliciete goedkeuring. |
+| IN PROGRESS | Binnen bestaande inhoudelijke goedkeuring begonnen werk; relevante resultaten, open criteria en volgende toegestane stap worden bijgehouden. |
+| BLOCKED | Een concrete beperking verhindert voortgang binnen een begonnen/goedgekeurde scope. Vermeld oorzaak, bewijs, eigenaar van de oplossing en veilige hervattingsvoorwaarde. |
+| DONE | Alle voor die fase vastgestelde acceptatiecriteria zijn aantoonbaar gehaald, inclusief de toepasselijke integratie-/releasecriteria. Ontbrekend of onbekend bewijs verhindert DONE. |
+
+Nog niet begonnen werk krijgt niet alleen wegens een toekomstige afhankelijkheid
+de status BLOCKED. Een geblokkeerd deeltraject kan onder een bredere fase
+IN PROGRESS vallen zolang ander toegestaan werk doorloopt. Een fase zonder
+bevestigde omvang/acceptatiecriteria kan niet achteraf DONE worden verklaard.
+
+Registreer naast de status altijd afzonderlijk: technisch geïmplementeerd,
+lokaal gevalideerd, op develop geïntegreerd, naar origin/develop gepubliceerd,
+Preview geverifieerd en Production vrijgegeven. Een lokale build of remote
+commit-SHA bewijst geen werkende deployment of Production-smoke.
+
+Een ontwerp-/documentatiefase hoeft geen Production-release te hebben wanneer
+dat vooraf expliciet niet van toepassing is; leg dat met de goedgekeurde
+fasecriteria vast. Voor fase 11 blijven de bestaande release- en
+Production-bewijzen vereist. Deze aanvulling keurt geen nieuwe acceptatiecriteria,
+algoritmen of productbesluiten stilzwijgend goed.
+
+## Start, uitvoering, afronding en opvolging
+
+1. **Start:** lees deze actuele roadmap, relevante workflow en detailbronnen.
+   Noteer branch, commit, lokale documentdiff, peildatum, fase/werkpakket,
+   status, prioriteit, afhankelijkheden, bestaand geldig bewijs en de
+   inhoudelijke goedkeuring. Voorkom dubbel onderzoek. Is de actuele bron niet
+   toegankelijk of haar actualiteit onbekend, meld dat vóór fasekeuze.
+2. **Uitvoering:** houd relevante voortgang bij in deze roadmap zonder
+   tussentijdse commits af te dwingen. Respecteer de goedgekeurde scope,
+   beschermde bestanden/worktrees en alle STOP-/securitygrenzen.
+3. **Afronding:** vergelijk resultaten met de voor die fase afgesproken
+   acceptatie- en releasecriteria. Werk status, open punten, bewijsverwijzingen,
+   beperkingen en volgende toegestane stap bij. Leg bij een statuswijziging
+   datum, oud/nieuw, reden, eigenaarbesluit en kandidaat-/omgevingsbewijs vast.
+   Neem deze normale documentatiehandeling waar veilig mogelijk mee in dezelfde
+   goedgekeurde afrondings- of releaseopdracht, zonder aparte micro-gate.
+4. **Schrijfgrens:** read-only autoriseert geen updates. Bij niet-toegestane
+   writes of beschermde overlap rapporteer de ontbrekende roadmapupdate; raak
+   geen andere worktree aan om de grens te omzeilen. Staging, commit, push,
+   merge en deployment behouden hun afzonderlijke bestaande autorisatie.
+5. **Na afronding:** bepaal de volgende inhoudelijke fase vanuit de actuele
+   roadmap en afhankelijkheden. Start die niet automatisch; vraag alleen de
+   noodzakelijke inhoudelijke goedkeuring, geen herhaling van reeds verleende
+   goedkeuring voor normale substappen.
+
+Een herbruikbare voortgangsnotitie vermeldt: fase/werkpakket; datum;
+statusovergang of reden waarom status gelijk blijft; criteria en open punten;
+exacte kandidaat en bestandsmanifest; uitgevoerde controles met uitkomst en
+omgeving; develop-/remote-/releasebewijs voor zover van toepassing; bronlocatie
+en bewijsgrenzen; eerstvolgende toegestane stap. Bewaar historische resultaten
+en voeg latere verificaties gedateerd toe.
 
 ## Brongezag en herkomst
 
@@ -202,6 +293,69 @@ Account & Security loopt parallel. Fase 9 betekent niet dat UX-ontwerp pas na
 fase 8 begint. De eerste formele core-releasescope blijft open. De strategische
 prioriteit Core → Public SEO → eventuele mobiele apps is geen bewijs van
 goedkeuring of afronding van afzonderlijke fases.
+
+## Actuele fasevoortgang
+
+Peildatum 25 oktober 2026; gebaseerd op V1.1, de bestaande detaildossiers,
+de in deze chat afgeronde herstel-/publicatierapporten en lokaal aanwezige
+Git-objecten. Geen nieuwe code-audit, tests, build of live herverificatie.
+De onderstaande criteria concretiseren uitsluitend bestaande roadmapinhoud
+voor beoordeling; zij zijn geen nieuwe productkeuze of fase-uitvoeringstoestemming.
+De eerste formele releasescope en definitieve faseacceptaties blijven open.
+
+| Fase | Status | Acceptatiecriteria / bestaande scope | Afhankelijkheden en open punten | Bewijs en beperking | Eerstvolgende toegestane stap |
+|---|---|---|---|---|---|
+| F01 | PLANNED | Contracten voor berekeningen, historie, Leefstijlkwaliteit, schaalbaarheid en kosten; eerste releasescope expliciet afgebakend en geaccepteerd. | Open contracten in dit document; geen complete acceptatieset vastgesteld. | Product-/architectuurbronnen aanwezig, geen integrale F01-acceptatie. V1.1-consolidatie alleen rondt F01 niet af. | Na inhoudelijke goedkeuring contracten en acceptatieomvang afbakenen; nu geen ontwikkeling starten. |
+| F02 | IN PROGRESS | Veiligheid en herstelbaarheid volgens eigen A&S-roadmap; relevante AUTH-, herstel-, isolatie- en releasecriteria aantonen. | Bestaand parallel traject; AUTH10 Hosted Staging/Production historisch BLOCKED, restoretest en overige AUTH-punten open. | Bestaand dossier en ondersteunende buildfixes B02/B03 hieronder. Geen volledige fase- of Production-afsluiting. | Relevante bestaande goedkeuring en het eigen A&S-hervattingspunt raadplegen; ontbrekend bewijs gericht aanvullen binnen passende scope. |
+| F03 | PLANNED | Productkwaliteit/import, definitieve trial-/Premium-/Pro-matrix, server-side rechten en financiële onderbouwing beoordeeld. | F01, A&S-betaalvoorwaarden; featurematrix/limieten en datadekking open. | Governance en financieel plan beschreven; actuele integrale datakwaliteits-/rechtenacceptatie ontbreekt. | Eerst contracten en productkeuzes afbakenen; geen data- of rechtenwijziging zonder goedkeuring. |
+| F04 | PLANNED | Dagelijkse en historische voeding-, drank-, activiteit- en gewichtsreizen met betrouwbare correctie/herberekening geaccepteerd. | F01/F03, dagcontext, historische geldigheid en gewichtsbron. | Bestaande basis beschreven; geen complete actuele CRUD-/herberekeningsacceptatie. | Relevante auditresultaten hergebruiken en ontbrekende acceptatiescenario's na goedkeuring afbakenen. |
+| F05 | PLANNED | Doelrichtingen, adaptieve mijlpalen, onderhoudsband en trends volgens expliciet geaccepteerde regels onderbouwd. | F01/F04; algoritmen, meetdekking en veiligheidsgrenzen open. | Gewenst ontwerp aanwezig; geen afgeronde algoritme-/implementatieacceptatie. | Product- en trendcontracten vaststellen binnen een goedgekeurde fase. |
+| F06 | PLANNED | Herbruikbare voedings-, drank- en trainingssjablonen; registratiehoeveelheid/duur aanpasbaar zonder het origineel te wijzigen. | F03/F04; component-/logcontract, bewerken/verwijderen en intensiteit open. | Geen complete template-acceptatie in dit dossier. | Sjabloon-/logcontract en acceptatiescenario's afbakenen vóór implementatie. |
+| F07 | PLANNED | Persoonlijke ritmes, uitzonderingen en diensten met verklaarbare tijdlijn/historie geaccepteerd. | F01/F03/F04; tijdzone/DST, rotaties, schemageldigheid en invloed op berekeningen open. | Geen actuele complete persoonlijke-ritmeacceptatie. | Toegestane invloed op verwachtingen, totalen en scores eerst besluiten. |
+| F08 | PLANNED | Doelvoortgang en Leefstijlkwaliteit met verklaarbare, historisch herleidbare indicatoren gevalideerd; één numerieke hoofdscore. | F01/F03/F04 en doelen/ritmes waar relevant; formules en indicatorvalidatie open. | Bestaande 40/30/30-architectuur en zes ontwerpgroepen zijn geen geaccepteerde nieuwe formule. | Definitieve indicator-/scorecontracten en hun validatie afbakenen; geen formulewijziging zonder besluit. |
+| F09 | PLANNED | Ingelogde app en design system passend bij dagelijkse taken, mobiel, toegankelijkheid, performance en identiteit geaccepteerd. | Ontwerp tijdig parallel, implementatie gefaseerd in afstemming met F03–F08; schermacceptaties open. | Productrichting vastgesteld; beschermd Public Web-werk bewijst geen afgeronde app-UX-fase. | Vroeg ontwerp binnen passende goedkeuring afbakenen; homepage en goedgekeurd parallel werk respecteren. |
+| F10 | PLANNED | Accountlevenscyclus, proefafloop, abonnementen, export, bewaren, privacy en communicatie volgens afgesproken scope geaccepteerd. | F02/F03 en app-UX; gegevensrechten en juridische review open. | Checklists/detaildossiers, geen volledige lifecycle-/complianceacceptatie. | Open consumenten-/privacycontracten en reviewverantwoordelijkheid afbakenen. |
+| F11 | PLANNED | Gekozen core-releasescope integraal op exacte kandidaat gevalideerd en volgens bestaande releasegates gecontroleerd vrijgegeven. | Toepasselijke voorgaande fases, herstelbaarheid/compliance en eigen releaseautorisatie; releasescope open. | Geen integrale Core-acceptatie of Production-vrijgave. Lokale builds B02/B03 zijn geen F11-releasebewijs. | Eerst releasescope en acceptatieplan bevestigen; geen vrijgave starten. |
+| F12 | PLANNED | Health-integratie met toestemming/intrekken, synchronisatie, bronidentiteit en deduplicatie geaccepteerd. | Latere uitbreiding, afzonderlijk prioriteren; niet automatisch eerste core-release. | Geen werkende koppeling of geslaagde sync vastgesteld. | Later inhoudelijk prioriteren en ontwerpen; nu niet starten. |
+
+F02 is IN PROGRESS wegens het al lopende, afzonderlijk goedgekeurde A&S-traject,
+niet omdat hiermee de volledige voorgestelde Core-fase 2 is vrijgegeven.
+Een geblokkeerd AUTH10-deeltraject wordt daarmee niet groen gemaakt.
+De overige fases zijn PLANNED omdat uitvoering/volledige acceptatie van hun
+geconsolideerde scope niet is vastgesteld; dat ontkent bestaande deelimplementaties
+niet. Geen van de twaalf fases is achteraf DONE verklaard.
+
+### Ondersteunende voortgang en bewijs
+
+Deze korte verwijzingen vervangen geen afzonderlijk A&S-bewijsregister.
+Bewijsketen: bestaande lokale Git-objecten plus gespreksrapporten van 24 oktober;
+lokale controle op 25 oktober. De eerder geverifieerde remote-SHA's zijn
+historisch publicatiebewijs, geen nieuwe remote- of live-verificatie.
+
+| ID | Afgebakend resultaat | Technisch / lokaal | Develop en remote-publicatie | Releasegrens |
+|---|---|---|---|---|
+| B01 | V1.1-documentatieconsolidatie | Documentatiecontroles gerapporteerd PASS, inclusief verwijzingen en bronconsistentie; geen applicatietestclaim. | Commit `c71daa94374e6dd9bbd0b7da860ef2febe3c677e`; op 24 oktober fast-forward geïntegreerd en naar origin/develop gepusht met geverifieerde SHA. | Afgerond documentatiewerkpakket, geen afgeronde Core-ontwikkelfase of Production-release. |
+| B02 | Supabase-buildinitialisatie en veilige GET-foutafhandeling | 44/44 gerichte tests, vijf nieuwe tests opnieuw PASS, TypeScript/gerichte lint/lokale production-build PASS; geen live API-validatie. | Commit `a1e383ac3b4a60f09e24466c73910b700196ded8`, drie bestanden; lokale commit en push naar origin/develop gerapporteerd en SHA geverifieerd. | De build gebruikte bestaande lokale configuratie. De latere eigenaarmelding noemt de Supabase-blokkade opgelost maar meldt een Stripe-Previewfout op deze SHA; geen volledige Preview-/Production-PASS. |
+| B03 | Uitgestelde Stripe-clientinitialisatie en importregressies | 52/52 gerichte tests inclusief zeven Stripe-tests, TypeScript/gerichte lint/lokale production-build PASS. De aanvankelijke server-only-testadapterfout is vóór de geslaagde run opgelost. | Commit `be3525c9baa79916ca4c3825569d7cb1f56786d3`, tien bestanden; push naar origin/develop met geverifieerde SHA gerapporteerd. | Geen echte betaling, live webhook of Vercel Preview-/Production-resultaat bevestigd. Runtimecredentials blijven noodzakelijk. |
+
+B02/B03 wijzigen geen productprioriteiten en ronden F02 of F11 niet af.
+Een nieuw Preview-resultaat moet exact deployment, branch, commit, omgeving,
+tijdstip en build-/smoke-uitkomst vermelden voordat een statusclaim verandert.
+De 21 beschermde Public Web-bestanden zijn volgens de herstel-/pushrapporten
+inhoudelijk behouden; hun aanwezigheid is geen acceptatie van F09.
+
+### Volgende fase en onderhoudslog
+
+De eerstvolgende openstaande inhoudelijke fase in de vastgelegde voorgestelde
+volgorde is **F01 — Contracten en integratiebasis**. Afbakenen/starten vereist
+inhoudelijke goedkeuring. Bestaande goedgekeurde parallelle werkzaamheden
+blijven gerespecteerd. De open verificatie van de Stripe-Preview na B03 is
+een relevant vervolg binnen het bestaande incidenttraject; deze documentatieopdracht
+voert haar niet uit en verleent geen nieuwe releaseautorisatie.
+
+| Datum | Wijziging | Herkomst / besluit | Bewijsgrens |
+|---|---|---|---|
+| 25 oktober 2026 | Bestaande V1.1-roadmap aangewezen als enige SSOT; vier statussen toegevoegd; initiële registratie F01/F03–F12 PLANNED en F02 IN PROGRESS. | Eigenaaropdracht Centrale roadmap & voortgangsbeheer plus aanvulling projectbrede verplichting. | Dit registreert bestaand werk, geen nieuwe fase gestart of DONE gemaakt; nieuwe documentatie nog ongecommit. |
 
 ## Open besluiten en overdracht
 

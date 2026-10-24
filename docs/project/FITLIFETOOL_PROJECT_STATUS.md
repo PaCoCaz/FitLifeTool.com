@@ -6,14 +6,37 @@
 **Documentstatus:** lokaal opgenomen ter beoordeling; samengesteld uit historische gespreksrapporten, niet opnieuw live geverifieerd\
 **Operationele status:** uitsluitend na actuele verificatie van Git/externe systemen als live-status beschouwen.
 
+## Actuele regieverwijzing — 25 oktober 2026
+
+De [Core Application-roadmap](CORE_APPLICATION_ROADMAP.md) is de enige officiële
+bron voor Core-planning en fasevoortgang. Deze projectstatus blijft het
+regie-/navigatieportaal en onderhoudt geen tweede Core-fasestatusregister.
+Raadpleeg de roadmap voor PLANNED/IN PROGRESS/BLOCKED/DONE, fasecriteria,
+afhankelijkheden, bewijs, open punten en de volgende toegestane stap.
+
+V1.1 is vastgelegd in `c71daa94374e6dd9bbd0b7da860ef2febe3c677e` en op
+24 oktober veilig in develop geïntegreerd en naar origin/develop gepusht.
+Daarna volgden de Supabase-fix `a1e383ac3b4a60f09e24466c73910b700196ded8`
+en Stripe-fix `be3525c9baa79916ca4c3825569d7cb1f56786d3`, met gerapporteerde
+lokale validatie en geverifieerde publicatie. De roadmap bevat de beperkte
+bewijsverwijzingen B01–B03; dit rondt geen volledige Core-fase af.
+De Vercel Preview-uitkomst na de Stripe-fix en Production-vrijgave zijn niet
+bevestigd. Het historische AUTH10-hervattingspunt hieronder blijft een eigen
+trajectbron en activeert geen automatische volgende opdracht.
+
+Gitbasis van deze documentatie-aanvulling: develop op `be3525c9baa79916ca4c3825569d7cb1f56786d3`.
+De aanvulling is ongecommit; geen staging, commit, push, merge of deployment.
+De [dossierindex](README.md) beschrijft projectbrede instructies, daadwerkelijke
+toegang en de handmatige instelling die de eigenaar nog moet uitvoeren.
+De reconstructiepeildatum van het oude securitybewijs blijft 22 oktober.
+
 ## Documentatieconsolidatie V1.1 met aanvulling — 24 oktober 2026
 
-**Actuele documentatiestatus:** lokale governancecommit
-`3b24cbf8ecce92e02f5165754ac08cd4769e7eca`, met deze nieuwe ongecommitte
-kandidaat op `codex/central-project-status-docs`; bij start schoon. Geen staging,
-commit, integratie, push, merge of deployment. Nog niet naar develop
-overgebracht. Historische reconstructie en operationele bewijscategorieën
-hierboven blijven ongewijzigd.
+**Historisch kandidaatverslag:** deze sectie beschrijft de schrijf-/validatiefase
+vóór commit `c71daa94374e6dd9bbd0b7da860ef2febe3c677e`. Die kandidaat is
+nadien met afzonderlijke goedkeuring gecommit, in develop geïntegreerd en
+gepubliceerd. De actuele voortgangsbron staat hierboven; de onderstaande
+historische operationele bewijscategorieën zijn niet opnieuw live geverifieerd.
 
 | Onderwerp | Centrale vastlegging | Status en bewijsgrens |
 |---|---|---|

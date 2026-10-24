@@ -12,12 +12,52 @@ Before changing anything:
 
 1. Read this `AGENTS.md`.
 2. Read `FITLIFETOOL_CONTEXT.md`.
-3. Read the deepest relevant Developer Handbook sections in
+3. Read the official planning/progress SSOT,
+   `docs/project/CORE_APPLICATION_ROADMAP.md`, and the relevant workflow before
+   any development, design, validation, release or prioritization task.
+4. Read the deepest relevant Developer Handbook sections in
    `app/(app)/handbook/`.
-4. For product-data work, read
+5. For product-data work, read
    `docs/product-data/PRODUCT_DATA_GOVERNANCE.md`.
-5. For development, release, AI and validation workflow, follow Handbook
-   5.7–5.9.
+6. For development, release, AI and validation workflow, follow Handbook
+   5.7–5.9 and the roadmap lifecycle rules; use the designated
+   `FITLIFETOOL_CHATGPT_WORKFLOW.md` where accessible.
+
+## Project-wide roadmap and progress governance
+
+- This policy applies to all existing and future FitLifeTool chats and Codex
+  sessions. The only official Core planning and phase-progress roadmap is
+  [docs/project/CORE_APPLICATION_ROADMAP.md](docs/project/CORE_APPLICATION_ROADMAP.md)
+  on the canonical development branch `develop`. Do not create a competing roadmap.
+- Before choosing/starting a phase, read the current roadmap and applicable
+  workflow. Record the branch, commit, local documentation changes, phase
+  status, priority, dependencies, existing approval and reusable evidence.
+  If the current Git source is inaccessible or freshness cannot be established,
+  report that before selecting a new phase. Do not silently use stale chat
+  memory, uploaded copies or an older checkout as current status.
+- Preserve the twelve phases, proposed execution order, owner decisions and
+  approved parallel work. Do not independently reprioritize or reopen accepted
+  decisions. The Handbook remains the architecture source; specific roadmaps
+  and evidence registers retain their own detail evidence.
+- Use PLANNED, IN PROGRESS, BLOCKED and DONE as defined in the roadmap. Keep
+  implementation, local validation, develop integration, remote publication,
+  Preview and Production evidence separate. Never infer DONE from code, a
+  local PASS or a worktree name alone.
+- During work, record relevant progress without unnecessary interim commits.
+  At every phase completion, check acceptance/release criteria and whether
+  roadmap status, evidence, open points and the next permitted step need
+  updating. Include safe documentation maintenance in the same approved phase;
+  do not introduce micro-approval rounds for ordinary authorized substeps.
+- Read-only scope does not authorize documentation writes. Existing STOP,
+  security, protected-worktree, staging, commit, push and deployment boundaries
+  remain unchanged. Report an update blocked by those boundaries.
+- Determine the next phase from the updated roadmap; do not start it without
+  substantive approval. If this checkout has old instructions, consult the
+  designated current develop documentation read-only; never switch or update
+  protected branches/worktrees to obtain it.
+- These files do not automatically update running chats, other worktrees or
+  ChatGPT project settings. Report the actual accessible source/version and any
+  required owner setup using the [central access guide](docs/project/README.md).
 
 ## Start read-only and define scope
 

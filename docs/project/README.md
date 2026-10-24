@@ -1,19 +1,20 @@
 # Centraal projectstatusdossier
 
-[FITLIFETOOL_PROJECT_STATUS.md](FITLIFETOOL_PROJECT_STATUS.md) is het centrale
-startpunt voor projectregie: werkstromen, planningsbesluiten, afhankelijkheden,
-blokkades en de Permanente Security & Privacy Guard. Dit dossier ontsluit ook
-de [Account & Security-roadmap](ACCOUNT_SECURITY_ROADMAP.md) en het
-[bewijsregister](ACCOUNT_SECURITY_EVIDENCE.md). Afzonderlijke roadmaps en
-evidence-dossiers blijven de inhoudelijke bron voor hun eigen traject; de
-centrale status vat samen en verwijst, zonder hun bewijs of regels te vervangen.
+[CORE_APPLICATION_ROADMAP.md](CORE_APPLICATION_ROADMAP.md) is de enige
+officiële SSOT voor Core Application-planning en fasevoortgang.
+[FITLIFETOOL_PROJECT_STATUS.md](FITLIFETOOL_PROJECT_STATUS.md) is het
+regie-/navigatieportaal voor werkstromen, afhankelijkheden, blokkades en Guard;
+het onderhoudt geen concurrerende Core-faseplanning. Dit dossier ontsluit ook
+de [A&S-roadmap](ACCOUNT_SECURITY_ROADMAP.md) en het
+[bewijsregister](ACCOUNT_SECURITY_EVIDENCE.md). Die bronnen blijven eigenaar
+van hun detailbewijs. Het Developer Handbook blijft de architectuurbron.
 
 ## Centrale bronnen en leesroute
 
 | Vraag | Leidende bron |
 |---|---|
 | Projectregie, afhankelijkheden en documentatiestatus | [Projectstatus](FITLIFETOOL_PROJECT_STATUS.md) |
-| Core-productrichting, ontwerpkaders, twaalf fases en voorgestelde uitvoeringsvolgorde | [Core Application-roadmap](CORE_APPLICATION_ROADMAP.md), eigenaarbasis V1.1 met aanvulling |
+| Officiële Core-planning en voortgang: twaalf fases, volgorde, status, acceptatie en bewijs | [Core Application-roadmap](CORE_APPLICATION_ROADMAP.md), eigenaarbasis V1.1 met aanvulling |
 | Commerciële en financiële planning | [Aangewezen Word-master en afgeleide samenvatting](COMMERCIAL_FINANCIAL_BASELINE.md) |
 | Functionele en technische architectuur | [Developer Handbook](<../../app/(app)/handbook/>) |
 | Account & Security-status en eigen historisch bewijs | [A&S-roadmap](ACCOUNT_SECURITY_ROADMAP.md) en [bewijsregister](ACCOUNT_SECURITY_EVIDENCE.md) |
@@ -101,16 +102,14 @@ Deze gelijkheid betreft de aanwezige refs; er is geen remote fetch of live
 releaseverificatie uitgevoerd. De beschermde main-checkout blijft afzonderlijk.
 De oorspronkelijke zesbestandenintegratie is lokaal gecommit als
 `126ecc7d438970b69c8a38062ee94c5f944c55ee` op
-`codex/central-project-status-docs`. Zij is niet naar `develop` overgebracht
-en binnen deze fasen niet naar GitHub gepusht; er is geen deployment uitgevoerd.
-De governance-aanvulling van 22 oktober 2026 is inmiddels lokaal gecommit als
-`3b24cbf8ecce92e02f5165754ac08cd4769e7eca`. Bij aanvang van de consolidatie van
-24 oktober was deze documentatieworktree schoon op die commit. V1.1 hieronder
-is een nieuwe ongecommitte kandidaat; de oude omschrijving als ongecommitte
-governance-aanvulling is hiermee gecorrigeerd. Geen overdracht naar develop is
-uitgevoerd. De bestaande develop-worktree bevat beschermd lokaal vervolgwerk.
-Er is geen fetch uitgevoerd; actuele externe remote- of Production-status
-wordt niet geclaimd.
+`codex/central-project-status-docs`. De governance-aanvulling is gecommit als
+`3b24cbf8ecce92e02f5165754ac08cd4769e7eca` en V1.1 als
+`c71daa94374e6dd9bbd0b7da860ef2febe3c677e`. De complete achtbestanden-set is
+op 24 oktober fast-forward in lokale develop geïntegreerd en daarna naar
+origin/develop gepusht; de push-SHA is toen geverifieerd. De eerdere
+niet-geïntegreerde/kandidaatstatus is historisch, niet de huidige Git-status.
+Er is geen Production-release mee bewezen. Beschermd Public Web-vervolgwerk
+is behouden. Deze documentatiefase doet geen nieuwe fetch of live-verificatie.
 
 Exact documentatiemanifest van de oorspronkelijke integratie:
 
@@ -176,6 +175,10 @@ integratietests zijn niet nodig voor deze uitsluitend documenterende wijziging.
 
 ## Consolidatie V1.1 met uitvoeringsvolgorde — 24 oktober 2026
 
+Historisch verslag van de toen goedgekeurde schrijf-/validatiefase. De
+commit- en integratiehandelingen volgden met afzonderlijke goedkeuring, zoals
+hierboven vermeld; de toenmalige ongecommitte status geldt niet meer.
+
 Complete vervangende eigenaaropdracht binnen dezelfde documentatiefase, met de
 daaropvolgende aanvulling over voorgestelde uitvoeringsvolgorde. Eerdere
 schrijfacties zijn geweigerd wegens aanvullende eigenaarinformatie en hebben
@@ -211,3 +214,118 @@ Normale documentatiecontrole: exact manifest, volledige diff, whitespace,
 lokale links, twaalf fases/volgorde, prijs-/trialconsistentie, besluit- versus
 bewijsstatus, masterintegriteit en behoud van worktrees. Resultaten staan in
 de oplevering. Geen applicatietests, builds, brede audit of externe validatie.
+
+
+## Roadmapbeheer en projectbrede toegang — 25 oktober 2026
+
+De bestaande roadmap is nu tevens het enige actuele Core-fasestatusregister.
+De eigenaaropdracht Centrale roadmap & voortgangsbeheer en de aanvulling voor
+alle chats autoriseren deze documentatie-/workflow-inrichting, geen nieuwe
+ontwikkelfase. De twaalf fases, volgorde en prioriteiten blijven behouden.
+Statusdefinities, fasecriteria, bewijsgrenzen, open punten en de volgende
+toegestane stap staan uitsluitend in de [roadmap](CORE_APPLICATION_ROADMAP.md).
+De projectstatus verwijst; kopieer geen onafhankelijk wijzigende fasetabel.
+
+### Daadwerkelijk beschikbare toegang
+
+- Codex kan in deze sessie de lokale develop-werkboom en Git-objecten lezen.
+  Gitbasis: `be3525c9baa79916ca4c3825569d7cb1f56786d3`; de huidige documentdiff
+  is nog ongecommit en staat dus nog niet in de gedeelde Git-versie.
+- In de beschikbare tools is geen GitHub-codeleesconnector en geen functie
+  voor lezen/schrijven van ChatGPT-projectinstructies aangetroffen.
+  Projectlisting toont het actieve ChatGPT-project **FitLifeTool**, naast
+  onder meer **FitLifeTool (old)**; de actuele instructie-inhoud en
+  accountkoppelingen van die projecten zijn niet uitgelezen of gewijzigd.
+  Deze beperking bewijst niet dat de gebruikersinterface die mogelijkheid mist.
+- De tool kan projectmetadata tonen; dat verleent geen instellingentoegang.
+  Daarom wordt onderstaande tekst aangeleverd voor éénmalige plaatsing door
+  de eigenaar. Geen projectinstellingen of chatlidmaatschappen zijn aangepast.
+- ChatGPT-projectinstructies kunnen projectchats gedeelde richtlijnen geven;
+  een project heeft niet vanzelf toegang tot lokale bestanden. Zie de
+  [officiële OpenAI-documentatie](https://learn.chatgpt.com/docs/projects).
+  De daadwerkelijk gelezen bronversie blijft bepalend, niet chatgeheugen.
+- Er is geen automatische Git-/projectbestandensynchronisatie of automatische
+  vernieuwing van alle bestaande chats/werkboomkopieën vastgesteld.
+
+### Praktische broncontrole voor iedere sessie
+
+1. Gebruik repository `PaCoCaz/FitLifeTool.com`, branch `develop`,
+   pad `docs/project/CORE_APPLICATION_ROADMAP.md`. Controleer de werkelijk
+   toegankelijke branch/commit, eventuele lokale diff en peildatum.
+   De default branch main mag niet stilzwijgend als actuele develop gelden.
+2. Codex leest de actuele werkboomversie naast HEAD; vermeld ongecommitte
+   aanvullingen afzonderlijk. In een oudere/beschermde checkout: raadpleeg de
+   aangewezen develop-bron read-only, zonder checkout, reset of worktree-update.
+3. Voorkeur voor ChatGPT: een geschikte, door de eigenaar verbonden GitHub-app
+   of andere toegestane bron die aantoonbaar dit bestand op develop én de
+   bijbehorende commit kan lezen. De eigenaar kiest de juiste account/repository
+   en verleent alleen de benodigde toegang. Test dat in een FitLifeTool-projectchat
+   door bestand, branch en werkelijke bron-SHA te laten teruggeven.
+   Een installatie of zoekhit alleen bewijst geen toegang tot deze branch.
+4. Biedt een beschikbare koppeling alleen een defaultbranch, indexsnapshot of
+   geen herleidbare versie, claim dan geen actuele Git-status. Als alternatief
+   kan de eigenaar een gecontroleerde export van roadmap en benodigde workflow
+   met commit-SHA, exportdatum en eventuele lokale diff beschikbaar maken.
+   Markeer dit als handmatig aangeleverde momentopname. Actualiseer de kopie na
+   relevante goedgekeurde wijzigingen; Git synchroniseert haar niet vanzelf.
+5. Als de actualiteit niet kan worden vastgesteld: expliciet melden vóór
+   nieuwe fasekeuze. Vraag uitsluitend de ontbrekende bron/versie; start
+   geen nieuwe fase op basis van een verouderde upload.
+6. Noteer bij overdracht gebruikte branch/SHA, lokale wijzigingen, fase,
+   geldig bewijs, open punten en volgende toegestane stap. Hervatte bestaande
+   chats moeten dezelfde actuele bron opnieuw raadplegen waar relevant;
+   deze documentwijziging herverwerkt hun oude antwoorden niet.
+
+### Eenmalige handeling voor de projecteigenaar
+
+Open de projectinstellingen van het actieve ChatGPT-project **FitLifeTool**,
+open het onderdeel voor projectinstructies en voeg onderstaande tekst toe met
+behoud van overige geldige instructies. Dit is de aangeleverde tekst, geen
+claim dat de instelling al is gewijzigd.
+
+Laat actieve FitLifeTool-chats onder dit project vallen of geef andere bewust
+behouden FitLifeTool-projecten dezelfde centrale bronverwijzing in hun eigen
+projectinstructies. Chats buiten een project krijgen de instructies van dat
+project niet automatisch. Verplaats of wijzig chats niet ongecontroleerd.
+Controleer in iedere hervatte/nieuwe relevante chat de bronversie voordat een
+nieuwe fase wordt gekozen. Configureer een geschikte bronkoppeling alleen als
+die daadwerkelijk beschikbaar is; de huidige Codex-toolset stelt de
+ChatGPT-koppeling of instellingen niet voor de eigenaar in.
+
+### Exacte ChatGPT-projectinstructie
+
+<!-- FITLIFETOOL_PROJECT_INSTRUCTIONS_BEGIN -->
+```text
+Deze afspraken gelden voor alle bestaande en toekomstige FitLifeTool-chats in dit project.
+
+De enige officiële bron voor Core Application-planning en voortgang is docs/project/CORE_APPLICATION_ROADMAP.md in repository PaCoCaz/FitLifeTool.com, branch develop. Raadpleeg ook de toepasselijke AGENTS.md, CODEX.md, projectcontext en FitLifeTool-workflow. Het Developer Handbook blijft leidend voor functionele en technische architectuur; afzonderlijke roadmaps en bewijsregisters behouden hun eigen detailbewijs.
+
+Lees bij iedere ontwikkel-, ontwerp-, validatie-, release- of prioriteringsopdracht de actuele roadmap. Vermeld de gelezen branch, commit-SHA en eventuele ongecommitte aanvullingen. Is de actuele Git-versie niet toegankelijk of kan de actualiteit niet worden vastgesteld, meld dat vóór het kiezen van een nieuwe fase. Gebruik een geüploade projectkopie of chatgeheugen nooit stilzwijgend als actuele status.
+
+Behoud de twaalf fases, hun voorgestelde volgorde, vastgestelde prioriteiten en afgeronde besluiten. Wijk daarvan niet zelfstandig af. Houd rekening met bestaande goedgekeurde parallelle werkzaamheden, waaronder Account & Security en tijdig UX-ontwerp. Maak geen tweede roadmap of concurrerende planning.
+
+Gebruik PLANNED, IN PROGRESS, BLOCKED en DONE volgens de definities in de officiële roadmap. DONE vereist de toepasselijke acceptatie- en releasebewijzen. Onderscheid implementatie, lokale validatie, integratie op develop, remote publicatie, Preview en Production.
+
+Controleer bij faseafronding of de roadmap moet worden bijgewerkt en neem de normale documentatie-update waar veilig mogelijk mee in dezelfde goedgekeurde opdracht. Respecteer read-only scope, STOP-condities en alle Git-, security-, worktree- en deploymentgrenzen. Geen extra micro-goedkeuring voor gewone substappen binnen een goedgekeurde fase.
+
+Bepaal daarna de eerstvolgende fase vanuit de actuele roadmap, maar start die niet automatisch zonder inhoudelijke goedkeuring. Claim geen automatische synchronisatie tussen Git, projectbestanden of bestaande chats.
+```
+<!-- FITLIFETOOL_PROJECT_INSTRUCTIONS_END -->
+
+### Scope en publicatie van deze kandidaat
+
+Alleen zes bestaande repository-Markdownbestanden wijzigen: `AGENTS.md`,
+`CODEX.md`, `FITLIFETOOL_CONTEXT.md`, `docs/project/CORE_APPLICATION_ROADMAP.md`,
+`docs/project/README.md` en `docs/project/FITLIFETOOL_PROJECT_STATUS.md`.
+Daarnaast is de bestaande externe
+`/Users/paulcastelijns/Projects/FITLIFETOOL_CHATGPT_WORKFLOW.md` gericht bijgewerkt.
+Dat workflowbestand staat buiten de repository en wordt niet automatisch
+meegenomen in een toekomstige Git-commit; er is geen tweede masterkopie gemaakt.
+
+Geen Handbook/applicatiecode, commerciële Word-master, dependencies, database,
+credentials, configuratie of beschermde worktree gewijzigd. De 21 beschermde
+Public Web-bestanden blijven intact. Bestaande main en andere werkboomversies
+van AGENTS.md worden niet aangepast. Zolang deze kandidaat niet afzonderlijk
+is gecommit/gepubliceerd en de eigenaar de projectinstructie niet heeft
+geplaatst, is projectbrede technische beschikbaarheid niet aangetoond.
+Geen tests/build nodig voor deze uitsluitend documenterende wijziging.

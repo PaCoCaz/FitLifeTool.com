@@ -58,10 +58,19 @@ Gebruik deze router om de diepste canonieke bron te vinden:
 - Projectvoortgang, Account & Security-roadmap en historisch bewijs →
   [centraal projectstatusdossier](docs/project/README.md); lees de peildatum en
   houd lokale validatie, historische resultaten en Production-status gescheiden.
-- Core-productvisie, Leefstijlkwaliteit, app-UX, twaalf voorgestelde fases en
-  uitvoeringsvolgorde → [Core Application-roadmap](docs/project/CORE_APPLICATION_ROADMAP.md),
-  eigenaarbasis V1.1 met aanvulling. Voorgestelde volgorde bewijst geen formeel
-  goedgekeurde/afgeronde fases; A&S en vroeg UX-ontwerp lopen parallel.
+- De enige officiële Core-planning én fasevoortgang (SSOT), inclusief visie,
+  twaalf fases, voorgestelde volgorde, acceptatie, status en bewijs →
+  [Core Application-roadmap](docs/project/CORE_APPLICATION_ROADMAP.md) op `develop`.
+  Verplicht raadplegen bij iedere ontwikkel-, ontwerp-, validatie-, release-
+  of prioriteringsopdracht. PLANNED/IN PROGRESS/BLOCKED/DONE betekenen geen
+  nieuwe uitvoeringstoestemming; DONE vereist toepasselijk bewijs.
+  Bij ontbrekende actuele bron: melden vóór fasekeuze. A&S en vroeg UX-ontwerp
+  lopen parallel; start een volgende fase niet automatisch.
+- Projectbrede ChatGPT-instructietekst, bronversies en praktische toegang →
+  [centrale lees- en overdrachtsafspraken](docs/project/README.md).
+  Projectstatus is het regieportaal, geen tweede Core-fasestatusregister.
+  Een upload is niet automatisch Git-gesynchroniseerd; de projectinstellingen
+  moeten door de eigenaar worden geplaatst als de beschikbare tools dat niet kunnen.
 - Commerciële/financiële planning → [basisplan en aangewezen Word-master](docs/project/COMMERCIAL_FINANCIAL_BASELINE.md).
   De samenvatting is afgeleid, geen tweede master; externe Word-toegang is niet
   universeel bewezen. Bedragen zijn planning, geen financiële validatie.
