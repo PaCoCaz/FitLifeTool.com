@@ -24,11 +24,35 @@ De Vercel Preview-uitkomst na de Stripe-fix en Production-vrijgave zijn niet
 bevestigd. Het historische AUTH10-hervattingspunt hieronder blijft een eigen
 trajectbron en activeert geen automatische volgende opdracht.
 
-Gitbasis van deze documentatie-aanvulling: develop op `be3525c9baa79916ca4c3825569d7cb1f56786d3`.
-De aanvulling is ongecommit; geen staging, commit, push, merge of deployment.
+Het centrale roadmapbeheer is gecommit en gepubliceerd als
+`3eba7f1d5ff5dbba5a935bb7cd8866229ab41761`; lokale en remote SHA zijn
+bij aanvang van F01 op 25 oktober read-only gelijk bevonden.
+De actuele F01-documentatieaanvulling is ongecommit; geen staging, commit,
+push, merge of deployment.
 De [dossierindex](README.md) beschrijft projectbrede instructies, daadwerkelijke
 toegang en de handmatige instelling die de eigenaar nog moet uitvoeren.
 De reconstructiepeildatum van het oude securitybewijs blijft 22 oktober.
+
+## F01-documentatieafronding — 25 oktober 2026
+
+Het [Core-releasecontract 1.0](CORE_APPLICATION_ROADMAP.md#f01--core-application-releasecontract-10)
+staat in de bestaande officiële roadmap: inhoudelijk geaccepteerde eerste
+releasescope C01–C11, uitsluitingen, basiservaring voor trial/Premium/Pro,
+Pro-meerwaarde, historische/berekeningsgrenzen en vervolgcriteria F02–F11.
+De opdracht verleent documentatieautorisatie; formele acceptatie van deze
+uitgewerkte kandidaat en technische uitwerking blijven onderscheiden.
+Zie uitsluitend de roadmap voor actuele fasestatus en volgende toegestane stap.
+Geen A&S-status, AUTH-blokkade of Production-bewijs gewijzigd; F03 niet gestart.
+Het laatste inhoudelijke F01-contractbesluit is expliciet door de eigenaar
+goedgekeurd: zie uitsluitend het [historische beleid in de roadmap](CORE_APPLICATION_ROADMAP.md#goedgekeurd-historisch-herberekeningsbeleid--25-oktober-2026).
+Technische opslag/geldigheid en controles zijn daar toegewezen aan bestaande
+vervolgfases; numerieke limieten, algoritmen en juridische/lifecycletoetsen
+blijven technische uitwerking, niet als uitgevoerd beschreven.
+De eigenaar heeft de definitieve Core-releasecontractversie 1.0 op
+25 oktober 2026 formeel geaccepteerd. De [afsluitregistratie](CORE_APPLICATION_ROADMAP.md#f01-documentatieacceptatie-en-overdracht)
+in de roadmap bevat de bronversie en bewijsbeoordeling; de centrale fasetabel
+is leidend. Dit sluit uitsluitend contract/documentatie af, geen implementatie-,
+Preview- of Production-acceptatie. Git-publicatie staat nog open.
 
 ## Documentatieconsolidatie V1.1 met aanvulling — 24 oktober 2026
 

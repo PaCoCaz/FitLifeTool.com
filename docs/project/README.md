@@ -14,7 +14,7 @@ van hun detailbewijs. Het Developer Handbook blijft de architectuurbron.
 | Vraag | Leidende bron |
 |---|---|
 | Projectregie, afhankelijkheden en documentatiestatus | [Projectstatus](FITLIFETOOL_PROJECT_STATUS.md) |
-| Officiële Core-planning en voortgang: twaalf fases, volgorde, status, acceptatie en bewijs | [Core Application-roadmap](CORE_APPLICATION_ROADMAP.md), eigenaarbasis V1.1 met aanvulling |
+| Officiële Core-planning en voortgang, F01-releasecontract 1.0, twaalf fases, status, acceptatie en bewijs | [Core Application-roadmap](CORE_APPLICATION_ROADMAP.md), eigenaarbasis V1.1 met aanvulling |
 | Commerciële en financiële planning | [Aangewezen Word-master en afgeleide samenvatting](COMMERCIAL_FINANCIAL_BASELINE.md) |
 | Functionele en technische architectuur | [Developer Handbook](<../../app/(app)/handbook/>) |
 | Account & Security-status en eigen historisch bewijs | [A&S-roadmap](ACCOUNT_SECURITY_ROADMAP.md) en [bewijsregister](ACCOUNT_SECURITY_EVIDENCE.md) |
@@ -329,3 +329,33 @@ van AGENTS.md worden niet aangepast. Zolang deze kandidaat niet afzonderlijk
 is gecommit/gepubliceerd en de eigenaar de projectinstructie niet heeft
 geplaatst, is projectbrede technische beschikbaarheid niet aangetoond.
 Geen tests/build nodig voor deze uitsluitend documenterende wijziging.
+
+## F01 Core-releasecontract 1.0 — 25 oktober 2026
+
+Het [releasecontract in de officiële roadmap](CORE_APPLICATION_ROADMAP.md#f01--core-application-releasecontract-10)
+legt C01–C11, eerste releasescope, uitsluitingen, abonnementspositionering,
+historische/berekeningsgrenzen en acceptatieafhankelijkheden F02–F11 vast.
+Geen nieuw zelfstandig contractbestand of tweede roadmap. De centrale
+fasestatus staat uitsluitend in de roadmap.
+
+Bron is de inhoudelijk goedgekeurde eigenaaropdracht van 25 oktober 2026.
+Gitbasis: develop op `3eba7f1d5ff5dbba5a935bb7cd8866229ab41761`, gelijk aan
+de read-only geverifieerde origin/develop-SHA bij aanvang. Deze F01-aanvulling
+is lokaal en ongecommit; eerdere omschrijvingen als ongepubliceerde governance
+hierboven beschrijven de toenmalige kandidaat, inmiddels gecommit/gepusht als 3eba7f1.
+
+Concrete favorietenquota, volledige rechtenmatrix, trend-/scorealgoritmen,
+dagritme-invloed, historische technische uitwerking en juridische/technische
+lifecycletoetsen blijven expliciete vervolgdetails; er zijn geen waarden ingevuld.
+Het laatste inhoudelijke F01-besluit is door de eigenaar goedgekeurd en
+eenmaal vastgelegd in het [historische beleid](CORE_APPLICATION_ROADMAP.md#goedgekeurd-historisch-herberekeningsbeleid--25-oktober-2026).
+Daar staan ook de toegewezen technische fases. De eigenaar heeft de definitieve
+Core-releasecontractversie 1.0 op 25 oktober 2026 formeel geaccepteerd. De
+[afsluitregistratie in de roadmap](CORE_APPLICATION_ROADMAP.md#f01-documentatieacceptatie-en-overdracht)
+legt bronversie, bewijs en toepasselijke voorwaarden vast. Raadpleeg alleen
+de centrale fasetabel voor de status; dit bewijst geen implementatie, Preview
+of Production. Git-publicatie is nog niet uitgevoerd.
+Geen toekomstige implementatie als bestaand gepresenteerd.
+Alleen roadmap, deze index en projectstatus wijzigen. Geen code, Handbook,
+A&S-dossier, externe workflow of commerciële master gewijzigd; geen tests/builds,
+staging, commit, push, merge, deployment of start van F03.

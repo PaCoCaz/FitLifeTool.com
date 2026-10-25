@@ -6,10 +6,12 @@ uitvoeringsvolgorde van de projecteigenaar, overgenomen op 24 oktober 2026.
 Core Application-planning en fasevoortgang, aangewezen door de eigenaar op
 25 oktober 2026. Canonieke ontwikkelbranch: `develop`.
 **Voortgangspeildatum:** 25 oktober 2026.
-**Git-basis van deze documentatiekandidaat:** `be3525c9baa79916ca4c3825569d7cb1f56786d3`.
+**Git-basis van de F01-documentatiekandidaat:** `3eba7f1d5ff5dbba5a935bb7cd8866229ab41761`.
 V1.1 is op 24 oktober vastgelegd in `c71daa94374e6dd9bbd0b7da860ef2febe3c677e`,
 lokaal op develop geïntegreerd en naar origin/develop gepusht.
-De huidige governance-aanvulling is nog ongecommit en ongepubliceerd.
+Het centrale roadmapbeheer is vastgelegd en gepubliceerd in
+`3eba7f1d5ff5dbba5a935bb7cd8866229ab41761`. De F01-aanvulling hieronder
+is een nieuwe lokale, ongecommitte documentatiekandidaat.
 
 Dit register maakt productrichtingen, ontwerpkaders, voorgestelde fases en
 bewijsgrenzen centraal vindbaar. Het verleent geen toestemming voor
@@ -183,8 +185,10 @@ Niet-gevalideerde implementaties worden nooit als afgerond geregistreerd.
 
 ## Functionele scope, bronnen en open werkzaamheden
 
-Alle beoogde gebruikerswaarde komt uit V1.1. Onderstaande bestaande bronnen
-bewijzen documentatiedekking, geen nieuwe code- of runtimeacceptatie.
+Onderstaande inventaris geeft de V1.1-bronbasis weer. Het F01-releasecontract
+1.0 hieronder concretiseert de eerste release, waaronder stappen, favorieten,
+eenvoudige ritmes en Pro-positionering. Bestaande bronnen bewijzen
+documentatiedekking, geen nieuwe code- of runtimeacceptatie.
 
 | Onderdeel en gebruikerswaarde | Besluit / bestaande bron | Afhankelijkheden en open werk | Acceptatiebewijs en beperking |
 |---|---|---|---|
@@ -210,10 +214,11 @@ zijn ontwerpkaders. Voorkom overreactie op één gewichtsmeting. Trends gebruike
 zeven **kalenderdagen** bij voldoende gegevens; exacte dekkingscriteria,
 algoritmen en veiligheidsgrenzen blijven open.
 
-Historische registraties moeten verklaarbaar blijven bij latere wijzigingen
-van product, doel, profiel of methode. Welke historische context wordt bewaard
-en hoe herberekening werkt moet in fase 1 worden besloten. Deze roadmap
-schrijft geen snapshots, aparte dagstatus of migraties voor.
+Het historische productbeleid is in F01 door de eigenaar vastgesteld; zie
+het goedgekeurde historische herberekeningsbeleid in releasecontract 1.0.
+Concrete opslag, historische geldigheid en implementatiecontroles volgen in de
+daar aangewezen bestaande fases. Geen snapshots, aparte dagstatus of migraties
+worden hiermee voorgeschreven.
 
 ## FitLifeScore en Leefstijlkwaliteit 1.0
 
@@ -265,6 +270,224 @@ implementatie gefaseerd. Deze productrichting is geen goedgekeurd schermontwerp
 of nieuw technisch patroon. Handbook-patronen blijven leidend tot expliciete
 uitwerking. De publieke homepage blijft ongewijzigd.
 
+## F01 — Core Application-releasecontract 1.0
+
+**Versie en herkomst:** 1.0, 25 oktober 2026. Eigenaaropdracht
+“F01 Core Application Releasecontract 1.0 — Documentation only” in deze chat.
+De eigenaar bevestigt inhoudelijke goedkeuring van de hieronder beschreven
+releaseomvang. Deze vastlegging is een lokale documentatiekandidaat op
+`develop`, basis `3eba7f1d5ff5dbba5a935bb7cd8866229ab41761`.
+Zij is geen uitvoeringsgoedkeuring voor F03 of een release.
+
+### Besluitniveau en bewijsgrens
+
+- **Productbesluit:** de eerste Core-release omvat de onderstaande gebruikersreizen,
+  basiservaring en abonnementspositionering. Dit concretiseert V1.1; oudere
+  vermeldingen dat de eerste releasescope geheel open was zijn historisch.
+- **Ontwerpkader:** adaptiviteit, aanpasbare ±2%-behoudsband, zeven kalenderdagen,
+  zes indicatorgroepen en eenvoudige dagritmes bepalen de richting.
+  Rekenkundige regels, grenswaarden en dekkingscriteria zijn hiermee niet ingevuld.
+- **Open technisch detail:** de onderstaande uitwerkingspunten hebben een eigenaarfase
+  en moeten vóór acceptatie van het betreffende onderdeel worden besloten en getoetst.
+  Er worden geen ontbrekende aantallen, schema's, formules of API-contracten verzonnen.
+- **Gevalideerd bewijs:** B01–B03 blijven uitsluitend het eerder geregistreerde,
+  beperkte documentatie-/buildbewijs. Deze fase levert documentatiecontrole,
+  geen nieuwe implementatie-, betaal-, juridische of gebruikersreisvalidatie.
+  Het Handbook blijft de architectuurbron; dit contract beschrijft het gewenste
+  product en verklaart afwijkende huidige implementaties niet conform.
+
+### Eerste releasescope en minimale gebruikersreizen
+
+| ID | Inhoudelijk vastgelegde eerste-releasefunctionaliteit | Uitwerking en latere acceptatie |
+|---|---|---|
+| C01 | Dashboard en actuele dagtotalen voor Free Trial, Premium en Pro; één consistente dagcontext voor voeding, hydratatie, activiteit, handmatige stappen en gewicht waar beschikbaar. | Na registreren/corrigeren/verwijderen zijn totalen en relevante afgeleide waarden consistent; ontbrekende gegevens blijven herkenbaar. Dashboardtoegang is geen belofte van onbeperkte historische analyse. F04/F09. |
+| C02 | Voeding en drinken zoeken, selecteren en in passende hoeveelheid registreren; registraties terugzien en corrigeren/verwijderen. Hydratatie omvat drinken en vochtbijdragen uit voeding. | Eenheden, porties en referentiedata controleerbaar; geen dubbele vochtregistratie. Bestaande afleiding uit consumptielogs behouden; geen nieuwe hydratatietabel besloten. F03/F04. |
+| C03 | Activiteiten registreren en corrigeren met passende duur en, waar van toepassing, intensiteit; handmatige stappen registreren en corrigeren. | Eenheid, dagtoewijzing en opslag van stappen, relatie met activiteit en voorkomen van dubbele energietoekenning expliciet uitwerken. Geen nieuwe stappen-naar-calorieënformule vastgesteld. F04/F06. |
+| C04 | Gewicht handmatig registreren/corrigeren en historie bekijken. Historische registraties en correcties voor alle relevante domeinen behoren tot de Core-ervaring. | Dagelijkse gewichtssnapshot onderscheiden van nutrition-/activity-events. Historiediepte per plan en toegang na proefafloop nog bepalen; correcties herberekenen de bedoelde dag zonder stilzwijgende wijziging van andere dagen. F04/F05/F10. |
+| C05 | Afvallen/aankomen ondersteunen met adaptieve tussentijdse streefdoelen; gewicht behouden met een aanpasbare standaardband van ±2%; trends over zeven kalenderdagen bij voldoende gegevens. | Mijlpalen aanpasbaar en verklaarbaar, geen overreactie op één meting. Referentiegewicht, aanpassingsfrequentie, minimumdekking, ontbrekende dagen, veiligheidsgrenzen en algoritmen nog besluiten. Zeven kalenderdagen zijn geen zeven willekeurige metingen. F05. |
+| C06 | Eén numerieke FitLifeScore en aanvullende Leefstijlkwaliteit; doelvoortgang onderscheiden van kwaliteit, balans, variatie en patronen. | Geen tweede numerieke hoofdscore. Basisinzichten onderscheiden van Pro-verdieping; indicatoren/formules en presentatiediepte per plan nog uitwerken. Registratiedekking begrenst conclusies. F08/F09. |
+| C07 | Favorieten voor voeding, drinken en activiteiten met oplopende limieten Free Trial → Premium → Pro. | Concrete limieten per domein en eventuele gezamenlijke quota zijn niet aangeleverd en blijven open voor F03. Server-side afdwingen; favoriet is geen log en telt niet als consumptie/activiteit. Bestaand behoud/lockgedrag bij downgrade respecteren. |
+| C08 | Een bruikbare Free Trial-basiservaring: dashboard, actuele dagtotalen en de basisreizen voor registreren, terugzien en corrigeren daadwerkelijk kunnen ervaren. | Beperkingen mogen de basiservaring niet onbruikbaar maken. Exacte catalogus-, historie- en favorietenlimieten vaststellen en met scenario's aantonen. Trial maximaal 30 dagen, zonder kaart, automatische betaling of permanent gratis plan. F03/F04/F10. |
+| C09 | Eenvoudige persoonlijke dagritmes vanaf de eerste release: eigen opsta- en bedtijden als minimale productuitwerking. | Rechten per plan, standaard/fallback, geldigheid, tijdzone/DST en invloed op verwachting versus totalen/score nog expliciet vastleggen. Week-, rotatie-, nachtwerk- en uitzonderingsschema's blijven roadmapscope, maar zijn niet vanzelf dit eenvoudige minimum of een toegezegde eerste-releasevariant. F07. |
+| C10 | Pro biedt herbruikbare voedings-/drankcombinaties en trainingen plus verdiepende analyses; Pro omvat de Premium-basis. | Bij registratie hoeveelheden, duur en relevante intensiteit aanpassen zonder het sjabloon te wijzigen; componenten behouden; sjabloon bewerken/verwijderen tast eerdere logs niet aan. Analysevragen, benodigde gegevens, beperkingen en concrete Pro-grenzen nog uitwerken. Geen onbewezen gezondheidsconclusies. F03/F06/F08. |
+| C11 | Account-, privacy- en abonnementsreizen horen bij de eerste release, inclusief veilige toegang/herstel, accountbeheer, proefafloop, expliciete betaalkeuze, opzegging/planwijziging en gegevensrechten. | A&S-contracten en blokkades blijven leidend. Export, verwijderen/bewaren, consumentencommunicatie, privacygrondslagen en betaalstatusovergangen vragen nog juridische én technische toetsing. Geen compliance- of betaalacceptatie geclaimd. F02/F03/F10/F11. |
+
+Dashboard, actuele dagtotalen en correcte basisberekeningen worden niet als
+uitsluitend Pro-meerwaarde gepositioneerd. Favorieten versnellen een losse
+registratie; herbruikbare combinaties/trainingen zijn een afzonderlijke Pro-functie.
+Een lager abonnement verandert niet de betekenis van reeds geregistreerde brondata.
+Een bruikbare trial impliceert geen onbeperkte toegang na afloop.
+
+De commerciële master en [afgeleide samenvatting](COMMERCIAL_FINANCIAL_BASELINE.md)
+blijven leidend voor de bestaande prijs-/planningsuitgangspunten:
+Premium € 6,95 en Pro € 9,95 per maand inclusief 21% btw.
+Dit contract concretiseert productpositionering; een volledige featurematrix,
+quota, proefstart/-afloop en downgradecontracten zijn nog geen gevalideerde
+entitlementconfiguratie. De externe Word-master wordt hier niet aangepast.
+
+### Expliciete uitsluitingen en niet-besloten uitbreiding
+
+De eerste Core-release omvat geen activering van Coach, Apple Health of
+Health Connect (F12), native mobiele apps, Public SEO-uitbreiding of
+advertentietechnologie. Bestaand goedgekeurd parallel Public Web-/A&S-werk
+blijft gerespecteerd. Geen advertenties in dashboards of ingelogde functies.
+Geen tweede numerieke hoofdscore of medische diagnose-/behandelclaim.
+
+Deze documentatieopdracht omvat geen implementatie, migratie, databasewijziging,
+authenticatie-/betalingsaanpassing, nieuwe formule, infrastructuurmutatie of release.
+Geavanceerde ritmevarianten, aanvullende slaap-/herstelindicatoren en niet
+gespecificeerde analyses worden niet automatisch aan de eerste release toegevoegd;
+eerste-releasegrenzen daarvoor moeten expliciet worden bevestigd.
+
+### Historische stabiliteit en berekeningsgrenzen
+
+1. Kalenderdagen en bronregistraties blijven de basis; geen aparte opgeslagen
+   dagstatus, progressie of score. Nutrition-/activity-events en dagelijkse
+   gewichtssnapshots behouden hun onderscheiden betekenis.
+2. Voor historische stabiliteit, expliciete correcties, controleerbaarheid,
+   ernstige fouten en onzekerheid geldt uitsluitend het goedgekeurde beleid
+   hieronder. Het laatste inhoudelijke F01-contractbesluit is daarmee vastgelegd.
+3. Het Handbook beschrijft bestaande dynamische herberekening met actuele
+   instellingen; dit bewijst geen naleving van het historische productcontract.
+   Technische aansluiting en validatie horen bij de hieronder aangewezen fases,
+   zonder wijziging aan het Handbook of de applicatie in deze opdracht.
+4. Activiteitsenergie blijft het beschikbare voedingsbudget van dezelfde dag
+   beïnvloeden. Handmatige stappen, trainingscomponenten en toekomstige imports
+   mogen niet ongemerkt dubbel meetellen. Gewichtsbron/fallback is een bekende
+   open architectuurvraag (Handbook 3.6), geen in F01 gekozen nieuwe bron.
+5. Persoonlijke dagritmes wijzigen niet automatisch kalenderdaggrenzen, calorieën,
+   hydratatie- of activiteitstotalen. Toegestane invloed op verwachte voortgang,
+   status en FitLifeScore expliciet besluiten in F07/F08; geen formulewijziging
+   afleiden uit alleen een opsta-/bedtijd.
+6. Voeding 40%, hydratatie 30%, activiteit 30% blijft het bestaande vertrekpunt.
+   Geen nieuwe gewichten, veiligheidsdrempels, afronding, energiebehoefte-,
+   mijlpaal- of trendformule goedgekeurd. Productscore blijft onderscheiden van
+   persoonlijke behoefte en FitLifeScore; onvolledige registratie is geen bewijs
+   van ongezond gedrag.
+7. Lokale datum, tijdzone, middernacht, zomer-/wintertijd en schemawijziging
+   met historie moeten in contracten en acceptatiescenario's worden afgedekt.
+   Geen nieuwe tijdzone- of dagmodelimplementatie gekozen.
+
+#### Goedgekeurd historisch herberekeningsbeleid — 25 oktober 2026
+
+De projecteigenaar heeft onderstaande vijf regels expliciet goedgekeurd als
+laatste inhoudelijke F01-contractbesluit in de voortzetting van deze opdracht.
+Dit is een productcontract voor de toekomstige implementatie, geen bewijs dat
+het huidige dynamische herberekeningspad hier al aan voldoet.
+
+1. **Historische stabiliteit:** latere wijzigingen in profiel, gewicht, doelen,
+   dagritme, productgegevens of berekeningsmethoden veranderen eerdere
+   beoordelingen niet stilzwijgend.
+2. **Expliciete correcties:** historische registraties mogen worden gecorrigeerd.
+   Correcties werken uitsluitend door in de relevante kalenderdagen, dagtotalen
+   en afgeleide resultaten, met de voor die dagen geldige historische context.
+3. **Controleerbaarheid:** de oorspronkelijke beoordeling en eventuele latere
+   correcties blijven verklaarbaar en controleerbaar. Dit besluit schrijft geen
+   specifieke database- of opslagarchitectuur voor.
+4. **Ernstige fouten:** aantoonbare ernstige gegevens- of berekeningsfouten
+   worden uitsluitend via een gecontroleerd, transparant en toetsbaar
+   correctiebeleid behandeld. Geen ongecontroleerde massale herberekening.
+5. **Onzekerheid:** ontbrekende historische context of onvoldoende betrouwbare
+   gegevens worden herkenbaar gemaakt. Presenteer geen schijnprecisie of
+   onbewezen historische reconstructies.
+
+Een latere wijziging met toekomstige geldigheid is geen doelbewuste historische
+correctie en verleent geen toestemming om eerdere beoordelingen ongemerkt
+te vervangen. Een doelbewuste historische correctie past de relevante invoer
+en resultaten aan binnen de destijds geldige context. Een gecontroleerde
+correctie van een ernstige fout is een afzonderlijke, transparante procedure;
+zij volgt niet automatisch uit een nieuwe product- of methodeversie.
+
+Technische uitwerking blijft binnen bestaande fases: F03 voor geldigheid en
+herleidbaarheid van product-/rechtencontext; F04 voor historische broncontext,
+effectieve datums, opslag/versies, correcties en reconstructie; F05 voor
+doel-/gewichtscontext en doorwerking in relevante trendvensters; F06 voor
+template-/componentcontext; F07 voor ritme-/tijdzonegeldigheid; F08 voor
+berekeningsversies, oorspronkelijke/gecorrigeerde beoordelingen, ernstige fouten
+en betrouwbaarheidsweergave. F09 verzorgt de begrijpelijke presentatie en
+F10 de bewaartermijnen/gegevensrechten in samenhang met dit beleid.
+F11 toetst de integrale samenhang met de bestaande F02-securityvoorwaarden.
+
+Opslagkeuze, versievelden en concrete geldigheids-/correctiemechanismen moeten
+dit beleid uitvoeren; zij mogen de vijf regels niet opnieuw ter discussie
+stellen. Implementatiecontroles dekken toekomstige wijzigingen, expliciete
+correcties, ernstige fouten en ontbrekende context afzonderlijk, inclusief de
+afbakening van relevante kalenderdagen en afhankelijke resultaten.
+Die technische uitwerking en uitvoering zijn geen resterend F01-productbesluit
+en worden in deze documentatieopdracht niet geïmplementeerd of getest.
+
+### Afhankelijkheden en acceptatie voor F02–F11
+
+Dit is contracttraceerbaarheid binnen deze roadmap, geen tweede planning of
+fasestatusregister. Onderstaande controles zijn nog uit te voeren criteria;
+geen van deze rijen verklaart een fase gevalideerd of vrijgegeven.
+
+| Fase | Contractafhankelijkheid | Vereist acceptatiebewijs vóór afsluiting van de relevante scope |
+|---|---|---|
+| F02 | C11; bestaande A&S-roadmap en bewijsregister. | Veilige auth-/herstel-/accountreizen en toepasselijke herstel-/isolatievoorwaarden op exacte kandidaat; open AUTH- en containmentblokkades aantoonbaar behandeld. Bestaand parallel traject niet herstarten. |
+| F03 | C02/C07–C11; productdata en commerciële master. | Geaccepteerde featurematrix met concrete catalogus-/favorieten-/historielimieten, trial/upgrade/downgrade; server-side weigering van ongeoorloofde toegang óók buiten UI; consistente canonical entitlements, gevalideerde referentiedata/import en onderbouwde capaciteit/kosten. Geen ontbrekende quota als onbeperkt interpreteren. |
+| F04 | C01–C04/C08; F01-contract en relevante F03-rechten. | Registreren, bekijken, wijzigen/verwijderen op actuele én eerdere dag voor alle basisdomeinen; totalen/herberekening coherent, gewichtsnapshot correct, stappen niet dubbel geteld; dagwisseling en historische wijzigingsscenario's aantoonbaar. |
+| F05 | C04/C05; betrouwbare historie en gewichtsbron. | Geaccepteerde algoritmen, veiligheidsgrenzen, aanpasbare mijlpalen/behoudsband en zeven-kalenderdagdekking; scenario's afvallen/behouden/aankomen, ontbrekende/uitbijtermetingen en doelwijziging met historie. |
+| F06 | C03/C10; losse registratie en Pro-rechten. | Combinaties/trainingen opslaan, hergebruiken, per component aanpassen, bewerken/verwijderen; oorspronkelijke template en eerdere logs blijven intact; relevante duur/intensiteit en totalen correct. |
+| F07 | C09; F04-historie en F03-rechten. | Eenvoudig persoonlijk ritme bruikbaar bij eerste release; fallback, geldigheidsdatum, tijdzone/DST en historische wijziging getest; contract bepaalt aantoonbaar welke verwachting/status verandert en welke totalen niet. Complexere schema's alleen in expliciet bevestigde scope. |
+| F08 | C05/C06/C10; betrouwbare brondata, F05/F07 waar relevant. | Eén numerieke hoofdscore; indicatoren en Pro-verdieping verklaarbaar, privacybewust en historisch herleidbaar; definitieve berekeningen met referentiescenario's en dekkings-/betrouwbaarheidsgrenzen gevalideerd. |
+| F09 | C01–C11; vroeg parallel ontwerp, gefaseerde implementatie. | Complete mobiele, meertalige en toegankelijke reizen voor trial/Premium/Pro; actuele dagtotalen, fout-/leeg-/laadstatus en locked-functionaliteit duidelijk; relevante browser-, eigenaar- en deviceacceptatie en afgesproken performancecriteria. |
+| F10 | C08/C11; F02/F03 en account-UX. | Juridische beoordeling en technische lifecycle-E2E voor proefstart/-afloop, expliciete betaalkeuze, opzegging, downgrade, gegevensrechten/export/verwijderen/bewaren en communicatie; geen stilzwijgende dataverwijdering door downgrade. Geen juridische termijnen verzinnen. |
+| F11 | C01–C11 en toepasselijke F02–F10-bewijzen. | Traceerbare integrale acceptatieset op één exacte releasekandidaat, inclusief security/rechten, historie, herstelbaarheid, schaalbaarheid/kosten en afgesproken performancecriteria; open releaseblokkades opgelost, expliciete releasegoedkeuring en relevante Production-/smokebewijzen. |
+
+Kwantitatieve limieten, prestatiedoelen, trenddekking en analysegrenzen moeten
+vóór de betreffende validatie zijn vastgesteld; zonder deze grenzen is geen
+volledige acceptatie mogelijk. Gebruik bestaande kandidaatgebonden resultaten
+waar geldig, vul alleen ontbrekend of ongeldig bewijs aan. Geen nieuwe audit
+of test-/buildfase gestart door deze documentatie.
+
+### F01-documentatieacceptatie en overdracht
+
+Voor formele documentatieacceptatie zijn nodig: C01–C11 volledig en vindbaar,
+uitsluitingen expliciet, productbesluiten gescheiden van ontwerp/open techniek,
+historische/berekeningsgrenzen benoemd, vervolgcriteria traceerbaar en de normale
+documentatie-/beschermingscontroles PASS. De eigenaar accepteert daarna deze
+vastlegging en de expliciet doorgeschoven uitwerkingspunten.
+
+De eigenaar heeft releasescope C01–C11 en het historische beleid als laatste
+inhoudelijke F01-contractbesluit goedgekeurd. Favorietenquota, algoritmen,
+opslag/geldigheid, ritme-invloed en lifecycletoetsen zijn expliciet belegd in
+F03–F10; schaalbaarheid/kosten in F03 en integrale toetsing in F11. Zij zijn
+geen bewijs van huidige implementatie en geen nieuw open F01-productbesluit.
+De bestaande F01-criteria worden hiermee niet geschrapt of vervangen.
+
+**Formele acceptatie en afsluitregistratie — 25 oktober 2026.**
+De projecteigenaar heeft in de opdracht “F01 | Formele acceptatie en
+afsluitregistratie” de definitieve documentversie van Core-releasecontract 1.0
+expliciet formeel geaccepteerd. Dit betreft C01–C11, de uitsluitingen, het
+goedgekeurde historische herberekeningsbeleid en de belegging van vervolgdetails.
+Verwijzing: de sectie F01 — Core Application-releasecontract 1.0 in dit bestand,
+inclusief het historische beleid van 25 oktober 2026.
+De geaccepteerde roadmapversie vóór toevoeging van deze afsluitregistratie heeft
+SHA-256 `4f581205c3313fbd1b024a2ae4435414f4d5d2918f0dba762c05fac0a6da9a42`;
+Git-basis `3eba7f1d5ff5dbba5a935bb7cd8866229ab41761`, met lokale F01-documentdiff.
+Deze hash identificeert de geaccepteerde documentinhoud, geen Git-commit.
+
+| Toepasselijke F01-voorwaarde | Bewijs en oordeel |
+|---|---|
+| Releasescope, uitsluitingen en productbesluiten | PASS: C01–C11 inhoudelijk goedgekeurd, ongewijzigd en opgenomen in de formeel geaccepteerde versie. |
+| Historisch contract en berekeningsgrenzen | PASS: vijf expliciet goedgekeurde historische regels; geen opslagarchitectuur of nieuwe formule voorgeschreven. |
+| Belegging technische vervolgdetails en afhankelijkheden | PASS: F03–F10 voor uitwerking, F02 blijft parallel; integrale acceptatie en releasebewijs bij F11. |
+| Documentatiekwaliteit en bescherming | PASS: eerdere diff-/opmaakcontrole en 91 lokale verwijzingen; geaccepteerde kandidaat via hashes bevestigd. Alleen de afsluitpassages worden gericht opnieuw gecontroleerd. |
+| Formele eigenaaracceptatie en gedateerde registratie | PASS: expliciete eigenaaracceptatie van 25 oktober 2026, vastgelegd in deze registratie. |
+
+Daarmee zijn de toepasselijke voorwaarden voor deze F01-contract- en
+documentatiefase vervuld: **IN PROGRESS → DONE op 25 oktober 2026**.
+Dit is uitsluitend documentatieacceptatie; geen implementatie-, runtime-,
+Preview- of Production-acceptatie. Voor deze documentatiefase is een
+applicatierelease niet van toepassing; het latere F11-releasebewijs blijft
+onverkort vereist. Technische vervolgdetails blijven toegewezen, niet uitgevoerd.
+
+Volgende toegestane stap is afzonderlijk goedgekeurde Git-publicatie van de
+documentatie. Geen staging, commit, push, merge of deployment in deze opdracht.
+F03 wordt niet gestart; geen andere fase krijgt automatisch uitvoeringstoestemming.
+Het parallelle A&S-traject behoudt zijn eigen autorisatie en hervattingspunt.
+
 ## Voorgestelde uitvoeringsvolgorde: twaalf fases
 
 Onderstaande volgorde is de expliciete voorgestelde uitvoeringsvolgorde uit de
@@ -290,7 +513,9 @@ geen geslaagde validatie.
 | 12 — Apple Health en Health Connect: latere uitbreiding | Toestemming, intrekken, synchronisatie, bronidentiteit en deduplicatie; later afzonderlijk prioriteren/ontwerpen. | Voorstel; geen werkende koppeling bewezen, niet automatisch onderdeel eerste core-release. |
 
 Account & Security loopt parallel. Fase 9 betekent niet dat UX-ontwerp pas na
-fase 8 begint. De eerste formele core-releasescope blijft open. De strategische
+fase 8 begint. De eerste core-releasescope staat in het F01-releasecontract;
+technische uitwerking en formele documentatieacceptatie blijven onderscheiden.
+De strategische
 prioriteit Core → Public SEO → eventuele mobiele apps is geen bewijs van
 goedkeuring of afronding van afzonderlijke fases.
 
@@ -301,11 +526,12 @@ de in deze chat afgeronde herstel-/publicatierapporten en lokaal aanwezige
 Git-objecten. Geen nieuwe code-audit, tests, build of live herverificatie.
 De onderstaande criteria concretiseren uitsluitend bestaande roadmapinhoud
 voor beoordeling; zij zijn geen nieuwe productkeuze of fase-uitvoeringstoestemming.
-De eerste formele releasescope en definitieve faseacceptaties blijven open.
+F01 is formeel afgesloten voor contract/documentatie; technische uitwerking en
+acceptatie van de vervolgfases blijven open volgens het contract.
 
 | Fase | Status | Acceptatiecriteria / bestaande scope | Afhankelijkheden en open punten | Bewijs en beperking | Eerstvolgende toegestane stap |
 |---|---|---|---|---|---|
-| F01 | PLANNED | Contracten voor berekeningen, historie, Leefstijlkwaliteit, schaalbaarheid en kosten; eerste releasescope expliciet afgebakend en geaccepteerd. | Open contracten in dit document; geen complete acceptatieset vastgesteld. | Product-/architectuurbronnen aanwezig, geen integrale F01-acceptatie. V1.1-consolidatie alleen rondt F01 niet af. | Na inhoudelijke goedkeuring contracten en acceptatieomvang afbakenen; nu geen ontwikkeling starten. |
+| F01 | DONE | Core-releasecontract 1.0 C01–C11, uitsluitingen, historische/berekeningsgrenzen en vervolgcriteria formeel geaccepteerd; afsluitregistratie van 25 oktober 2026 hierboven. | Technische uitwerking F03–F10 en integrale acceptatie/release F11 blijven open; geen nieuwe uitvoeringstoestemming. | Expliciete eigenaaracceptatie 25 oktober 2026, documentatiecontroles PASS, geaccepteerde bronversie via SHA-256 hierboven herleidbaar; uitsluitend contract-/documentatieacceptatie. | Afzonderlijk goedgekeurde Git-publicatie; nu geen staging/commit/push/deployment en F03 niet starten. |
 | F02 | IN PROGRESS | Veiligheid en herstelbaarheid volgens eigen A&S-roadmap; relevante AUTH-, herstel-, isolatie- en releasecriteria aantonen. | Bestaand parallel traject; AUTH10 Hosted Staging/Production historisch BLOCKED, restoretest en overige AUTH-punten open. | Bestaand dossier en ondersteunende buildfixes B02/B03 hieronder. Geen volledige fase- of Production-afsluiting. | Relevante bestaande goedkeuring en het eigen A&S-hervattingspunt raadplegen; ontbrekend bewijs gericht aanvullen binnen passende scope. |
 | F03 | PLANNED | Productkwaliteit/import, definitieve trial-/Premium-/Pro-matrix, server-side rechten en financiële onderbouwing beoordeeld. | F01, A&S-betaalvoorwaarden; featurematrix/limieten en datadekking open. | Governance en financieel plan beschreven; actuele integrale datakwaliteits-/rechtenacceptatie ontbreekt. | Eerst contracten en productkeuzes afbakenen; geen data- of rechtenwijziging zonder goedkeuring. |
 | F04 | PLANNED | Dagelijkse en historische voeding-, drank-, activiteit- en gewichtsreizen met betrouwbare correctie/herberekening geaccepteerd. | F01/F03, dagcontext, historische geldigheid en gewichtsbron. | Bestaande basis beschreven; geen complete actuele CRUD-/herberekeningsacceptatie. | Relevante auditresultaten hergebruiken en ontbrekende acceptatiescenario's na goedkeuring afbakenen. |
@@ -321,9 +547,11 @@ De eerste formele releasescope en definitieve faseacceptaties blijven open.
 F02 is IN PROGRESS wegens het al lopende, afzonderlijk goedgekeurde A&S-traject,
 niet omdat hiermee de volledige voorgestelde Core-fase 2 is vrijgegeven.
 Een geblokkeerd AUTH10-deeltraject wordt daarmee niet groen gemaakt.
-De overige fases zijn PLANNED omdat uitvoering/volledige acceptatie van hun
+F01 is DONE uitsluitend voor de formeel geaccepteerde contract-/documentatiefase
+van 25 oktober 2026. F03–F12 zijn PLANNED omdat uitvoering/
+volledige acceptatie van hun
 geconsolideerde scope niet is vastgesteld; dat ontkent bestaande deelimplementaties
-niet. Geen van de twaalf fases is achteraf DONE verklaard.
+niet. Geen andere fase is hiermee DONE verklaard.
 
 ### Ondersteunende voortgang en bewijs
 
@@ -346,26 +574,35 @@ inhoudelijk behouden; hun aanwezigheid is geen acceptatie van F09.
 
 ### Volgende fase en onderhoudslog
 
-De eerstvolgende openstaande inhoudelijke fase in de vastgelegde voorgestelde
-volgorde is **F01 — Contracten en integratiebasis**. Afbakenen/starten vereist
-inhoudelijke goedkeuring. Bestaande goedgekeurde parallelle werkzaamheden
-blijven gerespecteerd. De open verificatie van de Stripe-Preview na B03 is
+**F01 — Contracten en integratiebasis** is inhoudelijk goedgekeurd voor de
+documentatieafronding van releasecontract 1.0, inclusief het historische beleid,
+en is op 25 oktober 2026 formeel geaccepteerd en afgesloten. Volgende stap is
+afzonderlijk goedgekeurde Git-publicatie; F03 wordt niet gestart.
+Bestaande goedgekeurde parallelle werkzaamheden blijven gerespecteerd.
+De open verificatie van de Stripe-Preview na B03 is
 een relevant vervolg binnen het bestaande incidenttraject; deze documentatieopdracht
 voert haar niet uit en verleent geen nieuwe releaseautorisatie.
 
 | Datum | Wijziging | Herkomst / besluit | Bewijsgrens |
 |---|---|---|---|
 | 25 oktober 2026 | Bestaande V1.1-roadmap aangewezen als enige SSOT; vier statussen toegevoegd; initiële registratie F01/F03–F12 PLANNED en F02 IN PROGRESS. | Eigenaaropdracht Centrale roadmap & voortgangsbeheer plus aanvulling projectbrede verplichting. | Dit registreert bestaand werk, geen nieuwe fase gestart of DONE gemaakt; nieuwe documentatie nog ongecommit. |
+| 25 oktober 2026 | F01 PLANNED → IN PROGRESS; Core-releasecontract 1.0 opgenomen in deze bestaande roadmap. | Eigenaar bevestigt inhoudelijke goedkeuring en autoriseert uitsluitend documentatieafronding. | Formele documentatieacceptatie nog open; F02 en F03–F12 ongewijzigd; geen implementatie, staging, commit, push of release. |
+| 25 oktober 2026 | Laatste inhoudelijke F01-contractbesluit: vijf historische regels door de eigenaar goedgekeurd en vastgelegd. | Eigenaaropdracht historisch herberekeningscontract en formele acceptatieafronding. | F01 blijft IN PROGRESS tot acceptatie van de definitieve documentversie/afsluitregistratie; technische uitwerking belegd, geen implementatie- of releaseclaim. |
+| 25 oktober 2026 | F01 IN PROGRESS → DONE, uitsluitend contract- en documentatiefase. | Expliciete formele eigenaaracceptatie van de definitieve Core-releasecontractversie 1.0; afsluitregistratie hierboven. | Documentatiecontroles PASS; geen implementatie-, Preview- of Production-acceptatie; lokale documentatie nog ongecommit, overige fasestatussen behouden. |
 
 ## Open besluiten en overdracht
 
 - Definitieve scoreformules, indicatorbetekenis en validatie.
-- Volledige Premium-/Pro-featurematrix, limieten en betekenisvolle Pro-meerwaarde.
+- Numerieke limieten en volledige featurematrix in F03; Pro-combinaties en
+  verdiepende analyses zijn nu als productpositionering vastgesteld.
 - Precieze trialrechten, proefafloop, export, bewaartermijnen en gebruikerservaring.
-- Historische berekeningscontracten en voldoende meetgegevens voor gewichtstrends.
+- Technische uitvoering van het vastgestelde historische beleid en voldoende
+  meetgegevens voor gewichtstrends in de toegewezen vervolgfases.
 - Algoritmen/veiligheid voor doelen, dagritme-/tijdzonecontract en productdatadekking.
-- Eerste formele core-releasescope; actuele implementatie en acceptatie per fase
-  met kandidaat, omgeving, datum en resultaat.
+- Afzonderlijk goedgekeurde Git-publicatie van de formeel geaccepteerde
+  F01-documentatie. Technische details zijn belegd; actuele implementatie en
+  acceptatie per vervolgfase met kandidaat,
+  omgeving, datum en resultaat. De eerste releasescope staat hierboven.
 
 Baken deze punten af binnen een afzonderlijk goedgekeurde inhoudelijke opdracht.
 Hergebruik geldige auditresultaten; vul alleen ontbrekend/ongeldig bewijs aan.
