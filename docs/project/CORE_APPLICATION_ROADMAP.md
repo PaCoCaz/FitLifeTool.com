@@ -10,8 +10,11 @@ Core Application-planning en fasevoortgang, aangewezen door de eigenaar op
 V1.1 is op 24 oktober vastgelegd in `c71daa94374e6dd9bbd0b7da860ef2febe3c677e`,
 lokaal op develop geïntegreerd en naar origin/develop gepusht.
 Het centrale roadmapbeheer is vastgelegd en gepubliceerd in
-`3eba7f1d5ff5dbba5a935bb7cd8866229ab41761`. De F01-aanvulling hieronder
-is een nieuwe lokale, ongecommitte documentatiekandidaat.
+`3eba7f1d5ff5dbba5a935bb7cd8866229ab41761`. De F01-documentatie is gepubliceerd
+in `3e0db7bb9ae3fd34fcfcc39a3ac87ba45c02938d`.
+**Besluitenaanvulling:** 28 oktober 2026, lokale ongecommitte kandidaat op die
+ontwikkelbasis; de read-only GitHub-controle bevestigt dezelfde develop-SHA.
+De historische F01-acceptatie en de fasestatussen van 25 oktober blijven behouden.
 
 Dit register maakt productrichtingen, ontwerpkaders, voorgestelde fases en
 bewijsgrenzen centraal vindbaar. Het verleent geen toestemming voor
@@ -222,9 +225,80 @@ worden hiermee voorgeschreven.
 
 ## FitLifeScore en Leefstijlkwaliteit 1.0
 
-Voorlopig blijft voeding **40%**, hydratatie **30%**, activiteit **30%** het
-vertrekpunt. Deze bestaande verdeling is niet opnieuw gevalideerd en is geen
-definitieve formule voor Leefstijlkwaliteit. Geen tweede numerieke hoofdscore.
+### Goedgekeurde richting met vier pijlers — 28 oktober 2026
+
+Herkomst: eigenaaropdracht “Core Roadmap Documentatieupdate” in deze chat.
+FitLifeScore blijft de **enige overkoepelende numerieke dagscore**, met vier
+ondersteunende pijlers: **Voeding, Hydratatie, Activiteit en Voedingskwaliteit**.
+Dit is een goedgekeurde productrichting, geen bewijs van implementatie of
+scorevalidatie. Het Developer Handbook blijft de architectuurbron voor de
+bestaande werking; deze aanvulling beschrijft het te realiseren doelbeeld.
+
+De vierde pijler heeft de volgende vastgestelde namen:
+
+| Taal | Naam |
+|---|---|
+| NL | Voedingskwaliteit |
+| EN | Nutrition Quality |
+| FR | Qualité nutritionnelle |
+| DE | Ernährungsqualität |
+| PL | Jakość odżywcza |
+
+Technische ontwerpnaam: `nutrition_quality_score`. Dit is geen besluit tot
+het toevoegen van een databasekolom, opgeslagen dagscore of API-veld.
+
+Voedingskwaliteit beoordeelt de voedingskundige kwaliteit en samenstelling van
+de dagelijkse voeding, aanvullend op de doelgerichte VoedingsScore.
+Onderzoek doelafhankelijkheid waar inhoudelijk relevant voor afvallen,
+gewicht behouden en aankomen. Producteigenschappen, persoonlijke behoeften,
+geregistreerde hoeveelheden en de samenstelling van een kalenderdag blijven
+onderscheiden. De kwaliteitsmethodiek, indicatoren, drempels, aggregatie en
+omgang met onvolledige registratie zijn nog uit te werken in F08, afgestemd
+met de productdatabehoeften van F03. Geen tweede numerieke hoofdscore.
+
+#### Goedgekeurde functionele ontwerpeis: productkwaliteit en dagkwaliteit
+
+Aanvullend eigenaarbesluit van 28 oktober 2026: **productkwaliteit is niet
+hetzelfde als dagelijkse voedingskwaliteit**. Een afzonderlijk voedingsmiddel
+kan een gunstige productscore hebben terwijl een volledige dagvoeding met
+uitsluitend dat product voedingskundig onvoldoende is.
+
+**Concreet acceptatiescenario voor F08:** wanneer een gebruiker daadwerkelijk
+een hele dag uitsluitend sla eet, mag de dagelijkse VoedingskwaliteitScore
+niet hoog uitvallen, ook al scoort sla als afzonderlijk product positief.
+
+De dagbeoordeling moet daarom rekening kunnen houden met:
+
+- voedingskundige balans en toereikendheid;
+- gegeten hoeveelheden;
+- relevante voedingsmiddelgroepen en variatie;
+- persoonlijke voedingsbehoeften en doelen waar toepasselijk;
+- betrouwbaarheid en volledigheid van de registratie.
+
+Een eenvoudig gemiddelde van productscores is niet voldoende als volledige
+dagbeoordeling. Eén geregistreerd product bewijst op zichzelf niet dat iemand
+daadwerkelijk de hele dag alleen dat product heeft gegeten; onvolledige
+registratie blijft herkenbaar en wordt niet automatisch als onvoldoende
+dagvoeding beoordeeld.
+
+Dit is een **goedgekeurde functionele ontwerpeis**, geen geïmplementeerde of
+gevalideerde scoremethodiek. Exacte formules, gewichten, drempelwaarden en
+operationalisering van het acceptatiescenario blijven open voor F08.
+F03 moet de benodigde betrouwbare product- en bereidingsgegevens voor
+voedingsstoffen, hoeveelheden, relevante groepen en datadekking mogelijk maken.
+Persoonlijke behoeften en feitelijke daginname blijven gebruikers- en
+dagcontext; dit besluit schrijft geen nieuwe importkolommen voor.
+
+De huidige driepijlerweging voeding **40%**, hydratatie **30%**, activiteit
+**30%** wordt **herzien voor vier pijlers**. Er is nog geen nieuwe weging of
+formule goedgekeurd. De bestaande berekening blijft een technisch feit, geen
+vastgestelde eindverdeling voor het vierpijlermodel. De 40/30/30-vermelding
+in het formeel geaccepteerde F01-contract blijft het historische vertrekpunt
+van 25 oktober; deze gedateerde aanvulling wijzigt geen historische acceptatie.
+Implementatie, nieuwe scoregewichten en herberekening worden hiermee niet
+geautoriseerd.
+
+### Bestaand onderzoeks- en ontwerpkader
 
 Zes indicatorgroepen vormen het onderzoeks- en ontwerpkader:
 
@@ -235,7 +309,9 @@ Zes indicatorgroepen vormen het onderzoeks- en ontwerpkader:
 5. Consistentie over meerdere dagen.
 6. Registratiedekking en betrouwbaarheid van conclusies.
 
-De eerste vijf beschrijven gedrag; de zesde bepaalt mede de betrouwbaarheid.
+Deze zes indicatorgroepen zijn een onderzoeks- en ontwerpkader, geen zes
+ondersteunende scorepijlers. De eerste vijf beschrijven gedrag; de zesde bepaalt
+mede de betrouwbaarheid.
 Onvolledige registratie mag niet automatisch als ongezond gedrag worden
 geïnterpreteerd. Indicatoren moeten historisch verklaarbaar en coach-ready zijn.
 Slaap, herstel en aanvullende voedingsindicatoren blijven mogelijke
@@ -254,11 +330,63 @@ worden niet naar browser of publieke database verplaatst. Gepubliceerde
 waarden mogen zichtbaar zijn voor zover de app die nodig heeft. Productscore,
 persoonlijke behoefte en FitLifeScore blijven onderscheiden.
 
-Onderzoek in fase 3 of productcategorieën en indicatoren voldoende zijn.
-Verzadigd vet, toegevoegde suikers en productgroepclassificaties zijn mogelijke
-aanvullingen; eerst datakwaliteit/haalbaarheid beoordelen, niet automatisch
-toevoegen. De productdatagovernance blijft leidend; de beschermde Excel-master
-wordt niet gewijzigd of aangewezen als canoniek productiewerkboek.
+### Goedgekeurde ontwerpprincipes — 28 oktober 2026
+
+- **Correctness-first:** betrouwbare brondata, expliciet onderscheid tussen
+  nul en onbekend, uniforme en toetsbare berekeningen, versiebeheer en
+  reproduceerbaarheid. Een aanwezige numerieke waarde of formule is geen
+  zelfstandig bewijs van inhoudelijke juistheid.
+- **Performance-first:** bereken zoveel mogelijk productgebonden waarden en
+  scores offline in Excel. Beperk runtimeberekeningen tot noodzakelijke
+  gebruikers- en dagafhankelijke verwerking. Dit verplaatst geen persoonlijke
+  dagberekeningen naar vaste productdata en schrijft geen nieuwe opslag voor.
+- **Zero-downtime productdata-updates:** nieuwe en gewijzigde productgegevens
+  moeten snel, gevalideerd, consistent en zonder merkbare gebruikersverstoring
+  gepubliceerd kunnen worden. Ontwerp voor veilige staging, gecontroleerde
+  atomische publicatie, herstelbaarheid en behoud van historische juistheid.
+  De technische oplossing en meetbare acceptatiegrenzen zijn nog niet
+  vastgesteld. Bestaande synchronisatiedocumentatie is geen bewijs dat deze
+  eigenschappen voor alle productdatastromen al gerealiseerd zijn.
+
+F03 beoordeelt productcategorieën, brondekking en importbehoeften in afstemming
+met het kwaliteitsmethodiekcontract voor F08, inclusief de hierboven vastgelegde
+dagbalans, toereikendheid, hoeveelheden en variatie. Betrouwbare productgegevens
+moeten die dagbeoordeling mogelijk maken; een gunstige productscore alleen is
+geen voldoende gegevensbasis. Verzadigd vet, toegevoegde of
+vrije suikers en productgroepclassificaties zijn te beoordelen gegevens,
+geen automatisch goedgekeurde nieuwe kolommen. Maak onderscheid tussen
+ontbrekende brongegevens, afgeleide Excel-berekeningen en noodzakelijke
+dagberekeningen in de applicatie.
+
+De **definitieve uitbreiding van `PRODUCT_PREPARATIONS_IMPORT` volgt pas na
+vaststelling van de kwaliteitsmethodiek en een onderbouwde kolommen-gapanalyse**.
+De volgorde van de twaalf fases verandert hierdoor niet; noodzakelijke
+contractafstemming start geen afzonderlijke implementatiefase.
+De productdatagovernance blijft leidend; de beschermde Excel-master wordt niet
+gewijzigd of aangewezen als canoniek productiewerkboek.
+
+### Scoreaudit: te beoordelen afhankelijkheden voor F03/F08
+
+De read-only scoreaudit in deze chat onderzocht develop
+`3e0db7bb9ae3fd34fcfcc39a3ac87ba45c02938d`, het oorspronkelijke importbestand
+en de opgeslagen lokale master. Zij stelde onder meer afwijkende
+MAINTAIN-formules, suikerbronmapping en ontbrekende-waardenverwerking vast.
+Deze bevindingen moeten inhoudelijk worden beoordeeld voordat betrokken
+gegevens of berekeningen als gevalideerde basis voor Voedingskwaliteit worden
+hergebruikt. Ze zijn **niet opgelost** en vormen geen toestemming voor
+automatische formule-, bronwaarde- of importcorrecties.
+
+F03 behandelt brondefinities, eenheden, nul versus onbekend, datadekking,
+import-/versiegeldigheid en de veilige publicatieketen. F08 behandelt de
+uniforme en toetsbare scoremethodiek, relevante doelafhankelijkheid, weging,
+dubbeltelling en dagelijkse aggregatie; benodigde brongegevens worden met
+F03 afgestemd. Het oorspronkelijke `FitLifeTool Product Import.xlsx` is de
+primaire referentie voor de bestaande keten; `(new)` is de herinrichting.
+Verschillen met die werkversie zijn niet automatisch fouten of reeds
+gevalideerde functionaliteit. Het auditrapport staat in deze chat; er wordt
+geen afzonderlijk Git-bewijsregister of nieuwe audit mee aangemaakt.
+Er is geen live database-, Excel-engine-, Preview- of Production-validatie
+aan deze documentatieaanvulling verbonden.
 
 ## App UI/UX
 
@@ -501,12 +629,12 @@ geen geslaagde validatie.
 |---|---|---|
 | 1 — Contracten en integratiebasis | Berekeningen, datahistorie, Leefstijlkwaliteit-contracten, schaalbaarheid en kosten; eerste releasescope en ontbrekende auditmanifesten afbakenen. | Architectuurbronnen aanwezig; nieuw integraal contract en actuele acceptatie open. |
 | 2 — Account & Security: bestaand parallel traject | Veiligheid en herstelbaarheid; eigen roadmap/bewijs behouden, open AUTH-, containment-, staging- en herstelvoorwaarden. | Alleen historisch kandidaatgebonden bewijs uit eigen dossier; geen nieuwe audit/vrijgave. |
-| 3 — Productdata en abonnementsrechten | Excel-import, kwaliteit, proefmodel, Premium/Pro, server-side rechten, featurematrix en financiële onderbouwing; gebruikt contracten 1 en A&S. | Methodologie en entitlementarchitectuur beschreven; actuele volledigheid/handhaving en nieuwe trial niet hiermee gevalideerd. |
+| 3 — Productdata en abonnementsrechten | Excel-import, kwaliteit, proefmodel, Premium/Pro, server-side rechten, featurematrix en financiële onderbouwing; gebruikt contracten 1 en A&S. Bron-/kolommenbehoeften voor Voedingskwaliteit en veilige productdatapublicatie afstemmen volgens de aanvulling van 28 oktober. | Methodologie en entitlementarchitectuur beschreven; actuele volledigheid/handhaving en nieuwe trial niet hiermee gevalideerd. Auditafhankelijkheden en publicatieontwerp niet opgelost of gevalideerd. |
 | 4 — Basisregistratie en historie | Betrouwbare dagelijkse/historische voeding-, drank-, activiteit- en gewichtsregistratie; gebruikt 1/3. | Geen complete actuele kandidaatgebonden CRUD-/herberekeningsacceptatie in dit dossier. |
 | 5 — Persoonlijke doelen en gewicht | Adaptieve mijlpalen, behoudsband en trends; gewichtbron, dekking en veiligheid uitwerken op basis van 1/4. | Richting vastgesteld, algoritmen en meetcriteria open; geen afgeronde implementatieclaim. |
 | 6 — Voedingscombinaties en trainingen | Herbruikbare aanpasbare voedings-/drank-/trainingssjablonen; template-/logcontract, componenten en intensiteit; bouwt op 3/4. | Geen complete template-acceptatie vastgesteld; registratie mag oorspronkelijke sjabloon niet wijzigen. |
 | 7 — Persoonlijke dagritmes | Dagindelingen, uitzonderingen en ploegendiensten; dag/historie 1/4, rechten 3, tijdzone/DST, rotaties en schemageldigheid. | Geen nieuwe tijdlijnvalidatie; toegestane invloed op berekeningen nog kiezen. |
-| 8 — FitLifeScore 2.0 en Leefstijlkwaliteit | Doelvoortgang, kwaliteit/balans/variatie/patronen en coach-ready indicatoren; gebruikt 1/3/4 en doelen/ritmes waar relevant. | Bestaande scorearchitectuur beschreven; definitieve formules en validatie open. |
+| 8 — FitLifeScore 2.0 en Leefstijlkwaliteit | Doelvoortgang, kwaliteit/balans/variatie/patronen en coach-ready indicatoren; gebruikt 1/3/4 en doelen/ritmes waar relevant. Vier ondersteunende pijlers met Voedingskwaliteit onder één numerieke FitLifeScore uitwerken; productkwaliteit onderscheiden van dagbalans, toereikendheid en variatie. | Richting van 28 oktober goedgekeurd; nieuwe weging, kwaliteitsmethodiek, uniforme berekeningen en validatie open. |
 | 9 — App UI/UX en Design System | Ontwerp tijdig parallel starten; implementatie gefaseerd, afgestemd op 3–8; mobiel, toegankelijk, snel en visueel consistent. | Productrichting vastgesteld; scherm-, browser-, eigenaar- en deviceacceptatie open. |
 | 10 — Account-, consumenten- en privacyafsluiting | Accountlevenscyclus, proefafloop, abonnementen, export, bewaren, privacy en communicatie; afhankelijk van 2/3 en app-UX. | Dossiers/checklists aanwezig; geen afgeronde lifecycle-, juridische of complianceacceptatie claimen. |
 | 11 — Integrale coreacceptatie en release | E2E-, performance-, security- en rechtenvalidatie op exacte kandidaat; herstel/compliance en gekozen releasescope afdekken, gecontroleerd vrijgeven. | Geen actuele integrale Core-acceptatie of releasegoedkeuring; afzonderlijke autorisatie en Production-bewijs nodig. |
@@ -533,12 +661,12 @@ acceptatie van de vervolgfases blijven open volgens het contract.
 |---|---|---|---|---|---|
 | F01 | DONE | Core-releasecontract 1.0 C01–C11, uitsluitingen, historische/berekeningsgrenzen en vervolgcriteria formeel geaccepteerd; afsluitregistratie van 25 oktober 2026 hierboven. | Technische uitwerking F03–F10 en integrale acceptatie/release F11 blijven open; geen nieuwe uitvoeringstoestemming. | Expliciete eigenaaracceptatie 25 oktober 2026, documentatiecontroles PASS, geaccepteerde bronversie via SHA-256 hierboven herleidbaar; uitsluitend contract-/documentatieacceptatie. | Afzonderlijk goedgekeurde Git-publicatie; nu geen staging/commit/push/deployment en F03 niet starten. |
 | F02 | IN PROGRESS | Veiligheid en herstelbaarheid volgens eigen A&S-roadmap; relevante AUTH-, herstel-, isolatie- en releasecriteria aantonen. | Bestaand parallel traject; AUTH10 Hosted Staging/Production historisch BLOCKED, restoretest en overige AUTH-punten open. | Bestaand dossier en ondersteunende buildfixes B02/B03 hieronder. Geen volledige fase- of Production-afsluiting. | Relevante bestaande goedkeuring en het eigen A&S-hervattingspunt raadplegen; ontbrekend bewijs gericht aanvullen binnen passende scope. |
-| F03 | PLANNED | Productkwaliteit/import, definitieve trial-/Premium-/Pro-matrix, server-side rechten en financiële onderbouwing beoordeeld. | F01, A&S-betaalvoorwaarden; featurematrix/limieten en datadekking open. | Governance en financieel plan beschreven; actuele integrale datakwaliteits-/rechtenacceptatie ontbreekt. | Eerst contracten en productkeuzes afbakenen; geen data- of rechtenwijziging zonder goedkeuring. |
+| F03 | PLANNED | Productkwaliteit/import, definitieve trial-/Premium-/Pro-matrix, server-side rechten en financiële onderbouwing beoordeeld. Correctness-first, offline productberekeningen en veilige productdatapublicatie volgens de aanvulling van 28 oktober meenemen. | F01, A&S-betaalvoorwaarden; featurematrix/limieten en datadekking open. Kwaliteitsmethodiek en kolommen-gapanalyse vóór definitieve preparations-importuitbreiding; betrouwbare gegevens voor dagbalans, toereikendheid, hoeveelheden en variatie mogelijk maken. Bronmapping/nulwaarden en atomische publicatie/herstelbaarheid nog beoordelen. | Governance en financieel plan beschreven; scoreaudit levert aandachtspunten, geen herstelbewijs. Actuele integrale datakwaliteits-/rechtenacceptatie en zero-downtime-publicatiebewijs ontbreken. | Eerst contracten, productkeuzes en methodiekafhankelijkheden afbakenen; geen data- of rechtenwijziging zonder goedkeuring. |
 | F04 | PLANNED | Dagelijkse en historische voeding-, drank-, activiteit- en gewichtsreizen met betrouwbare correctie/herberekening geaccepteerd. | F01/F03, dagcontext, historische geldigheid en gewichtsbron. | Bestaande basis beschreven; geen complete actuele CRUD-/herberekeningsacceptatie. | Relevante auditresultaten hergebruiken en ontbrekende acceptatiescenario's na goedkeuring afbakenen. |
 | F05 | PLANNED | Doelrichtingen, adaptieve mijlpalen, onderhoudsband en trends volgens expliciet geaccepteerde regels onderbouwd. | F01/F04; algoritmen, meetdekking en veiligheidsgrenzen open. | Gewenst ontwerp aanwezig; geen afgeronde algoritme-/implementatieacceptatie. | Product- en trendcontracten vaststellen binnen een goedgekeurde fase. |
 | F06 | PLANNED | Herbruikbare voedings-, drank- en trainingssjablonen; registratiehoeveelheid/duur aanpasbaar zonder het origineel te wijzigen. | F03/F04; component-/logcontract, bewerken/verwijderen en intensiteit open. | Geen complete template-acceptatie in dit dossier. | Sjabloon-/logcontract en acceptatiescenario's afbakenen vóór implementatie. |
 | F07 | PLANNED | Persoonlijke ritmes, uitzonderingen en diensten met verklaarbare tijdlijn/historie geaccepteerd. | F01/F03/F04; tijdzone/DST, rotaties, schemageldigheid en invloed op berekeningen open. | Geen actuele complete persoonlijke-ritmeacceptatie. | Toegestane invloed op verwachtingen, totalen en scores eerst besluiten. |
-| F08 | PLANNED | Doelvoortgang en Leefstijlkwaliteit met verklaarbare, historisch herleidbare indicatoren gevalideerd; één numerieke hoofdscore. | F01/F03/F04 en doelen/ritmes waar relevant; formules en indicatorvalidatie open. | Bestaande 40/30/30-architectuur en zes ontwerpgroepen zijn geen geaccepteerde nieuwe formule. | Definitieve indicator-/scorecontracten en hun validatie afbakenen; geen formulewijziging zonder besluit. |
+| F08 | PLANNED | Eén overkoepelende numerieke FitLifeScore met Voeding, Hydratatie, Activiteit en Voedingskwaliteit; doelvoortgang en Leefstijlkwaliteit met verklaarbare, historisch herleidbare indicatoren valideren. Dagkwaliteit onderscheiden van productkwaliteit, inclusief het uitsluitend-sla-acceptatiescenario en de functionele dagbeoordeling uit de aanvulling van 28 oktober. | F01/F03/F04 en doelen/ritmes waar relevant; kwaliteitsmethodiek, relevante doelafhankelijkheid, uniforme berekeningen, nieuwe vierpijlerweging, dubbeltelling en indicatorvalidatie open. MAINTAIN-formulevarianten en ontbrekende-waardenverwerking beoordelen met F03. | Vierpijlerrichting, naamgeving en functionele dagbeoordeling op 28 oktober goedgekeurd; het uitsluitend-sla-scenario is nog niet uitgevoerd/gevalideerd. Bestaande 40/30/30-implementatie, zes ontwerpgroepen en auditbevindingen bewijzen geen nieuwe formule of opgeloste afwijkingen. | Methodiek- en scorecontracten met de bronbehoeften van F03 afstemmen en validatie afbakenen; geen formulewijziging zonder besluit. |
 | F09 | PLANNED | Ingelogde app en design system passend bij dagelijkse taken, mobiel, toegankelijkheid, performance en identiteit geaccepteerd. | Ontwerp tijdig parallel, implementatie gefaseerd in afstemming met F03–F08; schermacceptaties open. | Productrichting vastgesteld; beschermd Public Web-werk bewijst geen afgeronde app-UX-fase. | Vroeg ontwerp binnen passende goedkeuring afbakenen; homepage en goedgekeurd parallel werk respecteren. |
 | F10 | PLANNED | Accountlevenscyclus, proefafloop, abonnementen, export, bewaren, privacy en communicatie volgens afgesproken scope geaccepteerd. | F02/F03 en app-UX; gegevensrechten en juridische review open. | Checklists/detaildossiers, geen volledige lifecycle-/complianceacceptatie. | Open consumenten-/privacycontracten en reviewverantwoordelijkheid afbakenen. |
 | F11 | PLANNED | Gekozen core-releasescope integraal op exacte kandidaat gevalideerd en volgens bestaande releasegates gecontroleerd vrijgegeven. | Toepasselijke voorgaande fases, herstelbaarheid/compliance en eigen releaseautorisatie; releasescope open. | Geen integrale Core-acceptatie of Production-vrijgave. Lokale builds B02/B03 zijn geen F11-releasebewijs. | Eerst releasescope en acceptatieplan bevestigen; geen vrijgave starten. |
@@ -589,10 +717,21 @@ voert haar niet uit en verleent geen nieuwe releaseautorisatie.
 | 25 oktober 2026 | F01 PLANNED → IN PROGRESS; Core-releasecontract 1.0 opgenomen in deze bestaande roadmap. | Eigenaar bevestigt inhoudelijke goedkeuring en autoriseert uitsluitend documentatieafronding. | Formele documentatieacceptatie nog open; F02 en F03–F12 ongewijzigd; geen implementatie, staging, commit, push of release. |
 | 25 oktober 2026 | Laatste inhoudelijke F01-contractbesluit: vijf historische regels door de eigenaar goedgekeurd en vastgelegd. | Eigenaaropdracht historisch herberekeningscontract en formele acceptatieafronding. | F01 blijft IN PROGRESS tot acceptatie van de definitieve documentversie/afsluitregistratie; technische uitwerking belegd, geen implementatie- of releaseclaim. |
 | 25 oktober 2026 | F01 IN PROGRESS → DONE, uitsluitend contract- en documentatiefase. | Expliciete formele eigenaaracceptatie van de definitieve Core-releasecontractversie 1.0; afsluitregistratie hierboven. | Documentatiecontroles PASS; geen implementatie-, Preview- of Production-acceptatie; lokale documentatie nog ongecommit, overige fasestatussen behouden. |
+| 28 oktober 2026 | Vier ondersteunende pijlers onder één FitLifeScore; naamgeving Voedingskwaliteit, functionele dagbeoordeling met uitsluitend-sla-acceptatiescenario, correctness-first, performance-first en zero-downtime-productdata-updates vastgelegd; F03/F08-afhankelijkheden aangevuld. | Expliciet goedgekeurde eigenaaropdracht Core Roadmap Documentatieupdate; read-only scoreaudit als onderzoeksbewijs, develop-basis `3e0db7bb9ae3fd34fcfcc39a3ac87ba45c02938d`. | Alleen dit roadmapbestand lokaal gewijzigd; twaalf fases, volgorde en statussen behouden. Geen nieuwe weging/formule, importuitbreiding, opgeloste auditbevinding of implementatie-/releaseacceptatie; geen staging, commit, push of deployment. |
 
 ## Open besluiten en overdracht
 
-- Definitieve scoreformules, indicatorbetekenis en validatie.
+- Definitieve vierpijlerweging, scoreformules, kwaliteitsindicatoren,
+  doelafhankelijkheid, dagelijkse aggregatie, dubbeltelling en validatie.
+  Richting en naamgeving van Voedingskwaliteit zijn vastgesteld; de methodiek niet.
+- Beoordeling van de MAINTAIN-formulevarianten, suikerbronmapping en
+  ontbrekende-waardenverwerking; geen herstel of inhoudelijke acceptatie bewezen.
+- Kwaliteitsmethodiek en kolommen-gapanalyse vóór definitieve uitbreiding van
+  `PRODUCT_PREPARATIONS_IMPORT`; noodzakelijke brongegevens onderscheiden van
+  afgeleide productwaarden en dagelijkse verwerking.
+- Technische uitwerking en toetsbare acceptatiegrenzen voor veilige staging,
+  atomische publicatie, herstelbaarheid, versiebeheer, historische juistheid
+  en productdata-updates zonder merkbare gebruikersverstoring.
 - Numerieke limieten en volledige featurematrix in F03; Pro-combinaties en
   verdiepende analyses zijn nu als productpositionering vastgesteld.
 - Precieze trialrechten, proefafloop, export, bewaartermijnen en gebruikerservaring.
