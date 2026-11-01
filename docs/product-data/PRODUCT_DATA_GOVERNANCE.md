@@ -17,6 +17,117 @@ Productbeheer in Excel/VBA is een afzonderlijk toolingdomein naast de
 runtime-applicatie. De interne werking van afzonderlijke VBA-modules valt
 buiten dit document.
 
+## Ontwerpbesluit 2026-11-01
+
+**Onderwerp:** Productdatabase en FitLifeScore 2.0. **Besluitstatus:**
+goedgekeurde functionele ontwerpuitgangspunten; geen goedgekeurde
+formulewijzigingen, implementatie of release. Herkomst: het aangeleverde
+eigenaarbesluit
+`FitLifeTool_Productdatabase_FitLifeScore_2_0_Ontwerpbesluit_2026-11-01.md`,
+gebaseerd op de read-only productdatabase-audit van 1 november 2026 en de
+eigenaarbevestiging in ChatGPT op dezelfde datum.
+
+Deze gedateerde aanvulling beschrijft het goedgekeurde doelbeeld en het nog
+open onderzoek. Zij stelt niet dat de bestaande Excel- of applicatieketen dit
+al uitvoert. Handbook 2.5–2.7 blijven eigenaar van de bestaande architectuur;
+de [officiële Core-roadmap](../project/CORE_APPLICATION_ROADMAP.md) op `develop`
+blijft de enige bron voor de twaalf Core-fasen, volgorde, prioriteiten en
+voortgang. De eerdere besluiten en goedgekeurde parallelle werkzaamheden
+blijven behouden.
+
+### Vastgestelde invoer- en modeluitgangspunten
+
+- De scheiding tussen bronimport, berekening en export blijft uitgangspunt.
+  Nieuwe product-/bereidingsrecords bevatten productidentiteit, productgroep,
+  bereiding, bron/provenance, eenheid en feitelijke voedingswaarden.
+- Productgegevens worden éénmaal vastgelegd of geïmporteerd. LOSE-, MAINTAIN-
+  en GAIN-scores worden automatisch en deterministisch afgeleid met de
+  toepasselijke centrale modelinstellingen. Curveparameters en modifiers
+  worden niet per nieuw product handmatig overgenomen.
+- Eén centrale modeldefinitie levert de toepasselijke parameters. De feitelijke
+  Excel- en applicatiearchitectuur wordt eerst getoetst; dit besluit schrijft
+  geen nieuwe fysieke werkbladen, tabellen of databasevelden voor.
+- Groeps- en bereidingsmodifiers zijn in het doelbeeld standaard nul.
+  Afwijkingen vereisen een expliciete, toetsbare reden. Dit is geen opdracht
+  om bestaande modifiers nu te wijzigen.
+- Absolute voedingskundige bijdrage en relatieve positie binnen een
+  productgroep blijven onderscheiden: drie gram eiwit blijft drie gram eiwit,
+  ongeacht productgroep. Groepsvergelijkingen mogen de voedingsbijdrage niet
+  onbedoeld vertekenen. Groepsspecifieke parameters vereisen aangetoonde
+  inhoudelijke meerwaarde.
+
+### Nog te onderzoeken scoremethodiek
+
+De vastgestelde onderzoeksvolgorde begint bij de LOSE-energiecurve, daarna
+volgen MAINTAIN, GAIN en andere componenten. Een gekozen curve wordt pas na
+onderbouwing, vergelijking en acceptatie geïmplementeerd. Onderzoek afzonderlijk
+geschikte functies voor energie, eiwit, vezels, suikers, vetten, natrium/zout,
+alcohol en water; niet iedere voedingsstof krijgt dezelfde curve.
+
+- Voor eiwit en vezels kunnen stijgende functies met verzadiging worden
+  onderzocht; er is hiermee geen functie of parameter gekozen.
+- Totaal vet alleen is onvoldoende om vetkwaliteit te beoordelen.
+- Onderscheid totale van vrije/toegevoegde suikers en beoordeel de beschikbare
+  brongegevens; ontbrekende suikergegevens zijn geen bewezen nulwaarden.
+- Onderzoek afwaardering voor hoge natrium- en alcoholgehalten.
+- Voorkom dubbeltelling, onder meer tussen watergehalte en energiedichtheid.
+- Wegingen en A–E-grenzen zijn niet wetenschappelijk gevalideerd door de
+  technische audit en blijven onderzoeks- en beslispunten. Ook de eerdere
+  open vierpijlerweging wordt hier niet ingevuld.
+
+De productscore is niet gelijk aan de dagelijkse VoedingskwaliteitScore.
+De dagbeoordeling houdt rekening met hoeveelheden, balans, variatie,
+persoonlijke behoeften en volledigheid van registraties. Eén geregistreerd
+product bewijst niet dat iemand de hele dag uitsluitend dat product at.
+De bestaande F08-eis, inclusief het uitsluitend-sla-acceptatiescenario, blijft
+gelden; dit besluit kiest geen dagelijkse aggregatieformule en wijzigt geen
+persoonlijke behoeftenberekening of bestaande FitLifeScore-formule.
+
+### Datakwaliteit, eenheden en historische reproduceerbaarheid
+
+- Leg een eenduidig beleid vast voor `0`, ontbrekend, onbekend en niet van
+  toepassing. Behandel een ontbrekende bronwaarde niet stilzwijgend als nul.
+- De aangeleverde audit rapporteert 20 bevestigde NEVO-afwijkingen: 15 bij
+  suiker en 5 bij alcohol. De vastgestelde vervolgrichting is gecontroleerde
+  correctie of gedocumenteerde onderbouwing, herstel van de gerapporteerde
+  USDA-vezeldubbeltelling in de massabalans en onafhankelijke dichtheidscontroles.
+  Deze registratie bewijst geen uitgevoerd herstel en autoriseert geen
+  automatische correcties in deze documentatiefase.
+- Leg één contract vast voor gram/ml, dichtheid en conversies over import,
+  Excel, export en applicatie. Het concrete contract is nog uit te werken.
+- Maak scores historisch reproduceerbaar via bronversie, formule-/modelversie,
+  parameters en export-/publicatie-identiteit. Een inhoudelijk gewijzigde
+  score mag niet ongemerkt dezelfde betekenis onder `score_version = 1`
+  behouden. De concrete versie- en publicatie-uitwerking blijft open; het
+  reeds vastgestelde historische herberekeningsbeleid blijft gelden.
+
+### Latere acceptatie en bewijsgrenzen
+
+De latere uitvoering moet aantonen dat een nieuw product zonder handmatige
+invoer van curveparameters of modifiers kan worden toegevoegd, gelijke
+bronwaarden en modelversies dezelfde scores geven, en ontbrekende waarden en
+ongeldige eenheden expliciet worden afgehandeld. Centrale modelwijzigingen
+moeten toetsbaar zijn, met impactvergelijking per productgroep en zonder
+historische resultaten stilzwijgend te herschrijven. Product- en dagkwaliteit
+blijven functioneel gescheiden.
+
+Het eigenaarbesluit verwijst naar 5.985 onafhankelijk herberekende formulecellen,
+3.040 gecontroleerde exportcellen en 67 geïnventariseerde afgeleide kolommen
+in de audit van 1 november 2026. Deze aantallen zijn overgenomen auditbewijs,
+geen nieuwe heruitvoering, wetenschappelijke scorevalidatie of volledige
+runtimevalidatie. De werkelijke Excel-refresh, VBA-macro's en de applicatie-/
+databaseketen moeten bij latere uitvoering nog worden gevalideerd.
+
+F03 behandelt betrouwbare productdata, broncorrecties, invoer-/eenheidscontracten,
+validatie, export en relevante versiecontracten. F08 behandelt voedingskundige
+kalibratie, scorecurven, wegingen, A–E-grenzen en dagelijkse Voedingskwaliteit.
+De eerder besproken zes werkpakketten zijn een inhoudelijke werkvolgorde,
+geen nieuwe officiële Core-fasen en geen automatische uitvoeringsgoedkeuring.
+Deze documentatie start F03 of F08 niet en wijzigt geen fasestatus.
+De Excel-master blijft beschermd tegen directe AI/Codex-wijzigingen; deze
+registratie verleent geen Excel-, VBA-, applicatie-, database-, formule- of
+releaseautorisatie. De overige werkboek- en veiligheidsafspraken blijven gelden.
+
 ## Werkboekgovernance
 
 Er is nog geen canoniek productiewerkboek formeel aangewezen. Import-, test- en

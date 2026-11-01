@@ -388,6 +388,20 @@ geen afzonderlijk Git-bewijsregister of nieuwe audit mee aangemaakt.
 Er is geen live database-, Excel-engine-, Preview- of Production-validatie
 aan deze documentatieaanvulling verbonden.
 
+### Ontwerpbesluit productdatabase en FitLifeScore 2.0 — 1 november 2026
+
+De inhoudelijke, goedgekeurde ontwerpuitgangspunten staan in
+[Productdatagovernance — ontwerpbesluit 2026-11-01](../product-data/PRODUCT_DATA_GOVERNANCE.md#ontwerpbesluit-2026-11-01).
+F03 neemt de daar vastgelegde centrale modelinvoer, broncorrecties, eenheden,
+datakwaliteit en reproduceerbare versie-/exportcontracten mee. F08 behandelt
+het scoreonderzoek, beginnend bij de LOSE-energiecurve, daarna MAINTAIN/GAIN
+en overige componenten, met behoud van het onderscheid tussen product- en
+dagkwaliteit. Curven, parameters, wegingen en A–E-grenzen zijn nog niet als
+formule of implementatie geaccepteerd. De audit bewijst geen uitgevoerd herstel
+of volledige runtimevalidatie. Dit is uitsluitend een besluitregistratie:
+geen nieuwe Core-fase, statuswijziging, herprioritering of uitvoeringsgoedkeuring;
+de twaalf fasen, hun volgorde en goedgekeurd parallel werk blijven ongewijzigd.
+
 ## App UI/UX
 
 De volledige ingelogde-appherziening volgt User-first, Mobile-first,
